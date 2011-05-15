@@ -1,0 +1,42 @@
+
+----------
+kfleming    Date: Sun May 15 19:17:39 EDT 2011  CSN: CSN-multifpga-3
+                  Sun May 15 23:17:39 UTC 2011
+
+
+Directory config/pm
+ leap/                     Locally Added               0 
+
+Directory config/pm/leap
+ demos/                    Locally Added               0 
+
+Directory config/pm/leap/demos
+ traffic_light/            Locally Added               0 
+
+Directory config/pm/leap/demos/traffic_light
+ traffic_light_acp_synth_multifpga.apm Locally Added               0 
+
+Directory modules
+ leap/                     Locally Added               0 
+
+Directory modules/leap
+ build-support/            Locally Added               0 
+
+Directory modules/leap/build-support
+ stages/                   Locally Added               0 
+ project/                  Locally Added               0 
+
+Directory modules/leap/build-support/project
+ project-multifpga.awb     Locally Added               0 
+
+Directory modules/leap/build-support
+ pipelines/                Locally Added               0 
+
+Directory modules/leap/build-support/pipelines
+ multifpga/                Locally Added               0 
+
+Directory modules/multifpga
+ README                    Locally Removed             2 
+
+
+Fleshing out directory structure and adding some apm

@@ -1,0 +1,20 @@
+#/********************************************************************
+#* Awb module specification
+#********************************************************************/
+
+%name HW/SW Hybrid Multifpga Project Foundation
+%desc HW/SW Hybrid Multifpga Project Foundation
+%attributes hybrid project
+
+%provides model
+
+%requires connected_application 
+%requires environment_description
+%requires multifpga_build_pipeline
+
+# We should pick these up on union dir
+%makefile Makefile.top.template
+%scons %top   SCons.top.template
+%scons %hw    SCons.hw.template
+%scons %sw    SCons.sw.template
+%scons %iface SCons.iface.template
