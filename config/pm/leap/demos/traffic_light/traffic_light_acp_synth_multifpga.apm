@@ -34,18 +34,17 @@ hardware_system=Traffic Light System with Soft Connections
 File=modules/leap/examples/traffic-light/traffic-light-function/traffic-light-function-smart-synth-boundary.awb
 Packagehint=leap
 
-
-
-
-
-
-
-
-
-
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=Default Software Connected Application
+multifpga_build_pipeline=multiFPGA Build Pipeline
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
 Packagehint=multifpga
+
+[multiFPGA Build Pipeline]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
+Packagehint=leap
+
+[multiFPGA Build Pipeline/Requires]
+multifpga_parse_tool=multiFPGA Build Pipeline

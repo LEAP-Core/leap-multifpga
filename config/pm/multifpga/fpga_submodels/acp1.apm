@@ -1,0 +1,65 @@
+
+[Global]
+SaveParameters=0
+Description=Null project for multifpga synthesis
+File=acp1
+Version=2.2
+Name=ACP FPGA 1
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Pipeline Build
+RootProvides=model
+
+[Model]
+DefaultAttributes=hybrid project
+model=HW/SW Hybrid Pipeline Build
+
+
+
+
+
+
+[HW/SW Hybrid Pipeline Build]
+File=modules/leap/build-support/project/project-pipeline.awb
+Packagehint=leap
+
+[HW/SW Hybrid Pipeline Build/Requires]
+project_common=Default Hybrid Project Common Utilities
+fpgaenv=Hybrid ACP Dual Compute Environment  FPGA1 (Nallatech)
+application_env=Soft Services Hybrid Application Environment
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/hybrid/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment/Requires]
+platform_services=Standard Platform Services
+soft_services=Soft Services Submodel
+connected_application=Null Connected Application
+
+
+[Standard Platform Services]
+File=config/pm/hasim/submodels/platform-services/standard-platform-services.apm
+Packagehint=leap
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/hasim/submodels/common/project-common-default.apm
+Packagehint=leap
+
+
+[Soft Services Submodel]
+File=config/pm/hasim/submodels/common/soft-services.apm
+Packagehint=leap
+
+[Null Connected Application]
+File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
+Packagehint=leap-platforms
+
+[Hybrid ACP Dual Compute Environment  FPGA1 (Nallatech)]
+File=config/pm/hasim/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-no-cache-fpga1.apm
+Packagehint=leap-platforms-acp
+
+[Hybrid ACP Dual Compute Environment  FPGA1 (Nallatech)/Params]
+MODEL_CLOCK_DIVIDER=8

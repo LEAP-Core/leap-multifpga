@@ -40,3 +40,33 @@ Directory modules/multifpga
 
 
 Fleshing out directory structure and adding some apm
+
+----------
+kfleming    Date: Mon May 16 09:24:36 EDT 2011  CSN: CSN-multifpga-4
+                  Mon May 16 13:24:36 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ traffic_light_acp_synth_multifpga.apm Locally Modified            3 
+
+Directory config/pm/multifpga
+ fpga_submodels/           Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ acp0.apm                  Locally Added               0 
+ acp1.apm                  Locally Added               0 
+
+Directory modules
+ leap-platforms/           Locally Added               0 
+
+Directory modules/leap-platforms
+ fpga-environments/        Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments
+ acp/                      Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments/acp
+ acp_fpga_env.awb          Locally Added               0 
+ acp-dual.env              Locally Added               0 
+
+Added more structure to the multifpga build
