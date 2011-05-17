@@ -1,0 +1,12 @@
+#/********************************************************************
+#* Generic FPGA build pipeline
+#********************************************************************/
+
+%name multiFPGA Build Pipeline
+%desc FPGA Build Pipeline
+%attributes tool
+
+%provides build_pipeline
+%requires multifpga_parse_tool
+
+%scons %library multiFPGAPipeline.py

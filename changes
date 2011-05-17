@@ -70,3 +70,34 @@ Directory modules/leap-platforms/fpga-environments/acp
  acp-dual.env              Locally Added               0 
 
 Added more structure to the multifpga build
+
+----------
+kfleming    Date: Tue May 17 14:01:54 EDT 2011  CSN: CSN-multifpga-5
+                  Tue May 17 18:01:54 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ traffic_light_acp_synth_multifpga.apm Locally Modified            4 
+
+Directory modules/leap/build-support
+ build-pipelines/          Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines
+ pipelines/                Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/pipelines
+ multifpga/                Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/pipelines/multifpga
+ multifpga-build-pipeline.awb Locally Added               0 
+ multiFPGAPipeline.py      Locally Added               0 
+
+Directory modules/leap/build-support/project
+ project-multifpga.awb     Locally Modified            4 
+
+Directory modules/leap-platforms/fpga-environments/acp
+ acp-dual.env              Locally Modified            4 
+
+
+
+Added an initial pipeline stage for parsing the fpga file
