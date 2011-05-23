@@ -31,7 +31,7 @@ Packagehint=leap
 
 [Soft Services Hybrid Application Environment/Requires]
 platform_services=Standard Platform Services
-soft_services=Soft Services Submodel
+soft_services=Soft Services
 connected_application=Null Connected Application
 
 [Standard Platform Services]
@@ -40,10 +40,6 @@ Packagehint=leap
 
 [Default Hybrid Project Common Utilities]
 File=config/pm/hasim/submodels/common/project-common-default.apm
-Packagehint=leap
-
-[Soft Services Submodel]
-File=config/pm/hasim/submodels/common/soft-services.apm
 Packagehint=leap
 
 [Null Connected Application]
@@ -56,3 +52,60 @@ Packagehint=leap-platforms-acp
 
 [Hybrid ACP Dual Compute Environment FPGA0 (Nallatech)/Params]
 MODEL_CLOCK_DIVIDER=8
+
+[Shared Tree Physical Interconnect]
+File=modules/leap/libraries/soft-services/services/soft-connections/physical-interconnects/shared-tree/shared-tree.awb
+Packagehint=leap
+
+[Soft Services Library Dependencies]
+File=modules/leap/libraries/soft-services/util/soft-services-deps.awb
+Packagehint=leap
+
+[Soft Services Dependencies]
+File=modules/leap/libraries/soft-services/soft-service-sets/soft-connections-soft-clocks/soft-services-deps-small.awb
+Packagehint=leap
+
+[SoftService Soft Connections for MultiFPGA/Requires]
+soft_connections_alg=SoftService Soft Connections Algorithm
+soft_connections_common=Soft Service Soft Connections Common
+physical_interconnect=Shared Tree Physical Interconnect
+
+[Basic Soft Clock Algorithm]
+File=modules/leap/libraries/soft-services/services/soft-clocks/basic-clock.awb
+Packagehint=leap
+
+[Soft Services/Requires]
+soft_services_deps=Soft Services Dependencies
+soft_services_lib=Soft Services Library
+soft_clocks=Basic Soft Clock Algorithm
+soft_connections=SoftService Soft Connections for MultiFPGA
+
+[Basic Soft Clock Algorithm/Requires]
+soft_clocks_lib=Basic Soft Clock Library
+
+[Soft Services Library]
+File=modules/leap/libraries/soft-services/util/soft-services-lib.awb
+Packagehint=leap
+
+[SoftService Soft Connections for MultiFPGA]
+File=modules/leap/libraries/soft-services/services/soft-connections/soft-connections-module-context-multifpga.awb
+Packagehint=leap
+
+[SoftService Soft Connections Algorithm]
+File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-module-context.awb
+Packagehint=leap
+
+[Soft Services Library/Requires]
+smart_synth_boundaries=Soft Services Library Dependencies
+
+[Soft Services]
+File=modules/leap/libraries/soft-services/soft-service-sets/soft-connections-soft-clocks/soft-services.awb
+Packagehint=leap
+
+[Basic Soft Clock Library]
+File=modules/leap/libraries/soft-services/services/soft-clocks/basic-clock-lib.awb
+Packagehint=leap
+
+[Soft Service Soft Connections Common]
+File=modules/leap/libraries/soft-services/services/soft-connections/soft-connections-common-module-context.awb
+Packagehint=leap
