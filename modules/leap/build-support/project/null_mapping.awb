@@ -1,0 +1,17 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Null FPGA Mapping
+%desc This file is a null mapping
+
+%attributes tool
+
+%provides fpga_mapping
+
+%sources -t FPGAENV_MAPPING -v PUBLIC null-mapping.map
+
+
+
+
+

@@ -9,21 +9,12 @@ DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
 DefaultRunOpts=
-RootName=HW/SW Hybrid Pipeline Build
+RootName=MultiFPGA Platform
 RootProvides=model
 
 [Model]
 DefaultAttributes=
-model=HW/SW Hybrid Pipeline Build
-
-[HW/SW Hybrid Pipeline Build]
-File=modules/leap/build-support/project/project-pipeline.awb
-Packagehint=leap
-
-[HW/SW Hybrid Pipeline Build/Requires]
-project_common=Default Hybrid Project Common Utilities
-fpgaenv=Hybrid ACP Dual Compute Environment FPGA0 (Nallatech)
-application_env=Soft Services Hybrid Application Environment
+model=MultiFPGA Platform
 
 [Soft Services Hybrid Application Environment]
 File=modules/leap/build-support/project/application-env/hybrid/soft-services/application-env-hybrid-soft-service.awb
@@ -49,9 +40,6 @@ Packagehint=leap-platforms
 [Hybrid ACP Dual Compute Environment FPGA0 (Nallatech)]
 File=config/pm/hasim/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-no-cache-fpga0.apm
 Packagehint=leap-platforms-acp
-
-[Hybrid ACP Dual Compute Environment FPGA0 (Nallatech)/Params]
-MODEL_CLOCK_DIVIDER=8
 
 [Shared Tree Physical Interconnect]
 File=modules/leap/libraries/soft-services/services/soft-connections/physical-interconnects/shared-tree/shared-tree.awb
@@ -109,3 +97,17 @@ Packagehint=leap
 [Soft Service Soft Connections Common]
 File=modules/leap/libraries/soft-services/services/soft-connections/soft-connections-common-module-context.awb
 Packagehint=leap
+
+[MultiFPGA Platform]
+File=modules/leap/build-support/project/platform-multifpga.awb
+Packagehint=multifpga
+
+[MultiFPGA Platform/Requires]
+fpga_mapping=Null FPGA Mapping
+project_common=Default Hybrid Project Common Utilities
+fpgaenv=Hybrid ACP Dual Compute Environment FPGA0 (Nallatech)
+application_env=Soft Services Hybrid Application Environment
+
+[Null FPGA Mapping]
+File=modules/leap/build-support/project/null_mapping.awb
+Packagehint=multifpga

@@ -38,6 +38,7 @@ Packagehint=leap
 connected_application=Default Software Connected Application
 environment_description=ACP Dual FPGA Environment
 build_pipeline=multiFPGA Build Pipeline
+fpga_mapping=MultiFPGA Test ACP Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -51,9 +52,13 @@ Packagehint=multifpga
 File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
 Packagehint=multifpga
 
-[multiFPGA Build Stage]
+[multiFPGA Build Pipeline/Requires]
+multifpga_parse_tool=multiFPGA Parser Build Stage
+
+[MultiFPGA Test ACP Mapping]
+File=modules/multifpga/synthTest/acp_mapping.awb
+Packagehint=multifpga
+
+[multiFPGA Parser Build Stage]
 File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
 Packagehint=leap
-
-[multiFPGA Build Pipeline/Requires]
-multifpga_parse_tool=multiFPGA Build Stage

@@ -1,5 +1,5 @@
 #/********************************************************************
-#* Python libraries for XST synthesis tool
+#* Python libraries for Bluespec MultiFPGA build
 #********************************************************************/
 
 %name BSV Build Tool (First Phase)
@@ -8,8 +8,12 @@
 %attributes tool
 
 %provides bsv_tool
+%requires fpga_mapping
 
-%scons %library BSV.py
+%scons %library BSV-multi.py
+%scons %library fgpamap.py
+%scons %library fgpalex.py
+%scons %library fgpaparse.py
 
 %param BSC_FLAGS  "-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -remove-dollar"  "Bluespec compiler options"
 

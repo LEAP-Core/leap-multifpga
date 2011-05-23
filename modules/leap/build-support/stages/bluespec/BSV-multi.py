@@ -4,6 +4,10 @@ import re
 import SCons.Script
 from model import  *
 from config import *
+import ply.yacc as yacc
+import ply.lex as lex
+from fpgamaplex import *
+from fpgamapparse import *
 
 def get_wrapper(module):
   return  module.name + '_Wrapper.bsv'
@@ -19,7 +23,23 @@ def get_child_v(module):
 class BSV():
 
   def __init__(self, moduleList):
-   
+
+    # Parse the mapping file, using it to define the `MULTI_FPGA_PLATFORM
+       
+    # build the compiler
+    lex.lex()
+    yacc.yacc()
+
+    envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
+    if(len(envFile) != 1):
+      print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
+    mappingDescription = (open(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0], 'r')).read()
+    #print "opened env file: " + moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0] + " -> " + environmentDescription
+    self.mapping = yacc.parse(mappingDescription)
+    # at some point we should square the mapping and environment files to make sure that no extra/
+    print "mapping keys: " + str(environment.getPlatformNames)
+    
+
     TMP_BSC_DIR = moduleList.env['DEFS']['TMP_BSC_DIR']
 
     moduleList.env['DEFS']['CWD_REL'] = moduleList.env['DEFS']['ROOT_DIR_HW_MODEL']
@@ -152,7 +172,7 @@ class BSV():
       bdir = os.path.dirname(str(target[0]))
       # kill the bo target first ?
       lib_dirs = bsc_bdir_prune(env,ALL_LIB_DIRS_FROM_ROOT, ':', bdir)
-      return  BSC + ' ' + self.BSC_FLAGS + ' -p +:' + \
+      return  BSC + ' -D MULTI_FPGA_PLATFORM=' + self.mapping.getSynthesisBoundary(module.name)  + ' ' + self.BSC_FLAGS + ' -p +:' + \
            ROOT_DIR_HW_INC + ':' + ROOT_DIR_HW_INC + '/asim/provides:' + \
            lib_dirs + ':' + TMP_BSC_DIR + ' -bdir ' + bdir + \
            ' -vdir ' + bdir + ' -simdir ' + bdir + ' -info-dir ' + bdir

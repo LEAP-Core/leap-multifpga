@@ -10,6 +10,7 @@
 
 %requires connected_application 
 %requires environment_description
+%requires fpga_mapping
 %requires build_pipeline
 
 # We should pick these up on union dir
