@@ -1,4 +1,5 @@
 model -> ACPO;
+hardware_system -> ACPO;
 test_a -> ACPO;
 test_c -> ACPO;
 test_b -> ACP1;

@@ -1,3 +1,4 @@
+import ply.yacc as yacc
 
 tokens = [ 'RARROW', 'SEMICOLON',
            'NAME'
@@ -8,7 +9,7 @@ t_SEMICOLON = r';'
 
 def t_NAME(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
-    t.type = reserved.get(t.value,'NAME')
+    t.type = 'NAME'
     return t
 
 t_ignore = " \t\r" #white space requirements are evil

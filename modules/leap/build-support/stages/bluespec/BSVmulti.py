@@ -37,7 +37,7 @@ class BSV():
     #print "opened env file: " + moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0] + " -> " + environmentDescription
     self.mapping = yacc.parse(mappingDescription)
     # at some point we should square the mapping and environment files to make sure that no extra/
-    print "mapping keys: " + str(environment.getPlatformNames)
+    print "mapping keys: " + str(self.mapping.getPlatformNames()) + "\n"
     
 
     TMP_BSC_DIR = moduleList.env['DEFS']['TMP_BSC_DIR']
@@ -172,7 +172,7 @@ class BSV():
       bdir = os.path.dirname(str(target[0]))
       # kill the bo target first ?
       lib_dirs = bsc_bdir_prune(env,ALL_LIB_DIRS_FROM_ROOT, ':', bdir)
-      return  BSC + ' -D MULTI_FPGA_MAPPING=' + self.mapping.getSynthesisBoundary(module.name)  + ' ' + self.BSC_FLAGS + ' -p +:' + \
+      return  BSC + ' -D MULTI_FPGA_MAPPING=\\"' + self.mapping.getSynthesisBoundaryPlatform(module.name)  + '\\" ' + self.BSC_FLAGS + ' -p +:' + \
            ROOT_DIR_HW_INC + ':' + ROOT_DIR_HW_INC + '/asim/provides:' + \
            lib_dirs + ':' + TMP_BSC_DIR + ' -bdir ' + bdir + \
            ' -vdir ' + bdir + ' -simdir ' + bdir + ' -info-dir ' + bdir
@@ -213,18 +213,19 @@ class BSV():
     #for child in synth_children:
     #  child_v.append(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + get_child_v(child))
 
-
-
     wrapper_builds = []
     for bsv in  [get_wrapper(module)]:
       ##
       ## First pass just generates a log file to figure out cross synthesis
       ## boundary soft connection array sizes.
       ##
-      # this is a little hosed.
-    
+      # this is a little hosed.  We need to force a rebuild of soft_connections
+      # soft connection alg is the one that needs to be recompiled
+      # soft_connection_recompile = env.Command(, log, 'leap-connect --softservice --dynsize $SOURCE $TARGET')
+     
       log = env.BSC_LOG(MODULE_PATH + TMP_BSC_DIR + '/' + bsv.replace('.bsv', ''),
                         MODULE_PATH + bsv)
+      #moduleList.env.Depends(log,soft_connec
       #moduleList.env.Depends(log, child_v)
       # we should depend on subsidiary logs
       #moduleList.env.Depends(log, child_v)

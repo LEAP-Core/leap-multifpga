@@ -6,6 +6,7 @@ class FPGAMap(object):
         self.mapping = {}
         for entry in mappings:
             self.mapping[entry[0]] = entry[1]
+            print "Mapping: " + entry[1] + " -> " + entry[0] + "\n"
 
     def addSynthesisBoundaryMapping(self,boundary,platform):
         self.mapping[boundary] = platform;
@@ -13,15 +14,15 @@ class FPGAMap(object):
     def getSynthesisBoundaryPlatform(self,boundary):
         return self.mapping[boundary]
 
-    def getPlatformNames(self,boundary):
+    def getPlatformNames(self):
         return self.mapping.keys()
 
     def getPlatformSynthesisBoundaries(self):
         keys = self.mapping.keys()
         result = []
         for boundary in keys:
-            if(self.mapping[boundary] == platform)
-            result.append(boundary)
+            if(self.mapping[boundary] == platform):
+              result.append(boundary)
         return result
 
     # build a graph. This will make life easier

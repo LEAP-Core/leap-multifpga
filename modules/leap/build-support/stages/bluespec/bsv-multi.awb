@@ -9,8 +9,8 @@
 
 %provides bsv_tool
 
-%scons %library BSV-multi.py
-%scons %library fgpamap.py
+%scons %library BSVmulti.py
+%scons %library fpgamap.py
 %scons %library fpgamaplex.py
 %scons %library fpgamapparse.py
 
