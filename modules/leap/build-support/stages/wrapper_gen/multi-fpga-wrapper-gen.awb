@@ -1,0 +1,19 @@
+#/********************************************************************
+#* Python libraries for Bluespec MultiFPGA build
+#********************************************************************/
+
+%name Synthesis Boundary Wrapper generation tool
+%desc Build wrappper files for multifpga synthesis
+
+%attributes tool
+
+%provides wrapper_gen_tool
+
+%scons %library multifpga_wrapper_gen.py
+%scons %library fgpamap.py
+%scons %library fpgamaplex.py
+%scons %library fpgamapparse.py
+
+
+
+
