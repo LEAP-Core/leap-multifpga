@@ -1,5 +1,6 @@
-import sys
 import ply.yacc as yacc
+import ply.lex as lex
+from fpgamaplex import *
 from fpgamap import *
 
 def p_mapping(p):
@@ -17,3 +18,4 @@ def p_mapping_list(p):
         p[0] = []
     else:
         p[0] = [[p[1],p[3]]] + p[5]
+

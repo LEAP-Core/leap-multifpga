@@ -1,6 +1,6 @@
-model -> ACPO;
-hardware_system -> ACPO;
-test_a -> ACPO;
-test_c -> ACPO;
+model -> ACP0;
+hardware_system -> ACP0;
+test_a -> ACP0;
+test_c -> ACP0;
 test_b -> ACP1;
 test_d -> ACP1;

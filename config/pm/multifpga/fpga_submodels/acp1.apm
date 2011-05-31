@@ -57,7 +57,7 @@ File=modules/leap/libraries/soft-services/soft-service-sets/soft-connections-sof
 Packagehint=leap
 
 [SoftService Soft Connections for MultiFPGA/Requires]
-soft_connections_alg=SoftService Soft Connections Algorithm
+soft_connections_alg=SoftService Soft Connections Algorithm MultiFPGA
 soft_connections_common=Soft Service Soft Connections Common
 physical_interconnect=Shared Tree Physical Interconnect
 
@@ -80,10 +80,6 @@ Packagehint=leap
 
 [SoftService Soft Connections for MultiFPGA]
 File=modules/leap/libraries/soft-services/services/soft-connections/soft-connections-module-context-multifpga.awb
-Packagehint=leap
-
-[SoftService Soft Connections Algorithm]
-File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-module-context.awb
 Packagehint=leap
 
 [Soft Services Library/Requires]
@@ -114,3 +110,7 @@ application_env=Soft Services Hybrid Application Environment
 [Null FPGA Mapping]
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=multifpga
+
+[SoftService Soft Connections Algorithm MultiFPGA]
+File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-multifpga.awb
+Packagehint=leap

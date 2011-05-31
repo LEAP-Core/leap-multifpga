@@ -10,9 +10,6 @@
 %provides bsv_tool
 
 %scons %library BSVmulti.py
-%scons %library fpgamap.py
-%scons %library fpgamaplex.py
-%scons %library fpgamapparse.py
 
 %param BSC_FLAGS  "-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -remove-dollar"  "Bluespec compiler options"
 

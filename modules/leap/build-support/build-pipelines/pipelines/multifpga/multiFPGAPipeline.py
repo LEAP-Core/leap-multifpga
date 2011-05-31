@@ -2,11 +2,13 @@ import os
 import re
 import SCons.Script  
 from model import  *
-from multifpga_parse_tool import  *
+from multi_fpga_log_generator import  *
+from multi_fpga_connect import  *
 
 class Build(ProjectDependency):
   def __init__(self, moduleList):
-    ParseMultiFPGA(moduleList)
+    MultiFPGAGenerateLogfile(moduleList)
+    MultiFPGAConnect(moduleList)
 
 
 

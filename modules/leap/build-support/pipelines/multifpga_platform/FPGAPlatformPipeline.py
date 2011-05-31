@@ -2,6 +2,7 @@ import os
 import re
 import SCons.Script  
 from model import  *
+from wrapper_gen_tool import *
 from iface_tool import *
 from bsv_tool import *
 from fpga_program_tool import *

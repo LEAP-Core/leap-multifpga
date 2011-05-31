@@ -4,10 +4,6 @@ import re
 import SCons.Script
 from model import  *
 from config import *
-import ply.yacc as yacc
-import ply.lex as lex
-from fpgamaplex import *
-from fpgamapparse import *
 
 def get_wrapper(module):
   return  module.name + '_Wrapper.bsv'
@@ -16,29 +12,12 @@ def get_wrapper(module):
 def get_child_v(module):
   return module.buildPath + '/.bsc/' + module.name + '_Wrapper.bo'
 
-
 #this might be better implemented as a 'Node' in scons, but 
 #I want to get something working before exploring that path
 # This is going to recursively build all the bsvs
 class BSV():
 
   def __init__(self, moduleList):
-
-    # Parse the mapping file, using it to define the `MULTI_FPGA_PLATFORM
-       
-    # build the compiler
-    lex.lex()
-    yacc.yacc()
-
-    envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
-    if(len(envFile) != 1):
-      print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
-    mappingDescription = (open(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0], 'r')).read()
-    #print "opened env file: " + moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0] + " -> " + environmentDescription
-    self.mapping = yacc.parse(mappingDescription)
-    # at some point we should square the mapping and environment files to make sure that no extra/
-    print "mapping keys: " + str(self.mapping.getPlatformNames()) + "\n"
-    
 
     TMP_BSC_DIR = moduleList.env['DEFS']['TMP_BSC_DIR']
 
@@ -91,6 +70,7 @@ class BSV():
       if(child.name != module.name):
         SUBDIRS += child.name + ' ' 
 
+#    SURROGATE_BSVS = transform_string_list(SUBDIRS, None, MODULE_PATH+'/.synthBoundaries/', '.bsv'
     SURROGATE_BSVS = transform_string_list(SUBDIRS, None, MODULE_PATH, '.bsv')
 
     ##
@@ -128,8 +108,8 @@ class BSV():
     if (SURROGATE_BSVS != ''):
       DERIVED = ' -derived "' + SURROGATE_BSVS + '"'
 
-    print 'leap-bsc-mkdepend -bdir ' + TMP_BSC_DIR + DERIVED + ' -p +:' + ROOT_DIR_HW_INC_REL + ':' + ROOT_DIR_HW_INC_REL + '/asim/provides:' + ALL_LIB_DIRS_FROM_CWD + ' ' + WRAPPER_BSVS + ' > ' + MODULE_PATH + '.depends-bsv'
-    s = os.system('leap-bsc-mkdepend -bdir ' + TMP_BSC_DIR + DERIVED + ' -p +:' + ROOT_DIR_HW_INC_REL + ':' + ROOT_DIR_HW_INC_REL + '/asim/provides:' + ALL_LIB_DIRS_FROM_CWD + ' ' + WRAPPER_BSVS + ' > ' + MODULE_PATH + '.depends-bsv')
+    print 'leap-bsc-mkdepend -bdir ' + TMP_BSC_DIR + DERIVED + ' -p +:'+ MODULE_PATH + ':' + ROOT_DIR_HW_INC_REL + ':' + ROOT_DIR_HW_INC_REL + '/asim/provides:' + ALL_LIB_DIRS_FROM_CWD + ' ' + WRAPPER_BSVS + ' > ' + MODULE_PATH + '.depends-bsv'
+    s = os.system('leap-bsc-mkdepend -bdir ' + TMP_BSC_DIR + DERIVED + ' -p +:' + MODULE_PATH + ':' + ROOT_DIR_HW_INC_REL + ':' + ROOT_DIR_HW_INC_REL + '/asim/provides:' + ALL_LIB_DIRS_FROM_CWD + ' ' + WRAPPER_BSVS + ' > ' + MODULE_PATH + '.depends-bsv')
     if (s & 0xffff) != 0:
       print 'Aborting due to dependence errors'
       sys.exit(1)
@@ -172,7 +152,7 @@ class BSV():
       bdir = os.path.dirname(str(target[0]))
       # kill the bo target first ?
       lib_dirs = bsc_bdir_prune(env,ALL_LIB_DIRS_FROM_ROOT, ':', bdir)
-      return  BSC + ' -D MULTI_FPGA_MAPPING=\\"' + self.mapping.getSynthesisBoundaryPlatform(module.name)  + '\\" ' + self.BSC_FLAGS + ' -p +:' + \
+      return  BSC +" " +  self.BSC_FLAGS + ' -p +:' + MODULE_PATH + ":" + \
            ROOT_DIR_HW_INC + ':' + ROOT_DIR_HW_INC + '/asim/provides:' + \
            lib_dirs + ':' + TMP_BSC_DIR + ' -bdir ' + bdir + \
            ' -vdir ' + bdir + ' -simdir ' + bdir + ' -info-dir ' + bdir
@@ -194,6 +174,8 @@ class BSV():
     # and requires a bash shell
     moduleList.env['SHELL'] = 'bash' # coerce commands to be spanwed under bash
     bsc_log = moduleList.env.Builder(generator = compile_bsc_log, suffix = '.log', src_suffix = '.bsv')      
+
+    
 
     # SUBD method for building generated .bsv file.  Can't use automatic
     # suffix detection since source must be named explicitly.
@@ -222,7 +204,8 @@ class BSV():
       # this is a little hosed.  We need to force a rebuild of soft_connections
       # soft connection alg is the one that needs to be recompiled
       # soft_connection_recompile = env.Command(, log, 'leap-connect --softservice --dynsize $SOURCE $TARGET')
-     
+      logfile = MODULE_PATH + TMP_BSC_DIR + '/' + bsv.replace('.bsv', '.log')     
+
       log = env.BSC_LOG(MODULE_PATH + TMP_BSC_DIR + '/' + bsv.replace('.bsv', ''),
                         MODULE_PATH + bsv)
       #moduleList.env.Depends(log,soft_connec
@@ -247,30 +230,14 @@ class BSV():
 #      moduleList.env.Depends(upper_bo, wrapper_bo)
 
       # now we should call leap-connect soft-services again
+      # unfortunately leap-connect wants this file to reside in our 
       synth_stub_path = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/.stub/'
       synth_stub = synth_stub_path + module.name +'.bsv'
       c = env.Command(synth_stub, # target
                       [stub,wrapper_bo],  
                       [ 'mkdir -p ' + synth_stub_path,
-                      'leap-connect --softservice ' + APM_FILE + ' $TARGET'])
-      # spam this file to all synthesis boundaries in case one of them wants it. 
-      boundaries = moduleList.synthBoundaries() + [moduleList.topModule]
-      for boundary in boundaries:
-        #make sure module doesn't self-depend
-        boundarycopy = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath + '/' +  module.name + '.bsv'
-        if(module.name != boundary.name): 
-          print  " module: " + module.name + " boundary: " + boundary.name  + "\n"
-          print "command: cp " + str(synth_stub) + " " + boundarycopy +"\n"
-          c_boundary = env.Command(boundarycopy,
-                                   synth_stub,
-                                   'cp $SOURCE $TARGET')
-          #Need to insert the "bo" dependency as well.  
-          BOUNDARY_PATH =  moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath + '/' 
-          bo_dep = env.BSC_SUBD(BOUNDARY_PATH + TMP_BSC_DIR + '/' + module.name + '.bo', boundarycopy)
-          # if you need the child bo, then you will need its verilog also. 
-          print "child_v is: " + get_child_v(module) + "\n"
-          print "bo_dep is: " + str(bo_dep) + "\n"
-      #    moduleList.env.Depends(bo_dep,child_v)
+                      'leap-connect --alternative_logfile ' + logfile  + ' --softservice ' + APM_FILE + ' $TARGET'])
+
  
 
 
@@ -328,52 +295,81 @@ class BSV():
                        bld_v + bld_ba,
                        'leap-gen-black-box -nohash $SOURCE > $TARGET')
 
+      #This function generates yet another wrapper, this time of the sub functions 
+      #
+      def generateNullWrapper(logfile,outfile):
+        log = open(logfile,'r')
+        out = open(outfile,"w")
+        subBoundaries = []
+        # parse the log file to determine sub boundaries 
+        for line in log.readlines():
+          components = line.split(' ')
+          # our print is the last element of the list
+          components_print = (components[-1]).split(':')
+          if(components_print[0] == 'SynthBoundary'):
+            subBoundaries.append([components_print[1],components_print[2]])
+        
+        out.write("//generated by build pipeline")
+        out.write('import HList::*;\n')
+        out.write('import ModuleContext::*;\n')
+        out.write('// These are well-known/required leap modules\n')
+        out.write('`include "asim/provides/soft_connections.bsh"\n')
+        out.write('`include "asim/provides/soft_services_lib.bsh"\n')
+        out.write('`include "asim/provides/soft_services.bsh"\n')
+        out.write('`include "asim/provides/soft_services_deps.bsh"\n')
+        out.write('// import non-synthesis public files\n')
+
+        out.write('// import non-synthesis private files\n')
+        for boundary in subBoundaries:
+          out.write('`include "asim/provides/'+boundary[0]+'.bsh"\n')
+
+        out.write('`include "test_b_Wrapper_con_size.bsh"\n')
+
+        out.write('(* synthesize *)\n')
+        out.write('module mk_' + module.name + '_Wrapper (SOFT_SERVICES_SYNTHESIS_BOUNDARY#(`CON_RECV_' + module.name + ', `CON_SEND_' + module.name + ', `CON_RECV_MULTI_' + module.name + ', `CON_SEND_MULTI_' + module.name + '));\n')
+
+        out.write('    // instantiate own module\n')
+        out.write('   let ctx0 <- initializeServiceContext();\n')
+        i = 0
+        for boundary in subBoundaries:
+          out.write('    match {ctx' + str(i+1) + ', .m_final} <- runWithContext(ctx'+str(i)+', '+boundary[1]+');\n')
+          i = i + 1
+
+        out.write('    let service_ifc <- exposeServiceContext(ctx' + str(i) + ');\n')
+        out.write('    interface services = service_ifc;\n')
+        out.write('    interface device = ?;//device has no interface\n')
+        out.write('endmodule\n')
+
+
+      # spam this file to all synthesis boundaries in case one of them wants it. 
+      boundaries = moduleList.synthBoundaries() + [moduleList.topModule]
+      for boundary in boundaries:
+        #make sure module doesn't self-depend
+        #boundarydir  = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath + '/.synthBoundaries/' 
+        boundarydir  = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath +'/'
+        boundarycopy = boundarydir +  module.name + '.bsv'
+        
+        if(module.name != boundary.name): 
+          print  " module: " + module.name + " boundary: " + boundary.name  + "\n"
+          print "command: cp " + str(synth_stub) + " " + boundarycopy +"\n"
+          BOUNDARY_PATH =  moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath + '/' 
+          copy_bo = BOUNDARY_PATH + TMP_BSC_DIR + '/' + module.name + '.bo'
+          c_boundary = env.Command(boundarycopy,
+                                   [synth_stub,bld_ba,stub,wrapper_bo],
+                                   ['mkdir -p '+ boundarydir,
+                                    'cp ' + synth_stub + ' $TARGET'])
+          #Need to insert the "bo" dependency as well.  
+
+          bo_dep = env.BSC_SUBD(copy_bo, boundarycopy)
+          
+          # if you need the child bo, then you will need its verilog also. 
+          print "child_v is: " + get_child_v(module) + "\n"
+          print "bo_dep is: " + str(bo_dep) + "\n"
+      #    moduleList.env.Depends(bo_dep,child_v)
+
+
       # because I'm not sure that we guarantee the wrappers can only be imported
       # by parents, 
       moduleList.topModule.moduleDependency['VERILOG_STUB'] += [bb]
-
-    ##
-    ## Build subdirectories
-    ##
-
-
-    # the subdirs have already been built.  But we 
-    # need to run leap connect on them 
-#    for child in synth_children:
-#      s = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/' + child.name +'.bsv'
-      # Connection file derived from subdirectory build
-      # need to point 
-      # here we produce a link stub for the child directory.
-#      childModulePath =  moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + child.buildPath + '/'
-#      sd = childModulePath + child.name +'.bsv'
-      # this should also depend on the con wrapper being formed.  We need the first pass  and the subsequent rebuild of bi/bo to happen _before_ the second
-#      stub_bsh = sd.replace('.bsv', '_Wrapper_con_size.bsh')
-#      c = env.Command(s, # target
-#                      [sd,stub_bsh,get_child_v(child)],
-#                      [sd,stub_bsh],
-#                      'leap-connect --softservice ' + APM_FILE + ' $TARGET')
-      # spam this file to all synthesis boundaries in case one of them wants it. 
-#     boundaries = moduleList.synthBoundaries()
-#      for boundary in boundaries:
-        #make sure module doesn't self-depend
-#        boundarycopy = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath + '/' +  child.name + '.bsv'
-#        if(child.name != boundary.name and module.name != boundary.name and child.name != module.name):  #we got the parent boundary in the previous step
-#          print "child: " + child.name + " module: " + module.name + " boundary: " + boundary.name  + "\n"
-#          print "command: cp " + s + " " + boundarycopy +"\n"
-#          c_boundary = env.Command(boundarycopy,
-#                                   s,
-#                                   'cp $SOURCE $TARGET')
-          #Need to insert the "bo" dependency as well.  
-#          BOUNDARY_PATH =  moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath + '/' 
-#          bo_dep = env.BSC_SUBD(BOUNDARY_PATH + TMP_BSC_DIR + '/' + child.name + '.bo', boundarycopy)
-#          # if you need the child bo, then you will need its verilog also. 
-#          print "child_v is: " + get_child_v(child) + "\n"
- #         print "bo_dep is: " + str(bo_dep) + "\n"
- #     #    moduleList.env.Depends(bo_dep,child_v)
- #     # Explicitly depend on the child build
- #     #moduleList.env.Depends(c, child_v)
-
-      # Build rule for the connection file
-#      env.BSC_SUBD(MODULE_PATH + TMP_BSC_DIR + '/' + child.name + '.bo', c)
  
     return wrapper_builds

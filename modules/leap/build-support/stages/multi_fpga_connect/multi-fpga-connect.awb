@@ -1,0 +1,10 @@
+%name MultiFPGA Communication Complex Generator
+%desc Generates a connection complex between FPGAs
+
+%attributes tool
+
+%provides multi_fpga_connect
+%requires fpgamap_parser
+
+%scons %library multiFPGAConnect.py
+
