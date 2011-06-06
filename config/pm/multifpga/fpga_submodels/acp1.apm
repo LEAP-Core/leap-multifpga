@@ -21,13 +21,9 @@ File=modules/leap/build-support/project/application-env/hybrid/soft-services/app
 Packagehint=leap
 
 [Soft Services Hybrid Application Environment/Requires]
-platform_services=Standard Platform Services
+platform_services=MultiFPGA NULL Platform Services
 soft_services=Soft Services
 connected_application=Null Connected Application
-
-[Standard Platform Services]
-File=config/pm/hasim/submodels/platform-services/standard-platform-services.apm
-Packagehint=leap
 
 [Default Hybrid Project Common Utilities]
 File=config/pm/hasim/submodels/common/project-common-default.apm
@@ -114,3 +110,19 @@ Packagehint=multifpga
 [SoftService Soft Connections Algorithm MultiFPGA]
 File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-multifpga.awb
 Packagehint=leap
+
+[Starter Service]
+File=modules/leap/virtual-platform/virtual-devices/backwards-compat/platform-services/starter-service/starter-service.awb
+Packagehint=leap
+
+[MultiFPGA NULL Platform Services/Requires]
+multifpga_router_service=MultiFPGA Router Service
+starter_service=Starter Service
+
+[MultiFPGA NULL Platform Services]
+File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-null.awb
+Packagehint=multifpga
+
+[MultiFPGA Router Service]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/multifpga-router-service.awb
+Packagehint=multifpga

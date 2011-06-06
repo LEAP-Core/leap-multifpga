@@ -2,8 +2,7 @@
 
 PHYSICAL_DEVICES_CLASS::PHYSICAL_DEVICES_CLASS(
     PLATFORMS_MODULE p) :
-        PLATFORMS_MODULE_CLASS(p),
-        unixPipeDevice(this)
+        PLATFORMS_MODULE_CLASS(p)
 {
 }
 

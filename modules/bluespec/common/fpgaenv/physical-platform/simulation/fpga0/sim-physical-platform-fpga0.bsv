@@ -34,6 +34,7 @@ interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER    clocksDriver;
     interface UNIX_PIPE_DRIVER unixPipeDriver;
+    interface UNIX_COMM_DRIVER unixCommDriver;
 
 endinterface
 
@@ -48,6 +49,7 @@ interface TOP_LEVEL_WIRES;
     
     interface CLOCKS_WIRES    clocksWires;
     interface UNIX_PIPE_WIRES unixPipeWires;
+    interface UNIX_COMM_WIRES unixCommWires;
     
 endinterface
 
@@ -87,6 +89,11 @@ module mkPhysicalPlatform
                                                            clocked_by clk,
                                                            reset_by rst);
 
+    UNIX_COMM_DEVICE unix_comm_device  <- mkUNIXCommDevice("/tmp/FPGA0ToFPGA1",
+                                                           "/tmp/FPGA1ToFPGA0",
+                                                           clocked_by clk,
+                                                           reset_by reset);
+
     // Finally, instantiate all other physical devices
 
     // Aggregate the drivers
@@ -95,6 +102,7 @@ module mkPhysicalPlatform
     
         interface clocksDriver   = clocks_device.driver;
         interface unixPipeDriver = unix_pipe_device.driver;
+        interface unixCommDriver = unix_comm_device.driver;
 
     endinterface
     
@@ -104,6 +112,7 @@ module mkPhysicalPlatform
     
         interface clocksWires    = clocks_device.wires;
         interface unixPipeWires  = unix_pipe_device.wires;
+        interface unixCommWires  = unix_comm_device.wires;
 
     endinterface
                
