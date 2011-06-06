@@ -14,7 +14,6 @@ class WrapperGen():
 
   def __init__(self, moduleList):
 
-
     envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
     if(len(envFile) != 1):
       print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
@@ -97,4 +96,4 @@ class WrapperGen():
         wrapper_bsv.write('endmodule\n')
     
 
-
+      wrapper_bsv.close()
