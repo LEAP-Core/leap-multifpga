@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation Dual FPGA Environment
+%desc Simulation Dual FPGA Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-dual.env
+%AWB_END

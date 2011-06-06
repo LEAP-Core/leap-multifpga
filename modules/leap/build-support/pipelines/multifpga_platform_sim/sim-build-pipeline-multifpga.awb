@@ -1,0 +1,16 @@
+#/********************************************************************
+#* Generic FPGA build pipeline
+#********************************************************************/
+
+%name MultiFPGA BlueSim Platform Build Pipeline
+%desc MultiFPGA BlueSim Platform Build Pipeline
+%attributes tool
+
+%provides build_pipeline
+%requires wrapper_gen_tool
+%requires bsv_tool
+%requires iface_tool
+%requires software_tool
+%requires bluesim_tool
+
+%scons %library SimulationPipelineMultiFPGA.py

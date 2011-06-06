@@ -1,0 +1,6 @@
+model -> FPGA0;
+hardware_system -> FPGA0;
+test_a -> FPGA0;
+test_c -> FPGA0;
+test_b -> FPGA1;
+test_d -> FPGA1;

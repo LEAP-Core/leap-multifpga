@@ -1,0 +1,150 @@
+
+[Global]
+SaveParameters=0
+Description=MultiFPGA Simulation FPGA1 Environment
+File=multifpgaenv-hybrid-exe-fpga1
+Version=2.2
+Type=Leap
+Name=MultiFPGA Simulation FPGA1 Environment
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+RootName=FPGA Environment
+RootProvides=fpgaenv
+
+[Model]
+DefaultAttributes=hybrid exe
+model=FPGA Environment
+
+[FPGA Environment]
+File=modules/leap/virtual-platform/fpga-environment.awb
+Packagehint=leap
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+fpga_components=Software FPGA Components
+librl_bsv=RL Bluespec Library Submodel
+build_pipeline=MultiFPGA BlueSim Platform Build Pipeline
+
+[Standard Virtual Platform]
+File=modules/leap/virtual-platform/std-virtual-platform.awb
+Packagehint=leap
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices Submodel
+low_level_platform_interface=Low Level Platform Interface Hybrid
+umf=Little-Endian Unified Message Format
+
+[RRR Clients and Servers]
+File=modules/leap/virtual-platform/rrr/basic/basic-rrr.awb
+Packagehint=leap
+
+[Low Level Platform Interface Hybrid]
+File=modules/leap/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=leap
+
+[Low Level Platform Interface Hybrid/Requires]
+physical_platform=FPGA1 Simulation Physical Platform
+channelio=Null Channel IO Module
+rrr=RRR Clients and Servers
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=NULL Local Memory Interface
+remote_memory=Null Remote Memory
+
+[Software FPGA Components]
+File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
+Packagehint=leap-platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=leap-platforms
+
+[Simulation Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation/sim-clocks-device.awb
+Packagehint=leap-platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=leap-platforms
+
+[Null Remote Memory]
+File=modules/leap/virtual-platform/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=leap
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[RRR Common Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-common.awb
+Packagehint=leap
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module
+
+[Standard Virtual Devices Submodel]
+File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
+Packagehint=leap
+
+[RL Bluespec Library Submodel]
+File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+Packagehint=leap
+
+[UNIX Communication Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
+Packagehint=multifpga
+
+[FPGA1 Simulation Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga1/sim-physical-platform-fpga1.awb
+Packagehint=multifpga
+
+[FPGA1 Simulation Physical Platform/Requires]
+clocks_device=Simulation Clocks Device
+unix_comm_device=UNIX Communication Physical Device
+physical_platform_utils=Common Physical Platform Utilities
+
+[Null Channel IO Module]
+File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
+Packagehint=leap
+
+[NULL Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=leap
+
+[Synthesis Boundary Wrapper generation tool/Requires]
+fpgamap_parser=FPGAMap
+
+[Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/stages/wrapper_gen/multi-fpga-wrapper-gen.awb
+Packagehint=multifpga
+
+[BSV Bluesim Build Tool]
+File=modules/leap/build-support/build-pipelines/stages/bluesim/bsv-exe.awb
+Packagehint=leap
+
+[Interface builder]
+File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
+Packagehint=leap
+
+[Software build tool]
+File=modules/leap/build-support/build-pipelines/stages/software/software.awb
+Packagehint=leap
+
+[BSV Build Tool MultiFPGA]
+File=modules/leap/build-support/stages/bluespec/bsv-multi.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[MultiFPGA BlueSim Platform Build Pipeline/Requires]
+software_tool=Software build tool
+iface_tool=Interface builder
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+bluesim_tool=BSV Bluesim Build Tool
+bsv_tool=BSV Build Tool MultiFPGA
+
+[MultiFPGA BlueSim Platform Build Pipeline]
+File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
+Packagehint=multifpga

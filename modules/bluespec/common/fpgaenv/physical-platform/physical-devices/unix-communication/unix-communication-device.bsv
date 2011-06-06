@@ -47,8 +47,8 @@ STATE
 // UNIX_COMM_DRIVER
 interface UNIX_COMM_DRIVER;
 
-    method ActionValue#(UMF_CHUNK) read();
-    method Action                  write(UMF_CHUNK chunk);
+    method ActionValue#(UMF_CHUNK) get();
+    method Action                  put(UMF_CHUNK chunk);
         
 endinterface
 
