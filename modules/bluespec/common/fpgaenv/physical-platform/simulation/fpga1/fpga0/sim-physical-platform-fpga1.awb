@@ -1,12 +1,12 @@
 
-%name Simulation Physical Platform
-%desc Simulation Physical Platform
+%name FPGA0 Simulation Physical Platform
+%desc FPGA0 Simulation Physical Platform
 
 %provides physical_platform
 
 %requires clocks_device unix_pipe_device physical_platform_utils
 
-%sources -t BSV -v PUBLIC  sim-physical-platform.bsv
+%sources -t BSV -v PUBLIC  sim-physical-platform-acp0.bsv
 %sources -t H   -v PUBLIC  sim-physical-platform.h
 %sources -t CPP -v PRIVATE sim-physical-platform.cpp
 
