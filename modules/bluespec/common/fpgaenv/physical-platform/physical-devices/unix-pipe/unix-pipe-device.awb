@@ -1,0 +1,24 @@
+
+%name UNIX Pipe Physical Device
+%desc UNIX Pipe Physical Device
+
+%provides unix_pipe_device
+
+%sources -t BSV    -v PUBLIC  unix-pipe-device.bsv
+%sources -t BDPI_H -v PUBLIC  unix-pipe-device-bdpi.h
+%sources -t BDPI_C -v PRIVATE unix-pipe-device-bdpi.c
+
+%sources -t H      -v PUBLIC  unix-pipe-device.h
+%sources -t CPP    -v PRIVATE unix-pipe-device.cpp
+
+%generated -t BA pipe_init.ba
+%generated -t BA pipe_open.ba
+%generated -t BA pipe_read.ba
+%generated -t BA pipe_can_write.ba
+%generated -t BA pipe_write.ba
+%generated -t BA pipe_receive_reset.ba
+%generated -t BA pipe_clear_reset.ba
+
+%param SIMULATOR_ARGS  "-w"  "Simulator Args"
+
+

@@ -4,6 +4,7 @@ import re
 import SCons.Script
 from model import  *
 from config import *
+from multifpga_router_service import *
 
 def get_wrapper(module):
   return  module.name + '_Wrapper.bsv'
@@ -28,6 +29,11 @@ class BSV():
        bsc_events_flag = ' -D HASIM_EVENTS_ENABLED=False '
     else:
        bsc_events_flag = ' -D HASIM_EVENTS_ENABLED=True '
+
+    if(USE_ROUTING_KNOWN):
+       bsc_routing_known = ' -D ROUTING_KNOWN '
+    else:
+       bsc_routing_known = ' '
 
     self.BSC_FLAGS = BSC_FLAGS  + bsc_events_flag 
 
@@ -195,7 +201,7 @@ class BSV():
     #for child in synth_children:
     #  child_v.append(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + get_child_v(child))
 
-    wrapper_builds = []
+
     for bsv in  [get_wrapper(module)]:
       ##
       ## First pass just generates a log file to figure out cross synthesis
@@ -208,6 +214,11 @@ class BSV():
 
       log = env.BSC_LOG(MODULE_PATH + TMP_BSC_DIR + '/' + bsv.replace('.bsv', ''),
                         MODULE_PATH + bsv)
+
+      if(BUILD_LOGS_ONLY):
+        print "Adding Top: " + str(logfile) + ":" + str(log)+"\n"
+        moduleList.topDependency += [log]
+
       #moduleList.env.Depends(log,soft_connec
       #moduleList.env.Depends(log, child_v)
       # we should depend on subsidiary logs
@@ -285,7 +296,8 @@ class BSV():
                            '')
       module.moduleDependency['BA'] += [bld_ba] 
       env.Precious(bld_ba)
-     
+      if(BUILD_LOGS_ONLY):
+        moduleList.topDependency += [bld_ba]
 
     
       ##
@@ -370,6 +382,9 @@ class BSV():
 
       # because I'm not sure that we guarantee the wrappers can only be imported
       # by parents, 
+      if(BUILD_LOGS_ONLY):
+        print "Adding Top: " + str(logfile) + ":" + str(log)+"\n"
+        moduleList.topDependency += [bb]
       moduleList.topModule.moduleDependency['VERILOG_STUB'] += [bb]
  
-    return wrapper_builds
+

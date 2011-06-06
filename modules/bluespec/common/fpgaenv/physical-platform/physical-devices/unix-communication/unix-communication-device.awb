@@ -1,0 +1,18 @@
+
+%name UNIX Communication Physical Device
+%desc UNIX Communication Physical Device
+
+%provides unix_comm_device
+
+%sources -t BSV    -v PUBLIC  unix-communication-device.bsv
+%sources -t BDPI_H -v PUBLIC  unix-communication-device-bdpi.h
+%sources -t BDPI_C -v PRIVATE unix-communication-device-bdpi.c
+
+%generated -t BA comm_init.ba
+%generated -t BA comm_open.ba
+%generated -t BA comm_can_read.ba
+%generated -t BA comm_read.ba
+%generated -t BA comm_can_write.ba
+%generated -t BA comm_write.ba
+
+

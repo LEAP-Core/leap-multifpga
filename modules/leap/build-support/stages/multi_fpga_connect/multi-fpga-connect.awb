@@ -7,4 +7,6 @@
 %requires fpgamap_parser
 
 %scons %library multiFPGAConnect.py
+%scons %library danglingConnection.py
+
 

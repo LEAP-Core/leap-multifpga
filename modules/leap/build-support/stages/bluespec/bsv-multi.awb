@@ -17,4 +17,5 @@
 
 %param BSV_DEBUG 1 "BSV build debug"
 
+%param --global BUILD_LOGS_ONLY 0 "True if we should build only logfiles"
 

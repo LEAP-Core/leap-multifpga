@@ -9,5 +9,7 @@
 %provides build_pipeline
 %requires multi_fpga_log_generator
 %requires multi_fpga_connect
+%requires multi_fpga_generate_bitfile
 
 %scons %library multiFPGAPipeline.py
+

@@ -1,0 +1,12 @@
+%name MultiFPGA Router Service
+%desc A stub file for the build-time generated router
+
+%provides multifpga_router_service
+
+%attributes leap
+
+%public multifpga-router-service.bsv
+
+%param --global USE_ROUTING_KNOWN 0 "True if we can expect that the router has been generated"
+
+

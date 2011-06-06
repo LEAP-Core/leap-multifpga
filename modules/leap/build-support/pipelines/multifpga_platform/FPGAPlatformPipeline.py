@@ -11,18 +11,18 @@ from synthesis_tool import  *
 from post_synthesis_tool import *
 from mcd_tool import *
 
+
 class Build(ProjectDependency):
   def __init__(self, moduleList):
     WrapperGen(moduleList)
     Iface(moduleList)
     BSV(moduleList)
-    FPGAProgram(moduleList)
-    Software(moduleList)
-    MCD(moduleList)
-    #moduleList.dump()
-    Synthesize(moduleList)
-    #moduleList.dump()
-    PostSynthesize(moduleList)
+    if(not BUILD_LOGS_ONLY):
+      FPGAProgram(moduleList)
+      Software(moduleList)
+      MCD(moduleList)
+      Synthesize(moduleList)
+      PostSynthesize(moduleList)
 
 
 

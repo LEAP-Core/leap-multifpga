@@ -1,0 +1,12 @@
+%name MultiFPGA NULL Platform Services
+%desc Translates Virtual Devices into Soft Connections
+
+%provides platform_services
+
+
+%attributes leap
+
+%public platform-services-null.bsv
+
+%requires  starter_service
+%requires  multifpga_router_service
