@@ -8,11 +8,16 @@
 %sources -t BDPI_H -v PUBLIC  unix-communication-device-bdpi.h
 %sources -t BDPI_C -v PRIVATE unix-communication-device-bdpi.c
 
+%library libglib-2.0.a
+%library libgthread-2.0.a
+%library librt.a
+
 %generated -t BA comm_init.ba
 %generated -t BA comm_open.ba
 %generated -t BA comm_can_read.ba
 %generated -t BA comm_read.ba
 %generated -t BA comm_can_write.ba
 %generated -t BA comm_write.ba
+
 
 

@@ -67,6 +67,7 @@ typedef struct _Channel
 } Channel;
 
 /* interface methods */
+void comm_init();
 unsigned char comm_open(char *outgoing, char *incoming);
 
 // Returns 65 useful bits.  The first unsigned long long is data.  The next

@@ -48,6 +48,7 @@ Packagehint=leap
 [SoftService Soft Connections for MultiFPGA/Requires]
 soft_connections_common=Soft Service Soft Connections Common
 physical_interconnect=Shared Tree Physical Interconnect
+soft_connections_alg=SoftService Soft Connections Algorithm MultiFPGA
 
 [Basic Soft Clock Algorithm]
 File=modules/leap/libraries/soft-services/services/soft-clocks/basic-clock.awb
@@ -118,3 +119,7 @@ starter_service=Starter Service
 [MultiFPGA NULL Platform Services]
 File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-null.awb
 Packagehint=multifpga
+
+[SoftService Soft Connections Algorithm MultiFPGA]
+File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-multifpga.awb
+Packagehint=leap

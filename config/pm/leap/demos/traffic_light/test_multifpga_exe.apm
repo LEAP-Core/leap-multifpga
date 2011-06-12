@@ -40,6 +40,7 @@ Packagehint=multifpga
 [multiFPGA Build Pipeline/Requires]
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_generate_bitfile=multiFPGA Generate bitfle
+multi_fpga_log_generator=multiFPGA Log Generation
 
 [MultiFPGA Synthesis test module a]
 File=modules/multifpga/synthTest/test_a.awb
@@ -91,3 +92,14 @@ Packagehint=multifpga
 [Test Sim Mapping]
 File=modules/multifpga/synthTest/sim_mapping.awb
 Packagehint=multifpga
+
+[multiFPGA Log Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
+Packagehint=leap
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
+Packagehint=leap
+
+[multiFPGA Log Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype

@@ -22,6 +22,7 @@ import Clocks::*;
 
 `include "clocks_device.bsh"
 `include "unix_pipe_device.bsh"
+`include "unix_comm_device.bsh"
 `include "physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
@@ -92,7 +93,7 @@ module mkPhysicalPlatform
     UNIX_COMM_DEVICE unix_comm_device  <- mkUNIXCommDevice("/tmp/FPGA0ToFPGA1",
                                                            "/tmp/FPGA1ToFPGA0",
                                                            clocked_by clk,
-                                                           reset_by reset);
+                                                           reset_by rst);
 
     // Finally, instantiate all other physical devices
 

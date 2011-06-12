@@ -27,6 +27,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <pthread.h>
+#include <glib.h>
 
 #include "unix-communication-device-bdpi.h"
 
@@ -36,18 +38,23 @@ static Channel *freeList;
 static unsigned char initialized = 0;
 
 /* internal helper functions */
-void cleanup()
+void cleanup_comm()
 {
   // need to tear down all threads and fifos here
 }
 
-/* initialize global data structures */
-void comm_init(char* outgoing, char* incoming)
+/* doesn't seem too thread safe... */
+void comm_init()
 {
     int i;
     char buf[32];
 
+    printf("Calling comm init\n");
+    fflush(stdout);
+
+
     if (initialized) return;
+    initialized = 1;
 
     // Allows us to fork g_threads
     if(!g_thread_supported()) {
@@ -68,6 +75,7 @@ void comm_init(char* outgoing, char* incoming)
         OCHT[i].tableIndex = i;
         OCHT[i].prev = &OCHT[i-1];
         OCHT[i].next = &OCHT[i+1];
+        OCHT[i].open = 0;
     }
     OCHT[MAX_OPEN_CHANNELS - 1].prev = &OCHT[MAX_OPEN_CHANNELS - 2];
     OCHT[MAX_OPEN_CHANNELS - 1].next = &OCHT[0];
@@ -78,22 +86,36 @@ void process_incoming(Channel * descriptor) {
   // I assume that the sender will create the fifo for me. 
  
   // There's probably a race condition here.  We should sleep and retry for a while. 
-  int infile = open(descriptor->incomingFIFO, O_RDONLY);
-  if (infile < 0)
-  {
-    fprintf(stderr, "Error with %s\n", descriptor->incomingFIFO);
-    perror("named incoming pipe (pipes/TO_FPGA)");
-    exit(1);
+  int infile, retries = 0;
+  int bytes_read;
+  CommBlock buffer;
+
+  do {
+    infile = open(descriptor->incomingFIFO, O_RDONLY);
+    retries ++;
+    sleep(1);
+  } while (infile < 0 && retries < 120);
+
+  if(infile < 0) {
+    fprintf(stderr, "Timed out waiting for %s, transfers on this line result in deadlocks\n", descriptor->incomingFIFO);
+    // This isn't necessarily an error.
+    // We probably need some better phase in which we attempt to communicate with everything that 
+    // should exist.
+    return;
+  } else {
+    fprintf(stderr, "Opened %s\n", descriptor->incomingFIFO);
   }
 
   // Clear out everything unil sync word
 
   do {
-    CommBlock buffer;
     bytes_read = read(infile,
 		      &buffer,
 		      sizeof(CommBlock));
-  } while (!buffer.sync)
+  } while ((bytes_read < sizeof(CommBlock)) || !buffer.sync);
+
+  printf("Received Sync\n");
+  fflush(stdout);
 
   while(1) {
     int bytes_read;
@@ -113,14 +135,14 @@ void process_incoming(Channel * descriptor) {
     }
 
     // push the data out.  we will free the data on deq.
-    g_async_queue_push(incomingQ,buffer);     
+    g_async_queue_push(descriptor->incomingQ,buffer);     
   }
 
 }
 
 int send_block(int fd, CommBlock *block, Channel *channel) {
     /* send message on pipe */
-  bytes_written = write(fd, block, sizeof(CommBlock));
+    int bytes_written = write(fd, block, sizeof(CommBlock));
     if (bytes_written == -1)
     {
         fprintf(stderr, "         HW side exiting (pipe closed)\n");
@@ -131,33 +153,44 @@ int send_block(int fd, CommBlock *block, Channel *channel) {
     {
         fprintf(stderr, "could not write complete chunk.\n");
     }
+    printf("Sending block\n");
+    fflush(stdout);   
+    return bytes_written;
 }
 
-void process_outgoing(Channel * descriptor) {
+void process_outgoing(Channel * channel) {
   // It's our responsibility to unlink an existing fifo and to set it up.                                                                                           
   int outfile;
 
-  // someone probably already set this up. 
-  mkfifo(descriptor->outgoingFIFO, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+  fprintf(stderr, "Attempting to open %s\n", channel->outgoingFIFO);
 
-  int outfile = open(descriptor->outgoingFIFO, O_WRONLY);
+  // someone probably already set this up. 
+  mkfifo(channel->outgoingFIFO, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+  
+  outfile = open(channel->outgoingFIFO, O_WRONLY);
   if (outfile < 0)
-    {
-      fprintf(stderr, "Error with %s\n", descriptor->outgoingFIFO);
-      perror("named incoming pipe (pipes/TO_FPGA)");
+  {
+      fprintf(stderr, "Error with %s\n", channel->outgoingFIFO);
       exit(1);
-    }
+  }
+  else {
+      fprintf(stderr, "Opened %s\n", channel->outgoingFIFO);
+      fflush(stderr);
+  }
 
   // send a sync word
   CommBlock syncBlock;
   syncBlock.sync = 1;  
+
+  printf("Sending handshake\n");
+  fflush(stdout);
   
-  send_block(outfile, &syncBlock, descriptor);
+  send_block(outfile, &syncBlock, channel);
 
   while(1) {
     CommBlock *block = g_async_queue_pop(channel->outgoingQ);
-    send_block(outfile, block, descriptor);
-    free(block);    
+    send_block(outfile, block, channel);
+    free(block); 
   }
 
 }
@@ -169,6 +202,8 @@ unsigned char comm_open(char* outgoing, char* incoming)
     int i;
     Channel *channel;
 
+    printf("Calling comm open\n");
+
     assert(initialized == 1);
 
     /* try to allocate new channel from OCHT */
@@ -177,7 +212,8 @@ unsigned char comm_open(char* outgoing, char* incoming)
         /* can't allocate any more channels.
          * we should return an error value to the
          * model, but for now, just crash out.. TODO */
-        cleanup();
+        fprintf(stderr, "Free list is null, bailing\n");
+        cleanup_comm();
         exit(1);
     }
 
@@ -205,17 +241,18 @@ unsigned char comm_open(char* outgoing, char* incoming)
     channel->outgoingQ = g_async_queue_new();
 
     channel->incomingFIFO = (char*) malloc(strlen(incoming)*sizeof(char));
-    strcopy(channel->incomingFIFO,incoming,strlen(incoming));
+    strcpy(channel->incomingFIFO,incoming);
 
-    channel->outgoinggFIFO = (char*) malloc(strlen(outgoing)*sizeof(char));
-    strcopy(channel->outgoingFIFO,outgoing,strlen(outgoing));
+    channel->outgoingFIFO = (char*) malloc(strlen(outgoing)*sizeof(char));
+    strcpy(channel->outgoingFIFO,outgoing);
 
     pthread_create(&(channel->incomingThread), NULL, &process_incoming,channel);
     pthread_create(&(channel->outgoingThread), NULL, &process_outgoing,channel);
 
     /* initialize channel */
     channel->open = 1;
-
+    printf("Finished comm open\n");
+    fflush(stdout);
     /* return handle */
     return channel->tableIndex;
 }
@@ -225,13 +262,24 @@ Channel *validate_handle(unsigned char handle)
     Channel *channel;
     if (! initialized)
     {
-        return;
+        printf("Handle %d not initialized\n", handle);
+        fflush(stdout);
+        return NULL;
     }
 
     /* lookup OCHT */
-    assert(handle < MAX_OPEN_CHANNELS);
+    if(handle >= MAX_OPEN_CHANNELS) {
+      printf("Handle %d too large\n", handle);
+      fflush(stdout);
+      return NULL;
+    }
+
     channel = &OCHT[handle];
-    assert(channel->open);
+    if (!channel->open) {
+      printf("Handle %d not open\n", handle);
+      fflush(stdout);
+      return NULL;
+    }
 
     return channel;
 }
@@ -242,16 +290,17 @@ unsigned long long comm_read(unsigned char handle)
     Channel *channel;
     CommBlock *block;
     unsigned long long retval = 0;
+    int i;
 
-    channel = validateHandle(handle);
+    channel = validate_handle(handle);
 
     block = g_async_queue_pop(channel->incomingQ); 
     for (i = 0; i < BDPI_CHUNK_BYTES; i++)
     {
-	unsigned int byte = block->chunk[i];
-	retval |= (byte << (i * 8));
+    	unsigned int byte = block->chunk[i];
+    	retval |= (byte << (i * 8));
     }
-    
+
     return retval;
 }
 
@@ -269,7 +318,12 @@ unsigned char comm_can_read(unsigned char handle)
     Channel *channel;
     CommBlock *block;
 
-    channel = validateHandle(handle);
+    channel = validate_handle(handle);
+
+    if(channel == NULL) {
+      // We're not open yet. 
+      return 0;
+    }
 
     return  g_async_queue_length(channel->incomingQ) > 0;
 }
@@ -282,20 +336,26 @@ void comm_write(unsigned char handle, unsigned long long data)
 {   
     unsigned long long mask;  
     Channel *channel;
-    CommBlock *block;
-
-    channel = validateHandle(handle);
-
+    int i;
     CommBlock * buffer = (CommBlock*) malloc(sizeof(CommBlock));
 
+    channel = validate_handle(handle);
+    printf("Attempting a write\n");
+    fflush(stdout);
+    buffer->sync = 0;
     /* unpack UINT32 into byte sequence */
     mask = 0xFF;
     for (i = 0; i < BDPI_CHUNK_BYTES; i++)
     {
         unsigned char byte = (mask & data) >> (i * 8);
-        block->chunk[i] = (unsigned char)byte;
+        buffer->chunk[i] = (unsigned char)byte;
         mask = mask << 8;
     }
 
-    g_async_queue_push(channel->outgoingQ,block);     
+    printf("Attempting to push\n");
+    fflush(stdout);
+    g_async_queue_push(channel->outgoingQ,buffer);     
+
+    printf("Push succeeds\n");
+    fflush(stdout);
 }

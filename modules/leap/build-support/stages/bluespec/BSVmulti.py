@@ -30,12 +30,12 @@ class BSV():
     else:
        bsc_events_flag = ' -D HASIM_EVENTS_ENABLED=True '
 
-    if(USE_ROUTING_KNOWN):
+    if(USE_ROUTING_KNOWN == 1):
        bsc_routing_known = ' -D ROUTING_KNOWN '
     else:
        bsc_routing_known = ' '
 
-    self.BSC_FLAGS = BSC_FLAGS  + bsc_events_flag 
+    self.BSC_FLAGS = BSC_FLAGS  + bsc_events_flag + bsc_routing_known
 
    
     topo = moduleList.topologicalOrderSynth()
@@ -45,8 +45,14 @@ class BSV():
       # this should really be a crawl of the bluespec tree
       # probably in that case we can avoid a lot of synthesis time     
       # everyone should depend on the verilog wrappers?
+
+      # top bsv should now depend on multifpga_routing.bsh
       wrapper_v = self.build_synth_boundary(moduleList, module)
-    
+      if(USE_ROUTING_KNOWN == 1):
+        if(module.name == moduleList.topModule.name):
+          print "Depending on router " + moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath+ '/' + 'multifpga_routing.bsh' 
+          moduleList.env.Depends(wrapper_v,moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath+ '/' + 'multifpga_routing.bsh')
+             
 
     moduleList.env.BuildDir(TMP_BSC_DIR, '.', duplicate=0)
     moduleList.env['ENV']['BUILD_DIR'] = moduleList.env['DEFS']['BUILD_DIR']  # need to set the builddir for synplify

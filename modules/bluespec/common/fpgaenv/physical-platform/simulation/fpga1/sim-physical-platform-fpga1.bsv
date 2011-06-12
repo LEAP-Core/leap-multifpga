@@ -21,7 +21,7 @@
 import Clocks::*;
 
 `include "clocks_device.bsh"
-`include "unix_pipe_device.bsh"
+`include "unix_comm_device.bsh"
 `include "physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
@@ -33,7 +33,6 @@ import Clocks::*;
 interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER    clocksDriver;
-    interface UNIX_PIPE_DRIVER unixPipeDriver;
     interface UNIX_COMM_DRIVER unixCommDriver;
 
 endinterface
@@ -48,7 +47,6 @@ endinterface
 interface TOP_LEVEL_WIRES;
     
     interface CLOCKS_WIRES    clocksWires;
-    interface UNIX_PIPE_WIRES unixPipeWires;
     interface UNIX_COMM_WIRES unixCommWires;
     
 endinterface
@@ -82,17 +80,11 @@ module mkPhysicalPlatform
     Clock clk = clocks_device.driver.clock;
     Reset rst = clocks_device.driver.reset;
     
-    // Next, create the physical device that can trigger a soft reset. Pass along the
-    // interface to the trigger module that the clocks device has given us.
-
-    UNIX_PIPE_DEVICE unix_pipe_device  <- mkUNIXPipeDevice(clocks_device.softResetTrigger,
-                                                           clocked_by clk,
-                                                           reset_by rst);
 
     UNIX_COMM_DEVICE unix_comm_device  <- mkUNIXCommDevice("/tmp/FPGA1ToFPGA0",
                                                            "/tmp/FPGA0ToFPGA1",
                                                            clocked_by clk,
-                                                           reset_by reset);
+                                                           reset_by rst);
 
     // Finally, instantiate all other physical devices
 
@@ -101,7 +93,6 @@ module mkPhysicalPlatform
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface clocksDriver   = clocks_device.driver;
-        interface unixPipeDriver = unix_pipe_device.driver;
         interface unixCommDriver = unix_comm_device.driver;
 
     endinterface
@@ -111,7 +102,6 @@ module mkPhysicalPlatform
     interface TOP_LEVEL_WIRES topLevelWires;
     
         interface clocksWires    = clocks_device.wires;
-        interface unixPipeWires  = unix_pipe_device.wires;
         interface unixCommWires  = unix_comm_device.wires;
 
     endinterface

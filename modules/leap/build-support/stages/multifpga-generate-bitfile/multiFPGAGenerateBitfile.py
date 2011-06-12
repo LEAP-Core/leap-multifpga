@@ -2,9 +2,11 @@ import re
 import sys
 import SCons.Script
 from fpga_environment_parser import *
-from multi_fpga_log_generator import *
 from model import  *
 from config import *
+
+def makePlatformBitfileName(name, apm):
+  return name +'_'+ apm + '_multifpga_bitfile'
 
 class MultiFPGAGenerateBitfile():
 
@@ -30,7 +32,7 @@ class MultiFPGAGenerateBitfile():
 
          def compile_platform_log(target, source, env):
 
-           platformAPMName = makePlatformName(platform.name,APM_NAME) + '.apm'
+           platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
            platformPath = 'config/pm/private/' + platformAPMName
            platformBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/' + platformAPMName
            # and now we can build them -- should we use SCons here?
@@ -58,13 +60,17 @@ class MultiFPGAGenerateBitfile():
     #WORKSPACE_ROOT
     for platformName in environment.getPlatformNames():
       platform = environment.getPlatform(platformName)
-      platformAPMName = makePlatformName(platform.name,APM_NAME) + '.apm'
+      platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
       platformPath = 'config/pm/private/' + platformAPMName
-      platformBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformName(platform.name,APM_NAME) + '/pm/'
+      platformBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
       bitfile = platformBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.xilinx/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_'
 
       print "wrapper: " + bitfile
       print "platformPath: " + moduleList.env['DEFS']['WORKSPACE_ROOT'] + '/src/private/' + platformPath
+
+      execute('asim-shell cp ' + platform.path +" "+ platformPath)        
+      execute('asim-shell replace module ' + platformPath + ' ' + applicationPath)
+      execute('asim-shell replace module ' + platformPath + ' ' + mappingPath)
 
       # this dependency on platform logs is coarse.  we could do better, but it may not be necessary
       subbuild = moduleList.env.Command( 

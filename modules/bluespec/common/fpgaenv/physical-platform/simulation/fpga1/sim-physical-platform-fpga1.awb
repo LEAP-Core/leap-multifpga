@@ -4,10 +4,13 @@
 
 %provides physical_platform
 
-%requires clocks_device physical_platform_utils unix_comm_device
+%requires clocks_device physical_platform_utils unix_comm_device 
 
-%sources -t BSV -v PUBLIC  sim-physical-platform-fpga1.bsv
-%sources -t H   -v PUBLIC  sim-physical-platform-fpga1.h
-%sources -t CPP -v PRIVATE sim-physical-platform-fpga1.cpp
+%sources --t BSV --v PUBLIC  sim-physical-platform-fpga1.bsv
+%sources --t H   --v PUBLIC  sim-physical-platform-fpga1.h
+%sources --t CPP --v PRIVATE sim-physical-platform-fpga1.cpp
+%sources --t BSH --v PUBLIC  sim-physical-platform-fpga1.bsh
+
+
 
 

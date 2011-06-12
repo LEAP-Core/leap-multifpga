@@ -29,9 +29,9 @@ import Vector::*;
 import "BDPI" function Action                 comm_init();
 import "BDPI" function ActionValue#(Bit#(8))  comm_open(String outgoing, String incoming);
 import "BDPI" function ActionValue#(Bit#(64)) comm_read(Bit#(8) handle);
-import "BDPI" function Bit#(1)  comm_can_write(Bit#(8) handle);
-import "BDPI" function Bit#(1)  comm_can_read(Bit#(8) handle);
-import "BDPI" function Action   comm_write(Bit#(8) handle, Bit#(64) data);
+import "BDPI" function ActionValue#(Bit#(1))  comm_can_write(Bit#(8) handle);
+import "BDPI" function ActionValue#(Bit#(1))  comm_can_read(Bit#(8) handle);
+import "BDPI" function Action                 comm_write(Bit#(8) handle, Bit#(64) data);
                   
 
 // types
@@ -45,10 +45,11 @@ STATE
     deriving (Bits, Eq);
 
 // UNIX_COMM_DRIVER
+
 interface UNIX_COMM_DRIVER;
 
-    method ActionValue#(UMF_CHUNK) get();
-    method Action                  put(UMF_CHUNK chunk);
+    method ActionValue#(UMF_CHUNK) read();
+    method Action                  write(UMF_CHUNK chunk);
         
 endinterface
 
@@ -92,7 +93,7 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
     // initialize C code
     rule initialize(state == STATE_init0);
         $display("init" + outgoing + incoming);
-        comm_init(outgoing, incoming);
+        comm_init();
         state <= STATE_init1;
     endrule
 
@@ -104,18 +105,26 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
     endrule
 
     // probe C code for incoming chunk
-    rule read_bdpi (state == STATE_ready && pollCounter == 0 && unpack(comm_can_read(handle)));
-        Bit#(64) data <- comm_read(handle);
-        UMF_CHUNK chunk = truncate(data);
-        readBuffer.enq(chunk);
-        pollCounter <= `POLL_INTERVAL;
+    rule read_bdpi (state == STATE_ready && pollCounter == 0);
+        let guard <- comm_can_read(handle);
+        if(unpack(guard))
+          begin 
+            Bit#(64) data <- comm_read(handle);
+            UMF_CHUNK chunk = truncate(data);
+            readBuffer.enq(chunk);
+            pollCounter <= `POLL_INTERVAL;
+         end
     endrule
 
     // write chunk from write buffer into C code
-    rule write_bdpi (state == STATE_ready && unpack(comm_can_write(handle)));
-        UMF_CHUNK chunk = writeBuffer.first();
-        writeBuffer.deq();
-        comm_write(handle, zeroExtend(chunk));
+    rule write_bdpi (state == STATE_ready);
+        let guard <- comm_can_write(handle);
+        if(unpack(guard))
+          begin 
+            UMF_CHUNK chunk = writeBuffer.first();
+            writeBuffer.deq();
+            comm_write(handle, zeroExtend(chunk));
+          end
     endrule
 
 

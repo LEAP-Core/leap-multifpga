@@ -5,6 +5,9 @@ from model import  *
 from config import *
 from fpga_environment_parser import *
 from fpgamap_parser import *
+# we write to bitfile 
+# we read from logfile
+from multi_fpga_generate_bitfile import *
 from multi_fpga_log_generator import *
 from danglingConnection import *
 
@@ -32,25 +35,56 @@ class MultiFPGAConnect():
       for platformName in self.environment.getPlatformNames():
       # these defs are copied from a previous tool.  refactor
           platform = self.environment.getPlatform(platformName)
-          platformAPMName = makePlatformName(platform.name,APM_NAME) + '.apm'
-          platformPath = 'config/pm/private/' + makePlatformName(platform.name,APM_NAME)
-          platformBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformName(platform.name,APM_NAME) + '/pm/'
-          wrapperLog =  platformBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
-          parameterFile =  platformBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
-          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DANGLING': [], 'CONNECTED': [], 'INDEX': {}}
+          platformLogAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
+          platformLogPath = 'config/pm/private/' + makePlatformLogName(platform.name,APM_NAME)
+          platformLogBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformLogName(platform.name,APM_NAME) + '/pm/'
+
+          platformBitfileAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
+          platformBitfilrPath = 'config/pm/private/' + makePlatformBitfileName(platform.name,APM_NAME)
+          platformBitfileBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
+
+          wrapperLog =  platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
+          parameterFile =  platformBitfileBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
+          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}}
 
 
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
  
       subbuild = moduleList.env.Command( 
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
-          moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'],
+          moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]],
           self.processDanglingConnections
           )                   
       print "subbuild: " + str(subbuild)
 
 
       moduleList.topDependency += [subbuild]
+
+  def assignIndices(self,sourceConn,sinkConn):
+    print "Now processing a connection between " + sourceConn.platform + " <->" + sinkConn.platform
+    if(sinkConn.platform in self.platformData[sourceConn.platform]['INDEX']):
+      # only increment the sourceConn.  
+      self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] += 1
+      index = self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform]
+      sourceConn.idx = index 
+      sinkConn.idx = index 
+    else:
+      self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] = 0
+      sourceConn.idx = 0
+      sinkConn.idx = 0 
+    
+    # Tell the sink about the source.  The sink may have been processed already
+    if(sinkConn.platform in self.platformData[sourceConn.platform]['CONNECTED']):
+      self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] += [sinkConn]
+    else:   
+      self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] = [sinkConn]
+
+    if(sourceConn.platform in self.platformData[sinkConn.platform]['CONNECTED']):
+      self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] += [sourceConn]
+    else:   
+      self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] = [sourceConn]
+
+
 
   #First we parse the files, and then attempt to make all the connections.  Lots of dictionaries.
   def processDanglingConnections(self, target, source, env):
@@ -67,31 +101,24 @@ class MultiFPGAConnect():
                       # We should check to see that things are directly connected
                       # we don't handle the multi hop case yet, and may need a fixed point to do so. 
                       length = -1
+                                             
                       if(danglingNew.isSource()):
                           length = self.environment.getPathLength(danglingNew.platform, danglingOld.platform)
+                          self.assignIndices(danglingNew,danglingOld)
                       else:
                           length = self.environment.getPathLength(danglingOld.platform, danglingNew.platform)
+                          self.assignIndices(danglingOld,danglingNew)
+
                       if(length != 1):
                           print "either there is no connection between the connections named " + danglingNew.name + " or the connection requires multiple hops, which is not yet supported" 
                       matched = 1
                       # need to fill in the connection
                       danglingOld.matched = True
                       danglingNew.matched = True
-                      #lookup indexes
-                      if(danglingNew.platform in self.platformData[danglingOld.platform]['INDEX']):
-                          self.platformData[danglingOld.platform]['INDEX'][danglingNew.platform] += 1
-                          self.platformData[danglingNew.platform]['INDEX'][danglingOld.platform] += 1
-                          danglingNew.idx = self.platformData[danglingOld.platform]['INDEX'][danglingNew.platform]
-                          danglingOld.idx = self.platformData[danglingOld.platform]['INDEX'][danglingNew.platform]
-                      else:
-                          self.platformData[danglingOld.platform]['INDEX'][danglingNew.platform] = 0
-                          self.platformData[danglingNew.platform]['INDEX'][danglingOld.platform] = 0
-                          danglingNew.idx = 0 
-                          danglingOld.idx = 0
-
+                      #lookup indexes.  Note that the subhashes are indexed 
+               
                       # mark the connection in the data structure
-                      self.platformData[danglingOld.platform]['CONNECTED'] += [danglingNew]
-                      self.platformData[danglingNew.platform]['CONNECTED'] += [danglingOld]
+
                                             
                       
           danglingGlobal += self.platformData[platformName]['DANGLING']
@@ -103,28 +130,50 @@ class MultiFPGAConnect():
               sys.exit(0)
       # now that everything is matched we can ostensibly generate the header file
       # header must include device mapping as well
+
       for platform in self.environment.getPlatformNames():
           header = open(self.platformData[platform]['BSH'],'w')
           header.write('// Generated by build pipeline\n\n')
-
+     
           # toss out the mapping functions first
           header.write('module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);\n')
-#          for hardConnectionOut in environment.transitTablesOutgoing[platform].keys():
-#              header.write('"' + hardConnectionOut + ' ": vdevs.' + environment.transitTablesOutgoing[platform][hardConnectionOut] + ';\n')
-#          header.write('endfunction\n')
-
-#          header.write('function Get#(n) getIncomingLink(VIRTUAL_DEVICES vdevs, String str);\n')
-#          header.write('  case (str)\n')
-#          for hardConnectionIn in environment.transitTablesIncoming[platform].keys():
-#              header.write('"' + hardConnectionIn + ' ": vdevs.' + environment.transitTablesIncoming[platform][hardConnectionIn] + ';\n')
-#          header.write('endfunction\n')
+          header.write('messageM("Instantiating Custom Router"); \n')
 
           # handle the connections themselves
-          for dangling in self.platformData[danglingOld.platform]['CONNECTED']:
+          for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+            header.write('// Connection to ' + targetPlatform + ' \n')
+            sends = 0
+            recvs = 0
+
+            for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
               if(dangling.sc_type == 'Recv'):
-                  header.write('Connection_Receive#(' + dangling.raw_type+ ') g_' + dangling.name + ' <- mkConnectionReceive("' + dangling.name+'");\n')
+                  header.write('Connection_Receive#(' + dangling.raw_type+ ') recv_' + dangling.name + ' <- mkConnectionRecv("' + dangling.name+'");\n')
+                  recvs += 1 
               if(dangling.sc_type == 'Send'):
-                  header.write('Connection_Send#(' + dangling.raw_type+ ') g_' + dangling.name + '<- mkConnectionSend("' + dangling.name+'");\n')
+                  header.write('Connection_Send#(' + dangling.raw_type+ ') send_' + dangling.name + '<- mkConnectionSend("' + dangling.name+'");\n')
+                  sends += 1
+
+            # instantiate multiplexors - we need one per link 
+            if(recvs > 0):
+              print "Querying " + platform + ' <- ' + targetPlatform
+              hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
+              header.write('CHANNEL_VIRTUALIZER#(0,1) virtual_out_' + targetPlatform  + '<- mkChannelVirtualizer(?,' + hopFromTarget + '.write);\n')
+              header.write('ARBITED_CLIENT#(' + str(recvs) + ') switch_out_' + targetPlatform  + '<- mkArbitedClient(?, virtual_out_' + targetPlatform + '.writePorts[0].write);\n')
+
+            if(sends > 0):
+              print "Querying " + platform + ' -> ' + targetPlatform
+              hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
+              header.write('CHANNEL_VIRTUALIZER#(1,0) virtual_in_' + targetPlatform  + '<- mkChannelVirtualizer(' + hopFromTarget + '.read,?);\n')
+              header.write('ARBITED_SERVER#(' + str(sends) + ') switch_in_' + targetPlatform  + '<- mkArbitedServer(virtual_in_' + targetPlatform + '.readPorts[0].read,?);\n')
+
+            # hook 'em up
+            for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
+              if(dangling.sc_type == 'Recv'):
+                  header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',switch_out_' + targetPlatform  + '.requestPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
+              if(dangling.sc_type == 'Send'):
+                  header.write('Empty pack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.requestPorts['+str(dangling.idx) + ']);\n')
+
+
 
 
           header.write('endmodule\n')

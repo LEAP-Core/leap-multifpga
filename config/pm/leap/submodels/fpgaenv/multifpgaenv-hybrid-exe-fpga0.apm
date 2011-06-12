@@ -49,6 +49,7 @@ Packagehint=leap
 
 [Basic Virtual Channel Multiplexer/Requires]
 physical_channel=Simulation Physical Channel
+channelio_common=Common Files for Virtual Channel Multiplexer
 
 [Low Level Platform Interface Hybrid]
 File=modules/leap/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
@@ -64,7 +65,7 @@ remote_memory=Null Remote Memory
 
 [UNIX Pipe Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe/unix-pipe-device.awb
-Packagehint=leap-platforms
+Packagehint=multifpga
 
 [Software FPGA Components]
 File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
@@ -165,3 +166,7 @@ bsv_tool=BSV Build Tool MultiFPGA
 [MultiFPGA BlueSim Platform Build Pipeline]
 File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
 Packagehint=multifpga
+
+[Common Files for Virtual Channel Multiplexer]
+File=modules/leap/virtual-platform/channelio/common/channelio-common.awb
+Packagehint=leap

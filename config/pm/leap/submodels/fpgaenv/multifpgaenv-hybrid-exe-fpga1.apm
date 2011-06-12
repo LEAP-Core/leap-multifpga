@@ -31,7 +31,7 @@ File=modules/leap/virtual-platform/std-virtual-platform.awb
 Packagehint=leap
 
 [Standard Virtual Platform/Requires]
-virtual_devices=Standard Virtual Devices Submodel
+virtual_devices=NULL Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
 
@@ -82,10 +82,6 @@ Packagehint=leap
 [RRR Clients and Servers/Requires]
 rrr_common=RRR Common Module
 
-[Standard Virtual Devices Submodel]
-File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
-Packagehint=leap
-
 [RL Bluespec Library Submodel]
 File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
 Packagehint=leap
@@ -102,10 +98,7 @@ Packagehint=multifpga
 clocks_device=Simulation Clocks Device
 unix_comm_device=UNIX Communication Physical Device
 physical_platform_utils=Common Physical Platform Utilities
-
-[Null Channel IO Module]
-File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
-Packagehint=leap
+unix_pipe_device=UNIX Pipe Physical Device
 
 [NULL Local Memory Interface]
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
@@ -148,3 +141,29 @@ bsv_tool=BSV Build Tool MultiFPGA
 [MultiFPGA BlueSim Platform Build Pipeline]
 File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
 Packagehint=multifpga
+
+[Null Channel IO Module]
+File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
+Packagehint=leap
+
+[NULL Virtual Devices]
+File=modules/leap/virtual-platform/virtual-devices/virtual-device-sets/null/null-virtual-devices.awb
+Packagehint=leap
+
+[NULL Virtual Devices/Requires]
+starter_device=Null Starter Virtual Device
+
+[Null Starter Virtual Device]
+File=modules/leap/virtual-platform/virtual-devices/devices/starter/null/null-starter-device.awb
+Packagehint=leap
+
+[Null Channel IO Module/Requires]
+channelio_common=Common Files for Virtual Channel Multiplexer
+
+[Common Files for Virtual Channel Multiplexer]
+File=modules/leap/virtual-platform/channelio/common/channelio-common.awb
+Packagehint=leap
+
+[UNIX Pipe Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe/unix-pipe-device.awb
+Packagehint=leap-platforms
