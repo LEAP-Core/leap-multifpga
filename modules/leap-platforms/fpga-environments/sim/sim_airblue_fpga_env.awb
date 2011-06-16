@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Airblue Simulation Dual FPGA Environment
+%desc Airblue Simulation Dual FPGA Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-airblue-env.env
+%AWB_END

@@ -147,10 +147,11 @@ class MultiFPGAConnect():
 
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
               if(dangling.sc_type == 'Recv'):
-                  header.write('Connection_Receive#(' + dangling.raw_type+ ') recv_' + dangling.name + ' <- mkConnectionRecv("' + dangling.name+'");\n')
+                  header.write('CONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
                   recvs += 1 
               if(dangling.sc_type == 'Send'):
-                  header.write('Connection_Send#(' + dangling.raw_type+ ') send_' + dangling.name + '<- mkConnectionSend("' + dangling.name+'");\n')
+                  header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
+
                   sends += 1
 
             # instantiate multiplexors - we need one per link 

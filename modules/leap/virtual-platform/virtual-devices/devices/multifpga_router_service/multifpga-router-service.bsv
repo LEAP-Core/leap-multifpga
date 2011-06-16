@@ -4,38 +4,98 @@
 `include "asim/provides/virtual_devices.bsh"
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/rrr.bsh"
-`include "asim/provides/rrr_common.bsh"
 `include "asim/provides/umf.bsh"
-`include "asim/provides/channelio_common.bsh"
+`include "asim/provides/channelio.bsh"
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/soft_connections.bsh"
 
 `include "asim/provides/multifpga_router_service.bsh"
 
-// some useful modules
+import Vector::*;
 
+// some useful modules
+interface MARSHALLER#(numeric type n, type data);
+  method Action enq(Vector#(n,data) vec);
+  method Action deq();
+  method data first();
+endinterface
+
+interface DEMARSHALLER#(numeric type n, type data);
+  method Action enq(data dat);
+  method Action deq();
+  method Vector#(n,data) first();
+endinterface
+
+module mkSimpleMarshaller (MARSHALLER#(n,data))
+   provisos(Bits#(data, data_sz));
+
+  Reg#(Vector#(n,data)) buffer <- mkRegU();
+  Reg#(Bit#(TAdd#(1,TLog#(n)))) count <- mkReg(0);
+
+  method Action enq(Vector#(n,data) vec) if(count == 0);
+    count <= fromInteger(valueof(n));
+    buffer <= vec; 
+  endmethod
+
+  method Action deq() if(count > 0);
+    Vector#(1,data) dummy = newVector();
+    buffer <= takeTail(append(buffer,dummy));
+    count <= count - 1;
+  endmethod
+
+  method data first() if(count > 0);
+    return buffer[0];
+  endmethod
+endmodule
+
+module mkSimpleDemarshaller (DEMARSHALLER#(n,data))
+   provisos(Bits#(data, data_sz));
+
+  Reg#(Vector#(n,data)) buffer <- mkRegU();
+  Reg#(Bit#(TAdd#(1,TLog#(n)))) count <- mkReg(0);
+
+  method Action enq(data dat) if(count != fromInteger(valueof(n)));
+    Vector#(1,data) highVal = replicate(dat);
+    count <= count + 1;
+    buffer <= takeTail(append(buffer,highVal));
+  endmethod
+
+  method Action deq();
+    count <= 0;
+  endmethod
+
+  method Vector#(n,data) first() if(count == fromInteger(valueof(n)));
+    return buffer;
+  endmethod
+endmodule
 
 // At some point we're going to need flow control up here
-
+// We may not need marsh/demarsh!!!!  If all connections are the CHUNK size!
 module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SERVER_REQUEST_PORT port) (Empty)
    provisos(Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
-            Bits#(t_DATA, t_DATA_SZ));
-   DEMARSHALLER#(UMF_CHUNK, t_DATA) dem <- mkDeMarshaller();  
+            Bits#(t_DATA, t_DATA_SZ),
+            Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))));
 
-    rule startRequest (True);
-        $display("Send starting request");
+    Reg#(Bool) waiting <- mkReg(True);
+    DEMARSHALLER#(t_NUM_CHUNKS, UMF_CHUNK) dem <- mkSimpleDemarshaller();  
+
+    rule startRequest (waiting);
         UMF_PACKET packet <- port.read();
-        dem.start(fromInteger(valueof(t_NUM_CHUNKS)));
+        $display("Connection RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+        waiting <= False;
     endrule
 
-    rule continueRequest (True);
+    rule continueRequest (!waiting);
         UMF_PACKET packet <- port.read();
-        dem.insert(packet.UMF_PACKET_dataChunk);
+        dem.enq(packet.UMF_PACKET_dataChunk);
+        $display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
     endrule
 
-    rule sendData;
-        let retval <- dem.readAndDelete();
-        send.send(retval);
+    rule sendData(!waiting && send.notFull());
+        dem.deq();
+        send.send(unpack(truncate(pack(dem.first))));
+        $display("Connection RX spits out: %h", dem.first);
+        waiting <= True;
     endrule
 
 endmodule
@@ -43,18 +103,19 @@ endmodule
 module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, CLIENT_REQUEST_PORT port, Integer id) (Empty)
    provisos(Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
             Bits#(t_DATA, t_DATA_SZ),
-            Add#(t_XXX, TLog#(t_NUM_CHUNKS), 15));
+	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))));
 
-   MARSHALLER#(t_DATA, UMF_CHUNK) mar <- mkMarshaller();
+   MARSHALLER#(t_NUM_CHUNKS, UMF_CHUNK) mar <- mkSimpleMarshaller();
 
    rule continueRequest (True);
         UMF_CHUNK chunk = mar.first();
         mar.deq();
         port.write(tagged UMF_PACKET_dataChunk chunk);
+        $display("Connection RX sends: %h", chunk);
    endrule
 
-   rule startRequest;
-       $display("Receive starting request");
+   rule startRequest (recv.notEmpty());
+       $display("Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
        UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
                             {
                                 filler: ?,
@@ -66,7 +127,7 @@ module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, CLIENT_RE
                             };
         port.write(header);
         recv.deq;
-        mar.enq(recv.receive, fromInteger(valueof(t_NUM_CHUNKS)));
+        mar.enq(unpack(zeroExtend(pack(recv.receive))));
    endrule
 endmodule
 

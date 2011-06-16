@@ -1,0 +1,8 @@
+service TESTDRRR
+{
+   server hw (bsv, connection) <- sw (cpp, method)
+   {
+      method TakeOneInput(in UINT32[32] inData, out UINT32[32] outData);
+   };
+}
+

@@ -32,6 +32,8 @@
 
 #include "unix-communication-device-bdpi.h"
 
+#define DEBUG_COMM 0
+
 /* global table of open channel handles */
 static Channel OCHT[MAX_OPEN_CHANNELS];
 static Channel *freeList;
@@ -49,9 +51,10 @@ void comm_init()
     int i;
     char buf[32];
 
-    printf("Calling comm init\n");
-    fflush(stdout);
-
+    if(DEBUG_COMM) {
+      printf("Calling comm init\n");
+      fflush(stdout);
+    }
 
     if (initialized) return;
     initialized = 1;
@@ -103,7 +106,9 @@ void process_incoming(Channel * descriptor) {
     // should exist.
     return;
   } else {
-    fprintf(stderr, "Opened %s\n", descriptor->incomingFIFO);
+    if(DEBUG_COMM) {
+      fprintf(stderr, "Opened %s\n", descriptor->incomingFIFO);
+    }
   }
 
   // Clear out everything unil sync word
@@ -114,8 +119,10 @@ void process_incoming(Channel * descriptor) {
 		      sizeof(CommBlock));
   } while ((bytes_read < sizeof(CommBlock)) || !buffer.sync);
 
-  printf("Received Sync\n");
-  fflush(stdout);
+  if(DEBUG_COMM) {
+    printf("Received Sync\n");
+    fflush(stdout);
+  }
 
   while(1) {
     int bytes_read;
@@ -153,8 +160,12 @@ int send_block(int fd, CommBlock *block, Channel *channel) {
     {
         fprintf(stderr, "could not write complete chunk.\n");
     }
-    printf("Sending block\n");
-    fflush(stdout);   
+
+    if(DEBUG_COMM) {
+      printf("Sending block\n");
+      fflush(stdout);   
+    }
+
     return bytes_written;
 }
 
@@ -162,7 +173,9 @@ void process_outgoing(Channel * channel) {
   // It's our responsibility to unlink an existing fifo and to set it up.                                                                                           
   int outfile;
 
-  fprintf(stderr, "Attempting to open %s\n", channel->outgoingFIFO);
+  if(DEBUG_COMM) {
+    fprintf(stderr, "Attempting to open %s\n", channel->outgoingFIFO);
+  }
 
   // someone probably already set this up. 
   mkfifo(channel->outgoingFIFO, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
@@ -174,17 +187,21 @@ void process_outgoing(Channel * channel) {
       exit(1);
   }
   else {
+    if(DEBUG_COMM) {
       fprintf(stderr, "Opened %s\n", channel->outgoingFIFO);
       fflush(stderr);
+    }
   }
 
   // send a sync word
   CommBlock syncBlock;
   syncBlock.sync = 1;  
 
-  printf("Sending handshake\n");
-  fflush(stdout);
-  
+  if(DEBUG_COMM) {
+    printf("Sending handshake\n");
+    fflush(stdout);
+  }
+
   send_block(outfile, &syncBlock, channel);
 
   while(1) {
@@ -202,7 +219,9 @@ unsigned char comm_open(char* outgoing, char* incoming)
     int i;
     Channel *channel;
 
-    printf("Calling comm open\n");
+    if(DEBUG_COMM) {
+      printf("Calling comm open\n");
+    }
 
     assert(initialized == 1);
 
@@ -251,8 +270,12 @@ unsigned char comm_open(char* outgoing, char* incoming)
 
     /* initialize channel */
     channel->open = 1;
-    printf("Finished comm open\n");
-    fflush(stdout);
+
+    if(DEBUG_COMM) {
+      printf("Finished comm open\n");
+      fflush(stdout);
+    }
+
     /* return handle */
     return channel->tableIndex;
 }
@@ -309,6 +332,15 @@ unsigned long long comm_read(unsigned char handle)
 
 unsigned char comm_can_write(unsigned char handle)
 {
+    Channel *channel;
+    channel = validate_handle(handle);
+
+    if(channel == NULL) {
+      // We're not open yet. 
+      return 0;
+    }
+
+    // otherwise we can always write
     return  1;
 }
 
@@ -340,8 +372,12 @@ void comm_write(unsigned char handle, unsigned long long data)
     CommBlock * buffer = (CommBlock*) malloc(sizeof(CommBlock));
 
     channel = validate_handle(handle);
-    printf("Attempting a write\n");
-    fflush(stdout);
+
+    if(DEBUG_COMM) {
+      printf("Attempting a write\n");
+      fflush(stdout);
+    }
+
     buffer->sync = 0;
     /* unpack UINT32 into byte sequence */
     mask = 0xFF;
@@ -352,10 +388,15 @@ void comm_write(unsigned char handle, unsigned long long data)
         mask = mask << 8;
     }
 
-    printf("Attempting to push\n");
-    fflush(stdout);
+    if(DEBUG_COMM) {
+      printf("Attempting to push\n");
+      fflush(stdout);
+    }
+
     g_async_queue_push(channel->outgoingQ,buffer);     
 
-    printf("Push succeeds\n");
-    fflush(stdout);
+    if(DEBUG_COMM) {
+      printf("Push succeeds\n");
+      fflush(stdout);
+    }
 }

@@ -8,5 +8,6 @@
 
 %public platform-services-null.bsv
 
-%requires  starter_service
 %requires  multifpga_router_service
+
+
