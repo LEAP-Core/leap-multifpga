@@ -60,7 +60,7 @@ module mkSimpleDemarshaller (DEMARSHALLER#(n,data))
     buffer <= takeTail(append(buffer,highVal));
   endmethod
 
-  method Action deq();
+  method Action deq() if(count == fromInteger(valueof(n)));
     count <= 0;
   endmethod
 
@@ -81,20 +81,20 @@ module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SERVER_REQUEST_
 
     rule startRequest (waiting);
         UMF_PACKET packet <- port.read();
-        $display("Connection RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+        // $display("Connection RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
         waiting <= False;
     endrule
 
     rule continueRequest (!waiting);
         UMF_PACKET packet <- port.read();
         dem.enq(packet.UMF_PACKET_dataChunk);
-        $display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
+        // $display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
     endrule
 
     rule sendData(!waiting && send.notFull());
         dem.deq();
         send.send(unpack(truncate(pack(dem.first))));
-        $display("Connection RX spits out: %h", dem.first);
+        // $display("Connection RX spits out: %h", dem.first);
         waiting <= True;
     endrule
 
@@ -111,11 +111,11 @@ module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, CLIENT_RE
         UMF_CHUNK chunk = mar.first();
         mar.deq();
         port.write(tagged UMF_PACKET_dataChunk chunk);
-        $display("Connection RX sends: %h", chunk);
+        // $display("Connection TX sends: %h", chunk);
    endrule
 
    rule startRequest (recv.notEmpty());
-       $display("Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
+       // $display("Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
        UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
                             {
                                 filler: ?,

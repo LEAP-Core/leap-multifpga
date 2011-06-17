@@ -152,9 +152,12 @@ int send_block(int fd, CommBlock *block, Channel *channel) {
     int bytes_written = write(fd, block, sizeof(CommBlock));
     if (bytes_written == -1)
     {
-        fprintf(stderr, "         HW side exiting (pipe closed)\n");
+        fprintf(stderr, "HW exiting (pipe closed)\n");
         // I guess we should clean ourselves
-        // but i am not sure that this can ever fail    
+        // The way to do this is bailing...
+        // By bailing the main starter propagates through the 
+        // system. 
+        exit(0); 
     }
     else if (bytes_written < sizeof(CommBlock))
     {
@@ -318,10 +321,18 @@ unsigned long long comm_read(unsigned char handle)
     channel = validate_handle(handle);
 
     block = g_async_queue_pop(channel->incomingQ); 
-    for (i = 0; i < BDPI_CHUNK_BYTES; i++)
+    for (i = 0; i < UMF_CHUNK_BYTES; i++)
     {
-    	unsigned int byte = block->chunk[i];
-    	retval |= (byte << (i * 8));
+    	unsigned long long byte = block->chunk[i];
+	if(DEBUG_COMM) {
+	  printf("comm byte %d = %x\n", byte, block->chunk[i]);
+	}
+
+    	retval |= ((byte & 0xff) << (i * 8));
+    }
+
+    if(DEBUG_COMM) {
+      printf("comm driver reading: %llx\n", retval);
     }
 
     return retval;
@@ -369,9 +380,11 @@ void comm_write(unsigned char handle, unsigned long long data)
     unsigned long long mask;  
     Channel *channel;
     int i;
-    CommBlock * buffer = (CommBlock*) malloc(sizeof(CommBlock));
+    CommBlock * buffer;
 
     channel = validate_handle(handle);
+
+    buffer = (CommBlock*) malloc(sizeof(CommBlock));
 
     if(DEBUG_COMM) {
       printf("Attempting a write\n");
@@ -381,14 +394,19 @@ void comm_write(unsigned char handle, unsigned long long data)
     buffer->sync = 0;
     /* unpack UINT32 into byte sequence */
     mask = 0xFF;
-    for (i = 0; i < BDPI_CHUNK_BYTES; i++)
+    for (i = 0; i < UMF_CHUNK_BYTES; i++)
     {
         unsigned char byte = (mask & data) >> (i * 8);
         buffer->chunk[i] = (unsigned char)byte;
         mask = mask << 8;
+	if(DEBUG_COMM) {
+	  printf("comm byte %d = %x\n", i, buffer->chunk[i]);
+	}
     }
 
+
     if(DEBUG_COMM) {
+      printf("comm driver writing: %llx\n", data);
       printf("Attempting to push\n");
       fflush(stdout);
     }

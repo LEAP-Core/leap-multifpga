@@ -44,7 +44,7 @@
 
 typedef struct _CommBlock {
   char sync;
-  char chunk[UMF_CHUNK_BYTES];
+  unsigned char chunk[UMF_CHUNK_BYTES];
 } CommBlock;
 
 typedef struct _Channel
