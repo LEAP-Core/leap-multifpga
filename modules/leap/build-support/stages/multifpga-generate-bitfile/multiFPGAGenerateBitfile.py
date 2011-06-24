@@ -45,6 +45,7 @@ class MultiFPGAGenerateBitfile():
            execute('asim-shell set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 0 ')
            execute('asim-shell set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
            execute('asim-shell set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')
+           execute('asim-shell set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
            execute('asim-shell configure model ' + platformPath)
 
            print "alive in call platform log " + platformPath

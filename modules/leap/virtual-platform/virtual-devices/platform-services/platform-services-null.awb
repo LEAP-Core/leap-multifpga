@@ -9,5 +9,14 @@
 %public platform-services-null.bsv
 
 %requires  multifpga_router_service
+%requires  common_services
+%requires  mem_services
+
+
+
+
+
+
+
 
 

@@ -75,13 +75,14 @@ class WrapperGen():
         wrapper_bsv.write('`define CON_SEND_' + module.name + ' 100\n')
         wrapper_bsv.write('`define CON_RECV_MULTI_' + module.name + ' 50\n')
         wrapper_bsv.write('`define CON_SEND_MULTI_' + module.name + ' 50\n')
+        wrapper_bsv.write('`define CHAINS_' + module.name + ' 50\n')
         wrapper_bsv.write('`else\n')
         wrapper_bsv.write('// Real build pass.  Include file built dynamically.\n')
         wrapper_bsv.write('`include "' + module.name + '_Wrapper_con_size.bsh"\n')
         wrapper_bsv.write('`endif\n')
 
         wrapper_bsv.write('(* synthesize *)\n')
-        wrapper_bsv.write('module mk_' + module.name + '_Wrapper (SOFT_SERVICES_SYNTHESIS_BOUNDARY#(`CON_RECV_' + module.name + ', `CON_SEND_' + module.name + ', `CON_RECV_MULTI_' + module.name + ', `CON_SEND_MULTI_' + module.name +'));\n')
+        wrapper_bsv.write('module mk_' + module.name + '_Wrapper (SOFT_SERVICES_SYNTHESIS_BOUNDARY#(`CON_RECV_' + module.name + ', `CON_SEND_' + module.name + ', `CON_RECV_MULTI_' + module.name + ', `CON_SEND_MULTI_' + module.name +', `CHAINS_' + module.name +'));\n')
         wrapper_bsv.write('  \n')
         # we need to insert the fpga platform here
         # get my parameters 

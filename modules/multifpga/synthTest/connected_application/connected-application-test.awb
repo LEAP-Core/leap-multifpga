@@ -11,3 +11,5 @@
 %public  connected-application-test.h
 %public  connected-application-test.cpp
 
+%param SYNTH_BOUNDARY mkConnectedApplication "name of synthesis boundary"
+

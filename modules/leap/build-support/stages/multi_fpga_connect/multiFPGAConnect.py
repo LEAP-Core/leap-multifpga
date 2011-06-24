@@ -92,10 +92,26 @@ class MultiFPGAConnect():
       APM_NAME = self.moduleList.env['DEFS']['APM_NAME']
       
       danglingGlobal = [];
+      danglingChainSources = {};
+      danglingChainSinks = {};
       for platformName in self.environment.getPlatformNames():
           self.parseDangling(platformName)
           # we should now check for matches
           for danglingNew in self.platformData[platformName]['DANGLING']:
+              # build up lists of chains. 
+              if(danglingNew.isChain()):
+                print "Got chain " + danglingNew.name
+                if(danglingNew.isSource()):
+                  if(danglingNew.name in danglingChainSources):
+                    danglingChainSources[danglingNew.name] += [danglingNew]
+                  else:
+                    danglingChainSources[danglingNew.name] = [danglingNew]
+                else:
+                  if(danglingNew.name in danglingChainSinks):
+                    danglingChainSinks[danglingNew.name] += [danglingNew]
+                  else:
+                    danglingChainSinks[danglingNew.name] = [danglingNew]
+                continue # don't fall down the usual code path here
               for danglingOld in danglingGlobal:
                   if(danglingNew.matches(danglingOld)): # a potential match
                       # We should check to see that things are directly connected
@@ -123,11 +139,46 @@ class MultiFPGAConnect():
                       
           danglingGlobal += self.platformData[platformName]['DANGLING']
 
+      # link up the chains.  The algorithm below is suboptimal. 
+      # for more complex topologies than the ACP, we will want to 
+      # solve a mapping problem 
+      # we may want to sort these or something to ensure that we don't form singelton links XXX
+      # delete the length 1 chains immediately  -- they live on a single node
+      for chainName in danglingChainSources.keys():
+        if(len(danglingChainSources[chainName]) < 2):
+          del danglingChainSources[chainName]
+          del danglingChainSinks[chainName]
+          print "Removing single platform chain " + chainName
+
+      # Our algorithm here is highly suboptimal.  rotate sinks by one to get an offset list 
+      # We assume that the fpga network is strongly connected and that we don't care about transport 
+      # lengths.  Bad Bad Bad assumptions, but they work for the ACP
+      for chainName in danglingChainSources.keys():
+        chainSrcs = danglingChainSources[chainName]
+        chainSinks = danglingChainSinks[chainName]
+        
+        # rotate sinks by one to get an offset list 
+        chainSinks.append(chainSinks.pop(0))
+        for i in range(len(chainSinks)):
+          # we need to make sure the source we pick is not on the same platform.        
+          if(chainSinks[i].platform == chainSrcs[i].platform):
+            print "Sink/Src platforms match.  Something is wrong"
+
+          chainSinks[i].chainPartner = chainSrcs[i]
+          chainSrcs[i].chainPartner = chainSinks[i]
+          # get them indexes
+          print "Trying to pair " + chainSrcs[i].platform + " and " + chainSinks[i].platform + " on chain " + chainName
+          self.assignIndices(chainSrcs[i],chainSinks[i])
+
+
+
+
       #unmatched connections are bad
       for dangling in danglingGlobal:
           if(not dangling.optional and not dangling.matched):
               print 'Unmatched connection ' + dangling.name
               sys.exit(0)
+
       # now that everything is matched we can ostensibly generate the header file
       # header must include device mapping as well
 
@@ -139,11 +190,18 @@ class MultiFPGAConnect():
           header.write('module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);\n')
           header.write('messageM("Instantiating Custom Router"); \n')
 
+          # chains can and will have two different communications outlets, therefore, the chains connections
+          # cannot be filled in until after all the links are instantiated
+          # the chain insertion code must lexically come after the arbiter instantiation
+          chainsStr = ''
+
+
           # handle the connections themselves
           for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
             header.write('// Connection to ' + targetPlatform + ' \n')
             sends = 0
             recvs = 0
+            chains = 0           
 
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
               if(dangling.sc_type == 'Recv'):
@@ -153,29 +211,46 @@ class MultiFPGAConnect():
                   header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
 
                   sends += 1
+              # only create a chain when we see the source
+              if(dangling.sc_type == 'ChainSrc'):
+                chains += 1 
+                # we must create a logical chain information
+                chainsStr += 'let chain_' + dangling.name + ' = LOGICAL_CHAIN_INFO{logicalName: "' + dangling.name + '", logicalType: "' + \
+                             dangling.raw_type + '", computePlatform: "' + platform + '", incoming: pack_chain_' + dangling.name + \
+                             ', outgoing: unpack_chain_' + dangling.name + '};\n'
+                      
+                chainsStr += 'registerChain(chain_' + dangling.name + ');\n'
+
+
 
             # instantiate multiplexors - we need one per link 
-            if(recvs > 0):
+            # chains must necessarily have two links, one in and one out. 
+            if(recvs + chains > 0):
               print "Querying " + platform + ' <- ' + targetPlatform
               hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
               header.write('CHANNEL_VIRTUALIZER#(0,1) virtual_out_' + targetPlatform  + '<- mkChannelVirtualizer(?,' + hopFromTarget + '.write);\n')
-              header.write('ARBITED_CLIENT#(' + str(recvs) + ') switch_out_' + targetPlatform  + '<- mkArbitedClient(?, virtual_out_' + targetPlatform + '.writePorts[0].write);\n')
+              header.write('ARBITED_CLIENT#(' + str(recvs + chains) + ') switch_out_' + targetPlatform  + '<- mkArbitedClient(?, virtual_out_' + targetPlatform + '.writePorts[0].write);\n')
 
-            if(sends > 0):
+            if(sends + chains > 0):
               print "Querying " + platform + ' -> ' + targetPlatform
               hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
               header.write('CHANNEL_VIRTUALIZER#(1,0) virtual_in_' + targetPlatform  + '<- mkChannelVirtualizer(' + hopFromTarget + '.read,?);\n')
-              header.write('ARBITED_SERVER#(' + str(sends) + ') switch_in_' + targetPlatform  + '<- mkArbitedServer(virtual_in_' + targetPlatform + '.readPorts[0].read,?);\n')
+              header.write('ARBITED_SERVER#(' + str(sends + chains) + ') switch_in_' + targetPlatform  + '<- mkArbitedServer(virtual_in_' + targetPlatform + '.readPorts[0].read,?);\n')
 
             # hook 'em up
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
               if(dangling.sc_type == 'Recv'):
-                  header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',switch_out_' + targetPlatform  + '.requestPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
+                header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',switch_out_' + targetPlatform  + '.requestPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
               if(dangling.sc_type == 'Send'):
-                  header.write('Empty pack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.requestPorts['+str(dangling.idx) + ']);\n')
-
-
-
+                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.requestPorts['+str(dangling.idx) + ']);\n')
+              if(dangling.sc_type == 'ChainSrc' ):
+                header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(switch_in_' + targetPlatform  +'.requestPorts['+str(dangling.idx) + ']);\n')
+              if(dangling.sc_type == 'ChainSink' ):
+                header.write('PHYSICAL_CHAIN_IN pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(switch_out_' + targetPlatform  + '.requestPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
+          
+     
+          # Add in chain insertion code 
+          header.write(chainsStr + '\n')
 
           header.write('endmodule\n')
           header.close();
@@ -189,12 +264,26 @@ class MultiFPGAConnect():
               if(match):
             #python groups begin at index 1  
                   print 'found connection: ' + line
-                  self.platformData[platformName]['DANGLING'] += [DanglingConnection(match.group(1), 
+                  if(match.group(1) == "Chain"):
+                    print "Got chain " + match.group(3)
+                    sc_type = "ChainSrc"
+                  else:
+                    sc_type = match.group(1)
+
+                  self.platformData[platformName]['DANGLING'] += [DanglingConnection(sc_type, 
                                                                                 match.group(2),
                                                                                 match.group(3),
                                                                                 match.group(4),
                                                                                 match.group(5),
                                                                                 match.group(6))]
+                  if(match.group(1) == "Chain"):
+                    self.platformData[platformName]['DANGLING'] += [DanglingConnection("ChainSink", 
+                                                                                match.group(2),
+                                                                                match.group(3),
+                                                                                match.group(4),
+                                                                                match.group(5),
+                                                                                match.group(6))]
+
               else:
                   print "Malformed connection message: " + line
                   sys.exit(-1)

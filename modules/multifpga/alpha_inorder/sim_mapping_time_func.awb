@@ -1,0 +1,16 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Alpha Inorder Sim Mapping Timing/Functional partition
+%desc This file describes the mapping of the alhpa inorder pipeline to the ACP
+
+%attributes tool
+
+%provides fpga_mapping
+
+%sources -t FPGAENV_MAPPING -v PUBLIC sim-mapping-time-func.map
+
+
+
+

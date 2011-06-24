@@ -1,12 +1,12 @@
 %AWB_START
 
-%name MultiFPGA Synthesis test module d with rrr
-%desc MultiFPGA	Synthesis test module d with rrr 
+%name MultiFPGA Synthesis test module d with rrr and chains
+%desc MultiFPGA	Synthesis test module d with rrr and chains
 
 %provides test_d
 
 %sources -t RRR -v PUBLIC test-d-rrr.rrr
-%sources -t BSV -v PUBLIC test-d-rrr.bsv
+%sources -t BSV -v PUBLIC test-d-chains.bsv
 %sources -t DICT -v PUBLIC test-d.dic
 
 %param SYNTH_BOUNDARY mkD "name of synthesis boundary"

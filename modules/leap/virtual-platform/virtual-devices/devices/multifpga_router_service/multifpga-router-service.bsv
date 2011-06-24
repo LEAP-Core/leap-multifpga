@@ -18,12 +18,14 @@ interface MARSHALLER#(numeric type n, type data);
   method Action enq(Vector#(n,data) vec);
   method Action deq();
   method data first();
+  method Bool notFull();
 endinterface
 
 interface DEMARSHALLER#(numeric type n, type data);
   method Action enq(data dat);
   method Action deq();
   method Vector#(n,data) first();
+  method Bool notEmpty();
 endinterface
 
 module mkSimpleMarshaller (MARSHALLER#(n,data))
@@ -46,6 +48,10 @@ module mkSimpleMarshaller (MARSHALLER#(n,data))
   method data first() if(count > 0);
     return buffer[0];
   endmethod
+
+  method Bool notFull();
+    return count == 0;
+  endmethod
 endmodule
 
 module mkSimpleDemarshaller (DEMARSHALLER#(n,data))
@@ -66,6 +72,10 @@ module mkSimpleDemarshaller (DEMARSHALLER#(n,data))
 
   method Vector#(n,data) first() if(count == fromInteger(valueof(n)));
     return buffer;
+  endmethod
+
+  method Bool notEmpty();
+    return count == fromInteger(valueof(n));
   endmethod
 endmodule
 
@@ -129,6 +139,86 @@ module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, CLIENT_RE
         recv.deq;
         mar.enq(unpack(zeroExtend(pack(recv.receive))));
    endrule
+endmodule
+
+// At some point we're going to need flow control up here
+// We may not need marsh/demarsh!!!!  If all connections are the CHUNK size!
+module mkPacketizeOutgoingChain#(SERVER_REQUEST_PORT port) (PHYSICAL_CHAIN_OUT)
+   provisos(Div#(SizeOf#(PHYSICAL_CHAIN_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
+            Add#(n_EXTRA_SZ, SizeOf#(PHYSICAL_CHAIN_DATA), TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))));
+
+    Reg#(Bool) waiting <- mkReg(True);
+    DEMARSHALLER#(t_NUM_CHUNKS, UMF_CHUNK) dem <- mkSimpleDemarshaller();  
+
+    rule startRequest (waiting);
+        UMF_PACKET packet <- port.read();
+        // $display("Chain RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+        waiting <= False;
+    endrule
+
+    rule continueRequest (!waiting);
+        UMF_PACKET packet <- port.read();
+        dem.enq(packet.UMF_PACKET_dataChunk);
+        // $display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
+    endrule
+
+    let myClock <- exposeCurrentClock;
+    let myReset <- exposeCurrentReset;
+
+    interface clock = myClock;
+    interface reset = myReset;
+
+    method Action deq();
+      dem.deq;
+      waiting <= True;
+    endmethod
+
+    method PHYSICAL_CHAIN_DATA first = unpack(truncate(pack(dem.first)));
+    method Bool notEmpty() = dem.notEmpty;
+
+endmodule
+
+module mkPacketizeIncomingChain#(CLIENT_REQUEST_PORT port, Integer id) (PHYSICAL_CHAIN_IN)
+   provisos(Div#(SizeOf#(PHYSICAL_CHAIN_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
+	    Add#(n_EXTRA_SZ, SizeOf#(PHYSICAL_CHAIN_DATA), TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))));
+
+   MARSHALLER#(t_NUM_CHUNKS, UMF_CHUNK) mar <- mkSimpleMarshaller();
+   RWire#(PHYSICAL_CHAIN_DATA) tryData <- mkRWire();
+   PulseWire trySuccess <- mkPulseWire();
+
+   rule continueRequest (True);
+        UMF_CHUNK chunk = mar.first();
+        mar.deq();
+        port.write(tagged UMF_PACKET_dataChunk chunk);
+        // $display("Chain TX sends: %h", chunk);
+   endrule
+
+   rule startRequest (tryData.wget() matches tagged Valid .data);
+       // $display("Chain TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
+       UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
+                            {
+                                filler: ?,
+                                phyChannelPvt: ?,
+                                channelID: ?,
+                                serviceID: fromInteger(id),
+                                methodID : ?,
+                                numChunks: fromInteger(valueof(t_NUM_CHUNKS))
+                            };
+        port.write(header);
+        trySuccess.send;
+        mar.enq(unpack(zeroExtend(pack(data))));
+   endrule
+
+  let myClock <- exposeCurrentClock;
+  let myReset <- exposeCurrentReset;
+
+  interface clock = myClock;
+  interface reset = myReset;
+ 
+  method Bool success() = trySuccess;
+  method Action try(PHYSICAL_CHAIN_DATA d);
+    tryData.wset(d);     
+  endmethod
 endmodule
 
 
