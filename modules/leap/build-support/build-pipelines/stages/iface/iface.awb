@@ -1,0 +1,14 @@
+#/********************************************************************
+#* Python libraries for XST synthesis tool
+#********************************************************************/
+
+%name Interface builder
+%desc Build tool for LEAP interfaces
+
+%attributes tool
+
+%provides iface_tool
+
+%notes README
+
+%scons %library iface.py
