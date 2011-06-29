@@ -1,0 +1,7 @@
+model -> FPGA0;
+connected_application -> FPGA0;
+hardware_system -> FPGA0;
+test_a -> FPGA0;
+test_c -> FPGA1;
+test_b -> FPGA0;
+test_d -> FPGA1;

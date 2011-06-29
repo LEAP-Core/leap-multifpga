@@ -188,7 +188,8 @@ class MultiFPGAConnect():
      
           # toss out the mapping functions first
           header.write('module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);\n')
-          header.write('messageM("Instantiating Custom Router"); \n')
+          header.write('String platformName <- getSynthesisBoundaryPlatform();\n')
+          header.write('messageM("Instantiating Custom Router on " + platformName); \n')
 
           # chains can and will have two different communications outlets, therefore, the chains connections
           # cannot be filled in until after all the links are instantiated
@@ -260,7 +261,7 @@ class MultiFPGAConnect():
       print "Processing: " + self.platformData[platformName]['LOG']
       for line in logfile:
           if(re.match("Compilation message: .*: Dangling",line)):
-              match = re.search(r".*Dangling (\w+) {(.*)} \[(\d+)\]:(\w+):(\w+):(\w+)", line)
+              match = re.search(r'.*Dangling (\w+) {(.*)} \[(\d+)\]:(\w+):(\w+):(\w+)', line)
               if(match):
             #python groups begin at index 1  
                   print 'found connection: ' + line

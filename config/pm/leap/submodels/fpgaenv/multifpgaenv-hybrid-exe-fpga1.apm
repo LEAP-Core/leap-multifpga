@@ -103,33 +103,26 @@ physical_platform_utils=Common Physical Platform Utilities
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
 Packagehint=leap
 
-[Synthesis Boundary Wrapper generation tool/Requires]
-fpgamap_parser=FPGAMap
-
-[Synthesis Boundary Wrapper generation tool]
-File=modules/leap/build-support/stages/wrapper_gen/multi-fpga-wrapper-gen.awb
-Packagehint=multifpga
-
 [BSV Bluesim Build Tool]
 File=modules/leap/build-support/build-pipelines/stages/bluesim/bsv-exe.awb
 Packagehint=leap
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
-Packagehint=leap
+Packagehint=multifpga
 
 [BSV Build Tool MultiFPGA]
-File=modules/leap/build-support/stages/bluespec/bsv-multi.awb
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv-multi.awb
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap/build-support/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
 Packagehint=multifpga
 
 [MultiFPGA BlueSim Platform Build Pipeline/Requires]
 software_tool=Null software build tool
 iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+wrapper_gen_tool=MultiFPGA Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
 bsv_tool=BSV Build Tool MultiFPGA
 
@@ -212,5 +205,12 @@ File=modules/leap/virtual-platform/virtual-devices/devices/starter/hybrid/starte
 Packagehint=leap
 
 [Null software build tool]
-File=modules/leap/build-support/stages/null_software/null_software.awb
+File=modules/leap/build-support/build-pipelines/stages/null_software/null_software.awb
 Packagehint=multifpga
+
+[MultiFPGA Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/multi-fpga-wrapper-gen.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis Boundary Wrapper generation tool/Requires]
+fpgamap_parser=FPGAMap

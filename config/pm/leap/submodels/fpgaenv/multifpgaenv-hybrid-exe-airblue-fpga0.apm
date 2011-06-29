@@ -40,7 +40,7 @@ File=modules/leap/virtual-platform/rrr/basic/basic-rrr.awb
 Packagehint=leap
 
 [Simulation Physical Channel]
-File=modules/leap/virtual-platform/channelio/physical-channel/sim/sim-physical-channel.awb
+File=modules/leap/virtual-platform/physical-channel/sim/sim-physical-channel.awb
 Packagehint=leap
 
 [Basic Virtual Channel Multiplexer]
@@ -124,12 +124,9 @@ unix_comm_device=UNIX Communication Physical Device
 physical_platform_utils=Common Physical Platform Utilities
 unix_pipe_device=UNIX Pipe Physical Device
 
-[Synthesis Boundary Wrapper generation tool/Requires]
-fpgamap_parser=FPGAMap
-
 [Synthesis Boundary Wrapper generation tool]
-File=modules/leap/build-support/stages/wrapper_gen/multi-fpga-wrapper-gen.awb
-Packagehint=multifpga
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
+Packagehint=leap
 
 [BSV Bluesim Build Tool]
 File=modules/leap/build-support/build-pipelines/stages/bluesim/bsv-exe.awb
@@ -137,18 +134,14 @@ Packagehint=leap
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
-Packagehint=leap
+Packagehint=multifpga
 
 [Software build tool]
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
 
 [BSV Build Tool MultiFPGA]
-File=modules/leap/build-support/stages/bluespec/bsv-multi.awb
-Packagehint=multifpga
-
-[FPGAMap]
-File=modules/leap/build-support/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv-multi.awb
 Packagehint=multifpga
 
 [MultiFPGA BlueSim Platform Build Pipeline/Requires]
