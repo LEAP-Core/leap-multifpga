@@ -101,3 +101,15 @@ Directory modules/leap-platforms/fpga-environments/acp
 
 
 Added an initial pipeline stage for parsing the fpga file
+
+----------
+kfleming    Date: Thu Jun 30 13:13:16 EDT 2011  CSN: CSN-multifpga-27
+                  Thu Jun 30 17:13:16 UTC 2011
+
+
+Directory modules/leap-platforms/fpga-environments/acp
+ acp_fpga_env_airblue.awb  Locally Added               0 
+ acp-dual-airblue.env      Locally Added               0 
+
+
+Added ACP environment for airblue

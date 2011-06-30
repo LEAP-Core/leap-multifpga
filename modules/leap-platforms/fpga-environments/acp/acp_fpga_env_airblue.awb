@@ -1,0 +1,12 @@
+%AWB_START
+
+%name Airblue ACP Dual FPGA Environment
+%desc Airblue ACP Dual FPGA Environment
+%provides environment_description
+
+%attributes airblue
+
+%sources -t FPGAENV -v PUBLIC acp-dual-airblue.env
+
+
+%AWB_END
