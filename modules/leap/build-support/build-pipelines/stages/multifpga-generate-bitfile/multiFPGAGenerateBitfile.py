@@ -41,15 +41,15 @@ class MultiFPGAGenerateBitfile():
            # Ugly - we need to physically reconstruct the apm path
            # set the fpga parameter
            # for the first pass, we will ignore mismatched platforms
-           execute('asim-shell set parameter ' + platformPath + ' MULTI_FPGA_PLATFORM \\"' + platform.name + '\\"')
-           execute('asim-shell set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 0 ')
-           execute('asim-shell set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
-           execute('asim-shell set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')
-           execute('asim-shell set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
-           execute('asim-shell configure model ' + platformPath)
+           execute('asim-shell --batch set parameter ' + platformPath + ' MULTI_FPGA_PLATFORM \\"' + platform.name + '\\"')
+           execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 0 ')
+           execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
+           execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')
+           execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
+           execute('asim-shell --batch configure model ' + platformPath)
 
            print "alive in call platform log " + platformPath
-           execute('awb-shell build model ' + platformPath)   
+           execute('awb-shell --batch build model ' + platformPath)   
            print "dead in call platform log"
          return compile_platform_log
 
@@ -69,9 +69,9 @@ class MultiFPGAGenerateBitfile():
       print "wrapper: " + bitfile
       print "platformPath: " + moduleList.env['DEFS']['WORKSPACE_ROOT'] + '/src/private/' + platformPath
 
-      execute('asim-shell cp ' + platform.path +" "+ platformPath)        
-      execute('asim-shell replace module ' + platformPath + ' ' + applicationPath)
-      execute('asim-shell replace module ' + platformPath + ' ' + mappingPath)
+      execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
+      execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
+      execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
 
       # this dependency on platform logs is coarse.  we could do better, but it may not be necessary
       subbuild = moduleList.env.Command( 

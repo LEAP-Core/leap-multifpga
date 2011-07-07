@@ -36,18 +36,18 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [MultiFPGA Communication Complex Generator]
-File=modules/leap-old/build-support/stages/multi_fpga_connect/multi-fpga-connect.awb
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap-old/build-support/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 
 [multiFPGA Generate bitfle]
-File=modules/leap-old/build-support/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation]
@@ -154,3 +154,13 @@ Packagehint=multifpga
 [ACP Dual FPGA Environment]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env.awb
 Packagehint=multifpga
+
+[HAsim Common Default Configuration/Params]
+CONTEXT_ID_BITS=6
+
+[Alpha Functional Model/Params]
+FUNCP_PHYSICAL_REG_INDEX_BITS=12
+MAX_NUM_CONTEXTS=64
+
+[Chip Base Types/Params]
+NUM_CPUS=64
