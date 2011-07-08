@@ -140,3 +140,21 @@ Directory modules/multifpga/alpha_inorder
 
 
 Added mapping files and apm for various alpha builds.
+
+----------
+keflemin    Date: Fri Jul  8 19:44:36 EDT 2011  CSN: CSN-multifpga-30
+                  Fri Jul  8 23:44:36 UTC 2011
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_ring_acp_64_multifpga.apm Locally Added               0 
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_ring_acp_16_connected_application.apm Locally Added               0 
+ alpha_inorder_dm_wt_ring_acp_64_connected_application.apm Locally Added               0 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_ring_acp_16_multifpga.apm Locally Added               0 
+
+
+Added multifpga models for rings.

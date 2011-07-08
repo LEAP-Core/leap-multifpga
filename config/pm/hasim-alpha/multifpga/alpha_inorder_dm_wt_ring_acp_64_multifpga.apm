@@ -1,0 +1,83 @@
+
+[Global]
+SaveParameters=0
+Description=Inorder Alpha Direct Writethrough Caches Mesh ACP
+File=alpha_inorder_dm_wt_ring_acp_64_multifpga
+Version=2.2
+Name=Inorder Alpha Writethrough Caches Mesh ACP 16
+Type=HAsim
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=hasim inorder alpha acp
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[MultiFPGA Communication Complex Generator/Requires]
+fpgamap_parser=FPGAMap
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
+Packagehint=leap
+
+[multiFPGA Generate bitfle]
+File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+
+[multiFPGA Build Pipeline]
+File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
+Packagehint=multifpga
+
+[ACP Dual FPGA Environment]
+File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+build_pipeline=multiFPGA Build Pipeline
+connected_application=Alpha Inorder DM, WT, Ring 64 cores
+environment_description=ACP Dual FPGA Environment
+fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition with Cache
+
+[HW/SW Hybrid Multifpga Project Foundation/Params]
+SYNTH_BOUNDARY=mkModel
+
+[MultiFPGA Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
+Packagehint=leap
+
+[multiFPGA Build Pipeline/Requires]
+multi_fpga_generate_bitfile=multiFPGA Generate bitfle
+multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_log_generator=multiFPGA Log Generation
+
+[Alpha Inorder ACP Mapping Timing/Functional partition with Cache]
+File=modules/multifpga/alpha_inorder/acp_mapping_time_func_cache.awb
+Packagehint=multifpga
+
+[Alpha Inorder DM, WT, Ring 64 cores]
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_ring_acp_64_connected_application.apm
+Packagehint=multifpga
+
+[Alpha Inorder DM, WT, Ring 64 cores/Params]
+CONTEXT_ID_BITS=6
+FUNCP_PHYSICAL_REG_INDEX_BITS=13
+TOKEN_ID_BITS=6
+MAX_NUM_CONTEXTS=64
