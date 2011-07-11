@@ -196,6 +196,7 @@ module mkBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz, data_
    endmethod
    
    // first is unguarded here, we expecte the user to check it before they call first
+   // Does it drop the response? 
    method ActionValue#(data_t) firstResp()  if (finishInit);
       let readResp <- ugbram.readRsp();
       return readResp;

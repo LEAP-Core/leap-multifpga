@@ -92,7 +92,7 @@ module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_
     Reg#(Bool) waiting <- mkReg(True);
     DEMARSHALLER#(t_NUM_CHUNKS, UMF_CHUNK) dem <- mkSimpleDemarshaller();  
 
-    rule sendReady(waiting || !send.notFull());
+    rule sendReady(waiting || send.notFull());
       port.read_ready();
     endrule
 
@@ -132,7 +132,7 @@ module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EG
    endrule
 
    rule startRequest (recv.notEmpty());
-        $display("Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
+       $display("Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
        UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
                             {
                                 filler: ?,
@@ -170,7 +170,7 @@ module mkPacketizeOutgoingChain#(SWITCH_INGRESS_PORT port) (PHYSICAL_CHAIN_OUT)
     rule continueRequest (!waiting);
         UMF_PACKET packet <- port.read();
         dem.enq(packet.UMF_PACKET_dataChunk);
-        $display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
+        $display("Chain RX receives: %h", packet.UMF_PACKET_dataChunk);
     endrule
 
     let myClock <- exposeCurrentClock;

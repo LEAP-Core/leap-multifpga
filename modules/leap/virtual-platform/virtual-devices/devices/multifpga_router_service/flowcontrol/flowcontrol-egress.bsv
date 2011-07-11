@@ -95,27 +95,29 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
 
     Reg#(Bit#(TLog#(n))) requestActiveQueue  <- mkReg(0);
     Reg#(Bit#(TLog#(n))) responseActiveQueue <- mkReg(0);
+    Reg#(Bool) countersAdjusted <- mkReg(True); // helps us manage coherence in flow control
 
     // ==============================================================
     //                          Response Rules
     // ==============================================================
 
     // scan channel for incoming flowcontrol headers
-    rule scan_responses;
+    rule scan_responses (countersAdjusted);
         UMF_PACKET packet <- read();
-
         // enqueue header in service's queue
         // set up remaining chunks
         case (packet) matches
           tagged UMF_PACKET_header .header: 
             begin
               responseActiveQueue     <= truncate(packet.UMF_PACKET_header.serviceID);
+              $display("Got a flow control header for service %d", packet.UMF_PACKET_header.serviceID);
             end
           tagged UMF_PACKET_dataChunk .chunk:
             begin
               let creditsNext = truncate(chunk) + portCredits.sub(responseActiveQueue);
-              bufferAvailable[responseActiveQueue] <= creditsNext >= `MAX_TRANSACTION_SIZE;
+              bufferAvailable[responseActiveQueue] <= creditsNext >= `MAX_TRANSACTION_SIZE; // This should always be true...
               portCredits.upd(responseActiveQueue, creditsNext);
+              $display("Got flow control body for service %d", responseActiveQueue, creditsNext);
             end
         endcase
     endrule
@@ -133,7 +135,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
     //
 
     Wire#(Maybe#(UInt#(TLog#(n)))) newMsgQIdx <- mkDWire(tagged Invalid);
-    Reg#(Bool) countersAdjusted <- mkReg(True);
+
 
     //
     // First half -- pick an incoming requestQueue
@@ -148,8 +150,9 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
             request[s] = pack(requestQueues[s].notEmpty() && bufferAvailable[s] );
         end
 
-        newMsgQIdx <= arbiter.arbitrate(request);
-        $display("Egress BufferAvailible %b Reqs %b", pack(readVReg(bufferAvailable)), request);
+        newMsgQIdx <= arbiter.arbitrate(request); 
+        if(request != 0)
+	  $display("Egress BufferAvailible %b Reqs %b", pack(readVReg(bufferAvailable)), request);
     endrule
 
     //

@@ -18,6 +18,7 @@
 
 import Vector::*;
 import FIFOF::*;
+import DReg::*;
 
 `include "awb/provides/channelio.bsh"
 `include "awb/provides/rrr.bsh"
@@ -68,9 +69,9 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     Vector#(n, Wire#(Bool)) readReady <- replicateM(mkDWire(False));
     RWire#(Bit#(TLog#(n))) idxExamined <-mkRWire;
     Reg#(Bit#(TLog#(n))) idxRR <- mkReg(0);
-    FIFO#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) sendSize <- mkSizedFIFO(1);
+    FIFOF#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) sendSize <- mkSizedFIFOF(1);
 
-    rule startSendEmpty;
+    rule startSendEmpty(!sendSize.notEmpty);
        if(idxRR + 1 == fromInteger(valueof(n))) 
          begin
            idxRR <= 0;
@@ -109,6 +110,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     endrule
 
     rule finishSendEmpty;
+      $display("Finished sending tokens");
       sendSize.deq;
       write(tagged UMF_PACKET_dataChunk (zeroExtend(sendSize.first)));
     endrule
@@ -164,7 +166,8 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     // whether a responseQueue has data.
     //
 
-    Wire#(Maybe#(UInt#(TLog#(n)))) newMsgQIdx <- mkDWire(tagged Invalid);
+
+    Reg#(Maybe#(Bit#(TLog#(n))))  reqIdx <- mkDReg(tagged Invalid); // We use DReg because we may fail to deq.
 
     Scheduler#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),Bit#(1)) scheduler <- mkZeroCycleScheduler;
 
@@ -181,6 +184,8 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
 
     rule makeReq(scheduler.getNext() matches tagged Valid .idx);
         requestQueues.firstReq(idx);
+        $display("%t read request for %d", $time, idx);
+        reqIdx <= tagged Valid idx;
     endrule
 
 
@@ -192,16 +197,18 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
          // create a new request port and link it to the FIFO
         ingress_ports[s] = interface SWITCH_INGRESS_PORT
                            // We should probably latch the newMsgqIdx and check that we actually have data before dequeuing
-                           method ActionValue#(UMF_PACKET) read() if(newMsgQIdx matches tagged Valid .idx &&&
+                           method ActionValue#(UMF_PACKET) read() if(reqIdx matches tagged Valid .idx &&&
                                                                      fromInteger(s) == idx);
 
                                UMF_PACKET val <- requestQueues.firstResp();
-                               requestQueues.deq(pack(idx)); // Will this deq be one cycle behind?  Probably....
+                               $display("%t read dequeue for %d: %h", $time, idx, val); 
+                               requestQueues.deq(idx); // Will this deq be one cycle behind?  Probably....
                                return val;
 
                            endmethod
 
                            method Action read_ready();
+                              //$display("read ready %d", s); 
                               readReady[s] <= True;
                            endmethod
                        endinterface;
