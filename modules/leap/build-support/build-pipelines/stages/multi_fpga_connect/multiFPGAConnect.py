@@ -226,28 +226,36 @@ class MultiFPGAConnect():
 
             # instantiate multiplexors - we need one per link 
             # chains must necessarily have two links, one in and one out. 
+            # We now have two virtual channels for flow control purposes
             if(recvs + chains > 0):
               print "Querying " + platform + ' <- ' + targetPlatform
               hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-              header.write('CHANNEL_VIRTUALIZER#(0,1) virtual_out_' + targetPlatform  + '<- mkChannelVirtualizer(?,' + hopFromTarget + '.write);\n')
-              header.write('ARBITED_CLIENT#(' + str(recvs + chains) + ') switch_out_' + targetPlatform  + '<- mkArbitedClient(?, virtual_out_' + targetPlatform + '.writePorts[0].write);\n')
+              header.write('CHANNEL_VIRTUALIZER#(0,2) virtual_out_' + targetPlatform  + '<- mkChannelVirtualizer(?,' + hopFromTarget + '.write);\n')
+
 
             if(sends + chains > 0):
               print "Querying " + platform + ' -> ' + targetPlatform
               hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
-              header.write('CHANNEL_VIRTUALIZER#(1,0) virtual_in_' + targetPlatform  + '<- mkChannelVirtualizer(' + hopFromTarget + '.read,?);\n')
-              header.write('ARBITED_SERVER#(' + str(sends + chains) + ') switch_in_' + targetPlatform  + '<- mkArbitedServer(virtual_in_' + targetPlatform + '.readPorts[0].read,?);\n')
+              header.write('CHANNEL_VIRTUALIZER#(2,0) virtual_in_' + targetPlatform  + '<- mkChannelVirtualizer(' + hopFromTarget + '.read,?);\n')
+
+            if(recvs + chains > 0):
+              hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
+              header.write('EGRESS_SWITCH#(' + str(recvs + chains) + ') switch_out_' + targetPlatform  + '<- mkEgressSwitch(virtual_in_' + targetPlatform + '.readPorts[1].read, virtual_out_' + targetPlatform + '.writePorts[0].write);\n')
+
+            if(sends + chains > 0):
+              hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
+              header.write('INGRESS_SWITCH#(' + str(sends + chains) + ') switch_in_' + targetPlatform  + '<- mkIngressSwitch(virtual_in_' + targetPlatform + '.readPorts[0].read, virtual_out_' + targetPlatform + '.writePorts[1].write);\n')
 
             # hook 'em up
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
               if(dangling.sc_type == 'Recv'):
-                header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',switch_out_' + targetPlatform  + '.requestPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
+                header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',switch_out_' + targetPlatform  + '.egressPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
               if(dangling.sc_type == 'Send'):
-                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.requestPorts['+str(dangling.idx) + ']);\n')
+                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.ingressPorts['+str(dangling.idx) + ']);\n')
               if(dangling.sc_type == 'ChainSrc' ):
-                header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(switch_in_' + targetPlatform  +'.requestPorts['+str(dangling.idx) + ']);\n')
+                header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(switch_in_' + targetPlatform  +'.ingressPorts['+str(dangling.idx) + ']);\n')
               if(dangling.sc_type == 'ChainSink' ):
-                header.write('PHYSICAL_CHAIN_IN pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(switch_out_' + targetPlatform  + '.requestPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
+                header.write('PHYSICAL_CHAIN_IN pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(switch_out_' + targetPlatform  + '.egressPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
           
      
           # Add in chain insertion code 

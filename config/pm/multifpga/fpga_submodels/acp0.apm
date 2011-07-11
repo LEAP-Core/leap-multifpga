@@ -182,3 +182,10 @@ Packagehint=multifpga
 [Shared Memory Services]
 File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service.awb
 Packagehint=leap
+
+[MultiFPGA Router Service/Requires]
+multifpga_switch=MultiFPGA Switch
+
+[MultiFPGA Switch]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/simple/simple-switch.awb
+Packagehint=multifpga
