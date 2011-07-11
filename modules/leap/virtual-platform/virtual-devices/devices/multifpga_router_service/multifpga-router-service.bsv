@@ -6,6 +6,7 @@
 `include "asim/provides/channelio.bsh"
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/soft_connections.bsh"
+`include "asim/provides/multifpga_switch.bsh"
 
 `include "asim/provides/multifpga_router_service.bsh"
 
@@ -18,9 +19,6 @@
      endmodule
 `endif
  
-//XXX insert module for creating umf packets here.
-
-
 
 module [CONNECTED_MODULE] mkMultifpgaRouterServices#(VIRTUAL_PLATFORM vplat) (Empty);
   let m <- mkCommunicationModule(vplat);

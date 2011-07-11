@@ -1,0 +1,10 @@
+%name MultiFPGA Switch 
+%desc MultiFPGA Switch  
+
+%provides multifpga_switch
+
+%notes README
+
+%sources -t BSV -v PUBLIC  simple-ingress.bsv
+%sources -t BSV -v PUBLIC  simple-egress.bsv
+

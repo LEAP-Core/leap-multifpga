@@ -36,12 +36,26 @@ interface SWITCH_INGRESS_PORT;
 endinterface
 
 interface INGRESS_SWITCH#(numeric type n);
-    interface Vector#(n, SWITCH_INGRESS_PORT)  egressPorts;
+    interface Vector#(n, SWITCH_INGRESS_PORT)  ingressPorts;
 endinterface
+
+module mkIngressSwitch#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (INGRESS_SWITCH#(n))
+    provisos(Add#(serviceExcess, TLog#(n), SizeOf#(UMF_SERVICE_ID)),
+                  Add#(1, nExcess, n));
+  INGRESS_SWITCH#(n) m = ?;
+  if(valueof(n) > 0)
+    begin
+      m <- mkFlowControlSwitchIngressNonZero(read,write);
+    end
+  return m;
+endmodule
+
 
 // Here we are reading and sticking things into the BRAM buffer. 
 // We write back the credits periodically
-module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (INGRESS_SWITCH#(n));
+module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (INGRESS_SWITCH#(n))
+    provisos(Add#(serviceExcess, TLog#(n), SizeOf#(UMF_SERVICE_ID)),
+             Add#(1, nExcess, n));
 
     // ==============================================================
     //                        Ports and Queues
@@ -51,22 +65,23 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     // However we do need to eat the free tokens so that the flow control will work right. 
     VLevelFIFO#(n,`MULTIFPGA_FIFO_SIZES,UMF_PACKET) requestQueues <- mkBRAMVLevelFIFO(True); // This true causes the 
     Vector#(n, SWITCH_INGRESS_PORT) ingress_ports = newVector();
-    Vector#(n, Reg#(Bool)) readReady <- replicateM(mkReg(True));
+    Vector#(n, Wire#(Bool)) readReady <- replicateM(mkDWire(False));
     RWire#(Bit#(TLog#(n))) idxExamined <-mkRWire;
-    FIFO#(Bit#(TLog#(`MULTIFPGA_FIFO_SIZES))) sendSize <- mkSizedFIFO(1);
+    Reg#(Bit#(TLog#(n))) idxRR <- mkReg(0);
+    FIFO#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) sendSize <- mkSizedFIFO(1);
 
     rule startSendEmpty;
-       if(idx + 1 == fromInteger(valueof(n))) 
+       if(idxRR + 1 == fromInteger(valueof(n))) 
          begin
-           idx <= 0;
+           idxRR <= 0;
          end 
        else
          begin
-           idx <= idx + 1;
+           idxRR <= idxRR + 1;
          end
-       let use_idx = idx;
+       let use_idx = idxRR;
        
-       if(idxExamined matches tagged Valid .enqIdx)
+       if(idxExamined.wget() matches tagged Valid .enqIdx)
          begin
            use_idx = enqIdx;
          end
@@ -74,38 +89,37 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
        // If we get too free, we need to send come cedits down the pipe.
        if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES - `MAX_TRANSACTION_SIZE)
          begin 
+           $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
            UMF_PACKET newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
                                        {
                                          filler: ?,
                                          phyChannelPvt: ?,
                                          channelID: 1,
-                                         serviceID: idx,
+                                         serviceID: zeroExtend(use_idx),
                                          methodID : ?,
                                          numChunks: 1
                                         };
 
           // hand out the whole pack of tokens  
-          requestQueues.decrFree(idx, requestQueues.free[use_idx]);
+          requestQueues.decrFree(use_idx, requestQueues.free[use_idx]);
           // send the header packet to channelio
           write(newpacket);
-          sendSize.enq(requestQueues.free[use_idx]);
+          sendSize.enq(zeroExtend(requestQueues.free[use_idx]));
          end 
     endrule
 
     rule finishSendEmpty;
       sendSize.deq;
-      write(zeroExtend(sendSize.first));
+      write(tagged UMF_PACKET_dataChunk (zeroExtend(sendSize.first)));
     endrule
 
     // === arbiters ===
-
-    ARBITER#(n) arbiter <- mkRoundRobinArbiter();
 
     // === other state ===
 
     Reg#(UMF_MSG_LENGTH) requestChunksRemaining  <- mkReg(0);
 
-    Reg#(UMF_SERVICE_ID) requestActiveQueue  <- mkReg(0);
+    Reg#(Bit#(TLog#(n))) requestActiveQueue  <- mkReg(0);
 
     // ==============================================================
     //                          Request Rules
@@ -116,14 +130,14 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     rule scan_requests (requestChunksRemaining == 0);
 
         UMF_PACKET packet <- read();
-
+        $display("ingress got a packet for service %d", packet.UMF_PACKET_header.serviceID);
         // enqueue header in service's queue
         // enqueues are always safe 
-        requestQueues.enq(packet.UMF_PACKET_header.serviceID,packet);
+        requestQueues.enq(truncate(packet.UMF_PACKET_header.serviceID),packet);
 
         // set up remaining chunks
         requestChunksRemaining <= packet.UMF_PACKET_header.numChunks;
-        requestActiveQueue     <= packet.UMF_PACKET_header.serviceID;
+        requestActiveQueue     <= truncate(packet.UMF_PACKET_header.serviceID);
 
     endrule
 
@@ -152,6 +166,8 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
 
     Wire#(Maybe#(UInt#(TLog#(n)))) newMsgQIdx <- mkDWire(tagged Invalid);
 
+    Scheduler#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),Bit#(1)) scheduler <- mkZeroCycleScheduler;
+
     // call first req in one rule
     // then call resp+deq in the next
 
@@ -159,12 +175,11 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     //
     // First half -- pick an incoming responseQueue
     //
-    rule write_response_newmsg1 (responseChunksRemaining == 0);
+    rule write_response_newmsg1;
+        scheduler.putInfo(map(pack,readVReg(readReady)), requestQueues.used());
+    endrule
 
-        // arbitrate
-        Bit#(n) request = pack(zipWith( \&&, map( \< (1), responseQueues.used(), readReady)));
-        let idx = arbiter.arbitrate(request);
-        newMsgQIdx <= idx;
+    rule makeReq(scheduler.getNext() matches tagged Valid .idx);
         requestQueues.firstReq(idx);
     endrule
 
@@ -175,12 +190,13 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     for (Integer s = 0; s < fromInteger(valueof(n)); s = s + 1)
     begin
          // create a new request port and link it to the FIFO
-        req_ports[s] = interface SWITCH_INGRESS_PORT
+        ingress_ports[s] = interface SWITCH_INGRESS_PORT
+                           // We should probably latch the newMsgqIdx and check that we actually have data before dequeuing
                            method ActionValue#(UMF_PACKET) read() if(newMsgQIdx matches tagged Valid .idx &&&
                                                                      fromInteger(s) == idx);
 
-                               UMF_PACKET val = requestQueues.firstResp();
-                               requestQueues.deq(idx);
+                               UMF_PACKET val <- requestQueues.firstResp();
+                               requestQueues.deq(pack(idx)); // Will this deq be one cycle behind?  Probably....
                                return val;
 
                            endmethod

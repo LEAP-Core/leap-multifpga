@@ -34,6 +34,10 @@
 // 3) the data type stored in the fifo      
 //////////////////////////////////////////////////////////////////////////
 
+`include "awb/provides/fpga_components.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/librl_bsv_storage.bsh"
+
 // import standard library
 import DReg::*;
 import FIFO::*;
@@ -73,7 +77,7 @@ module mkBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz, data_
              Add#(TLog#(no_fifo),TLog#(fifo_sz),bram_idx_sz));   
 
    // instantiate an unguarded 1 cycle latency bram (i.e. the read response will only valid for 1 cycle)  
-   UGBRAM#(Bit#(bram_idx_sz), data_t)           ugbram <- mkBypassUGBRAM_Full();
+   BRAM#(Bit#(bram_idx_sz), data_t)           ugbram <- mkBRAMUnguarded();
    
    RegFile#(Bit#(TLog#(no_fifo)),Bit#(TLog#(fifo_sz)))  head <- mkRegFileFull();
    RegFile#(Bit#(TLog#(no_fifo)),Bit#(TLog#(fifo_sz)))  tail <- mkRegFileFull();
@@ -109,7 +113,6 @@ module mkBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz, data_
    let firstIdxVal       = fromMaybe(0,firstIdx);
    let decrFreeIdxVal    = fromMaybe(0,decrFreeIdx);
    let deqIdxNEQFirstIdx = deqIdxVal != firstIdxVal;  
-   let readResp          = ugbram.read_resp();
      
    // start the initialization processor
    rule initialization(!finishInit);
@@ -156,7 +159,7 @@ module mkBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz, data_
    
    rule processFirstReq(finishInit && isValid(firstIdx));
       let headVal = head.sub(firstIdxVal);
-      ugbram.read_req({firstIdxVal,headVal});
+      ugbram.readReq({firstIdxVal,headVal});
 //       if (deqIdxNEQFirstIdx || !isValid(deqIdx))
 //          begin
 //             ugbram.read_req({firstIdxVal,headVal});
@@ -193,7 +196,8 @@ module mkBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz, data_
    endmethod
    
    // first is unguarded here, we expecte the user to check it before they call first
-   method data_t firstResp()  if (finishInit);
+   method ActionValue#(data_t) firstResp()  if (finishInit);
+      let readResp <- ugbram.readRsp();
       return readResp;
    endmethod
    
@@ -227,7 +231,7 @@ module mkDecrOneBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz
              Add#(TLog#(no_fifo),TLog#(fifo_sz),bram_idx_sz));   
 
    // instantiate an unguarded 1 cycle latency bram (i.e. the read response will only valid for 1 cycle)  
-   UGBRAM#(Bit#(bram_idx_sz), data_t)           ugbram <- mkBypassUGBRAM_Full();
+   BRAM#(Bit#(bram_idx_sz), data_t)           ugbram <- mkBRAMUnguarded();
    
    RegFile#(Bit#(TLog#(no_fifo)),Bit#(TLog#(fifo_sz)))  head <- mkRegFileFull();
    RegFile#(Bit#(TLog#(no_fifo)),Bit#(TLog#(fifo_sz)))  tail <- mkRegFileFull();
@@ -261,7 +265,6 @@ module mkDecrOneBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz
    let firstIdxVal       = fromMaybe(0,firstIdx);
    let decrFreeIdxVal    = fromMaybe(0,decrFreeIdx);
    let deqIdxNEQFirstIdx = deqIdxVal != firstIdxVal;  
-   let readResp          = ugbram.read_resp();
      
    // start the initialization processor
    rule initialization(!finishInit);
@@ -322,7 +325,7 @@ module mkDecrOneBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz
    
    rule processFirstReq(finishInit && isValid(firstIdx));
       let headVal = head.sub(firstIdxVal);
-      ugbram.read_req({firstIdxVal,headVal});
+      ugbram.readReq({firstIdxVal,headVal});
       
 //       if (deqIdxNEQFirstIdx || !isValid(deqIdx))
 //          begin
@@ -359,8 +362,9 @@ module mkDecrOneBRAMVLevelFIFO#(Bool zeroFreeInit) (VLevelFIFO#(no_fifo, fifo_sz
    endmethod
    
    // first is unguarded here, we expect the user to check it before they call first
-   method data_t firstResp()  if (finishInit);
-      return readResp;
+   method ActionValue#(data_t) firstResp()  if (finishInit);
+      let val <- ugbram.readRsp();
+      return val;
    endmethod
    
    method Action clear()  if (finishInit);

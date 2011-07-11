@@ -30,15 +30,16 @@ import FIFOF::*;
 // RRR Client
 
 // request/response port interfaces
-interface EGRESS_PORT;
+interface SWITCH_EGRESS_PORT;
     method Action write(UMF_PACKET data);
 endinterface
 
 interface EGRESS_SWITCH#(numeric type n);
-    interface Vector#(n, EGRESS_PORT)  egressPorts;
+    interface Vector#(n, SWITCH_EGRESS_PORT)  egressPorts;
 endinterface
 
-module mkEgressSwitch#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (EGRESS_SWITCH#(n));
+module mkEgressSwitch#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (EGRESS_SWITCH#(n))
+    provisos(Add#(serviceExcess, TLog#(n), SizeOf#(UMF_SERVICE_ID)));
   EGRESS_SWITCH#(n) m = ?;
   if(valueof(n) > 0)
     begin
@@ -52,7 +53,8 @@ endmodule
 // General idea here is that we can only send for non-zero values
 // One issue is simplifying the arbitration logic.  On one hand, we would like to just and buffer_available and fifo_ready. That's simple.  
 // But that invovlves dealing with a max sized message, which is probably easy enough.   
-module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (EGRESS_SWITCH#(n));
+module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (EGRESS_SWITCH#(n))
+   provisos(Add#(extraServices, TLog#(n), SizeOf#(UMF_SERVICE_ID)));
 
     // ==============================================================
     //                        Ports and Queues
@@ -60,20 +62,21 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
 
     // Lutram to store the pointer values
     // For now we do a 'full-knowledge' protocol, where each return token signifying a return of credits
-    LUTRAM#(Bit#(TLog#(n)), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) portCredits <- mkLUTRAM(`MULTIFPGA_FIFO_SIZES);
+    LUTRAM#(Bit#(TLog#(n)), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) portCredits <- mkLUTRAM(`MULTIFPGA_FIFO_SIZES);
     Vector#(n,Reg#(Bool)) bufferAvailable <- replicateM(mkReg(True));
 
     // create request/response buffers and link them to ports
     FIFOF#(UMF_PACKET)                     requestQueues[valueof(n)];
-    Vector#(n, EGRESS_PORT) egress_ports = newVector();
+    Vector#(n,SWITCH_EGRESS_PORT) egress_ports = newVector();
 
 
     for (Integer s = 0; s < valueof(n); s = s + 1)
     begin
         requestQueues[s]  <- mkFIFOF();
         // create a new request port and link it to the FIFO
-        egress_ports[s] = interface EGRESS_PORT
+        egress_ports[s] = interface SWITCH_EGRESS_PORT
                              method Action write(UMF_PACKET data);
+                               $display("enqueue to egress Q %d",s);
                                requestQueues[s].enq(data);
                              endmethod
                           endinterface;
@@ -90,42 +93,31 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
     Reg#(UMF_MSG_LENGTH) requestChunks <- mkReg(0);
     Reg#(UMF_MSG_LENGTH) responseChunksRemaining <- mkReg(0);
 
-    Reg#(UMF_SERVICE_ID) requestActiveQueue  <- mkReg(0);
-    Reg#(UMF_SERVICE_ID) responseActiveQueue <- mkReg(0);
+    Reg#(Bit#(TLog#(n))) requestActiveQueue  <- mkReg(0);
+    Reg#(Bit#(TLog#(n))) responseActiveQueue <- mkReg(0);
 
     // ==============================================================
     //                          Response Rules
     // ==============================================================
 
     // scan channel for incoming flowcontrol headers
-    rule scan_responses (responseChunksRemaining == 0);
-
+    rule scan_responses;
         UMF_PACKET packet <- read();
 
         // enqueue header in service's queue
         // set up remaining chunks
-        responseChunksRemaining <= packet.UMF_PACKET_header.numChunks;
-        responseActiveQueue     <= packet.UMF_PACKET_header.serviceID;
-
-    endrule
-
-    // scan channel for response message chunks
-    rule scan_params (responseChunksRemaining != 0);
-
-        // grab a chunk from channelio and place it into the active response queue
-        UMF_PACKET packet <- read();
-        // one chunk processed
-        responseChunksRemaining <= responseChunksRemaining - 1;
-
-        // Making the strong assuption of size 1 chunks
-        // we could probably always assume that getting this value puts us past the maximum size
-        // for a single packet
-        let creditsNext = truncate(packet) + portCredits.sub(responseActiveQueue);
-
-        bufferAvailable[responseActiveQueue] <= creditsNext >= `MAX_TRANSACTION_SIZE;
-
-        portCredits.upd(responseActiveQueue, creditsNext);
-        
+        case (packet) matches
+          tagged UMF_PACKET_header .header: 
+            begin
+              responseActiveQueue     <= truncate(packet.UMF_PACKET_header.serviceID);
+            end
+          tagged UMF_PACKET_dataChunk .chunk:
+            begin
+              let creditsNext = truncate(chunk) + portCredits.sub(responseActiveQueue);
+              bufferAvailable[responseActiveQueue] <= creditsNext >= `MAX_TRANSACTION_SIZE;
+              portCredits.upd(responseActiveQueue, creditsNext);
+            end
+        endcase
     endrule
 
     // ==============================================================
@@ -153,11 +145,11 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
         Bit#(n) request = '0;
         for (Integer s = 0; s < valueof(n); s = s + 1)
         begin
-            request[s] = pack(zipWith( \| , requestQueues[s].notEmpty(), bufferAvailable);
+            request[s] = pack(requestQueues[s].notEmpty() && bufferAvailable[s] );
         end
 
         newMsgQIdx <= arbiter.arbitrate(request);
-       
+        $display("Egress BufferAvailible %b Reqs %b", pack(readVReg(bufferAvailable)), request);
     endrule
 
     //
@@ -170,7 +162,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
         rule write_request_newmsg2 (newMsgQIdx matches tagged Valid .idx &&&
                                     fromInteger(s) == idx &&&
                                     requestChunksRemaining == 0);
-
+            $display("scheduled %d", idx);
             // get header packet
             UMF_PACKET packet = requestQueues[s].first();
             requestQueues[s].deq();
@@ -180,7 +172,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
                                        {
                                         filler: ?,
                                         phyChannelPvt: ?,
-                                        channelID: `CLIENT_CHANNEL_ID,
+                                        channelID: 0,
                                         serviceID: packet.UMF_PACKET_header.serviceID,
                                         methodID : packet.UMF_PACKET_header.methodID,
                                         numChunks: packet.UMF_PACKET_header.numChunks
@@ -200,15 +192,17 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
     // This happens post-arbitration, but before another arbitration can happen
     // It allows us to be using the channel while updating counters and possibly receiving credit 
     // messages 
-    rule adjustCounters(!counters_adjusted);
-      counters_adjusted <= True;
-      let newCount =  portCredits.sub(requestActiveQueue) - requestChunks;
+    rule adjustCounters(!countersAdjusted);
+      countersAdjusted <= True;
+      let newCount =  portCredits.sub(requestActiveQueue) - truncate(requestChunks);
       portCredits.upd(requestActiveQueue,newCount);
       bufferAvailable[requestActiveQueue] <= newCount >= `MAX_TRANSACTION_SIZE;
+      $display("Setting port credits for %d to %d", requestActiveQueue, newCount);
     endrule
 
     // continue writing message
     rule write_request_continue (requestChunksRemaining != 0);
+        $display("sending packet on  %d", requestActiveQueue);
 
         // get the next packet from the active request queue
         UMF_PACKET packet = requestQueues[requestActiveQueue].first();

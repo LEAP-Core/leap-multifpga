@@ -45,7 +45,7 @@ interface VLevelFIFO#(numeric type no_fifo,
    method Action firstReq(Bit#(TLog#(no_fifo)) idx);
       
    // first_resp
-   method data_t firstResp();
+   method ActionValue#(data_t) firstResp();
       
    // clear all fifos
    method Action clear();

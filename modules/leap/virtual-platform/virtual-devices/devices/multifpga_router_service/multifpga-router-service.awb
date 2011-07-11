@@ -2,6 +2,7 @@
 %desc A stub file for the build-time generated router
 
 %provides multifpga_router_service
+%requires multifpga_switch
 
 %attributes leap
 
