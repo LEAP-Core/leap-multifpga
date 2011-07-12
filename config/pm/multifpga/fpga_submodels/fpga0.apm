@@ -182,3 +182,10 @@ Packagehint=multifpga
 [SoftService Soft Connections Algorithm MultiFPGA]
 File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-multifpga.awb
 Packagehint=leap
+
+[MultiFPGA Router Service/Requires]
+multifpga_switch=MultiFPGA Switch with Flowcontrol
+
+[MultiFPGA Switch with Flowcontrol]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
+Packagehint=multifpga

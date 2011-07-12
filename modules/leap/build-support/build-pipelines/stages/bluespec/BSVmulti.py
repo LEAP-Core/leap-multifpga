@@ -252,6 +252,8 @@ class BSV():
       ## Now we are ready for the real build
       ##
       wrapper_bo = env.BSC(MODULE_PATH + TMP_BSC_DIR + '/' + bsv.replace('.bsv', ''), MODULE_PATH + bsv)
+      env.Requires(wrapper_bo,deps)
+      env.Requires(wrapper_bo,dependency)
       # if we rebuild the wrapper, we also need to rebuild the parent bo
 #      upper_bo = MODULE_PATH + '/../' + TMP_BSC_DIR + '/' + bsv.replace('_Wrapper.bsv', '.bo')
       if(BSV_DEBUG == 1):
@@ -301,24 +303,44 @@ class BSV():
       if(BSV_DEBUG == 1):
         print "Name: " + module.name
 
-      # we also generate all this synth boundary's GEN_BAS
-      gen_ba = moduleList.getSynthBoundaryDependencies(module, 'GEN_BAS')
-      # dress them with the correct directory
-      ext_gen_ba = []
-      for ba in gen_ba:
-        ext_gen_ba += [MODULE_PATH + TMP_BSC_DIR + '/' + ba]    
-
-
-      ##
-      ## Do the same for .ba
-      ##
-      bld_ba = env.Command([MODULE_PATH + TMP_BSC_DIR + '/mk_' + bsv.replace('.bsv', '.ba')] + ext_gen_ba,
+      # each synth boundary will produce a ba
+      bld_ba = env.Command([MODULE_PATH + TMP_BSC_DIR + '/mk_' + bsv.replace('.bsv', '.ba')],
                            MODULE_PATH + TMP_BSC_DIR + '/' + bsv.replace('.bsv', '.bo'),
                            '')
-      module.moduleDependency['BA'] += [bld_ba] 
+      module.moduleDependency['BA'] += [bld_ba]
       env.Precious(bld_ba)
-      if(BUILD_LOGS_ONLY):
-        moduleList.topDependency += [bld_ba]
+      env.Requires(bld_ba,deps)
+      env.Requires(bld_ba,dependency)
+
+      # we also generate all this synth boundary's GEN_BAS
+      # this is a little different because we must dependent on awb module bo rather
+      # than the synth boundary bo
+      descendents = moduleList.getSynthBoundaryDescendents(module)
+      for descendent in descendents:
+        print "BA: working on " + descendent.name
+        gen_ba = moduleList.getDependencies(descendent, 'GEN_BAS')
+        # dress them with the correct directory
+        # really the ba depend on their specific bo
+        ext_gen_ba = []
+        for ba in gen_ba:
+          print "BA: " + descendent.name + " generates " + MODULE_PATH + TMP_BSC_DIR + '/' + ba
+          ext_gen_ba += [MODULE_PATH + TMP_BSC_DIR + '/' + ba]    
+
+        ## our descendents need to wait for leap-bsc-mkdeps
+        env.Requires(MODULE_PATH + '/' + descendent.name + '.bsv',deps)    
+        env.Requires(MODULE_PATH + '/' + descendent.name + '.bsv',dependency)
+          
+        ##
+        ## Do the same for .ba
+        ##
+        bld_ba = env.Command(ext_gen_ba,
+                             MODULE_PATH + TMP_BSC_DIR + '/' + descendent.name + '.bo',
+                             '')
+        env.Requires(bld_ba,deps)
+        env.Requires(bld_ba,dependency)
+
+        module.moduleDependency['BA'] += [bld_ba]
+        env.Precious(bld_ba)
 
     
       ##

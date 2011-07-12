@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Inorder Alpha Direct Writethrough Caches Mesh ACP
-File=alpha_inorder_dm_wt_mesh_acp_16_multifpga
+File=alpha_inorder_dm_wt_ring_exe_16_multifpga
 Version=2.2
 Name=Inorder Alpha Writethrough Caches Mesh ACP 16
 Type=HAsim
@@ -48,7 +48,7 @@ Packagehint=multifpga
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 build_pipeline=multiFPGA Build Pipeline
-connected_application=New Asim Model
+connected_application=alpha_inorder_dm_wt_ring_acp_16
 environment_description=ACP Dual FPGA Environment
 fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition with Cache
 
@@ -72,12 +72,12 @@ multi_fpga_log_generator=multiFPGA Log Generation
 File=modules/multifpga/alpha_inorder/acp_mapping_time_func_cache.awb
 Packagehint=multifpga
 
-[New Asim Model]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_16_connected_application.apm
-Packagehint=multifpga
-
-[New Asim Model/Params]
+[alpha_inorder_dm_wt_ring_acp_16/Params]
 CONTEXT_ID_BITS=4
 FUNCP_PHYSICAL_REG_INDEX_BITS=11
 TOKEN_ID_BITS=6
 MAX_NUM_CONTEXTS=16
+
+[alpha_inorder_dm_wt_ring_acp_16]
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_ring_acp_16_connected_application.apm
+Packagehint=multifpga

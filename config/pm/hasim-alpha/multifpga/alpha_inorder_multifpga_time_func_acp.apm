@@ -152,5 +152,5 @@ File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env.awb
 Packagehint=multifpga
 
 [Alpha Inorder ACP Mapping Timing/Functional partition]
-File=modules/multifpga/alpha_inorder/sim_mapping_time_func.awb
+File=modules/multifpga/alpha_inorder/acp_mapping_time_func.awb
 Packagehint=multifpga

@@ -172,3 +172,10 @@ assertions_service=Assertions Service Null
 debug_scan_service=Debug Scan Services Null
 streams_service=Streams Service Null
 dynamic_parameters_service=Dynamic Parameter Service Null
+
+[MultiFPGA Router Service/Requires]
+multifpga_switch=MultiFPGA Switch with Flowcontrol
+
+[MultiFPGA Switch with Flowcontrol]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
+Packagehint=multifpga

@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=HAsim Performance Model
 environment_description=Simulation Dual FPGA Environment
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Alpha Inorder Sim Mapping Timing/Functional partition
+fpga_mapping=Alpha Inorder Simulation Mapping Timing/Functional partition
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -36,18 +36,18 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/stages/multi_fpga_connect/multi-fpga-connect.awb
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap/build-support/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 
 [multiFPGA Generate bitfle]
-File=modules/leap/build-support/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
 [Simulation Dual FPGA Environment]
@@ -151,6 +151,6 @@ Packagehint=hasim
 File=modules/hasim/timing-models/memory/base-types/memory-base-types.awb
 Packagehint=hasim-models
 
-[Alpha Inorder Sim Mapping Timing/Functional partition]
+[Alpha Inorder Simulation Mapping Timing/Functional partition]
 File=modules/multifpga/alpha_inorder/sim_mapping_time_func.awb
 Packagehint=multifpga
