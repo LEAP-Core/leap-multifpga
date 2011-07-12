@@ -2,8 +2,6 @@
 #ifndef __CONNECTED_APPLICATION__
 #define __CONNECTED_APPLICATION__
 
-#include <glib.h>
-
 #include "awb/provides/virtual_platform.h"
 #include "asim/rrr/client_stub_TESTDRRR.h"
 
