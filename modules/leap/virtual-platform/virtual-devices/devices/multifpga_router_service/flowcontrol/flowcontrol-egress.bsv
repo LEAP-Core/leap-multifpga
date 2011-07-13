@@ -65,6 +65,20 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
     LUTRAM#(Bit#(TLog#(n)), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) portCredits <- mkLUTRAM(`MULTIFPGA_FIFO_SIZES);
     Vector#(n,Reg#(Bool)) bufferAvailable <- replicateM(mkReg(True));
 
+
+    Reg#(Bit#(10)) count <- mkReg(0);
+
+    rule debug(`SWITCH_DEBUG == 1);
+      count <= count + 1;
+      if(count == 0)
+        begin
+          for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
+            begin
+              $display("Egress Queue %d thinks bufferAvailable %b", i, bufferAvailable[i]);
+            end
+        end
+    endrule
+
     // create request/response buffers and link them to ports
     FIFOF#(UMF_PACKET)                     requestQueues[valueof(n)];
     Vector#(n,SWITCH_EGRESS_PORT) egress_ports = newVector();
@@ -76,7 +90,11 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
         // create a new request port and link it to the FIFO
         egress_ports[s] = interface SWITCH_EGRESS_PORT
                              method Action write(UMF_PACKET data);
-                               $display("enqueue to egress Q %d",s);
+                               if(`SWITCH_DEBUG == 1)
+                                 begin
+                                   $display("enqueue to egress Q %d",s);
+                                 end
+
                                requestQueues[s].enq(data);
                              endmethod
                           endinterface;
@@ -110,14 +128,28 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
           tagged UMF_PACKET_header .header: 
             begin
               responseActiveQueue     <= truncate(packet.UMF_PACKET_header.serviceID);
-              $display("Got a flow control header for service %d", packet.UMF_PACKET_header.serviceID);
+              if(`SWITCH_DEBUG == 1)
+                begin
+                  $display("Got a flow control header for service %d", packet.UMF_PACKET_header.serviceID);
+                end
             end
           tagged UMF_PACKET_dataChunk .chunk:
             begin
-              let creditsNext = truncate(chunk) + portCredits.sub(responseActiveQueue);
+              let currentCredits = portCredits.sub(responseActiveQueue);
+              let creditsNext = truncate(chunk) + currentCredits;
               bufferAvailable[responseActiveQueue] <= creditsNext >= `MAX_TRANSACTION_SIZE; // This should always be true...
               portCredits.upd(responseActiveQueue, creditsNext);
-              $display("Got flow control body for service %d", responseActiveQueue, creditsNext);
+              if(`SWITCH_DEBUG == 1)
+                begin
+                  $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, chunk, currentCredits, creditsNext);
+                end
+
+              if(creditsNext < `MAX_TRANSACTION_SIZE)
+              begin
+                $display("Setting credits to zero... this is a bug");
+                $finish;
+              end 
+
             end
         endcase
     endrule
@@ -141,7 +173,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
     // First half -- pick an incoming requestQueue
     // we could make this 
     //
-    rule write_request_newmsg1 (requestChunksRemaining == 0);
+    rule write_request_newmsg1 (requestChunksRemaining == 0 && countersAdjusted);
 
         // arbitrate
         Bit#(n) request = '0;
@@ -151,7 +183,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
         end
 
         newMsgQIdx <= arbiter.arbitrate(request); 
-        if(request != 0)
+        if(request != 0 && `SWITCH_DEBUG == 1)
 	  $display("Egress BufferAvailible %b Reqs %b", pack(readVReg(bufferAvailable)), request);
     endrule
 
@@ -165,7 +197,10 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
         rule write_request_newmsg2 (newMsgQIdx matches tagged Valid .idx &&&
                                     fromInteger(s) == idx &&&
                                     requestChunksRemaining == 0);
-            $display("scheduled %d", idx);
+            if(`SWITCH_DEBUG == 1)
+              begin
+                $display("scheduled %d", idx);
+              end
             // get header packet
             UMF_PACKET packet = requestQueues[s].first();
             requestQueues[s].deq();
@@ -188,6 +223,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
             requestChunksRemaining <= newpacket.UMF_PACKET_header.numChunks;
             requestChunks <= newpacket.UMF_PACKET_header.numChunks + 1; // also sending header
             requestActiveQueue <= fromInteger(s);
+            countersAdjusted <= False;
         endrule
 
     end
@@ -200,12 +236,18 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
       let newCount =  portCredits.sub(requestActiveQueue) - truncate(requestChunks);
       portCredits.upd(requestActiveQueue,newCount);
       bufferAvailable[requestActiveQueue] <= newCount >= `MAX_TRANSACTION_SIZE;
-      $display("Setting port credits for %d to %d", requestActiveQueue, newCount);
+      if(`SWITCH_DEBUG == 1)
+        begin
+          $display("Setting portCredits for %d to %d", requestActiveQueue, newCount);
+        end
     endrule
 
     // continue writing message
     rule write_request_continue (requestChunksRemaining != 0);
-        $display("sending packet on  %d", requestActiveQueue);
+        if(`SWITCH_DEBUG == 1)
+          begin
+            $display("sending packet on  %d", requestActiveQueue);  
+          end
 
         // get the next packet from the active request queue
         UMF_PACKET packet = requestQueues[requestActiveQueue].first();

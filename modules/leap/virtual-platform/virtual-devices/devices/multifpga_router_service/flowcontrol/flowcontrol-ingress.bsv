@@ -71,8 +71,24 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     Reg#(Bit#(TLog#(n))) idxRR <- mkReg(0);
     FIFOF#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) sendSize <- mkSizedFIFOF(1);
 
+   Reg#(Bit#(10)) count <- mkReg(0);
+
+   rule debug (`SWITCH_DEBUG == 1);
+     count <= count + 1;
+     let used = requestQueues.used();
+     let free = requestQueues.free();
+     if(count == 0)
+       begin
+         for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
+           begin
+             $display("Ingress Queue %d free %d used %d ready %b", i, free[i], used[i], readReady[i]);
+           end
+       end
+   endrule
+ 
+
     rule startSendEmpty(!sendSize.notEmpty);
-       if(idxRR + 1 == fromInteger(valueof(n))) 
+       if(idxRR == fromInteger(valueof(n)-1)) 
          begin
            idxRR <= 0;
          end 
@@ -90,7 +106,11 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
        // If we get too free, we need to send come cedits down the pipe.
        if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES - `MAX_TRANSACTION_SIZE)
          begin 
-           $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
+           if(`SWITCH_DEBUG == 1)
+             begin
+               $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
+             end
+
            UMF_PACKET newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
                                        {
                                          filler: ?,
@@ -110,7 +130,11 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     endrule
 
     rule finishSendEmpty;
-      $display("Finished sending tokens");
+      if(`SWITCH_DEBUG == 1)
+        begin
+          $display("Finished sending tokens");
+        end
+
       sendSize.deq;
       write(tagged UMF_PACKET_dataChunk (zeroExtend(sendSize.first)));
     endrule
@@ -132,7 +156,11 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     rule scan_requests (requestChunksRemaining == 0);
 
         UMF_PACKET packet <- read();
-        $display("ingress got a packet for service %d", packet.UMF_PACKET_header.serviceID);
+        if(`SWITCH_DEBUG == 1)
+          begin
+            $display("ingress got a packet for service %d", packet.UMF_PACKET_header.serviceID);
+          end
+
         // enqueue header in service's queue
         // enqueues are always safe 
         requestQueues.enq(truncate(packet.UMF_PACKET_header.serviceID),packet);
@@ -171,6 +199,8 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
 
     Scheduler#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),Bit#(1)) scheduler <- mkZeroCycleScheduler;
 
+    PulseWire deqFired <- mkPulseWire;
+
     // call first req in one rule
     // then call resp+deq in the next
 
@@ -184,7 +214,11 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
 
     rule makeReq(scheduler.getNext() matches tagged Valid .idx);
         requestQueues.firstReq(idx);
-        $display("%t read request for %d", $time, idx);
+        if(`SWITCH_DEBUG == 1)
+          begin
+            $display("%t read request for %d", $time, idx);
+          end
+
         reqIdx <= tagged Valid idx;
     endrule
 
@@ -201,20 +235,30 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
                                                                      fromInteger(s) == idx);
 
                                UMF_PACKET val <- requestQueues.firstResp();
-                               $display("%t read dequeue for %d: %h", $time, idx, val); 
+                               if(`SWITCH_DEBUG == 1)
+                                 begin
+                                   $display("%t read dequeue for %d: %h", $time, idx, val); 
+                                 end
+
                                requestQueues.deq(idx); // Will this deq be one cycle behind?  Probably....
+                               deqFired.send;
                                return val;
 
                            endmethod
 
                            method Action read_ready();
-                              //$display("read ready %d", s); 
                               readReady[s] <= True;
                            endmethod
                        endinterface;
 
     end
 
+    rule warnOnNonDeq(reqIdx matches tagged Valid .idx  &&& !deqFired);
+      if(`SWITCH_DEBUG == 1)
+        begin
+          $display("Warning: Queue %d was scheduled but did not deq value",idx);
+        end
+    endrule
 
     interface ingressPorts  = ingress_ports;
 
