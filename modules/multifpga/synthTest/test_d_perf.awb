@@ -1,0 +1,14 @@
+%AWB_START
+
+%name MultiFPGA Synthesis test module d for benchmarking link
+%desc MultiFPGA	Synthesis test module d for benchmarking link 
+
+%provides test_d
+
+%sources -t RRR -v PUBLIC test-d-rrr.rrr
+%sources -t BSV -v PUBLIC test-d-perf.bsv
+%sources -t DICT -v PUBLIC test-d.dic
+
+%param SYNTH_BOUNDARY mkD "name of synthesis boundary"
+
+%AWB_END

@@ -1,0 +1,12 @@
+%AWB_START
+
+%name MultiFPGA Synthesis test module c for benchmarking
+%desc MultiFPGA	Synthesis test module c for benchmarking
+
+%provides test_c
+
+%public test-c-perf.bsv
+
+%param SYNTH_BOUNDARY mkC "name of synthesis boundary"
+
+%AWB_END
