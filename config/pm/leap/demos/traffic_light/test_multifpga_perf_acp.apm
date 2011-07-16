@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_rrr_acp
+File=test_multifpga_perf_acp
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=

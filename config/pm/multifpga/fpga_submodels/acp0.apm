@@ -184,8 +184,8 @@ File=modules/leap/libraries/platform-services/mem-services/shared-memory-service
 Packagehint=leap
 
 [MultiFPGA Router Service/Requires]
-multifpga_switch=MultiFPGA Switch with Flowcontrol
+multifpga_switch=MultiFPGA Switch
 
-[MultiFPGA Switch with Flowcontrol]
-File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
+[MultiFPGA Switch]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/simple/simple-switch.awb
 Packagehint=multifpga

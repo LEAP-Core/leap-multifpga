@@ -2,9 +2,9 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_rrr_acp
+File=test_multifpga_perf_acp_single
 Version=2.2
-Name=Multifpga synthesis test 
+Name=Single hop perf test
 DefaultBenchmark=
 Type=Leap
 Class=Asim::Model
@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=MultiFPGA Perf Test Connected Application
 environment_description=ACP Dual FPGA Environment
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Test ACP Mapping
+fpga_mapping=Test ACP Mapping Single Hop Perf
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -57,10 +57,6 @@ Packagehint=multifpga
 
 [MultiFPGA Synthesis test module top]
 File=modules/multifpga/synthTest/top.awb
-Packagehint=multifpga
-
-[Test ACP Mapping]
-File=modules/multifpga/synthTest/acp_mapping.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation]
@@ -102,4 +98,8 @@ hardware_system=MultiFPGA Synthesis test module top
 
 [MultiFPGA Synthesis test module d for benchmarking link]
 File=modules/multifpga/synthTest/test_d_perf.awb
+Packagehint=multifpga
+
+[Test ACP Mapping Single Hop Perf]
+File=modules/multifpga/synthTest/acp_perf_single_mapping.awb
 Packagehint=multifpga

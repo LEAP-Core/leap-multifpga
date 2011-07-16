@@ -31,14 +31,14 @@ CONNECTED_APPLICATION_CLASS::Main()
 {
   // Eventually we'll call the frontend initialization here.                                                                        
   STATS_DEVICE_SERVER_CLASS::GetInstance()->SetupStats();
-  UINT32 total = 0;
-  for(UINT32 i = 0; i < 50; i++) {
+  UINT32 total = 0, i;
+  for(i = 0; i < 50; i++) {
     UINT32 result = clientStub->TakeOneInput(i);
-    printf("Single Transfer Ticks %d \n", i, result);
+    printf("Single Transfer Ticks %d %d\n", i, result);
     total += result;
   }
 
-  printf("Average cycle\n", total/(float)i);
+  printf("Average cycle %f\n", total/(float)i);
 
   STATS_DEVICE_SERVER_CLASS::GetInstance()->DumpStats();
   STATS_DEVICE_SERVER_CLASS::GetInstance()->EmitFile();

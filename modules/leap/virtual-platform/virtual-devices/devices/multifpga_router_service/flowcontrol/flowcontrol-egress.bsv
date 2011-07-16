@@ -39,7 +39,10 @@ interface EGRESS_SWITCH#(numeric type n);
 endinterface
 
 module mkEgressSwitch#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (EGRESS_SWITCH#(n))
-    provisos(Add#(serviceExcess, TLog#(n), SizeOf#(UMF_SERVICE_ID)));
+    provisos(// Compute a non-zero size for the read port index
+             Max#(n, 2, n_FIFOS_SAFE),
+             Log#(n_FIFOS_SAFE, n_SAFE_FIFOS_SZ),
+             Add#(serviceExcess, n_SAFE_FIFOS_SZ, SizeOf#(UMF_SERVICE_ID)));
   EGRESS_SWITCH#(n) m = ?;
   if(valueof(n) > 0)
     begin
@@ -54,7 +57,10 @@ endmodule
 // One issue is simplifying the arbitration logic.  On one hand, we would like to just and buffer_available and fifo_ready. That's simple.  
 // But that invovlves dealing with a max sized message, which is probably easy enough.   
 module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (EGRESS_SWITCH#(n))
-   provisos(Add#(extraServices, TLog#(n), SizeOf#(UMF_SERVICE_ID)));
+   provisos(  // Compute a non-zero size for the read port index
+              Max#(n, 2, n_FIFOS_SAFE),
+              Log#(n_FIFOS_SAFE, n_FIFOS_SAFE_SZ),
+              Add#(extraServices, n_FIFOS_SAFE_SZ, SizeOf#(UMF_SERVICE_ID)));
 
     // ==============================================================
     //                        Ports and Queues
@@ -62,7 +68,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
 
     // Lutram to store the pointer values
     // For now we do a 'full-knowledge' protocol, where each return token signifying a return of credits
-    LUTRAM#(Bit#(TLog#(n)), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) portCredits <- mkLUTRAM(`MULTIFPGA_FIFO_SIZES);
+    LUTRAM#(Bit#(n_FIFOS_SAFE_SZ), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) portCredits <- mkLUTRAM(`MULTIFPGA_FIFO_SIZES);
     Vector#(n,Reg#(Bool)) bufferAvailable <- replicateM(mkReg(True));
 
 
@@ -103,7 +109,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
 
     // === arbiters ===
 
-    ARBITER#(n) arbiter <- mkRoundRobinArbiter();
+    ARBITER#(n_FIFOS_SAFE) arbiter <- mkRoundRobinArbiter();
 
     // === other state ===
 
@@ -111,8 +117,8 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
     Reg#(UMF_MSG_LENGTH) requestChunks <- mkReg(0);
     Reg#(UMF_MSG_LENGTH) responseChunksRemaining <- mkReg(0);
 
-    Reg#(Bit#(TLog#(n))) requestActiveQueue  <- mkReg(0);
-    Reg#(Bit#(TLog#(n))) responseActiveQueue <- mkReg(0);
+    Reg#(Bit#(n_FIFOS_SAFE_SZ)) requestActiveQueue  <- mkReg(0);
+    Reg#(Bit#(n_FIFOS_SAFE_SZ)) responseActiveQueue <- mkReg(0);
     Reg#(Bool) countersAdjusted <- mkReg(True); // helps us manage coherence in flow control
 
     // ==============================================================
@@ -166,7 +172,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
     // whether a requestQueue has data.
     //
 
-    Wire#(Maybe#(UInt#(TLog#(n)))) newMsgQIdx <- mkDWire(tagged Invalid);
+    Wire#(Maybe#(UInt#(n_FIFOS_SAFE_SZ))) newMsgQIdx <- mkDWire(tagged Invalid);
 
 
     //
@@ -176,7 +182,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
     rule write_request_newmsg1 (requestChunksRemaining == 0 && countersAdjusted);
 
         // arbitrate
-        Bit#(n) request = '0;
+        Bit#(n_FIFOS_SAFE) request = '0;
         for (Integer s = 0; s < valueof(n); s = s + 1)
         begin
             request[s] = pack(requestQueues[s].notEmpty() && bufferAvailable[s] );
