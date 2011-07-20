@@ -80,11 +80,28 @@ module mkSimpleDemarshaller (DEMARSHALLER#(n,data))
   endmethod
 endmodule
 
+module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT port) (Empty)
+   provisos(Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
+            Bits#(t_DATA, t_DATA_SZ),
+            Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))),
+            Add#(n_DATA_EXTRA, SizeOf#(UMF_CHUNK), t_DATA_SZ));
 
+  Empty m = ?;
+  if(valueof(t_NUM_CHUNKS) == 1) // don't instantiate a marshaller!
+    begin
+      m <- mkPacketizeConnectionSendUnmarshalled(send,port);
+    end
+  else
+    begin
+      m <- mkPacketizeConnectionSendMarshalled(send,port);
+    end
+
+  return m;
+endmodule
 
 // At some point we're going to need flow control up here
 // We may not need marsh/demarsh!!!!  If all connections are the CHUNK size!
-module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT port) (Empty)
+module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT port) (Empty)
    provisos(Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
             Bits#(t_DATA, t_DATA_SZ),
             Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))));
@@ -117,7 +134,53 @@ module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_
 
 endmodule
 
+module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT port) (Empty)
+   provisos(Bits#(t_DATA, t_DATA_SZ),
+            Add#(n_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ));
+
+    Reg#(Bool) waiting <- mkReg(True);
+
+    rule sendReady(waiting || send.notFull());
+      port.read_ready();
+    endrule
+
+    rule startRequest (waiting);
+        UMF_PACKET packet <- port.read();
+        //$display("Connection RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+        waiting <= False;
+    endrule
+
+    rule continueRequest (!waiting);
+        UMF_PACKET packet <- port.read();
+        send.send(unpack(zeroExtend(pack(packet.UMF_PACKET_dataChunk))));
+        //$display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
+        waiting <= True;
+    endrule
+
+endmodule
+
+
 module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT port, Integer id) (Empty)
+   provisos(Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
+            Bits#(t_DATA, t_DATA_SZ),
+	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))),
+            Add#(n_CHUNK_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ));
+
+  Empty m = ?;
+  if(valueof(t_NUM_CHUNKS) == 1) // don't instantiate a marshaller!
+    begin
+      m <- mkPacketizeConnectionReceiveUnmarshalled(recv,port, id);
+    end
+  else
+    begin
+      m <- mkPacketizeConnectionReceiveMarshalled(recv,port, id);
+    end
+
+  return m;
+endmodule
+
+
+module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT port, Integer id) (Empty)
    provisos(Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
             Bits#(t_DATA, t_DATA_SZ),
 	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))));
@@ -145,6 +208,37 @@ module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EG
         port.write(header);
         recv.deq;
         mar.enq(unpack(zeroExtend(pack(recv.receive))));
+   endrule
+endmodule
+
+module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT port, Integer id) (Empty)
+   provisos(/*Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),*/
+            Bits#(t_DATA, t_DATA_SZ),
+/*	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK)))*/
+            Add#(n_CHUNK_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ));
+   Reg#(Bool) waitHeader <- mkReg(True);
+
+   rule continueRequest (!waitHeader);
+        UMF_CHUNK chunk = truncate(pack(recv.receive));
+        recv.deq();
+        waitHeader <= True;
+        port.write(tagged UMF_PACKET_dataChunk chunk);
+        // $display("Connection TX sends: %h", chunk);
+   endrule
+
+   rule startRequest (recv.notEmpty && waitHeader);
+       //$display("Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
+       UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
+                            {
+                                filler: ?,
+                                phyChannelPvt: ?,
+                                channelID: 0, // we use this elsewhere to refer to flow control messages
+                                serviceID: fromInteger(id),
+                                methodID : ?, 
+                                numChunks: 1
+                            };
+        port.write(header);
+        waitHeader <= False;
    endrule
 endmodule
 
