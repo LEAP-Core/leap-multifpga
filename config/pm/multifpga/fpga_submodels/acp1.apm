@@ -174,8 +174,8 @@ streams_service=Streams Service Null
 dynamic_parameters_service=Dynamic Parameter Service Null
 
 [MultiFPGA Router Service/Requires]
-multifpga_switch=MultiFPGA Switch
+multifpga_switch=MultiFPGA Switch with Flowcontrol
 
-[MultiFPGA Switch]
-File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/simple/simple-switch.awb
+[MultiFPGA Switch with Flowcontrol]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
 Packagehint=multifpga
