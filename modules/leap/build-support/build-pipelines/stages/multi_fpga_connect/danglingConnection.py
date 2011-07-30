@@ -2,13 +2,14 @@ import sys
 
 class DanglingConnection():
   
-  def __init__(self, sc_type, raw_type, idx, name, platform, optional):
+  def __init__(self, sc_type, raw_type, idx, name, platform, optional, bitwidth):
       self.sc_type = sc_type
       self.raw_type = raw_type
       self.name = name
       self.idx = -1 # we don't care about the physical indexes yet. They get assigned during the match operation
       self.platform = platform
       self.optional = optional
+      self.bitwidth = bitwidth
       self.matched = False
       self.chainPartner = -1
 

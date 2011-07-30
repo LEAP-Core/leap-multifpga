@@ -8,6 +8,8 @@
 `include "asim/provides/channelio.bsh"
 `include "asim/provides/physical_platform.bsh"
 `include "asim/provides/soft_connections.bsh"
+`include "asim/provides/librl_bsv_base.bsh"
+`include "asim/provides/librl_bsv_storage.bsh"
 `include "asim/provides/multifpga_switch.bsh"
 
 `include "asim/provides/multifpga_router_service.bsh"
@@ -80,16 +82,17 @@ module mkSimpleDemarshaller (DEMARSHALLER#(n,data))
   endmethod
 endmodule
 
-module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT port) (Empty)
+module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT port, NumTypeParam#(bitwidth) width) (Empty)
    provisos(Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
             Bits#(t_DATA, t_DATA_SZ),
+            Add#(fill_EXTRA, UMF_PACKET_HEADER_FILLER_BITS, t_DATA_SZ),
             Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))),
             Add#(n_DATA_EXTRA, SizeOf#(UMF_CHUNK), t_DATA_SZ));
 
   Empty m = ?;
   if(valueof(t_NUM_CHUNKS) == 1) // don't instantiate a marshaller!
     begin
-      m <- mkPacketizeConnectionSendUnmarshalled(send,port);
+      m <- mkPacketizeConnectionSendUnmarshalled(send,port,width);
     end
   else
     begin
@@ -134,46 +137,61 @@ module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITC
 
 endmodule
 
-module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT port) (Empty)
+module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT port, NumTypeParam#(bitwidth) width) (Empty)
    provisos(Bits#(t_DATA, t_DATA_SZ),
+            Add#(fill_EXTRA, UMF_PACKET_HEADER_FILLER_BITS, t_DATA_SZ),
             Add#(n_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ));
 
-    Reg#(Bool) waiting <- mkReg(True);
+   if(valueof(bitwidth) < valueof(UMF_PACKET_HEADER_FILLER_BITS))
+     begin
+       rule sendReady(send.notFull());
+         port.read_ready();
+       endrule
+       rule continueRequest;
+         UMF_PACKET packet <- port.read();
+         send.send(unpack(zeroExtend(packet.UMF_PACKET_header.filler)));
+       endrule
+     end
+   else
+     begin
+       Reg#(Bool) waiting <- mkReg(True);
 
-    rule sendReady(waiting || send.notFull());
-      port.read_ready();
-    endrule
+       rule sendReady(waiting || send.notFull());
+         port.read_ready();
+       endrule
 
-    rule startRequest (waiting);
-        UMF_PACKET packet <- port.read();
-        //$display("Connection RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
-        waiting <= False;
-    endrule
+       rule startRequest (waiting);
+         UMF_PACKET packet <- port.read();
+         //$display("Connection RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+         waiting <= False;
+       endrule
 
-    rule continueRequest (!waiting);
-        UMF_PACKET packet <- port.read();
-        send.send(unpack(zeroExtend(pack(packet.UMF_PACKET_dataChunk))));
-        //$display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
-        waiting <= True;
-    endrule
-
+       rule continueRequest (!waiting);
+         UMF_PACKET packet <- port.read();
+         send.send(unpack(zeroExtend(pack(packet.UMF_PACKET_dataChunk))));
+         //$display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
+         waiting <= True;
+       endrule
+     end
 endmodule
 
 
-module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT port, Integer id) (Empty)
+module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT port, 
+                                     Integer id, NumTypeParam#(bitwidth) width) (Empty)
    provisos(Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),
             Bits#(t_DATA, t_DATA_SZ),
 	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK))),
+            Add#(fill_EXTRA, UMF_PACKET_HEADER_FILLER_BITS, t_DATA_SZ),
             Add#(n_CHUNK_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ));
 
   Empty m = ?;
   if(valueof(t_NUM_CHUNKS) == 1) // don't instantiate a marshaller!
     begin
-      m <- mkPacketizeConnectionReceiveUnmarshalled(recv,port, id);
+      m <- mkPacketizeConnectionReceiveUnmarshalled(recv,port, id, width);
     end
   else
     begin
-      m <- mkPacketizeConnectionReceiveMarshalled(recv,port, id);
+      m <- mkPacketizeConnectionReceiveMarshalled(recv,port,id);
     end
 
   return m;
@@ -211,24 +229,44 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
    endrule
 endmodule
 
-module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT port, Integer id) (Empty)
+module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT port, Integer id, NumTypeParam#(bitwidth) width) (Empty)
    provisos(/*Div#(SizeOf#(t_DATA),SizeOf#(UMF_CHUNK),t_NUM_CHUNKS),*/
             Bits#(t_DATA, t_DATA_SZ),
-/*	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(UMF_CHUNK)))*/
-            Add#(n_CHUNK_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ));
-   Reg#(Bool) waitHeader <- mkReg(True);
+            Add#(n_CHUNK_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ),
+            Add#(fill_EXTRA, UMF_PACKET_HEADER_FILLER_BITS, t_DATA_SZ));
+ 
+   // Is the bitwidth sufficient to fint into the header?
+   if(valueof(bitwidth) < valueof(UMF_PACKET_HEADER_FILLER_BITS))
+     begin
+       rule startRequest;
+         recv.deq;
+         UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
+                            {
+                                filler: truncate(pack(recv.receive)),  // Woot
+                                phyChannelPvt: ?,
+                                channelID: 0, // we use this elsewhere to refer to flow control messages
+                                serviceID: fromInteger(id),
+                                methodID : ?,
+                                numChunks: 0
+                            };
+          port.write(header);
+        endrule
+     end
+   else
+     begin
+       Reg#(Bool) waitHeader <- mkReg(True);
 
-   rule continueRequest (!waitHeader);
-        UMF_CHUNK chunk = truncate(pack(recv.receive));
-        recv.deq();
-        waitHeader <= True;
-        port.write(tagged UMF_PACKET_dataChunk chunk);
-        // $display("Connection TX sends: %h", chunk);
-   endrule
+       rule continueRequest (!waitHeader);
+         UMF_CHUNK chunk = truncate(pack(recv.receive));
+         recv.deq();
+         waitHeader <= True;
+         port.write(tagged UMF_PACKET_dataChunk chunk);
+         // $display("Connection TX sends: %h", chunk);
+       endrule
 
-   rule startRequest (recv.notEmpty && waitHeader);
-       //$display("Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
-       UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
+       rule startRequest (recv.notEmpty && waitHeader);
+         //$display("Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(UMF_CHUNK)) , fromInteger(valueof(t_NUM_CHUNKS)));
+         UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
                             {
                                 filler: ?,
                                 phyChannelPvt: ?,
@@ -237,9 +275,10 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
                                 methodID : ?, 
                                 numChunks: 1
                             };
-        port.write(header);
-        waitHeader <= False;
-   endrule
+          port.write(header);
+          waitHeader <= False;
+        endrule
+      end
 endmodule
 
 // At some point we're going to need flow control up here

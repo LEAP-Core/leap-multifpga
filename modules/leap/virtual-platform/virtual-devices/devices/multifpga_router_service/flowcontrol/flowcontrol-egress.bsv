@@ -214,7 +214,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
             // add my virtual channelID to header
             UMF_PACKET newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
                                        {
-                                        filler: ?,
+                                        filler: packet.UMF_PACKET_header.filler, // We might well have data
                                         phyChannelPvt: ?,
                                         channelID: 0,
                                         serviceID: packet.UMF_PACKET_header.serviceID,
@@ -229,7 +229,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(UMF_PACKET) read(
             requestChunksRemaining <= newpacket.UMF_PACKET_header.numChunks;
             requestChunks <= newpacket.UMF_PACKET_header.numChunks + 1; // also sending header
             requestActiveQueue <= fromInteger(s);
-            countersAdjusted <= False;
+            countersAdjusted <= False; // Should this be a single cycle?
         endrule
 
     end

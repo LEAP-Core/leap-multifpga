@@ -249,9 +249,11 @@ class MultiFPGAConnect():
             # hook 'em up
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
               if(dangling.sc_type == 'Recv'):
-                header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',switch_out_' + targetPlatform  + '.egressPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ');\n')
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.name +' = ?;\n')
+                header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',switch_out_' + targetPlatform  + '.egressPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ', width_recv_' + dangling.name + ');\n')
               if(dangling.sc_type == 'Send'):
-                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.ingressPorts['+str(dangling.idx) + ']);\n')
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.name +' = ?\n;')
+                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.ingressPorts['+str(dangling.idx) + '], width_send_' + dangling.name+');\n')
               if(dangling.sc_type == 'ChainSrc' ):
                 header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(switch_in_' + targetPlatform  +'.ingressPorts['+str(dangling.idx) + ']);\n')
               if(dangling.sc_type == 'ChainSink' ):
@@ -269,7 +271,7 @@ class MultiFPGAConnect():
       print "Processing: " + self.platformData[platformName]['LOG']
       for line in logfile:
           if(re.match("Compilation message: .*: Dangling",line)):
-              match = re.search(r'.*Dangling (\w+) {(.*)} \[(\d+)\]:(\w+):(\w+):(\w+)', line)
+              match = re.search(r'.*Dangling (\w+) {(.*)} \[(\d+)\]:(\w+):(\w+):(\w+):(\d+)', line)
               if(match):
             #python groups begin at index 1  
                   print 'found connection: ' + line
@@ -284,14 +286,16 @@ class MultiFPGAConnect():
                                                                                 match.group(3),
                                                                                 match.group(4),
                                                                                 match.group(5),
-                                                                                match.group(6))]
+                                                                                match.group(6),
+                                                                                match.group(7))]
                   if(match.group(1) == "Chain"):
                     self.platformData[platformName]['DANGLING'] += [DanglingConnection("ChainSink", 
                                                                                 match.group(2),
                                                                                 match.group(3),
                                                                                 match.group(4),
                                                                                 match.group(5),
-                                                                                match.group(6))]
+                                                                                match.group(6),
+                                                                                match.group(7))]
 
               else:
                   print "Malformed connection message: " + line
