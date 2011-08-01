@@ -90,7 +90,8 @@ module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_
             Add#(n_DATA_EXTRA, SizeOf#(UMF_CHUNK), t_DATA_SZ));
 
   Empty m = ?;
-  if(valueof(t_NUM_CHUNKS) == 1) // don't instantiate a marshaller!
+       //messageM("Choosing packetizer numChunks: " + integerToString(valueof(t_NUM_CHUNKS))  + " width: "+ integerToString(valueof(bitwidth)) + " is less than " + integerToString(valueof(UMF_PACKET_HEADER_FILLER_BITS)));
+  if(valueof(bitwidth) <= valueof(SizeOf#(UMF_CHUNK))) // don't instantiate a marshaller!
     begin
       m <- mkPacketizeConnectionSendUnmarshalled(send,port,width);
     end
@@ -144,11 +145,14 @@ module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWI
 
    if(valueof(bitwidth) < valueof(UMF_PACKET_HEADER_FILLER_BITS))
      begin
+       //messageM("Choosing efficient small bit packetizer " + integerToString(valueof(bitwidth)) + " is less than " + integerToString(valueof(UMF_PACKET_HEADER_FILLER_BITS)));
+       
        rule sendReady(send.notFull());
          port.read_ready();
        endrule
-       rule continueRequest;
-         UMF_PACKET packet <- port.read();
+       rule continueRequest(send.notFull());
+         UMF_PACKET packet <- port.read(); 
+         //$display("Small guy gets %h", packet.UMF_PACKET_header.filler);
          send.send(unpack(zeroExtend(packet.UMF_PACKET_header.filler)));
        endrule
      end
@@ -185,7 +189,7 @@ module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EG
             Add#(n_CHUNK_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ));
 
   Empty m = ?;
-  if(valueof(t_NUM_CHUNKS) == 1) // don't instantiate a marshaller!
+  if(valueof(bitwidth) <= valueof(SizeOf#(UMF_CHUNK))) // don't instantiate a marshaller!
     begin
       m <- mkPacketizeConnectionReceiveUnmarshalled(recv,port, id, width);
     end
@@ -234,11 +238,12 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
             Bits#(t_DATA, t_DATA_SZ),
             Add#(n_CHUNK_EXTRA_SZ, SizeOf#(UMF_CHUNK), t_DATA_SZ),
             Add#(fill_EXTRA, UMF_PACKET_HEADER_FILLER_BITS, t_DATA_SZ));
- 
+
    // Is the bitwidth sufficient to fint into the header?
    if(valueof(bitwidth) < valueof(UMF_PACKET_HEADER_FILLER_BITS))
      begin
-       rule startRequest;
+       //messageM("Choosing efficient small bit packetizer " + integerToString(valueof(bitwidth)) + " is less than " + integerToString(valueof(UMF_PACKET_HEADER_FILLER_BITS))); 
+       rule startRequest(recv.notEmpty);
          recv.deq;
          UMF_PACKET header = tagged UMF_PACKET_header UMF_PACKET_HEADER
                             {
@@ -249,6 +254,8 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
                                 methodID : ?,
                                 numChunks: 0
                             };
+          //$display("Small guy sends %h", header.UMF_PACKET_header.filler);
+
           port.write(header);
         endrule
      end
