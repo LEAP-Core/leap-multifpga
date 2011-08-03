@@ -1,0 +1,12 @@
+%AWB_START
+
+%name ACP Dual FPGA Environment with SRAM
+%desc ACP Dual FPGA Environment
+%provides environment_description
+
+%attributes airblue
+
+%sources -t FPGAENV -v PUBLIC acp-dual-sram.env
+
+
+%AWB_END
