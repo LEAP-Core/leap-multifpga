@@ -158,3 +158,19 @@ Directory config/pm/hasim-alpha/multifpga
 
 
 Added multifpga models for rings.
+
+----------
+mcadler     Date: Thu Aug  4 17:42:27 EDT 2011  CSN: CSN-multifpga-44
+                  Thu Aug  4 21:42:27 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages
+ iface/                    Locally Removed            43 
+
+Directory modules/leap/build-support/build-pipelines/stages/iface
+ iface.awb                 Locally Removed            43 
+ README                    Locally Removed            43 
+ iface.py                  Locally Removed            43 
+
+Remove iface code from multifpga.  It had no changes for multiple FPGAs and
+was out of date.
