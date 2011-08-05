@@ -189,3 +189,6 @@ Packagehint=multifpga
 [Hybrid ACP Dual Compute Environment with SRAM Central Cache FPGA0 (Nallatech)]
 File=config/pm/hasim/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-sram-fpga0.apm
 Packagehint=leap-platforms-acp
+
+[Hybrid ACP Dual Compute Environment with SRAM Central Cache FPGA0 (Nallatech)/Params]
+COST_TABLE=2
