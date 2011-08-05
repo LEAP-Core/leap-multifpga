@@ -174,3 +174,13 @@ Directory modules/leap/build-support/build-pipelines/stages/iface
 
 Remove iface code from multifpga.  It had no changes for multiple FPGAs and
 was out of date.
+
+----------
+mcadler     Date: Fri Aug  5 16:16:50 EDT 2011  CSN: CSN-multifpga-45
+                  Fri Aug  5 20:16:50 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ multifpga_wrapper_gen.py  Locally Modified           44 
+
+Patches from main leap repository version.
