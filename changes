@@ -184,3 +184,14 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
  multifpga_wrapper_gen.py  Locally Modified           44 
 
 Patches from main leap repository version.
+
+----------
+kfleming    Date: Mon Aug 15 18:21:28 EDT 2011  CSN: CSN-multifpga-47
+                  Mon Aug 15 22:21:28 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/null_software
+ software_null.py          Locally Modified           46 
+
+
+need fix for syntax.h.
