@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_exe
+File=test_multifpga_loop
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -21,7 +21,7 @@ File=modules/leap/build-support/project/application-env/hybrid/soft-services/def
 Packagehint=leap
 
 [Default Software Connected Application/Requires]
-hardware_system=MultiFPGA Synthesis test module top
+hardware_system=MultiFPGA Loop Synthesis test module top
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=Default Software Connected Application
@@ -41,34 +41,6 @@ Packagehint=multifpga
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_log_generator=multiFPGA Log Generation
-
-[MultiFPGA Synthesis test module a]
-File=modules/multifpga/synthTest/test_a.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module top/Requires]
-test_c=MultiFPGA Synthesis test module c
-test_a=MultiFPGA Synthesis test module a
-test_b=MultiFPGA Synthesis test module b
-
-[MultiFPGA Synthesis test module a/Requires]
-test_d=MultiFPGA Synthesis test module d
-
-[MultiFPGA Synthesis test module b]
-File=modules/multifpga/synthTest/test_b.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module d]
-File=modules/multifpga/synthTest/test_d.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module c]
-File=modules/multifpga/synthTest/test_c.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module top]
-File=modules/multifpga/synthTest/top.awb
-Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
@@ -103,3 +75,19 @@ Packagehint=leap
 
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype
+
+[Configurable Crossing test module d]
+File=modules/multifpga/longChain/test_d.awb
+Packagehint=multifpga
+
+[Configurable Crossing test module c]
+File=modules/multifpga/longChain/test_c.awb
+Packagehint=multifpga
+
+[MultiFPGA Loop Synthesis test module top]
+File=modules/multifpga/longChain/top.awb
+Packagehint=multifpga
+
+[MultiFPGA Loop Synthesis test module top/Requires]
+test_c=Configurable Crossing test module c
+test_d=Configurable Crossing test module d

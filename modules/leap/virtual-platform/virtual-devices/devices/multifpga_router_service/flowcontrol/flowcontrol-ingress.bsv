@@ -31,19 +31,41 @@ import DReg::*;
 // me to inquire if there are any outstanding requests for them
 
 // request/response port interfaces
-interface SWITCH_INGRESS_PORT;
-    method ActionValue#(UMF_PACKET) read();
+interface SWITCH_INGRESS_PORT#(type umf_packet);
+    method ActionValue#(umf_packet) read();
     method Action read_ready();
 endinterface
 
-interface INGRESS_SWITCH#(numeric type n);
-    interface Vector#(n, SWITCH_INGRESS_PORT)  ingressPorts;
+interface INGRESS_SWITCH#(numeric type n, type umf_packet);
+    interface Vector#(n, SWITCH_INGRESS_PORT#(umf_packet))  ingressPorts;
 endinterface
 
-module mkIngressSwitch#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (INGRESS_SWITCH#(n))
-    provisos(Add#(serviceExcess, TLog#(n), SizeOf#(UMF_SERVICE_ID)),
-                  Add#(1, nExcess, n));
-  INGRESS_SWITCH#(n) m = ?;
+module mkIngressSwitch#(function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk)) read(), function Action write(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id_w, umf_service_id_w,
+                           umf_method_id_w,  umf_message_len_w,
+                           umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) data)) (INGRESS_SWITCH#(n, GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk)))
+    provisos(Add#(serviceExcess, TLog#(n), umf_service_id),
+                 Bits#(umf_chunk, TAdd#(filler_bits, TAdd#(umf_phy_pvt,
+                                  TAdd#(umf_channel_id, TAdd#(umf_service_id,
+                                                        TAdd#(umf_method_id,
+                                        umf_message_len)))))),
+                 Bits#(umf_chunk_w, TAdd#(filler_bits_w, TAdd#(umf_phy_pvt_w,
+                                    TAdd#(umf_channel_id_w, TAdd#(umf_service_id_w,
+                                                        TAdd#(umf_method_id_w,
+                                        umf_message_len_w)))))),
+                  Add#(chunk_extra, TAdd#(umf_service_id,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))), SizeOf#(umf_chunk_w)),
+                  Add#(1, nExcess, n)
+            );
+  INGRESS_SWITCH#(n,GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk)) m = ?;
   if(valueof(n) > 0)
     begin
       m <- mkFlowControlSwitchIngressNonZero(read,write);
@@ -54,8 +76,30 @@ endmodule
 
 // Here we are reading and sticking things into the BRAM buffer. 
 // We write back the credits periodically
-module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read(), function Action write(UMF_PACKET data)) (INGRESS_SWITCH#(n))
-    provisos(Add#(serviceExcess, TLog#(n), SizeOf#(UMF_SERVICE_ID)),
+module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk)) read(), function Action write(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id_w, umf_service_id_w,
+                           umf_method_id_w,  umf_message_len_w,
+                           umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) data)) (INGRESS_SWITCH#(n, GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk)))
+    provisos(
+             Bits#(umf_chunk, TAdd#(filler_bits, TAdd#(umf_phy_pvt,
+                                  TAdd#(umf_channel_id, TAdd#(umf_service_id,
+                                                        TAdd#(umf_method_id,
+                                        umf_message_len)))))),
+             
+             Bits#(umf_chunk_w, TAdd#(filler_bits_w, TAdd#(umf_phy_pvt_w,
+                                  TAdd#(umf_channel_id_w, TAdd#(umf_service_id_w,
+                                                        TAdd#(umf_method_id_w,
+                                        umf_message_len_w)))))),
+             Add#(chunk_extra, TAdd#(umf_service_id,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))), SizeOf#(umf_chunk_w)),
+
+
+             Add#(service_id_extra, TLog#(n), umf_service_id),
              Add#(1, nExcess, n));
 
     // ==============================================================
@@ -64,12 +108,18 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
 
     // We don't need to send tokens at first.  The other side assumes that we are empty.
     // However we do need to eat the free tokens so that the flow control will work right. 
-    VLevelFIFO#(n,`MULTIFPGA_FIFO_SIZES,UMF_PACKET) requestQueues <- mkBRAMVLevelFIFO(True); // This true causes the 
-    Vector#(n, SWITCH_INGRESS_PORT) ingress_ports = newVector();
+    VLevelFIFO#(n,`MULTIFPGA_FIFO_SIZES, GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk)) requestQueues <- mkBRAMVLevelFIFO(True); // This true causes the 
+    Vector#(n, SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk))) ingress_ports = newVector();
     Vector#(n, Wire#(Bool)) readReady <- replicateM(mkDWire(False));
     RWire#(Bit#(TLog#(n))) idxExamined <-mkRWire;
     Reg#(Bit#(TLog#(n))) idxRR <- mkReg(0);
-    FIFOF#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) sendSize <- mkSizedFIFOF(1);
+    FIFOF#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))) sendSize <- mkSizedFIFOF(1);
 
    Reg#(Bit#(10)) count <- mkReg(0);
 
@@ -111,12 +161,15 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
                $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
              end
 
-           UMF_PACKET newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
+           GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id_w, umf_service_id_w,
+                           umf_method_id_w,  umf_message_len_w,
+                           umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
                                        {
                                          filler: ?,
                                          phyChannelPvt: ?,
                                          channelID: 1,
-                                         serviceID: zeroExtend(use_idx),
+                                         serviceID: ?,
                                          methodID : ?,
                                          numChunks: 1
                                         };
@@ -125,7 +178,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
           requestQueues.decrFree(use_idx, requestQueues.free[use_idx]);
           // send the header packet to channelio
           write(newpacket);
-          sendSize.enq(zeroExtend(requestQueues.free[use_idx]));
+          sendSize.enq(tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx])));
          end 
     endrule
 
@@ -136,14 +189,14 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
         end
 
       sendSize.deq;
-      write(tagged UMF_PACKET_dataChunk (zeroExtend(sendSize.first)));
+      write(tagged UMF_PACKET_dataChunk unpack((zeroExtend(pack(sendSize.first)))));
     endrule
 
     // === arbiters ===
 
     // === other state ===
 
-    Reg#(UMF_MSG_LENGTH) requestChunksRemaining  <- mkReg(0);
+    Reg#(Bit#(umf_message_len)) requestChunksRemaining  <- mkReg(0);
 
     Reg#(Bit#(TLog#(n))) requestActiveQueue  <- mkReg(0);
 
@@ -155,7 +208,10 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     // the VLevelFIFO is a massive unguarded dance filled with potential miscalculation
     rule scan_requests (requestChunksRemaining == 0);
 
-        UMF_PACKET packet <- read();
+        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk) packet <- read();
         if(`SWITCH_DEBUG == 1)
           begin
             $display("ingress got a packet for service %d", packet.UMF_PACKET_header.serviceID);
@@ -175,7 +231,10 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     rule scan_params (requestChunksRemaining != 0);
 
         // grab a chunk from channelio and place it into the active request queue
-        UMF_PACKET packet <- read();
+        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk) packet <- read();
         requestQueues.enq(requestActiveQueue,packet);
         // one chunk processed
         requestChunksRemaining <= requestChunksRemaining - 1;
@@ -229,12 +288,22 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(UMF_PACKET) read
     for (Integer s = 0; s < fromInteger(valueof(n)); s = s + 1)
     begin
          // create a new request port and link it to the FIFO
-        ingress_ports[s] = interface SWITCH_INGRESS_PORT
+        ingress_ports[s] = interface SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk))
+
                            // We should probably latch the newMsgqIdx and check that we actually have data before dequeuing
-                           method ActionValue#(UMF_PACKET) read() if(reqIdx matches tagged Valid .idx &&&
+                           method ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk)) read() if(reqIdx matches tagged Valid .idx &&&
                                                                      fromInteger(s) == idx);
 
-                               UMF_PACKET val <- requestQueues.firstResp();
+                               GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk) val <- requestQueues.firstResp();
                                if(`SWITCH_DEBUG == 1)
                                  begin
                                    $display("%t read dequeue for %d: %h", $time, idx, val); 

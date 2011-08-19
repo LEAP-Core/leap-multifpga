@@ -195,3 +195,46 @@ Directory modules/leap/build-support/build-pipelines/stages/null_software
 
 
 need fix for syntax.h.
+
+----------
+kfleming    Date: Fri Aug 19 14:48:53 EDT 2011  CSN: CSN-multifpga-48
+                  Fri Aug 19 18:48:53 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_exe.apm    Locally Modified           47 
+ test_multifpga_loop.apm   Locally Added               0 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified           47 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified           47 
+ flowcontrol-ingress.bsv   Locally Modified           47 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service.bsv Locally Modified           47 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           47 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device-bdpi.c Locally Modified           47 
+ unix-communication-device-bdpi.h Locally Modified           47 
+ unix-communication-device.bsv Locally Modified           47 
+
+Directory modules/multifpga
+ longChain/                Locally Added               0 
+
+Directory modules/multifpga/longChain
+ test-b.bsv                Locally Added               0 
+ test-c.bsv                Locally Added               0 
+ test_b.awb                Locally Added               0 
+ test_c.awb                Locally Added               0 
+ test-d.bsv                Locally Added               0 
+ top.awb                   Locally Added               0 
+ test_top.bsv              Locally Added               0 
+ test_d.awb                Locally Added               0 
+
+
+Buckets of code to support multifpga compilation.  

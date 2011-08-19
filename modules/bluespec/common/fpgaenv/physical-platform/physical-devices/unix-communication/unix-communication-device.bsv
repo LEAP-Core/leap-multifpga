@@ -48,8 +48,8 @@ STATE
 
 interface UNIX_COMM_DRIVER;
 
-    method ActionValue#(UMF_CHUNK) read();
-    method Action                  write(UMF_CHUNK chunk);
+    method ActionValue#(Bit#(64)) read();
+    method Action                  write(Bit#(64) chunk);
         
 endinterface
 
@@ -78,8 +78,8 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
     Reg#(STATE)    state       <- mkReg(STATE_init0);
     
     // buffers
-    FIFOF#(UMF_CHUNK) readBuffer  <- mkFIFOF();
-    FIFOF#(UMF_CHUNK) writeBuffer <- mkFIFOF();
+    FIFOF#(Bit#(64)) readBuffer  <- mkFIFOF();
+    FIFOF#(Bit#(64)) writeBuffer <- mkFIFOF();
 
     // ==============================================================
     //                            Rules
@@ -109,8 +109,9 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
         let guard <- comm_can_read(handle);
         if(unpack(guard))
           begin 
-            Bit#(64) data <- comm_read(handle);
-            UMF_CHUNK chunk = truncate(data);
+            Bit#(64) chunk <- comm_read(handle);
+            
+            //$display("UNIX Comm RX %h", chunk);
             readBuffer.enq(chunk);
             pollCounter <= `POLL_INTERVAL;
          end
@@ -121,9 +122,10 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
         let guard <- comm_can_write(handle);
         if(unpack(guard))
           begin 
-            UMF_CHUNK chunk = writeBuffer.first();
+            Bit#(64) chunk = writeBuffer.first();
             writeBuffer.deq();
-            comm_write(handle, zeroExtend(chunk));
+            //$display("UNIX Comm TX %h", chunk);
+            comm_write(handle, chunk);
           end
     endrule
 
@@ -136,14 +138,14 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
     interface UNIX_COMM_DRIVER driver;
         
         // read
-        method ActionValue#(UMF_CHUNK) read();
-            UMF_CHUNK chunk = readBuffer.first();
+        method ActionValue#(Bit#(64)) read();
+            Bit#(64) chunk = readBuffer.first();
             readBuffer.deq();
             return chunk;
         endmethod
 
         // write
-        method Action write(UMF_CHUNK chunk);
+        method Action write(Bit#(64) chunk);
             writeBuffer.enq(chunk);
         endmethod
         

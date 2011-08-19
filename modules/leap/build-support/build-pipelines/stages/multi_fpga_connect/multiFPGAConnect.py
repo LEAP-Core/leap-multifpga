@@ -45,7 +45,7 @@ class MultiFPGAConnect():
 
           wrapperLog =  platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
           parameterFile =  platformBitfileBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
-          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}}
+          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}}
 
 
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
@@ -188,6 +188,7 @@ class MultiFPGAConnect():
      
           # toss out the mapping functions first
           header.write('module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);\n')
+
           header.write('String platformName <- getSynthesisBoundaryPlatform();\n')
           header.write('messageM("Instantiating Custom Router on " + platformName); \n')
 
@@ -224,27 +225,44 @@ class MultiFPGAConnect():
 
 
 
-            # instantiate multiplexors - we need one per link 
-            # chains must necessarily have two links, one in and one out. 
-            # We now have two virtual channels for flow control purposes
+            # instantiate multiplexors - we need one per link chains
+            # must necessarily have two links, one in and one out.  We
+            # now have two virtual channels for flow control purposes
+            # the following code is fairly wrong.  We need to
+            # aggregate all virtual channels across a link.  If we
+            # don't have a strongly connected FPGA graph, this code
+            # will fail miserably XXX
+            egressType = ""
+            ingressType = ""
             if(recvs + chains > 0):
               print "Querying " + platform + ' <- ' + targetPlatform
               hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-              header.write('CHANNEL_VIRTUALIZER#(0,2) virtual_out_' + targetPlatform  + '<- mkChannelVirtualizer(?,' + hopFromTarget + '.write);\n')
-
+              # dump out the packet type for this link...
+              via = hopFromTarget.replace(".","_") + '_write'
+              egressType = "GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(\n" + \
+                           "             1, TLog#(TAdd#(1," + str(recvs+chains) + ")) ,\n" + \
+                           "             0,  TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(self.platformData[platform]['WIDTHS'][via]) + ")))),\n" + \
+                           "             `UMF_PHY_CHANNEL_RESERVED_BITS, TSub#(" + str(self.platformData[platform]['WIDTHS'][via])  + ", TAdd#(TAdd#(1,TLog#(TAdd#(1," + str(recvs+chains) + "))),TAdd#(`UMF_PHY_CHANNEL_RESERVED_BITS, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," +  str(self.platformData[platform]['WIDTHS'][via]) + ")))))))), Bit#(" +  str(self.platformData[platform]['WIDTHS'][via]) + "))"
+              header.write('CHANNEL_VIRTUALIZER#(0,2,' + egressType +') virtual_out_' + targetPlatform  + '<- mkChannelVirtualizer(?,' + hopFromTarget + '.write);\n')
 
             if(sends + chains > 0):
               print "Querying " + platform + ' -> ' + targetPlatform
               hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
-              header.write('CHANNEL_VIRTUALIZER#(2,0) virtual_in_' + targetPlatform  + '<- mkChannelVirtualizer(' + hopFromTarget + '.read,?);\n')
+              via = hopToTarget.replace(".","_") + '_write'
+              ingressType = "GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(\n" + \
+                           "             1, TLog#(TAdd#(1," + str(sends+chains) + ")) ,\n" + \
+                           "             0,  TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(self.platformData[platform]['WIDTHS'][via])  + ")))),\n" + \
+                           "             `UMF_PHY_CHANNEL_RESERVED_BITS, TSub#(" + str(self.platformData[platform]['WIDTHS'][via]) + ", TAdd#(TAdd#(1,TLog#(TAdd#(1," + str(sends+chains) + "))),TAdd#(`UMF_PHY_CHANNEL_RESERVED_BITS, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(self.platformData[platform]['WIDTHS'][via])  + ")))))))), Bit#(" + str(self.platformData[platform]['WIDTHS'][via])  + "))"
+
+              header.write('CHANNEL_VIRTUALIZER#(2,0,' + ingressType + ') virtual_in_' + targetPlatform  + '<- mkChannelVirtualizer(' + hopFromTarget + '.read,?);\n')
 
             if(recvs + chains > 0):
               hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-              header.write('EGRESS_SWITCH#(' + str(recvs + chains) + ') switch_out_' + targetPlatform  + '<- mkEgressSwitch(virtual_in_' + targetPlatform + '.readPorts[1].read, virtual_out_' + targetPlatform + '.writePorts[0].write);\n')
+              header.write('EGRESS_SWITCH#(' + str(recvs + chains) + ',' + egressType + ') switch_out_' + targetPlatform  + '<- mkEgressSwitch(virtual_in_' + targetPlatform + '.readPorts[1].read, virtual_out_' + targetPlatform + '.writePorts[0].write);\n')
 
             if(sends + chains > 0):
               hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
-              header.write('INGRESS_SWITCH#(' + str(sends + chains) + ') switch_in_' + targetPlatform  + '<- mkIngressSwitch(virtual_in_' + targetPlatform + '.readPorts[0].read, virtual_out_' + targetPlatform + '.writePorts[1].write);\n')
+              header.write('INGRESS_SWITCH#(' + str(sends + chains) + ',' + ingressType + ') switch_in_' + targetPlatform  + '<- mkIngressSwitch(virtual_in_' + targetPlatform + '.readPorts[0].read, virtual_out_' + targetPlatform + '.writePorts[1].write);\n')
 
             # hook 'em up
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
@@ -253,7 +271,7 @@ class MultiFPGAConnect():
                 header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',switch_out_' + targetPlatform  + '.egressPorts[' + str(dangling.idx) + '],' + str(dangling.idx) + ', width_recv_' + dangling.name + ');\n')
               if(dangling.sc_type == 'Send'):
 	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.name +' = ?\n;')
-                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.ingressPorts['+str(dangling.idx) + '], width_send_' + dangling.name+');\n')
+                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',switch_in_' + targetPlatform  +'.ingressPorts['+str(dangling.idx) + '], ' + str(dangling.idx) + ', width_send_' + dangling.name+');\n')
               if(dangling.sc_type == 'ChainSrc' ):
                 header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(switch_in_' + targetPlatform  +'.ingressPorts['+str(dangling.idx) + ']);\n')
               if(dangling.sc_type == 'ChainSink' ):
@@ -270,6 +288,11 @@ class MultiFPGAConnect():
       logfile = open(self.platformData[platformName]['LOG'],'r')
       print "Processing: " + self.platformData[platformName]['LOG']
       for line in logfile:
+          # also pull out link widths
+          if(re.match('.*SizeOfVia:.*',line)):
+            match = re.search(r'.*SizeOfVia:(\w+):(\d+)',line)
+            if(match):
+              self.platformData[platformName]['WIDTHS'][match.group(1)] = int(match.group(2))
           if(re.match("Compilation message: .*: Dangling",line)):
               match = re.search(r'.*Dangling (\w+) {(.*)} \[(\d+)\]:(\w+):(\w+):(\w+):(\d+)', line)
               if(match):

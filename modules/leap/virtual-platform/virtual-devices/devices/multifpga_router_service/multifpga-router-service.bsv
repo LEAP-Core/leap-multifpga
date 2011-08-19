@@ -10,15 +10,8 @@
 
 `include "asim/provides/multifpga_router_service.bsh"
 
-`ifdef ROUTING_KNOWN
-    `include "multifpga_routing.bsh"
-`else
-    // define a null routing module
-     module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);
-         // Intentionally empty
-     endmodule
-`endif
- 
+`include "multifpga_routing.bsh"
+
 
 module [CONNECTED_MODULE] mkMultifpgaRouterServices#(VIRTUAL_PLATFORM vplat) (Empty);
   let m <- mkCommunicationModule(vplat);

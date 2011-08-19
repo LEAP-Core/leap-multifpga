@@ -321,7 +321,7 @@ unsigned long long comm_read(unsigned char handle)
     channel = validate_handle(handle);
 
     block = g_async_queue_pop(channel->incomingQ); 
-    for (i = 0; i < UMF_CHUNK_BYTES; i++)
+    for (i = 0; i < BDPI_CHUNK_BYTES; i++)
     {
     	unsigned long long byte = block->chunk[i];
 	if(DEBUG_COMM) {
@@ -394,7 +394,7 @@ void comm_write(unsigned char handle, unsigned long long data)
     buffer->sync = 0;
     /* unpack UINT32 into byte sequence */
     mask = 0xFF;
-    for (i = 0; i < UMF_CHUNK_BYTES; i++)
+    for (i = 0; i < BDPI_CHUNK_BYTES; i++)
     {
         unsigned char byte = (mask & data) >> (i * 8);
         buffer->chunk[i] = (unsigned char)byte;

@@ -31,7 +31,7 @@
 /* pipe I/O happens at the granularity of "chunks",
  * but to reduce overheads we physically do selects, reads
  * and writes at the granularity of "blocks" */
-#define BDPI_CHUNK_BYTES    UMF_CHUNK_BYTES
+#define BDPI_CHUNK_BYTES    8
 
 #define PIPE_NULL           1
 
@@ -39,12 +39,12 @@
 
 #define STDIN             0
 #define STDOUT            1
-#define BLOCK_SIZE        UMF_CHUNK_BYTES
+#define BLOCK_SIZE        BDPI_CHUNK_BYTES
 #define SELECT_TIMEOUT    0
 
 typedef struct _CommBlock {
   char sync;
-  unsigned char chunk[UMF_CHUNK_BYTES];
+  unsigned char chunk[BDPI_CHUNK_BYTES];
 } CommBlock;
 
 typedef struct _Channel
