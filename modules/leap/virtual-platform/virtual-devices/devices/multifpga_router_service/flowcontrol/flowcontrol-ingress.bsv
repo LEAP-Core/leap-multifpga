@@ -136,32 +136,82 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
        end
    endrule
  
-
-    rule startSendEmpty(!sendSize.notEmpty);
-       if(idxRR == fromInteger(valueof(n)-1)) 
-         begin
-           idxRR <= 0;
-         end 
-       else
-         begin
-           idxRR <= idxRR + 1;
-         end
-       let use_idx = idxRR;
+     
+   if(valueof(filler_bits) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))))))
+     begin
+       rule startSendEmpty;
+         if(idxRR == fromInteger(valueof(n)-1)) 
+           begin
+             idxRR <= 0;
+           end 
+         else
+           begin
+             idxRR <= idxRR + 1;
+           end
+         let use_idx = idxRR;
        
-       if(idxExamined.wget() matches tagged Valid .enqIdx)
-         begin
-           use_idx = enqIdx;
-         end
+         if(idxExamined.wget() matches tagged Valid .enqIdx)
+           begin
+             use_idx = enqIdx;
+           end
 
-       // If we get too free, we need to send come cedits down the pipe.
-       if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES - `MAX_TRANSACTION_SIZE)
-         begin 
-           if(`SWITCH_DEBUG == 1)
-             begin
-               $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
-             end
+         // If we get too free, we need to send come cedits down the pipe.
+         if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES - `MAX_TRANSACTION_SIZE)
+           begin 
+             if(`SWITCH_DEBUG == 1)
+               begin
+                 $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
+               end
+             Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) control_packet = tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx]));
 
-           GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+             GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id_w, umf_service_id_w,
+                           umf_method_id_w,  umf_message_len_w,
+                           umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
+                                       {
+                                         filler: zeroExtendNP(pack(control_packet)),
+                                         phyChannelPvt: ?,
+                                         channelID: 1,
+                                         serviceID: ?,
+                                         methodID : ?,
+                                         numChunks: 0
+                                        };
+
+           // hand out the whole pack of tokens  
+           requestQueues.decrFree(use_idx, requestQueues.free[use_idx]);
+           // send the header packet to channelio
+           write(newpacket);
+         end 
+       endrule
+     end
+   else
+     begin
+       rule startSendEmpty(!sendSize.notEmpty);
+         if(idxRR == fromInteger(valueof(n)-1)) 
+           begin
+             idxRR <= 0;
+           end 
+         else
+           begin
+             idxRR <= idxRR + 1;
+           end
+         let use_idx = idxRR;
+       
+         if(idxExamined.wget() matches tagged Valid .enqIdx)
+           begin
+             use_idx = enqIdx;
+           end
+
+         // If we get too free, we need to send come cedits down the pipe.
+         if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES - `MAX_TRANSACTION_SIZE)
+           begin 
+             if(`SWITCH_DEBUG == 1)
+               begin
+                 $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
+               end
+
+
+             GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id_w, umf_service_id_w,
                            umf_method_id_w,  umf_message_len_w,
                            umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
@@ -179,18 +229,19 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
           // send the header packet to channelio
           write(newpacket);
           sendSize.enq(tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx])));
-         end 
-    endrule
+        end 
+      endrule
 
-    rule finishSendEmpty;
-      if(`SWITCH_DEBUG == 1)
-        begin
-          $display("Finished sending tokens");
-        end
+      rule finishSendEmpty;
+        if(`SWITCH_DEBUG == 1)
+          begin
+            $display("Finished sending tokens");
+          end
 
-      sendSize.deq;
-      write(tagged UMF_PACKET_dataChunk unpack((zeroExtend(pack(sendSize.first)))));
-    endrule
+        sendSize.deq;
+        write(tagged UMF_PACKET_dataChunk unpack((zeroExtend(pack(sendSize.first)))));
+      endrule
+    end
 
     // === arbiters ===
 

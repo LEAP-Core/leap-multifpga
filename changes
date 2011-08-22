@@ -238,3 +238,18 @@ Directory modules/multifpga/longChain
 
 
 Buckets of code to support multifpga compilation.  
+
+----------
+kfleming    Date: Mon Aug 22 14:41:04 EDT 2011  CSN: CSN-multifpga-49
+                  Mon Aug 22 18:41:04 UTC 2011
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_time_func_16_acp_sram.apm Locally Added               0 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified           48 
+ flowcontrol-ingress.bsv   Locally Modified           48 
+
+
+Reduced 2-cycle behavior of flow control updates.  This nets about 5% performance in HAsim.  

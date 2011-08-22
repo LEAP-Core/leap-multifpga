@@ -157,28 +157,64 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
     Reg#(Bit#(TAdd#(1,umf_message_len))) requestChunks <- mkReg(0);
 
     Reg#(Bit#(n_FIFOS_SAFE_SZ)) requestActiveQueue  <- mkReg(0);
-    Reg#(Bool) countersAdjusted <- mkReg(True); // helps us manage coherence in flow control
+
+    Reg#(Bool) deqHeader <- mkReg(True);
+
+
 
     // ==============================================================
     //                          Response Rules
     // ==============================================================
 
     // scan channel for incoming flowcontrol headers
-    rule scan_responses (countersAdjusted);
-        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id_r, umf_service_id_r,
-                           umf_method_id_r,  umf_message_len_r,
-                           umf_phy_pvt_r,    filler_bits_r), umf_chunk_r) packet <- read();
-        // enqueue header in service's queue
-        // set up remaining chunks
-        case (packet) matches
-          tagged UMF_PACKET_header .header: 
-            begin
-              // nothing to do here...
-            end
-          tagged UMF_PACKET_dataChunk .chunk:
-            begin
-              Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) payload =  unpack(truncate(pack(chunk))); 
+    // in some cases we can fit the flow control bits in the header
+    if(valueof(filler_bits_r) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))
+)))      begin
+       rule adjustCredits;
+         GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                             umf_channel_id_r, umf_service_id_r,
+                             umf_method_id_r,  umf_message_len_r,
+                             umf_phy_pvt_r,    filler_bits_r), umf_chunk_r) packet <- read();
+         // enqueue header in service's queue
+         // set up remaining chunks
+         Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) payload = unpack(truncateNP(packet.UMF_PACKET_header.filler)); 
+         let responseActiveQueue  = tpl_1(payload);
+         let currentCredits = portCredits.sub(truncate(responseActiveQueue));
+         let creditsNext = tpl_2(payload) + currentCredits;
+
+         bufferAvailable[responseActiveQueue] <= creditsNext >= `MAX_TRANSACTION_SIZE; // This should always be true...
+         portCredits.upd(truncate(responseActiveQueue), creditsNext);
+      
+         if(`SWITCH_DEBUG == 1)
+           begin
+             $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, payload, currentCredits, creditsNext);
+           end
+
+         if(creditsNext < `MAX_TRANSACTION_SIZE)
+           begin
+             $display("Setting credits to zero... this is a bug");
+             $finish;
+           end      
+        endrule
+      end
+    else 
+      begin
+
+        rule dropHeader (deqHeader);
+          let packet <- read();
+          deqHeader <= !deqHeader;
+        endrule
+   
+ 
+       rule scan_responses (!deqHeader);
+         deqHeader <= !deqHeader;
+         GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                             umf_channel_id_r, umf_service_id_r,
+                             umf_method_id_r,  umf_message_len_r,
+                             umf_phy_pvt_r,    filler_bits_r), umf_chunk_r) packet <- read();
+         // enqueue header in service's queue
+         // set up remaining chunks
+          Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) payload =  unpack(truncate(pack(packet.UMF_PACKET_dataChunk))); 
               let responseActiveQueue  = tpl_1(payload);
               let currentCredits = portCredits.sub(truncate(responseActiveQueue));
               let creditsNext = tpl_2(payload) + currentCredits;
@@ -187,19 +223,16 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
               portCredits.upd(truncate(responseActiveQueue), creditsNext);
               if(`SWITCH_DEBUG == 1)
                 begin
-                  $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, chunk, currentCredits, creditsNext);
+                  $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, payload, currentCredits, creditsNext);
                 end
 
               if(creditsNext < `MAX_TRANSACTION_SIZE)
               begin
                 $display("Setting credits to zero... this is a bug");
                 $finish;
-              end 
-
-            end
-        endcase
-    endrule
-
+              end      
+       endrule
+     end
     // ==============================================================
     //                          Request Rules
     // ==============================================================
@@ -219,7 +252,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
     // First half -- pick an incoming requestQueue
     // we could make this 
     //
-    rule write_request_newmsg1 (requestChunksRemaining == 0 && countersAdjusted);
+    rule write_request_newmsg1 (requestChunksRemaining == 0);
 
         // arbitrate
         Bit#(n_FIFOS_SAFE) request = '0;
@@ -276,26 +309,19 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
 
             // setup remaining chunks
             requestChunksRemaining <= newpacket.UMF_PACKET_header.numChunks;
-            requestChunks <= zeroExtend(newpacket.UMF_PACKET_header.numChunks) + 1; // also sending header
+            Bit#(TAdd#(1,umf_message_len)) requestChunks = zeroExtend(newpacket.UMF_PACKET_header.numChunks) + 1; // also sending header
             requestActiveQueue <= fromInteger(s);
-            countersAdjusted <= False; // Should this be a single cycle?
+           
+            Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  portCredits.sub(fromInteger(s)) - resize(requestChunks);
+            portCredits.upd(fromInteger(s),newCount);
+            bufferAvailable[fromInteger(s)] <= newCount >= `MAX_TRANSACTION_SIZE;
+            if(`SWITCH_DEBUG == 1)
+              begin
+                $display("Setting portCredits for %d to %d", s, newCount);
+              end
         endrule
 
     end
-
-    // This happens post-arbitration, but before another arbitration can happen
-    // It allows us to be using the channel while updating counters and possibly receiving credit 
-    // messages 
-    rule adjustCounters(!countersAdjusted);
-      countersAdjusted <= True;
-      Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  portCredits.sub(requestActiveQueue) - resize(requestChunks);
-      portCredits.upd(requestActiveQueue,newCount);
-      bufferAvailable[requestActiveQueue] <= newCount >= `MAX_TRANSACTION_SIZE;
-      if(`SWITCH_DEBUG == 1)
-        begin
-          $display("Setting portCredits for %d to %d", requestActiveQueue, newCount);
-        end
-    endrule
 
     // continue writing message
     rule write_request_continue (requestChunksRemaining != 0);
