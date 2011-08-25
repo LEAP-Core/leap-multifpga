@@ -17,7 +17,7 @@ DefaultAttributes=hybrid project
 model=MultiFPGA Platform
 
 [Soft Services Hybrid Application Environment]
-File=modules/leap/build-support/project/application-env/hybrid/soft-services/application-env-hybrid-soft-service.awb
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
 Packagehint=leap
 
 [Soft Services Hybrid Application Environment/Requires]
@@ -26,7 +26,7 @@ soft_services=Soft Services
 connected_application=Null Connected Application
 
 [Default Hybrid Project Common Utilities]
-File=config/pm/hasim/submodels/common/project-common-default.apm
+File=config/pm/leap/submodels/common/project-common-default.apm
 Packagehint=leap
 
 [Null Connected Application]
@@ -34,7 +34,7 @@ File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
 Packagehint=leap-platforms
 
 [Hybrid ACP Dual Compute Environment  FPGA1 (Nallatech)]
-File=config/pm/hasim/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-no-cache-fpga1.apm
+File=config/pm/leap/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-no-cache-fpga1.apm
 Packagehint=leap-platforms-acp
 
 [Shared Tree Physical Interconnect]

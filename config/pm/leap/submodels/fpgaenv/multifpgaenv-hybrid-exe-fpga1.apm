@@ -83,7 +83,7 @@ Packagehint=leap
 rrr_common=RRR Common Module
 
 [RL Bluespec Library Submodel]
-File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
 [UNIX Communication Physical Device]
@@ -109,7 +109,7 @@ Packagehint=leap
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
-Packagehint=multifpga
+Packagehint=leap
 
 [BSV Build Tool MultiFPGA]
 File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv-multi.awb

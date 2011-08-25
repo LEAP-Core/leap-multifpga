@@ -17,7 +17,7 @@ DefaultAttributes=
 model=MultiFPGA Platform
 
 [Soft Services Hybrid Application Environment]
-File=modules/leap/build-support/project/application-env/hybrid/soft-services/application-env-hybrid-soft-service.awb
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
 Packagehint=leap
 
 [Soft Services Hybrid Application Environment/Requires]
@@ -26,7 +26,7 @@ soft_services=Soft Services
 connected_application=Null Connected Application
 
 [Default Hybrid Project Common Utilities]
-File=config/pm/hasim/submodels/common/project-common-default.apm
+File=config/pm/leap/submodels/common/project-common-default.apm
 Packagehint=leap
 
 [Null Connected Application]
@@ -109,7 +109,7 @@ File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-ser
 Packagehint=leap
 
 [Hybrid ACP Dual Compute Environment  FPGA0 (Nallatech)]
-File=config/pm/hasim/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-no-cache-fpga0.apm
+File=config/pm/leap/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-no-cache-fpga0.apm
 Packagehint=leap-platforms-acp
 
 [Common Services/Requires]

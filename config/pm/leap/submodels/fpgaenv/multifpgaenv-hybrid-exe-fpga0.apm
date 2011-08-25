@@ -107,11 +107,11 @@ Packagehint=leap
 rrr_common=RRR Common Module
 
 [Standard Virtual Devices Submodel]
-File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
+File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
 
 [RL Bluespec Library Submodel]
-File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
 [UNIX Communication Physical Device]
@@ -134,7 +134,7 @@ Packagehint=leap
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
-Packagehint=multifpga
+Packagehint=leap
 
 [Software build tool]
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb

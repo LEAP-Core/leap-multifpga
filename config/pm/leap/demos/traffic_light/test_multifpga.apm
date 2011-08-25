@@ -17,7 +17,7 @@ DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid
 model=HW/SW Hybrid Multifpga Project Foundation
 
 [Default Software Connected Application]
-File=modules/leap/build-support/project/application-env/hybrid/soft-connections/default-sw/connected-application-default-sw.awb
+File=modules/leap/build-support/project/application-env/soft-services/default-sw/connected-application-default-sw.awb
 Packagehint=leap
 
 [Default Software Connected Application/Requires]
@@ -90,16 +90,16 @@ Packagehint=leap
 fpga_environment_parser=FPGA Environment Datatype
 
 [MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/stages/multi_fpga_connect/multi-fpga-connect.awb
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap/build-support/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 
 [multiFPGA Generate bitfle]
-File=modules/leap/build-support/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga

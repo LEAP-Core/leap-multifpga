@@ -253,3 +253,33 @@ Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router
 
 
 Reduced 2-cycle behavior of flow control updates.  This nets about 5% performance in HAsim.  
+
+----------
+mpellaue    Date: Thu Aug 25 18:16:02 EDT 2011  CSN: CSN-multifpga-50
+                  Thu Aug 25 22:16:02 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ traffic_light_acp_synth_multifpga.apm Locally Modified           49 
+ test_multifpga.apm        Locally Modified           49 
+ test_multifpga_exe.apm    Locally Modified           49 
+ test_multifpga_rrr_exe.apm Locally Modified           49 
+ test_multifpga_loop.apm   Locally Modified           49 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga0.apm Locally Modified           49 
+ multifpgaenv-hybrid-exe-fpga1.apm Locally Modified           49 
+
+Directory config/pm/leap/submodels/pipelines
+ build-pipeline-xilinx-multifpga.apm Locally Modified           49 
+
+Directory config/pm/multifpga/fpga_submodels
+ acp0-sram.apm             Locally Modified           49 
+ acp0.apm                  Locally Modified           49 
+ acp1.apm                  Locally Modified           49 
+ fpga0.apm                 Locally Modified           49 
+ fpga1.apm                 Locally Modified           49 
+
+
+* Updated stale .apm files.
+* Removed reference to no-longer existing xst-nobasicio stage.
