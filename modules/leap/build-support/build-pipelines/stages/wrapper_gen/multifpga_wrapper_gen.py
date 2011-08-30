@@ -3,8 +3,10 @@ import sys
 import re
 import SCons.Script
 from model import  *
-from config import *
+from fpga_environment_parser import *
 from fpgamap_parser import *
+from config import *
+
 
 
 #this might be better implemented as a 'Node' in scons, but 
@@ -19,6 +21,12 @@ class WrapperGen():
       print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
     self.mapping = parseFPGAMap(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
     print "mapping keys: " + str(self.mapping.getPlatformNames)
+
+    envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENVS')
+    if(len(envFile) != 1):
+      print "Found more than one environment file: " + str(envFile) + ", exiting\n"
+    self.environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
+    print "environment keys: " + str(self.environment.getPlatformNames)
 
     topo = moduleList.topologicalOrderSynth()
     # we probably want reverse topological ordering... ???? Really?
@@ -106,8 +114,9 @@ class WrapperGen():
 
           wrapper.write('    // instantiate own module\n')
           wrapper.write('    let ctx <- initializeServiceContext();\n')
-          wrapper.write('    match {.intermediate_ctx, .m_name} <- runWithContext(ctx,putSynthesisBoundaryPlatform("' + self.mapping.getSynthesisBoundaryPlatform(module.name) + '"));\n');          
-          wrapper.write('    match {.final_ctx, .m_final} <- runWithContext(intermediate_ctx, ' + module.synthBoundaryModule + ');\n')
+          wrapper.write('    match {.intermediate_ctx, .m_name} <- runWithContext(ctx,putSynthesisBoundaryPlatform("' + self.mapping.getSynthesisBoundaryPlatform(module.name) + '"));\n')          
+          wrapper.write('    match {.intermediate_ctx2, .m_name2} <- runWithContext(intermediate_ctx,putSynthesisBoundaryPlatformID(' + str(self.environment.getSynthesisBoundaryPlatformID(self.mapping.getSynthesisBoundaryPlatform(module.name))) + '));\n')          
+          wrapper.write('    match {.final_ctx, .m_final} <- runWithContext(intermediate_ctx2, ' + module.synthBoundaryModule + ');\n')
           wrapper.write('    let service_ifc <- exposeServiceContext(final_ctx);\n')
           wrapper.write('    interface services = service_ifc;\n')
           wrapper.write('    interface device = m_final;\n')

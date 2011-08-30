@@ -1,0 +1,8 @@
+%name Null FPGA Environment
+%desc This file is a null environment
+
+%attributes tool
+
+%provides environment_description
+
+%sources -t FPGAENV_MAPPING -v PUBLIC null-description.env

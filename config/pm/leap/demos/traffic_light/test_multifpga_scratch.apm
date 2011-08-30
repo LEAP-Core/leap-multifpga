@@ -1,0 +1,93 @@
+
+[Global]
+SaveParameters=0
+Description=has strange module alingments
+File=test_multifpga_scratch
+Version=2.2
+Name=Multifpga synthesis test 
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[Default Software Connected Application]
+File=modules/leap/build-support/project/application-env/hybrid/soft-services/default-sw/connected-application-default-sw.awb
+Packagehint=leap
+
+[Default Software Connected Application/Requires]
+hardware_system=MultiFPGA Loop Synthesis test module top
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=Default Software Connected Application
+environment_description=Simulation Dual FPGA Environment with Dual Cache
+build_pipeline=multiFPGA Build Pipeline
+fpga_mapping=Test Sim Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline]
+File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline/Requires]
+multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_generate_bitfile=multiFPGA Generate bitfle
+multi_fpga_log_generator=multiFPGA Log Generation
+
+[MultiFPGA Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Requires]
+fpgamap_parser=FPGAMap
+
+[multiFPGA Generate bitfle]
+File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+Packagehint=multifpga
+
+[Test Sim Mapping]
+File=modules/multifpga/synthTest/sim_mapping.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
+Packagehint=leap
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
+Packagehint=leap
+
+[multiFPGA Log Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+
+[MultiFPGA Loop Synthesis test module top]
+File=modules/multifpga/longChain/top.awb
+Packagehint=multifpga
+
+[MultiFPGA Loop Synthesis test module top/Requires]
+test_c=Scratchpad Crossing test module c
+test_d=Scratchpad Crossing test module d
+
+[Scratchpad Crossing test module d]
+File=modules/multifpga/scratchdual/test_d.awb
+Packagehint=multifpga
+
+[Simulation Dual FPGA Environment with Dual Cache]
+File=modules/leap-platforms/fpga-environments/sim/sim_fpga_cache_env.awb
+Packagehint=multifpga
+
+[Scratchpad Crossing test module c]
+File=modules/multifpga/scratchdual/test_c.awb
+Packagehint=multifpga

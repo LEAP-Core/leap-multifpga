@@ -1,0 +1,14 @@
+%AWB_START
+
+%name Scratchpad Crossing test module c
+%desc Scratchpad Crossing test module c
+
+%provides test_c
+
+%public test-c.bsv
+%public test-c.dic
+
+%param SYNTH_BOUNDARY mkC "name of synthesis boundary"
+%param NUM_CONNS 16 "Number of loopbacks"
+
+%AWB_END

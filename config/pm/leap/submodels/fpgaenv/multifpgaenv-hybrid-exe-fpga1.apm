@@ -214,3 +214,8 @@ Packagehint=multifpga
 
 [MultiFPGA Synthesis Boundary Wrapper generation tool/Requires]
 fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
+Packagehint=leap

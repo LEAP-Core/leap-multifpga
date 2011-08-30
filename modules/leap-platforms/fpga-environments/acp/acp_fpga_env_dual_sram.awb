@@ -1,0 +1,10 @@
+
+%name ACP Dual FPGA Env with Dual SRAM
+%desc ACP Dual FPGA Env with Dual SRAM
+%provides environment_description
+
+%attributes airblue
+
+%sources -t FPGAENV -v PUBLIC acp-dual-sram-dual.env
+
+

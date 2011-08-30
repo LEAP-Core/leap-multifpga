@@ -1,0 +1,13 @@
+%AWB_START
+
+%name Scratchpad Crossing test module d
+%desc Scratchpad Crossing test module d
+
+%provides test_d
+
+%public test-d.bsv
+%public test-d.dic
+
+%param SYNTH_BOUNDARY mkD "name of synthesis boundary"
+
+%AWB_END

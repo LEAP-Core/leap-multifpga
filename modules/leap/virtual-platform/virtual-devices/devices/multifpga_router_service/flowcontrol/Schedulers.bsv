@@ -64,8 +64,8 @@ import BRAMVLevelFIFO::*;
 import EHRReg::*;
 import VLevelFIFO::*;
 
-`define SortDebug0 True
-`define SortDebug1 True
+`define SortDebug0 False
+`define SortDebug1 False
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // interfaces definitions

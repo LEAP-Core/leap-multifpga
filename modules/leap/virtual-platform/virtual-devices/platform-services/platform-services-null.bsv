@@ -23,6 +23,7 @@ import Vector::*;
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/soft_connections.bsh"
 `include "asim/provides/multifpga_router_service.bsh"
+`include "asim/provides/mem_services.bsh"
 
 //
 // mkPlatformInterface: Wrap the LLPI and virtual devices in soft connections.
@@ -34,6 +35,6 @@ module [CONNECTED_MODULE] mkPlatformServices#(VIRTUAL_PLATFORM virtualPlatform)
 
     // auto-generated submodules for RRR connections
     let multifpgaRouterService  <- mkMultifpgaRouterServices(virtualPlatform);    
-
+    let memoryServices <- mkMemServices(virtualPlatform.virtualDevices);
 
 endmodule

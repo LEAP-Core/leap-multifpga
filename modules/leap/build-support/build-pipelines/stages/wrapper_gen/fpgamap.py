@@ -9,7 +9,7 @@ class FPGAMap(object):
             print "Mapping: " + entry[1] + " -> " + entry[0] + "\n"
 
     def addSynthesisBoundaryMapping(self,boundary,platform):
-        self.mapping[boundary] = platform;
+        self.mapping[boundary] = platform
 
     def getSynthesisBoundaryPlatform(self,boundary):
         return self.mapping[boundary]

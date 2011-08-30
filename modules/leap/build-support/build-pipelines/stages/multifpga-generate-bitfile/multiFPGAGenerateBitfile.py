@@ -2,6 +2,7 @@ import re
 import sys
 import SCons.Script
 from fpga_environment_parser import *
+from fpgamap_parser import *
 from model import  *
 from config import *
 
@@ -21,12 +22,21 @@ class MultiFPGAGenerateBitfile():
     mappingRootName = APM_NAME  + '_mutlifpga_mapping'
     mappingName = mappingRootName + '.apm'
     mappingPath =  'config/pm/private/' + mappingName
+    environmentRootName = APM_NAME  + '_multifpga_environment'
+    environmentName = environmentRootName + '.apm'
+    environmentPath =  'config/pm/private/' + environmentName
+
+    envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
+    if(len(envFile) != 1):
+      print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
+    self.mapping = parseFPGAMap(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
+    print "mapping keys: " + str(self.mapping.getPlatformNames)
   
     envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENVS')
     if(len(envFile) != 1):
       print "Found more than one environment file: " + str(envFile) + ", exiting\n"
-    environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
-    print "environment keys: " + str(environment.getPlatformNames)
+    self.environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
+    print "environment keys: " + str(self.environment.getPlatformNames)
 
     def compile_closure(platform):
 
@@ -44,7 +54,8 @@ class MultiFPGAGenerateBitfile():
            execute('asim-shell --batch set parameter ' + platformPath + ' MULTI_FPGA_PLATFORM \\"' + platform.name + '\\"')
            execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 0 ')
            execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
-           execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')
+           execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')           
+           execute('asim-shell --batch set parameter ' + platformPath + ' SCRATCHPAD_PLATFORM_ID ' + str((self.environment.getSynthesisBoundaryPlatformID(platform.name))))
            execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
            execute('asim-shell --batch configure model ' + platformPath)
 
@@ -59,8 +70,8 @@ class MultiFPGAGenerateBitfile():
     # copy the environment descriptions to private 
     #APM_FILE
     #WORKSPACE_ROOT
-    for platformName in environment.getPlatformNames():
-      platform = environment.getPlatform(platformName)
+    for platformName in self.environment.getPlatformNames():
+      platform = self.environment.getPlatform(platformName)
       platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
       platformPath = 'config/pm/private/' + platformAPMName
       platformBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
@@ -72,6 +83,7 @@ class MultiFPGAGenerateBitfile():
       execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
       execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
       execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
+      execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)
 
       # this dependency on platform logs is coarse.  we could do better, but it may not be necessary
       subbuild = moduleList.env.Command( 

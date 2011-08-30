@@ -9,6 +9,7 @@
 
 %provides wrapper_gen_tool
 %requires fpgamap_parser
+%requires fpga_environment_parser
 
 %scons %library multifpga_wrapper_gen.py
 
