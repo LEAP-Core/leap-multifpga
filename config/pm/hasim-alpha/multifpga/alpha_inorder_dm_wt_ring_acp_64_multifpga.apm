@@ -38,10 +38,6 @@ fpga_environment_parser=FPGA Environment Datatype
 File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
 Packagehint=multifpga
 
-[ACP Dual FPGA Environment]
-File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env.awb
-Packagehint=multifpga
-
 [FPGAMap]
 File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
 Packagehint=multifpga
@@ -49,7 +45,7 @@ Packagehint=multifpga
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 build_pipeline=multiFPGA Build Pipeline
 connected_application=Alpha Inorder DM, WT, Ring 64 cores
-environment_description=ACP Dual FPGA Environment
+environment_description=ACP Dual FPGA Environment with SRAM
 fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition with Cache
 
 [HW/SW Hybrid Multifpga Project Foundation/Params]
@@ -81,3 +77,7 @@ CONTEXT_ID_BITS=6
 FUNCP_PHYSICAL_REG_INDEX_BITS=13
 TOKEN_ID_BITS=6
 MAX_NUM_CONTEXTS=64
+
+[ACP Dual FPGA Environment with SRAM]
+File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_sram.awb
+Packagehint=multifpga

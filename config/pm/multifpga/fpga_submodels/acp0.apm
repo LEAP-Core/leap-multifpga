@@ -95,6 +95,7 @@ fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
 fpgaenv=Hybrid ACP Dual Compute Environment  FPGA0 (Nallatech)
 application_env=Soft Services Hybrid Application Environment
+environment_description=Null FPGA Environment
 
 [Null FPGA Mapping]
 File=modules/leap/build-support/project/null_mapping.awb
@@ -188,4 +189,8 @@ multifpga_switch=MultiFPGA Switch with Flowcontrol
 
 [MultiFPGA Switch with Flowcontrol]
 File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
+Packagehint=multifpga
+
+[Null FPGA Environment]
+File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga

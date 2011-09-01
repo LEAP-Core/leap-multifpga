@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Inorder Alpha Direct Writethrough Caches Mesh ACP
-File=alpha_inorder_dm_wt_mesh_acp_64_multifpga
+File=alpha_inorder_dm_wt_mesh_acp_64_multifpga_sram
 Version=2.2
 Name=Inorder Alpha Writethrough Caches Mesh ACP 16
 Type=HAsim

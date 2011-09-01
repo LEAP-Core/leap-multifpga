@@ -17,7 +17,7 @@ DefaultAttributes=
 model=MultiFPGA Platform
 
 [Soft Services Hybrid Application Environment]
-File=modules/leap/build-support/project/application-env/hybrid/soft-services/application-env-hybrid-soft-service.awb
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
 Packagehint=leap
 
 [Soft Services Hybrid Application Environment/Requires]
@@ -26,7 +26,7 @@ soft_services=Soft Services
 connected_application=Null Connected Application
 
 [Default Hybrid Project Common Utilities]
-File=config/pm/hasim/submodels/common/project-common-default.apm
+File=config/pm/leap/submodels/common/project-common-default.apm
 Packagehint=leap
 
 [Null Connected Application]
@@ -95,14 +95,11 @@ fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
 fpgaenv=MultiFPGA Airblue Simulation FPGA1 Environment
 application_env=Soft Services Hybrid Application Environment
+environment_description=Null FPGA Environment
 
 [Null FPGA Mapping]
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=multifpga
-
-[Starter Service]
-File=modules/leap/virtual-platform/virtual-devices/backwards-compat/platform-services/starter-service/starter-service.awb
-Packagehint=leap
 
 [MultiFPGA Router Service]
 File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/multifpga-router-service.awb
@@ -110,7 +107,8 @@ Packagehint=multifpga
 
 [MultiFPGA NULL Platform Services/Requires]
 multifpga_router_service=MultiFPGA Router Service
-starter_service=Starter Service
+common_services=Common Services Null
+mem_services=Standard Mem Services
 
 [MultiFPGA NULL Platform Services]
 File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-null.awb
@@ -122,4 +120,67 @@ Packagehint=leap
 
 [MultiFPGA Airblue Simulation FPGA1 Environment]
 File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-fpga1.apm
+Packagehint=multifpga
+
+[Null Scratchpad Memory Service]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-null.awb
+Packagehint=leap
+
+[Debug Scan Services Null]
+File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service-null.awb
+Packagehint=leap
+
+[Standard Mem Services]
+File=modules/leap/libraries/platform-services/mem-services/mem-services-standard.awb
+Packagehint=leap
+
+[Assertions Service Null]
+File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service-null.awb
+Packagehint=leap
+
+[Null FPGA Environment]
+File=modules/leap/build-support/project/null_environment.awb
+Packagehint=multifpga
+
+[Common Services Null]
+File=modules/leap/libraries/platform-services/common-services/common-services-standard-null.awb
+Packagehint=leap
+
+[Null Shared Memory Services]
+File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
+Packagehint=leap
+
+[Stats Service Null]
+File=modules/leap/libraries/platform-services/common-services/stats-service/stats-service-null.awb
+Packagehint=leap
+
+[Streams Service Null]
+File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service-null.awb
+Packagehint=leap
+
+[Standard Mem Services/Requires]
+shared_memory_service=Null Shared Memory Services
+scratchpad_memory_service=Null Scratchpad Memory Service
+central_cache_service=Null Central Cache Service
+
+[Dynamic Parameter Service Null]
+File=modules/leap/libraries/platform-services/common-services/dynamic-parameters-service/dynamic-parameters-service-null.awb
+Packagehint=leap
+
+[Null Central Cache Service]
+File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service-null.awb
+Packagehint=leap
+
+[Common Services Null/Requires]
+stats_service=Stats Service Null
+assertions_service=Assertions Service Null
+debug_scan_service=Debug Scan Services Null
+streams_service=Streams Service Null
+dynamic_parameters_service=Dynamic Parameter Service Null
+
+[MultiFPGA Router Service/Requires]
+multifpga_switch=MultiFPGA Switch with Flowcontrol
+
+[MultiFPGA Switch with Flowcontrol]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
 Packagehint=multifpga

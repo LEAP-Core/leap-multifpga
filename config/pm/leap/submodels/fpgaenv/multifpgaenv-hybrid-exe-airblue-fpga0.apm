@@ -107,7 +107,7 @@ Packagehint=leap
 rrr_common=RRR Common Module
 
 [Standard Virtual Devices Submodel]
-File=config/pm/hasim/submodels/fpgaenv/std-virtual-devices.apm
+File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
 
 [UNIX Communication Physical Device]
@@ -156,5 +156,5 @@ File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipel
 Packagehint=multifpga
 
 [RL Bluespec Library Submodel]
-File=config/pm/hasim/submodels/fpgaenv/librl-bsv.apm
+File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap

@@ -99,12 +99,10 @@ physical_platform_utils=Common Physical Platform Utilities
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
 Packagehint=leap
 
-[Synthesis Boundary Wrapper generation tool/Requires]
-fpgamap_parser=FPGAMap
 
 [Synthesis Boundary Wrapper generation tool]
-File=modules/leap/build-support/stages/wrapper_gen/multi-fpga-wrapper-gen.awb
-Packagehint=multifpga
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
+Packagehint=leap
 
 [BSV Bluesim Build Tool]
 File=modules/leap/build-support/build-pipelines/stages/bluesim/bsv-exe.awb
@@ -119,12 +117,9 @@ File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
 
 [BSV Build Tool MultiFPGA]
-File=modules/leap/build-support/stages/bluespec/bsv-multi.awb
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv-multi.awb
 Packagehint=multifpga
 
-[FPGAMap]
-File=modules/leap/build-support/stages/wrapper_gen/fpgamap_parser.awb
-Packagehint=multifpga
 
 [MultiFPGA BlueSim Platform Build Pipeline/Requires]
 software_tool=Software build tool
@@ -148,12 +143,7 @@ Packagehint=leap
 [NULL Virtual Devices/Requires]
 starter_device=Null Starter Virtual Device
 
-[Null Channel IO Module/Requires]
-channelio_common=Common Files for Virtual Channel Multiplexer
 
-[Common Files for Virtual Channel Multiplexer]
-File=modules/leap/virtual-platform/channelio/common/channelio-common.awb
-Packagehint=leap
 
 [FIFO Utility]
 File=modules/bsv-libraries/bluespec/FIFOUtility/fifo_utility.awb

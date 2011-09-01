@@ -1,0 +1,13 @@
+model -> ACP0;
+connected_application -> ACP0;
+hasim_funcp -> ACP0;
+hasim_isa_datapath -> ACP0;
+funcp_memstate -> ACP0;
+funcp_memstate_tlb -> ACP0;
+hasim_timep -> ACP0;
+inorder_pipeline_front_end -> ACP1;
+decode_stage -> ACP0;
+inorder_pipeline_back_end -> ACP1;
+hasim_l1_caches-> ACP1;
+hasim_last_level_cache-> ACP1;
+
