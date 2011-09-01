@@ -95,7 +95,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
     // ==============================================================
 
     // Lutram to store the pointer values
-    // For now we do a 'full-knowledge' protocol, where each return token signifying a return of credits
+    // For now we do a 'full-knowledge' protocol, where each return token signifying a return of credis
     LUTRAM#(Bit#(n_FIFOS_SAFE_SZ), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) portCredits <- mkLUTRAM(`MULTIFPGA_FIFO_SIZES);
     Vector#(n,Reg#(Bool)) bufferAvailable <- replicateM(mkReg(True));
 
@@ -166,18 +166,28 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
     //                          Response Rules
     // ==============================================================
 
+    FIFOF#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))) creditDelay <- mkFIFOF;
+
     // scan channel for incoming flowcontrol headers
     // in some cases we can fit the flow control bits in the header
     if(valueof(filler_bits_r) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))
 )))      begin
-       rule adjustCredits;
+       rule delayCredits;
+
          GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                              umf_channel_id_r, umf_service_id_r,
                              umf_method_id_r,  umf_message_len_r,
                              umf_phy_pvt_r,    filler_bits_r), umf_chunk_r) packet <- read();
+
+         Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) payload = unpack(truncateNP(packet.UMF_PACKET_header.filler)); 
+         creditDelay.enq(payload);
+       endrule
+ 
+       rule adjustCredits;
          // enqueue header in service's queue
          // set up remaining chunks
-         Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) payload = unpack(truncateNP(packet.UMF_PACKET_header.filler)); 
+         let payload = creditDelay.first();
+         creditDelay.deq();  
          let responseActiveQueue  = tpl_1(payload);
          let currentCredits = portCredits.sub(truncate(responseActiveQueue));
          let creditsNext = tpl_2(payload) + currentCredits;
@@ -275,7 +285,8 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
     begin	
         rule write_request_newmsg2 (newMsgQIdx matches tagged Valid .idx &&&
                                     fromInteger(s) == idx &&&
-                                    requestChunksRemaining == 0);
+                                    requestChunksRemaining == 0 &&&
+                                    !creditDelay.notEmpty());
             if(`SWITCH_DEBUG == 1)
               begin
                 $display("scheduled %d", idx);

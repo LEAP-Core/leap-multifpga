@@ -283,3 +283,22 @@ Directory config/pm/multifpga/fpga_submodels
 
 * Updated stale .apm files.
 * Removed reference to no-longer existing xst-nobasicio stage.
+
+----------
+kfleming    Date: Thu Sep  1 08:45:25 EDT 2011  CSN: CSN-multifpga-52
+                  Thu Sep  1 12:45:25 UTC 2011
+
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga0-dist-cache.apm Locally Modified           51 
+ multifpgaenv-hybrid-exe-fpga1-dist-cache.apm Locally Modified           51 
+
+Directory config/pm/multifpga/fpga_submodels
+ fpga0-dist-cache.apm      Locally Modified           51 
+ fpga1-dist-cache.apm      Locally Modified           51 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified           51 
+
+
+Patched a few apm and broke some critical paths in flow control.
