@@ -1,0 +1,19 @@
+%name MultiFPGA Switch with Registered Flowcontrol 
+%desc MultiFPGA Switch with Registered Flowcontrol 
+
+%provides multifpga_switch
+
+%notes README
+
+%sources -t BSV -v PUBLIC  flowcontrol-ingress-regs.bsv
+%sources -t BSV -v PUBLIC  flowcontrol-egress.bsv
+%sources -t BSV -v PUBLIC  EHRReg.bsv
+%sources -t BSV -v PUBLIC  VLevelFIFO.bsv
+%sources -t BSV -v PUBLIC  RegisterVLevelFIFO.bsv
+%sources -t BSV -v PUBLIC  Schedulers.bsv
+
+
+%param --global MULTIFPGA_FIFO_SIZES 128 "True if we can expect that the router has been generated"
+%param --global MAX_TRANSACTION_SIZE 8 "True if we can expect that the router has been generated"
+%param  SWITCH_DEBUG 0 "Enables copious switch debug printing"
+
