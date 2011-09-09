@@ -302,3 +302,16 @@ Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router
 
 
 Patched a few apm and broke some critical paths in flow control.
+
+----------
+mcadler     Date: Fri Sep  9 07:27:25 EDT 2011  CSN: CSN-multifpga-55
+                  Fri Sep  9 11:27:25 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           54 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile
+ multiFPGAGenerateBitfile.py Locally Modified           54 
+
+Build all sub-models under the parent in the multi_fpga directory.

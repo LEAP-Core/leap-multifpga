@@ -26,6 +26,9 @@ class MultiFPGAGenerateBitfile():
     environmentName = environmentRootName + '.apm'
     environmentPath =  'config/pm/private/' + environmentName
 
+    def makePlatformBuildDir(name):
+      return 'multi_fpga/' + makePlatformBitfileName(name,APM_NAME) + '/pm'
+
     envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
     if(len(envFile) != 1):
       print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
@@ -44,7 +47,7 @@ class MultiFPGAGenerateBitfile():
 
            platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
            platformPath = 'config/pm/private/' + platformAPMName
-           platformBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/' + platformAPMName
+           platformBuildDir = makePlatformBuildDir(platform.name)
            # and now we can build them -- should we use SCons here?
            # what we want to gather here is dangling top level connections
            # so we should depend on the model log
@@ -57,10 +60,10 @@ class MultiFPGAGenerateBitfile():
            execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')           
            execute('asim-shell --batch set parameter ' + platformPath + ' SCRATCHPAD_PLATFORM_ID ' + str((self.environment.getSynthesisBoundaryPlatformID(platform.name))))
            execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
-           execute('asim-shell --batch configure model ' + platformPath)
+           execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
 
            print "alive in call platform log " + platformPath
-           execute('awb-shell --batch build model ' + platformPath)   
+           execute('awb-shell --batch -- build model ' + platformPath + ' --builddir ' + platformBuildDir)
            print "dead in call platform log"
          return compile_platform_log
 
@@ -74,8 +77,8 @@ class MultiFPGAGenerateBitfile():
       platform = self.environment.getPlatform(platformName)
       platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
       platformPath = 'config/pm/private/' + platformAPMName
-      platformBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
-      bitfile = platformBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.xilinx/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_'
+      platformBuildDir = makePlatformBuildDir(platform.name)
+      bitfile = platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.xilinx/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_'
 
       print "wrapper: " + bitfile
       print "platformPath: " + moduleList.env['DEFS']['WORKSPACE_ROOT'] + '/src/private/' + platformPath

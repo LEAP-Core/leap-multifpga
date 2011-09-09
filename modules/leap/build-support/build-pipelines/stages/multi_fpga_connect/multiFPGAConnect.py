@@ -37,14 +37,14 @@ class MultiFPGAConnect():
           platform = self.environment.getPlatform(platformName)
           platformLogAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
           platformLogPath = 'config/pm/private/' + makePlatformLogName(platform.name,APM_NAME)
-          platformLogBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformLogName(platform.name,APM_NAME) + '/pm/'
+          platformLogBuildDir = 'multi_fpga/' + makePlatformLogName(platform.name,APM_NAME) + '/pm'
 
           platformBitfileAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
-          platformBitfilrPath = 'config/pm/private/' + makePlatformBitfileName(platform.name,APM_NAME)
-          platformBitfileBuildDir = moduleList.env['DEFS']['BUILD_DIR'] +'/../../' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
+          platformBitfilePath = 'config/pm/private/' + makePlatformBitfileName(platform.name,APM_NAME)
+          platformBitfileBuildDir = 'multi_fpga/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
 
-          wrapperLog =  platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
-          parameterFile =  platformBitfileBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
+          wrapperLog =  platformLogBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
+          parameterFile =  platformBitfileBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
           self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}}
 
 
