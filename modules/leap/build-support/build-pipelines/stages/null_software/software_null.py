@@ -23,4 +23,6 @@ def host_defs():
 class Software():
 
   def __init__(self, moduleList):
-      print "Software intentionally not built" 
+      moduleList.swExe = []
+      if (getBuildPipelineDebug(moduleList) != 0):
+          print 'NULL Software'

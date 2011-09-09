@@ -315,3 +315,22 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-b
  multiFPGAGenerateBitfile.py Locally Modified           54 
 
 Build all sub-models under the parent in the multi_fpga directory.
+
+----------
+mcadler     Date: Fri Sep  9 10:41:24 EDT 2011  CSN: CSN-multifpga-56
+                  Fri Sep  9 14:41:24 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/null_software
+ software_null.py          Locally Modified           55 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile
+ multiFPGAGenerateBitfile.py Locally Modified           55 
+
+Directory modules/multifpga/synthTest
+ test-c.dic                Locally Modified           55 
+ test-d.dic                Locally Modified           55 
+
+- Pass OPT, DEBUG, TRACE and EVENTS command line options to sub-model builds.
+- Check status of sub-model build
+- Fix a couple of syntax warnings.

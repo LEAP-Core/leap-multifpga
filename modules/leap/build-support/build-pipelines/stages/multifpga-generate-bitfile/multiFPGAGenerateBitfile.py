@@ -48,7 +48,7 @@ class MultiFPGAGenerateBitfile():
            platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
            platformPath = 'config/pm/private/' + platformAPMName
            platformBuildDir = makePlatformBuildDir(platform.name)
-           # and now we can build them -- should we use SCons here?
+           # and now we can build them
            # what we want to gather here is dangling top level connections
            # so we should depend on the model log
            # Ugly - we need to physically reconstruct the apm path
@@ -63,8 +63,15 @@ class MultiFPGAGenerateBitfile():
            execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
 
            print "alive in call platform log " + platformPath
-           execute('awb-shell --batch -- build model ' + platformPath + ' --builddir ' + platformBuildDir)
+           # Compute the build options
+           scons_cmd = 'scons'
+           scons_cmd += ' DEBUG=1' if getDebug(moduleList) else ' OPT=1'
+           scons_cmd += ' TRACE=' + str(getTrace(moduleList))
+           scons_cmd += ' EVENTS=' + str(getEvents(moduleList))
+           print scons_cmd
+           sts = execute('cd ' + platformBuildDir + '; ' + scons_cmd)
            print "dead in call platform log"
+           return sts
          return compile_platform_log
 
     moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] = []
