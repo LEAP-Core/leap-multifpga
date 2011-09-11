@@ -59,10 +59,6 @@ import FIFOF::*;
 import StmtFSM::*;
 import Vector::*;
 
-// import self-made library
-import BRAMVLevelFIFO::*;
-import EHRReg::*;
-import VLevelFIFO::*;
 
 `define SortDebug0 False
 `define SortDebug1 False
