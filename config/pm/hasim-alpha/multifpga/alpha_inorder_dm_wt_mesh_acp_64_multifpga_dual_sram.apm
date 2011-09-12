@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Inorder Alpha Direct Writethrough Caches Mesh ACP
-File=alpha_inorder_dm_wt_mesh_acp_64_multifpga_sram
+File=alpha_inorder_dm_wt_mesh_acp_64_multifpga_dual_sram
 Version=2.2
 Name=Inorder Alpha Writethrough Caches Mesh ACP 16
 Type=HAsim
@@ -45,7 +45,7 @@ Packagehint=multifpga
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 build_pipeline=multiFPGA Build Pipeline
 connected_application=Alpha Inorder DM, WT, Mesh 64 cores
-environment_description=ACP Dual FPGA Environment with SRAM
+environment_description=ACP Dual FPGA Env with Dual SRAM
 fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition with Cache
 
 [HW/SW Hybrid Multifpga Project Foundation/Params]
@@ -77,7 +77,10 @@ CONTEXT_ID_BITS=6
 FUNCP_PHYSICAL_REG_INDEX_BITS=13
 TOKEN_ID_BITS=6
 MAX_NUM_CONTEXTS=64
+FUNCP_TLB_PVT_ENTRIES=4096
+FUNCP_PVT_CACHE_ENTRIES=16384
 
-[ACP Dual FPGA Environment with SRAM]
-File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_sram.awb
+
+[ACP Dual FPGA Env with Dual SRAM]
+File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
 Packagehint=multifpga

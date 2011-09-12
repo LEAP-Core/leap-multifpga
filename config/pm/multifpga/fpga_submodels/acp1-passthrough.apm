@@ -184,3 +184,9 @@ Packagehint=multifpga
 [Null FPGA Environment]
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
+
+[Soft Service Soft Connections Common/Params]
+CON_CWIDTH=128
+
+[Hybrid ACP Dual Compute Environment  FPGA1 (Nallatech)/Params]
+MAPPER_OPTIONS="-cm balanced -global_opt on"

@@ -5,6 +5,7 @@ memory_base_types=Memory Base Types
 [Mesh Interconnect/Params]
 MESH_HEIGHT=4
 MESH_WIDTH=4
+MESH_MEM_CTRL_LOC=5
 
 [Global]
 SaveParameters=0
