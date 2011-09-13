@@ -364,3 +364,34 @@ Directory config/pm/multifpga/fpga_submodels
 - Alpha mesh models:
   - Set default memory controller location to the center of the mesh.
   - Replace single SRAM 64-CPU configuration with a dual SRAM configuration.
+
+----------
+mcadler     Date: Tue Sep 13 14:09:23 EDT 2011  CSN: CSN-multifpga-59
+                  Tue Sep 13 18:09:23 UTC 2011
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga.apm Locally Removed            58 
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_acp_30_connected_application.apm Locally Added               0 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_acp_64_multifpga.apm Locally Removed            58 
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga_sram.apm Locally Removed            58 
+ alpha_inorder_dm_wt_mesh_acp_30_multifpga_dual_sram.apm Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile
+ multiFPGAGenerateBitfile.py Locally Modified           58 
+
+- The multi-FPGA rule for building the bitfiles in the 2nd pass now can take
+  the command to execute from a variable specified on the SCons command
+  line:  MULTIFPGA_BITFILE_COMPILE_CMD.  If set, that command will be executed
+  in each bitfile build subdirectory.  The command could submit a batch job,
+  compile for multiple cost tables, etc.  If not specified, the old behavior
+  of invoking SCons remains.
+
+- Add a 30-way mesh model (32 would be an 8x4 rectangle, 30 is more square at
+  6x5).
+
+- Remove all mesh models lacking SRAM on each FPGA.

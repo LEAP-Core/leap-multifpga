@@ -63,13 +63,23 @@ class MultiFPGAGenerateBitfile():
            execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
 
            print "alive in call platform log " + platformPath
-           # Compute the build options
-           scons_cmd = 'scons'
-           scons_cmd += ' DEBUG=1' if getDebug(moduleList) else ' OPT=1'
-           scons_cmd += ' TRACE=' + str(getTrace(moduleList))
-           scons_cmd += ' EVENTS=' + str(getEvents(moduleList))
-           print scons_cmd
-           sts = execute('cd ' + platformBuildDir + '; ' + scons_cmd)
+
+           ##
+           ## Did the user specify a command to compile the bitfiles as an
+           ## argument?  If not, construct a scons command.
+           ##
+           compile_cmd = moduleList.arguments.get('MULTIFPGA_BITFILE_COMPILE_CMD', None)
+           if compile_cmd == None:
+               # Compute the build options
+               compile_cmd = 'scons'
+               compile_cmd += ' DEBUG=1' if getDebug(moduleList) else ' OPT=1'
+               compile_cmd += ' TRACE=' + str(getTrace(moduleList))
+               compile_cmd += ' EVENTS=' + str(getEvents(moduleList))
+
+           compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
+           print compile_cmd
+
+           sts = execute(compile_cmd)
            print "dead in call platform log"
            return sts
          return compile_platform_log
