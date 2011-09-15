@@ -395,3 +395,18 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-b
   6x5).
 
 - Remove all mesh models lacking SRAM on each FPGA.
+
+----------
+mcadler     Date: Thu Sep 15 16:41:59 EDT 2011  CSN: CSN-multifpga-60
+                  Thu Sep 15 20:41:59 UTC 2011
+
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_acp_30_connected_application.apm Locally Removed            59 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_acp_30_multifpga_dual_sram.apm Locally Removed            59 
+
+Remove useless model.  The mesh has to be square, so only 25 nodes are supported.
+Model frequency was essentially the same as the 64 node model, so there is
+nothing gained by building for 25.
