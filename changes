@@ -410,3 +410,19 @@ Directory config/pm/hasim-alpha/multifpga
 Remove useless model.  The mesh has to be square, so only 25 nodes are supported.
 Model frequency was essentially the same as the 64 node model, so there is
 nothing gained by building for 25.
+
+----------
+mcadler     Date: Wed Oct  5 17:43:33 EDT 2011  CSN: CSN-multifpga-61
+                  Wed Oct  5 21:43:33 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ BSVmulti.py               Locally Modified           60 
+
+Use SCons "Copy" factory instead of "cp" because SCons stores the signature of
+the program in the build dependence.  If "cp" is a different binary it looks like
+rebuilding is needed.
+
+Removed mkdir from the rules instead of using "Mkdir" factory, since the
+directories appear to be present already and the factory version fails if
+the target exists.
