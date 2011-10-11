@@ -426,3 +426,26 @@ rebuilding is needed.
 Removed mkdir from the rules instead of using "Mkdir" factory, since the
 directories appear to be present already and the factory version fails if
 the target exists.
+
+----------
+kfleming    Date: Tue Oct 11 16:45:24 EDT 2011  CSN: CSN-multifpga-62
+                  Tue Oct 11 20:45:24 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_chains_exe.apm Locally Modified           61 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified           61 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified           61 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           61 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile
+ multiFPGAGenerateBitfile.py Locally Modified           61 
+
+
+Added support for automatically instrumenting inter-FPGA links with statistics.

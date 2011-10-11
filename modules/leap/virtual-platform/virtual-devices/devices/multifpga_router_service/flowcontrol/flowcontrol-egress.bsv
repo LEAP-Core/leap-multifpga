@@ -197,14 +197,24 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
       
          if(`SWITCH_DEBUG == 1)
            begin
-             $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, payload, currentCredits, creditsNext);
+             $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
            end
 
          if(creditsNext < `MAX_TRANSACTION_SIZE)
            begin
              $display("Setting credits to zero... this is a bug");
+             $display("creditNext %d creditsRX %d currentCredits %d", creditsNext, tpl_2(payload), currentCredits);
              $finish;
            end      
+
+         if(creditsNext > `MULTIFPGA_FIFO_SIZES)
+           begin
+             $display("Credits have overflowed fifo size... this is a bug");
+             $display("creditNext %d creditsRX %d currentCredits %d", creditsNext, tpl_2(payload), currentCredits);
+             $finish;
+           end      
+
+
         endrule
       end
     else 
@@ -323,13 +333,22 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
             Bit#(TAdd#(1,umf_message_len)) requestChunks = zeroExtend(newpacket.UMF_PACKET_header.numChunks) + 1; // also sending header
             requestActiveQueue <= fromInteger(s);
            
-            Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  portCredits.sub(fromInteger(s)) - resize(requestChunks);
+            Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) oldCredits = portCredits.sub(fromInteger(s)); 
+
+            Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  oldCredits - zeroExtendNP(requestChunks);
             portCredits.upd(fromInteger(s),newCount);
             bufferAvailable[fromInteger(s)] <= newCount >= `MAX_TRANSACTION_SIZE;
             if(`SWITCH_DEBUG == 1)
               begin
                 $display("Setting portCredits for %d to %d", s, newCount);
               end
+
+           if(oldCredits < zeroExtendNP(requestChunks))
+             begin
+               $display("Bizzarre Credit Underflow oldCredit %d messageSize %d newCount %d", oldCredits, requestChunks, newCount);
+               $finish;               
+             end
+
         endrule
 
     end

@@ -103,3 +103,6 @@ Packagehint=multifpga
 [MultiFPGA Synthesis test module c (with chains)]
 File=modules/multifpga/synthTest/test_c_chains.awb
 Packagehint=multifpga
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=0

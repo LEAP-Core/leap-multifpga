@@ -1,18 +1,19 @@
 // This file is effectively a stub for the generated router code. 
 
-`include "asim/provides/virtual_platform.bsh"
-`include "asim/provides/virtual_devices.bsh"
-`include "asim/provides/low_level_platform_interface.bsh"
-`include "asim/provides/rrr.bsh"
-`include "asim/provides/umf.bsh"
-`include "asim/provides/channelio.bsh"
-`include "asim/provides/physical_platform.bsh"
-`include "asim/provides/soft_connections.bsh"
-`include "asim/provides/librl_bsv_base.bsh"
-`include "asim/provides/librl_bsv_storage.bsh"
-`include "asim/provides/multifpga_switch.bsh"
+`include "awb/provides/virtual_platform.bsh"
+`include "awb/provides/virtual_devices.bsh"
+`include "awb/provides/low_level_platform_interface.bsh"
+`include "awb/provides/rrr.bsh"
+`include "awb/provides/umf.bsh"
+`include "awb/provides/channelio.bsh"
+`include "awb/provides/physical_platform.bsh"
+`include "awb/provides/soft_connections.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/librl_bsv_storage.bsh"
+`include "awb/provides/multifpga_switch.bsh"
+`include "awb/provides/stats_service.bsh"
 
-`include "asim/provides/multifpga_router_service.bsh"
+`include "awb/provides/multifpga_router_service.bsh"
 
 import Vector::*;
 
@@ -215,7 +216,7 @@ module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EG
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
                            umf_phy_pvt,    filler_bits), umf_chunk)) port, 
-                                     Integer id, NumTypeParam#(bitwidth) width) (Empty)
+                                     Integer id, NumTypeParam#(bitwidth) width, STAT blocked, STAT sent) (Empty)
    provisos(Div#(SizeOf#(t_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
             Bits#(t_DATA, t_DATA_SZ),
 	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)))
@@ -225,11 +226,11 @@ module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EG
   Empty m = ?;
   if(valueof(bitwidth) <= valueof(SizeOf#(umf_chunk))) // don't instantiate a marshaller!
     begin
-      m <- mkPacketizeConnectionReceiveUnmarshalled(recv,port, id, width);
+      m <- mkPacketizeConnectionReceiveUnmarshalled(recv,port, id, width, blocked, sent);
     end
   else
     begin
-      m <- mkPacketizeConnectionReceiveMarshalled(recv,port,id);
+      m <- mkPacketizeConnectionReceiveMarshalled(recv,port,id, blocked, sent);
     end
 
   return m;
@@ -239,22 +240,32 @@ endmodule
 module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id) (Empty)
+                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id,
+               STAT blocked, STAT sent) (Empty)
    provisos(Div#(SizeOf#(t_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
             Bits#(t_DATA, t_DATA_SZ),
 	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+   PulseWire continueRequestFired <- mkPulseWire(); 
+   PulseWire startRequestFired <- mkPulseWire(); 
 
    MARSHALLER#(t_NUM_CHUNKS, umf_chunk) mar <- mkSimpleMarshaller();
 
    rule continueRequest (True);
         umf_chunk chunk = mar.first();
         mar.deq();
+        sent.incr();
         port.write(tagged UMF_PACKET_dataChunk chunk);
         $display("Marshalled Connection TX sends: %h", chunk);
+        continueRequestFired.send();
+   endrule
+
+   rule checkBlocked(recv.notEmpty() && !(continueRequestFired || startRequestFired));
+     blocked.incr();
    endrule
 
    rule startRequest (recv.notEmpty());
-
+       sent.incr();
+       startRequestFired.send();
        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
@@ -277,7 +288,7 @@ endmodule
 module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id, NumTypeParam#(bitwidth) width) (Empty)
+                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id, NumTypeParam#(bitwidth) width,  STAT blocked, STAT sent) (Empty)
    provisos(/*Div#(SizeOf#(t_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),*/
             Bits#(t_DATA, t_DATA_SZ),
             Bits#(umf_chunk,umf_chunk_SZ));
@@ -285,9 +296,18 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
    // Is the bitwidth sufficient to fint into the header?
    if(valueof(bitwidth) < valueof(filler_bits))
      begin
-       messageM("Choosing efficient small bit packetizer " + integerToString(valueof(bitwidth)) + " is less than " + integerToString(valueof(filler_bits))); 
+       messageM("Choosing efficient small bit packetizer " + integerToString(valueof(bitwidth)) + " is less than " + integerToString(valueof(filler_bits)));
+     
+       PulseWire startRequestFired <- mkPulseWire();  
+ 
+       rule checkBlocked(recv.notEmpty() && !(startRequestFired));
+         blocked.incr();
+       endrule
+
        rule startRequest(recv.notEmpty); 
          recv.deq;
+         sent.incr();
+         startRequestFired.send();
          Bit#(bitwidth) value = resize(pack(recv.receive));
          GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
@@ -310,6 +330,12 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
    else
      begin
        Reg#(Bool) waitHeader <- mkReg(True);
+       PulseWire continueRequestFired <- mkPulseWire(); 
+       PulseWire startRequestFired <- mkPulseWire(); 
+
+       rule checkBlocked(recv.notEmpty() && !(continueRequestFired || startRequestFired));
+         blocked.incr();
+       endrule
 
        rule continueRequest (!waitHeader && recv.notEmpty);
          umf_chunk chunk = unpack(resize(pack(recv.receive)));
@@ -318,9 +344,13 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
          waitHeader <= True;
          port.write(tagged UMF_PACKET_dataChunk chunk);
          $display("Unmarshalled Rev Connection TX sends: %h", chunk);
+         sent.incr();
+         continueRequestFired.send();
        endrule
 
        rule startRequest (recv.notEmpty && waitHeader);
+         sent.incr();
+         startRequestFired.send();
          $display("Unmarshalled Recv Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) , fromInteger(valueof(bitwidth)));
          GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
