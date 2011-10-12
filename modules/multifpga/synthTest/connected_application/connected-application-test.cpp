@@ -32,7 +32,7 @@ CONNECTED_APPLICATION_CLASS::Main()
   // Eventually we'll call the frontend initialization here.                                                                        
   STATS_DEVICE_SERVER_CLASS::GetInstance()->SetupStats();
 
-  for(UINT32 i = 0; i < 50; i++) {
+  for(UINT32 i = 0; i < 500; i++) {
     printf("Sending %d\n", i);
     UINT32 result = clientStub->TakeOneInput(i);
     printf("%d + 7 = %d \n", i, result);

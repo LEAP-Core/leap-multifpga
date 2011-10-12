@@ -12,7 +12,8 @@ class DanglingConnection():
       self.bitwidth = bitwidth
       self.matched = False
       self.chainPartner = -1
-
+      self.via = -1
+      self.via_link = -1
 
   # can probably extend matches to support chains
   def matches(self, other):

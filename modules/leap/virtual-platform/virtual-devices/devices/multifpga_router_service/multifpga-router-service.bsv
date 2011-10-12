@@ -10,6 +10,8 @@
 
 `include "asim/provides/multifpga_router_service.bsh"
 
+import FIFOF::*;
+
 `include "multifpga_routing.bsh"
 
 

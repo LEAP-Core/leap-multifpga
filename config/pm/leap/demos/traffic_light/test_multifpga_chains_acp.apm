@@ -103,3 +103,6 @@ Packagehint=multifpga
 [ACP Dual FPGA Environment]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env.awb
 Packagehint=multifpga
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=1
