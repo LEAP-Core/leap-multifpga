@@ -1,0 +1,151 @@
+
+[Airblue Shared Libraries]
+File=modules/airblue/lib/airblue_shared.awb
+Packagehint=airblue
+
+[Global]
+SaveParameters=0
+DefaultBenchmark=
+Version=2.2
+Type=Asim
+RootName=HW only hybrid application
+RootProvides=connected_application
+File=viterbi_softphy_hw_only_submodel
+Class=Asim::Model
+DefaultRunOpts=
+Name=Viterbi SoftPHY Test (HW channel model)
+Description=
+
+[Airblue Descrambler]
+File=modules/airblue/lib/Scrambler/src/airblue_descrambler.awb
+Packagehint=airblue
+
+[Model]
+DefaultAttributes=
+model=HW only hybrid application
+
+[Airblue Convolutional Decoder Test Common Definitions]
+File=modules/airblue/lib/ConvDecoder/common/test/airblue_convolutional_decoder_test_common.awb
+Packagehint=airblue
+
+[Airblue Convolutional Decoder Common (Viterbi SoftHints)]
+File=modules/airblue/lib/ConvDecoder/common/src/airblue_convolutional_decoder_common_viterbi_soft.awb
+Packagehint=airblue
+
+[Airblue BCJR Test/Requires]
+airblue_convolutional_decoder_test=Airblue Convolutional Decoder Test HW
+airblue_types=Airblue types (with SoftHints)
+airblue_shared=Airblue Shared Libraries
+airblue_convolutional_decoder=Airblue Viterbi (with SoftHints)
+airblue_parameters=Airblue WiFi parameters (with standard null SHIM)
+
+[Airblue Depuncturer]
+File=modules/airblue/lib/Puncturer/src/airblue_depuncturer.awb
+Packagehint=airblue
+
+[Airblue WiFi parameters (with standard null SHIM)]
+File=modules/airblue/parameters/WiFi/airblue_wifi_parameters_no_shim.awb
+Packagehint=airblue
+
+[Simple RRR Host Control]
+File=modules/airblue/lib/HostControl/RRR/Simple/simple_host_control.awb
+Packagehint=airblue
+
+[SoftPhy Bucket Backend]
+File=modules/airblue/lib/ConvDecoder/BCJR/test/backend/airblue_soft_phy_bucket_backend.awb
+Packagehint=airblue
+
+[Airblue Viterbi (with SoftHints)/Params]
+VITERBI_TB_MAX_PATH=0
+
+[Airblue Shifted Registers]
+File=modules/airblue/lib/ShiftRegs/src/airblue_shift_regs.awb
+Packagehint=airblue
+
+[Airblue Special FIFOs]
+File=modules/airblue/lib/FIFOs/src/airblue_special_fifos.awb
+Packagehint=airblue
+
+[Airblue Mapper]
+File=modules/airblue/lib/Mapper/src/airblue_mapper.awb
+Packagehint=airblue
+
+[Airblue BCJR Test]
+File=modules/airblue/lib/ConvDecoder/BCJR/test/airblue_bcjr_test.awb
+Packagehint=airblue
+
+[Airblue Shared Libraries/Requires]
+airblue_common=Airblue common library
+airblue_shift_regs=Airblue Shifted Registers
+airblue_special_fifos=Airblue Special FIFOs
+
+[Airblue Viterbi (with SoftHints)/Requires]
+airblue_convolutional_decoder_common=Airblue Convolutional Decoder Common (Viterbi SoftHints)
+
+[Airblue common library]
+File=modules/airblue/lib/Common/airblue_common.awb
+Packagehint=airblue
+
+[Airblue types (with SoftHints)]
+File=modules/airblue/lib/Types/airblue_types_with_soft_hints.awb
+Packagehint=airblue
+
+[Airblue Convolutional Encoder]
+File=modules/airblue/lib/ConvEncoder/src/airblue_convolutional_encoder.awb
+Packagehint=airblue
+
+[Airblue Puncturer]
+File=modules/airblue/lib/Puncturer/src/airblue_puncturer.awb
+Packagehint=airblue
+
+[HW only hybrid application]
+File=modules/bsv-libraries/bluespec/Common/hw-only-testbench.awb
+Packagehint=bsv-libraries
+
+[Airblue Viterbi (with SoftHints)]
+File=modules/airblue/lib/ConvDecoder/Viterbi/src/airblue_viterbi_soft.awb
+Packagehint=airblue
+
+[HW only hybrid application/Requires]
+hw_only_application=Airblue BCJR Test
+
+[Airblue Scrambler]
+File=modules/airblue/lib/Scrambler/src/airblue_scrambler.awb
+Packagehint=airblue
+
+[Airblue Demapper]
+File=modules/airblue/lib/Mapper/src/airblue_demapper.awb
+Packagehint=airblue
+
+[Airblue Folded FFT/IFFT]
+File=modules/airblue/lib/FFT/src/airblue_folded_fft.awb
+Packagehint=airblue
+
+[Airblue Clear Channel]
+File=modules/airblue/lib/Channel/airblue_clear_channel.awb
+Packagehint=airblue
+
+[Airblue Convolutional Decoder Test HW/Requires]
+airblue_host_control=Simple RRR Host Control
+airblue_convolutional_encoder=Airblue Convolutional Encoder
+airblue_fft_library=Airblue Folded FFT/IFFT
+airblue_demapper=Airblue Demapper
+airblue_convolutional_decoder_test_common=Airblue Convolutional Decoder Test Common Definitions
+airblue_depuncturer=Airblue Depuncturer
+airblue_descrambler=Airblue Descrambler
+airblue_scrambler=Airblue Scrambler
+airblue_mapper=Airblue Mapper
+airblue_puncturer=Airblue Puncturer
+airblue_convolutional_decoder_backend=SoftPhy Bucket Backend
+airblue_channel=Airblue Clear Channel
+
+[Airblue Convolutional Decoder Test HW]
+File=modules/airblue/lib/ConvDecoder/common/test/airblue_convolutional_decoder_test_hw.awb
+Packagehint=airblue
+
+[Airblue Environment]
+File=modules/airblue/lib/HostControl/Environment/airblue_environment.awb
+Packagehint=airblue
+
+[Simple RRR Host Control/Requires]
+airblue_environment=Airblue Environment

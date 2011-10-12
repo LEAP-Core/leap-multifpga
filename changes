@@ -449,3 +449,55 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-b
 
 
 Added support for automatically instrumenting inter-FPGA links with statistics.
+
+----------
+kfleming    Date: Wed Oct 12 12:20:24 EDT 2011  CSN: CSN-multifpga-63
+                  Wed Oct 12 16:20:24 UTC 2011
+
+
+Directory config/pm
+ h264/                     Locally Added               0 
+
+Directory config/pm/h264
+ softphy_SOVA_acp.apm      Locally Added               0 
+ h264_multifpga_decoder_split_synth.apm Locally Added               0 
+ submodels/                Locally Added               0 
+
+Directory config/pm/h264/submodels
+ h264_multifpga.apm        Locally Added               0 
+
+Directory config/pm/h264
+ h264_multifpga_decoder_split_synth_exe.apm Locally Added               0 
+
+Directory config/pm
+ airblue/                  Locally Added               0 
+
+Directory config/pm/airblue
+ library_tests/            Locally Added               0 
+
+Directory config/pm/airblue/library_tests
+ softphy_SOVA_acp.apm      Locally Added               0 
+ submodels/                Locally Added               0 
+
+Directory config/pm/airblue/library_tests/submodels
+ viterbi_softphy_hw_only_submodel.apm Locally Added               0 
+ viterbi_softphy_submodel.apm Locally Added               0 
+
+Directory modules/multifpga
+ h264/                     Locally Added               0 
+
+Directory modules/multifpga/h264
+ acp_mapping.awb           Locally Added               0 
+ acp-mapping.map           Locally Added               0 
+ sim_mapping.awb           Locally Added               0 
+ sim-mapping.map           Locally Added               0 
+
+Directory modules/multifpga
+ airblue/                  Locally Added               0 
+
+Directory modules/multifpga/airblue
+ acp_mapping.awb           Locally Added               0 
+ acp-mapping.map           Locally Added               0 
+ sim_mapping.awb           Locally Added               0 
+
+Added mappings for airblue and h264

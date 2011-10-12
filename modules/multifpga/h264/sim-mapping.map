@@ -1,0 +1,10 @@
+model -> FPGA0;
+connected_application -> FPGA0;
+h264_prediction -> FPGA0;
+h264_interpolator_synth -> FPGA0;
+h264_buffer_control -> FPGA0;
+h264_deblocking -> FPGA0;
+h264_entropy_decoder -> FPGA1;
+h264_inverse_transform -> FPGA1;
+
+

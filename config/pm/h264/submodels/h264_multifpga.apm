@@ -1,0 +1,123 @@
+
+[H264 deblocking filter module]
+File=modules/h264/src/deblocking/h264_deblocking.awb
+Packagehint=h264
+
+[Global]
+SaveParameters=0
+DefaultBenchmark=
+Version=2.2
+Type=Asim
+RootName=H264 System
+RootProvides=connected_application
+File=h264_multifpga
+Class=Asim::Model
+DefaultRunOpts=
+Name=H264 MultiFPGA
+Description=
+
+[Synthesizable H264 interpolator split memory access module]
+File=modules/h264/src/interpolator/h264_interpolator_split_synth.awb
+Packagehint=h264
+
+[H264 System]
+File=modules/h264/src/h264_h264_system.awb
+Packagehint=h264
+
+[Model]
+DefaultAttributes=
+model=H264 System
+
+[H264 output Dump]
+File=modules/h264/src/finalOutput/h264_output_dump.awb
+Packagehint=h264
+
+[H264 default simulation module]
+File=modules/h264/src/memory/h264_default_memory_unit.awb
+Packagehint=h264
+
+[H264 buffer control wide common]
+File=modules/h264/src/bufferControl/common/h264_buffer_control_common_wide.awb
+Packagehint=h264
+
+[H264 decoder module/Requires]
+h264_control=H264 default control module
+h264_deblocking=H264 deblocking filter module
+h264_inverse_transform=H264 inverse transform module
+h264_decoder_types=H264 Decoder Types
+h264_prediction=Synth Interpolator H264 prediction module
+h264_entropy_decoder=H264 entropy decoder module
+h264_nal_unwrap=H264 nal unwrap module
+h264_buffer_control=H264 split LC coalescing parallel buffer 64 bit
+
+[H264 split LC coalescing parallel buffer 64 bit]
+File=modules/h264/src/bufferControl/split/h264_buffer_control_coalesced_parallel_wide.awb
+Packagehint=h264
+
+[H264 output control module split, wide memory/Requires]
+processor_library=Processor Library
+
+[H264 Synth Interpolator types]
+File=modules/h264/src/interpolator/h264_interpolator_types.awb
+Packagehint=h264
+
+[H264 entropy decoder module]
+File=modules/h264/src/entropy/h264_entropy_decoder.awb
+Packagehint=h264
+
+[H264 System types]
+File=modules/h264/src/h264_system_types.awb
+Packagehint=h264
+
+[H264 Decoder Types]
+File=modules/h264/src/h264_decoder_types.awb
+Packagehint=h264
+
+[H264 System/Requires]
+h264_memory_unit=H264 default simulation module
+h264_decoder=H264 decoder module
+h264_input=H264 RRR input module
+h264_output=H264 output Dump
+h264_types=H264 System types
+
+[H264 nal unwrap module]
+File=modules/h264/src/nal/h264_nal_unwrap.awb
+Packagehint=h264
+
+[H264 output control module split, wide memory]
+File=modules/h264/src/bufferControl/outputControl/h264_output_control_split_wide.awb
+Packagehint=h264
+
+[Processor Library]
+File=modules/bluespec/mit-6.375/lab4/processor_library.awb
+Packagehint=mit-6.375
+
+[H264 default control module]
+File=modules/h264/src/h264_control.awb
+Packagehint=h264
+
+[Synth Interpolator H264 prediction module/Requires]
+h264_interpolator_synth=Synthesizable H264 interpolator split memory access module
+
+[H264 split LC coalescing parallel buffer 64 bit/Requires]
+h264_buffer_control_common=H264 buffer control wide common
+h264_output_control_split_wide=H264 output control module split, wide memory
+
+[H264 decoder module]
+File=modules/h264/src/h264_decoder.awb
+Packagehint=h264
+
+[Synth Interpolator H264 prediction module]
+File=modules/h264/src/prediction/h264_prediction_synth.awb
+Packagehint=h264
+
+[H264 RRR input module]
+File=modules/h264/src/inputGen/h264_input_rrr.awb
+Packagehint=h264
+
+[Synthesizable H264 interpolator split memory access module/Requires]
+h264_interpolator_types_synth=H264 Synth Interpolator types
+
+[H264 inverse transform module]
+File=modules/h264/src/transform/h264_inverse_transform.awb
+Packagehint=h264
