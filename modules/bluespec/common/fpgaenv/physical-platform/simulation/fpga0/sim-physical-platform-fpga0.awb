@@ -11,4 +11,6 @@
 %sources --t CPP --v PRIVATE sim-physical-platform-fpga0.cpp
 %sources --t BSH --v PUBLIC  sim-physical-platform-fpga0.bsh
 
+%param SIM_WRITE_PORT  "/tmp/FPGA0ToFPGA1"  "Simulator Write Port"
+%param SIM_READ_PORT   "/tmp/FPGA1ToFPGA0"  "Simulator Read Port"
 

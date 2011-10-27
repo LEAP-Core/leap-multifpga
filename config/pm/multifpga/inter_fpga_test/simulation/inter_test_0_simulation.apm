@@ -1,0 +1,94 @@
+
+[Global]
+SaveParameters=0
+DefaultBenchmark=
+Version=2.2
+Type=Leap
+File=inter_test_0_simulation
+Class=Asim::Model
+Name=WiFi Phy RX Testbench
+Description=Wifi Phy RX Testbench 
+DefaultRunOpts=
+RootName=HW/SW Hybrid Pipeline Build
+RootProvides=model
+
+[Model]
+DefaultAttributes=airblue
+model=HW/SW Hybrid Pipeline Build
+
+[HW/SW Hybrid Pipeline Build]
+File=modules/leap/build-support/project/project-pipeline.awb
+Packagehint=leap
+
+[HW/SW Hybrid Pipeline Build/Requires]
+project_common=Default Hybrid Project Common Utilities
+fpgaenv=Hybrid Simulation FPGA Environment
+application_env=Soft Services Hybrid Application Environment
+
+[Soft Services Hybrid Application Environment/Requires]
+platform_services=InterFPGA Test Platform Services
+connected_application=Inter FPGA Communications Test
+soft_services=Soft Services Submodel
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+[Common Services/Requires]
+stats_service=Stats Service
+assertions_service=Assertions Service
+debug_scan_service=Debug Scan Services
+streams_service=Streams Service
+dynamic_parameters_service=Dynamic Parameter Service
+
+[Streams Service]
+File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service.awb
+Packagehint=leap
+
+[Stats Service]
+File=modules/leap/libraries/platform-services/common-services/stats-service/stats-service.awb
+Packagehint=leap
+
+[Common Services]
+File=modules/leap/libraries/platform-services/common-services/common-services-standard.awb
+Packagehint=leap
+
+[Assertions Service]
+File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service.awb
+Packagehint=leap
+
+[Debug Scan Services]
+File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service.awb
+Packagehint=leap
+
+[Dynamic Parameter Service]
+File=modules/leap/libraries/platform-services/common-services/dynamic-parameters-service/dynamic-parameters-service.awb
+Packagehint=leap
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/leap/submodels/common/project-common-default.apm
+Packagehint=leap
+
+[Soft Services Submodel]
+File=config/pm/leap/submodels/common/soft-services.apm
+Packagehint=leap
+
+[InterFPGA Test Platform Services/Requires]
+common_services=Common Services
+inter_fpga_service=Unix Comm InterFPGA Service
+
+[InterFPGA Test Platform Services]
+File=modules/leap/libraries/platform-services/platform-services-standard.awb
+Packagehint=multifpga
+
+[Inter FPGA Communications Test]
+File=modules/multifpga/inter-fpga-test/inter-fpga-test.awb
+Packagehint=multifpga
+
+[Unix Comm InterFPGA Service]
+File=modules/leap/libraries/platform-services/inter-fpga-service/simulation/simulation-interfpga-service.awb
+Packagehint=multifpga
+
+[Hybrid Simulation FPGA Environment]
+File=config/pm/leap/submodels/fpgaenv/fpgaenv-hybrid-exe.apm
+Packagehint=leap

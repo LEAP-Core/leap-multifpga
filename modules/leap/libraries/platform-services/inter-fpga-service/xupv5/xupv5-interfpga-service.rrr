@@ -1,0 +1,16 @@
+service INTER_FPGA
+{
+    server hw (bsv, connection) <- sw (cpp, method)
+    {
+       method GetTXCount       (in UINT16[16] value, out UINT64[64] samples);  
+       method GetTXCountIn     (in UINT16[16] value, out UINT64[64] samples);  
+       method GetRXCount       (in UINT16[16] value, out UINT64[64] samples);  
+       method GetSampleSent    (in UINT16[16] value, out UINT64[64] samples);  
+       method GetSampleDropped (in UINT16[16] value, out UINT64[64] samples);  
+       method GetRXErrors      (in UINT16[16] value, out UINT64[64] samples);  
+       method GetRealign       (in UINT16[16] value, out UINT64[64] samples);  
+       method GetPHYStatus     (in UINT16[16] value, out UINT64[64] samples);  
+       method GetPHYRXCount    (in UINT16[16] value, out UINT32[32] samples);  
+       method GetPHYTXCount    (in UINT16[16] value, out UINT32[32] samples);  
+    };
+};

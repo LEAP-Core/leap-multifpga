@@ -1,0 +1,14 @@
+%name InterFPGA Test Platform Services
+%desc Translates Virtual Devices into Soft Connections
+
+%provides platform_services
+
+%attributes leap
+
+%notes README
+
+%public platform-services-standard.bsv
+
+%requires inter_fpga_service common_services
+
+

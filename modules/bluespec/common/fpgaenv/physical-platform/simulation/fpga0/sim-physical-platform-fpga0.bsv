@@ -90,8 +90,8 @@ module mkPhysicalPlatform
                                                            clocked_by clk,
                                                            reset_by rst);
 
-    UNIX_COMM_DEVICE unix_comm_device  <- mkUNIXCommDevice("/tmp/FPGA0ToFPGA1",
-                                                           "/tmp/FPGA1ToFPGA0",
+    UNIX_COMM_DEVICE unix_comm_device  <- mkUNIXCommDevice(`SIM_WRITE_PORT,
+                                                           `SIM_READ_PORT,
                                                            clocked_by clk,
                                                            reset_by rst);
 

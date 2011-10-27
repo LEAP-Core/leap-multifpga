@@ -1,0 +1,15 @@
+%name XUPV5 InterFPGA Test Service 
+%desc XUPV5 InterFPGA Test Service 
+
+%provides inter_fpga_service
+
+%attributes hybrid connected
+
+%public xupv5-interfpga-service.bsv
+%public xupv5-interfpga-service.rrr
+%public xupv5-interfpga-service.h
+%public xupv5-interfpga-service.cpp
+
+
+
+

@@ -1,0 +1,11 @@
+service INTER_FPGA_TEST
+{
+    server hw (bsv, connection) <- sw (cpp, method)
+    {
+       method GetErrorPair     (in UINT16[16] value, out UINT32[32] errorPair);
+       method GetCorrect       (in UINT16[16] value, out UINT64[64] samples);
+       method GetError         (in UINT16[16] value, out UINT64[64] samples);
+       method GetSent          (in UINT16[16] value, out UINT64[64] samples);
+       method GetReturned      (in UINT16[16] value, out UINT64[64] samples);
+    };
+};

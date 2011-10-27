@@ -1,0 +1,105 @@
+
+[Global]
+SaveParameters=0
+Description=has strange module alingments
+File=test_multifpga_perf_xupv5
+Version=2.2
+Name=Multifpga synthesis test 
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=MultiFPGA Perf Test Connected Application
+environment_description=XUPV5 Dual FPGA Environment
+build_pipeline=multiFPGA Build Pipeline
+fpga_mapping=Test ACP Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline]
+File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline/Requires]
+multi_fpga_log_generator=multiFPGA Log Generation
+multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_generate_bitfile=multiFPGA Generate bitfle
+
+[MultiFPGA Synthesis test module a]
+File=modules/multifpga/synthTest/test_a.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis test module top/Requires]
+test_c=MultiFPGA Synthesis test module c for benchmarking
+test_a=MultiFPGA Synthesis test module a
+test_b=MultiFPGA Synthesis test module b
+
+[MultiFPGA Synthesis test module a/Requires]
+test_d=MultiFPGA Synthesis test module d for benchmarking link
+
+[MultiFPGA Synthesis test module b]
+File=modules/multifpga/synthTest/test_b.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis test module top]
+File=modules/multifpga/synthTest/top.awb
+Packagehint=multifpga
+
+[Test ACP Mapping]
+File=modules/multifpga/synthTest/acp_mapping.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
+Packagehint=leap
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
+Packagehint=leap
+
+[multiFPGA Log Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+
+[MultiFPGA Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Requires]
+fpgamap_parser=FPGAMap
+
+[multiFPGA Generate bitfle]
+File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis test module c for benchmarking]
+File=modules/multifpga/synthTest/test_c_perf.awb
+Packagehint=multifpga
+
+[MultiFPGA Perf Test Connected Application]
+File=modules/multifpga/synthTest/connected_application/connected-application-perf.awb
+Packagehint=multifpga
+
+[MultiFPGA Perf Test Connected Application/Requires]
+hardware_system=MultiFPGA Synthesis test module top
+
+[MultiFPGA Synthesis test module d for benchmarking link]
+File=modules/multifpga/synthTest/test_d_perf.awb
+Packagehint=multifpga
+
+[XUPV5 Dual FPGA Environment]
+File=modules/leap-platforms/fpga-environments/xupv5/xupv5_fpga_env.awb
+Packagehint=multifpga

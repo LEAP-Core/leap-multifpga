@@ -1,0 +1,18 @@
+%name Unix Comm InterFPGA Service
+%desc Unix Comm InterFPGA Service
+
+%provides inter_fpga_service
+
+%attributes hybrid connected
+
+%public simulation-interfpga-service.bsv
+%public simulation-interfpga-service.h
+
+
+
+
+
+
+
+
+

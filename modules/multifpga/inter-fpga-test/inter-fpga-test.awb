@@ -1,0 +1,18 @@
+
+%name Inter FPGA Communications Test
+%desc This application verifies that two physically connected applications can talk to eachother
+
+%provides connected_application
+
+%public  inter-fpga-test.h
+%public  inter-fpga-test.bsv
+%private inter-fpga-test.cpp
+%sources -t DICT -v PUBLIC inter-fpga-test.dic
+%public inter-fpga-test.rrr
+
+%param SYNTH_BOUNDARY mkConnectedApplication "name of synthesis boundary"
+
+%param ID 0 "The ID of this FPGA build"
+
+
+

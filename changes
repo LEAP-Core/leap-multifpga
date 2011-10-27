@@ -501,3 +501,107 @@ Directory modules/multifpga/airblue
  sim_mapping.awb           Locally Added               0 
 
 Added mappings for airblue and h264
+
+----------
+kfleming    Date: Thu Oct 27 13:21:15 EDT 2011  CSN: CSN-multifpga-66
+                  Thu Oct 27 17:21:15 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_perf_xupv5.apm Locally Added               0 
+ test_multifpga_scratch_acp.apm Locally Modified           65 
+ test_multifpga_chains_xupv5.apm Locally Added               0 
+ test_multifpga_scratch.apm Locally Modified           65 
+
+Directory config/pm/leap/submodels/fpgaenv
+ inter-fpga-test/          Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv/inter-fpga-test
+ inter-fpga-test-hybrid-exe-fpga1.apm Locally Added               0 
+ inter-fpga-test-hybrid-exe-fpga0.apm Locally Added               0 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_time_func_xupv5.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ xupv50.apm                Locally Added               0 
+ xupv51.apm                Locally Added               0 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Added               0 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Added               0 
+
+Directory config/pm/multifpga
+ inter_fpga_test/          Locally Added               0 
+
+Directory config/pm/multifpga/inter_fpga_test
+ simulation/               Locally Added               0 
+
+Directory config/pm/multifpga/inter_fpga_test/simulation
+ inter_test_0_simulation.apm Locally Added               0 
+ inter_test_1_simulation.apm Locally Added               0 
+
+Directory config/pm/multifpga/inter_fpga_test
+ xupv5/                    Locally Added               0 
+
+Directory config/pm/multifpga/inter_fpga_test/xupv5
+ inter_test_0_xupv5.apm    Locally Added               0 
+ inter_test_1_xupv5.apm    Locally Added               0 
+
+Directory modules/leap
+ libraries/                Locally Added               0 
+
+Directory modules/leap/libraries
+ platform-services/        Locally Added               0 
+
+Directory modules/leap/libraries/platform-services
+ platform-services-inter-fpga.awb Locally Added               0 
+ platform-services-inter-fpga.bsv Locally Added               0 
+ inter-fpga-service/       Locally Added               0 
+
+Directory modules/leap/libraries/platform-services/inter-fpga-service
+ simulation/               Locally Added               0 
+
+Directory modules/leap/libraries/platform-services/inter-fpga-service/simulation
+ simulation-interfpga-service.h Locally Added               0 
+ simulation-interfpga-service.awb Locally Added               0 
+ simulation-interfpga-service.bsv Locally Added               0 
+
+Directory modules/leap/libraries/platform-services/inter-fpga-service
+ xupv5/                    Locally Added               0 
+
+Directory modules/leap/libraries/platform-services/inter-fpga-service/xupv5
+ xupv5-interfpga-service.cpp Locally Added               0 
+ xupv5-interfpga-service.rrr Locally Added               0 
+ xupv5-interfpga-service.h Locally Added               0 
+ xupv5-interfpga-service.awb Locally Added               0 
+ xupv5-interfpga-service.bsv Locally Added               0 
+
+Directory modules/leap/libraries/platform-services
+ README                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.awb Locally Modified           65 
+ sim-physical-platform-fpga0.bsv Locally Modified           65 
+
+Directory modules/leap-platforms/fpga-environments
+ xupv5/                    Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments/xupv5
+ xupv5-dual.env            Locally Added               0 
+ xupv5_fpga_env.awb        Locally Added               0 
+
+Directory modules/multifpga
+ inter-fpga-test/          Locally Added               0 
+
+Directory modules/multifpga/inter-fpga-test
+ inter-fpga-test.h         Locally Added               0 
+ inter-fpga-test.awb       Locally Added               0 
+ inter-fpga-test.bsv       Locally Added               0 
+ inter-fpga-test.dic       Locally Added               0 
+ inter-fpga-test.cpp       Locally Added               0 
+ inter-fpga-test.rrr       Locally Added               0 
+
+
+Added support multifpga compilation to a configuration of XUPV5s.
+
+Also added some helpful single FPGA testbenches to be used in testing
+pair-wise links.

@@ -1,0 +1,217 @@
+
+[Global]
+SaveParameters=0
+Description=Uses a single sata link to communicate between FPGAs
+File=multifpgaenv-hybrid-xupv5-fpga0
+Version=2.2
+Type=HAsim
+Name=XUPV5 FPGA 0
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+RootName=FPGA Environment
+RootProvides=fpgaenv
+
+[Model]
+DefaultAttributes=bluespec htg-v5-jtag
+model=FPGA Environment
+
+[FPGA Environment/Requires]
+virtual_platform=Standard Virtual Platform
+fpga_components=Hardware FPGA Components for Virtex 5
+librl_bsv=RL Bluespec Library Submodel
+build_pipeline=FPGA Platform Build Pipeline
+
+[Standard Virtual Platform]
+File=modules/leap/virtual-platform/std-virtual-platform.awb
+Packagehint=leap
+
+[Standard Virtual Platform/Requires]
+virtual_devices=Standard Virtual Devices Submodel
+low_level_platform_interface=Low Level Platform Interface Hybrid
+umf=Little-Endian Unified Message Format
+
+[FPGA Environment]
+File=modules/leap/virtual-platform/fpga-environment.awb
+Packagehint=leap
+
+[RRR Clients and Servers]
+File=modules/leap/virtual-platform/rrr/basic/basic-rrr.awb
+Packagehint=leap
+
+[Low Level Platform Interface Hybrid]
+File=modules/leap/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=leap
+
+[Low Level Platform Interface Hybrid/Requires]
+physical_platform=XUP Virtex 5 PCIE SATA
+channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=NULL Local Memory Interface
+remote_memory=Null Remote Memory
+
+[Single-Ended Crystal Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=leap-platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=leap-platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=leap-platforms
+
+[Hardware FPGA Components for Virtex 5]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex5.awb
+Packagehint=leap-platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[RRR Common Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-common.awb
+Packagehint=leap
+
+[RRR Clients and Servers/Requires]
+rrr_common=RRR Common Module
+
+[Null Remote Memory]
+File=modules/leap/virtual-platform/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=leap
+
+[NULL Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=leap
+
+[Single-Ended Crystal Clocks Device/Params]
+CRYSTAL_CLOCK_FREQ=100
+
+[NULL Local Memory Interface/Params]
+LOCAL_MEM_WORDS_PER_LINE=4
+LOCAL_MEM_WORD_BITS=64
+LOCAL_MEM_ADDR_BITS=26
+
+[Standard Virtual Devices Submodel]
+File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
+Packagehint=leap
+
+[Basic Virtual Channel Multiplexer]
+File=modules/leap/virtual-platform/channelio/basic/basic-channelio.awb
+Packagehint=leap
+
+[Basic Virtual Channel Multiplexer/Requires]
+physical_channel=Bluespec PCIE Physical Channel
+
+[XUP Virtex 5 PCIE SATA]
+File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sata/xilinx-xup-pcie-sata.awb
+Packagehint=leap-platforms
+
+[XUP Virtex 5 PCIE SATA/Requires]
+pcie_device=Bluespec PCIE Device
+clocks_device=Single-Ended Crystal Clocks Device
+sata_device=Aurora SATA Device, Single Lane, 3gbps
+physical_platform_utils=Common Physical Platform Utilities
+
+[Bluespec PCIE Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec/pcie-bluespec.awb
+Packagehint=leap-platforms
+
+[Bluespec PCIE Physical Channel]
+File=modules/leap/virtual-platform/physical-channel/pcie/bluespec/pcie-bluespec-physical-channel.awb
+Packagehint=leap
+
+[RL Bluespec Library Submodel]
+File=config/pm/leap/submodels/common/librl-bsv.apm
+Packagehint=leap
+
+[Aurora SATA Device, Single Lane, 3gbps]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3gbps/sata-aurora.awb
+Packagehint=leap-platforms
+
+[Xilinx BITGEN]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
+Packagehint=leap
+
+[Xilinx LOADER]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
+Packagehint=leap
+
+[Interface builder]
+File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
+Packagehint=leap
+
+[Xilinx NGD]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-ngd.awb
+Packagehint=leap
+
+[MultiFPGA Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/multi-fpga-wrapper-gen.awb
+Packagehint=multifpga
+
+[FPGA Programming Tool]
+File=modules/leap/build-support/build-pipelines/stages/fpgaprog/fpgaprog.awb
+Packagehint=leap
+
+[XST Synthesis Tool]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
+Packagehint=leap
+
+[BSV Build Tool MultiFPGA]
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv-multi.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis Boundary Wrapper generation tool/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+fpgamap_parser=FPGAMap
+
+[Xilinx Post-synthesis Toolchain]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-post-synth.awb
+Packagehint=leap
+
+[Xilinx PAR]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-par.awb
+Packagehint=leap
+
+[Xilinx Post-synthesis Toolchain/Requires]
+xilinx_ngd=Xilinx NGD
+xilinx_bitgen=Xilinx BITGEN
+xilinx_par=Xilinx PAR
+xilinx_map=Xilinx MAP
+xilinx_loader=Xilinx LOADER
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
+Packagehint=leap
+
+[MCD Tool for Xilinx]
+File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
+Packagehint=leap
+
+[Xilinx MAP]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
+Packagehint=leap
+
+[FPGA Platform Build Pipeline]
+File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
+Packagehint=multifpga
+
+[FPGA Platform Build Pipeline/Requires]
+fpga_program_tool=FPGA Programming Tool
+post_synthesis_tool=Xilinx Post-synthesis Toolchain
+software_tool=Software build tool
+mcd_tool=MCD Tool for Xilinx
+iface_tool=Interface builder
+wrapper_gen_tool=MultiFPGA Synthesis Boundary Wrapper generation tool
+synthesis_tool=XST Synthesis Tool
+bsv_tool=BSV Build Tool MultiFPGA
+
+[Software build tool]
+File=modules/leap/build-support/build-pipelines/stages/software/software.awb
+Packagehint=leap

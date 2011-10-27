@@ -1,0 +1,5 @@
+def STATS.LINK.countCorrect "Inter-FPGA link countCorrect";
+def STATS.LINK.countError "Inter-FPGA link countError";
+def STATS.LINK.countSent "Inter-FPGA link countSent";
+def STATS.LINK.countReturned "Inter-FPGA link countReturned";
+
