@@ -97,6 +97,7 @@ class MultiFPGAConnect():
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
+    multiplexor_dictionary = ""
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
@@ -116,23 +117,28 @@ class MultiFPGAConnect():
 
       multiplexor_names[targetPlatform] = 'inst_' + moduleName
 
-      multiplexor_instantiation += 'let ' + multiplexor_names[targetPlatform] + ' <- ' + moduleName + '(' + hopFromTarget + '.write);\n'
+      multiplexor_instantiation += 'let ' + multiplexor_names[targetPlatform] + ' <- ' + moduleName + '(' + hopFromTarget + '.write,\n'
+      multiplexor_instantiation += '    ' + hopFromTarget + '.write_ready);\n'
 
       for via in egressVias:
         multiplexor_definition += '  method Action ' + via.via_method + '(Bit#(' + str(via.via_width)  + ') data);\n'
  
       multiplexor_definition += 'endinterface\n\n'
 
-      multiplexor_definition += 'module ' + moduleName + '#(function Action write(Bit#(' + str(egressViaWidth) +') goSteelers)) (' + interfaceName + ');\n'
+      multiplexor_definition += 'module [CONNECTED_MODULE] ' + moduleName + '#(function Action write(Bit#(' + str(egressViaWidth) +') goSteelers),\n'
+      multiplexor_definition += '                           function Bool write_ready() ) (' + interfaceName + ');\n'
       # mkDwire with empty string signifier...
       for via in egressVias:
         multiplexor_definition += '  let ' + via.via_method + '_wire <- mkDWire(tagged Invalid);\n' 
         multiplexor_definition += '  let ' + via.via_method + '_pulse <- mkPulseWire();\n' 
-      multiplexor_definition += ' let  fifo <- mkFIFOF();'
-      multiplexor_definition += '  rule sendData;\n'
-      multiplexor_definition += '    fifo.deq;\n'
-      multiplexor_definition += '    write(fifo.first);\n'
-      multiplexor_definition += '  endrule\n'
+        multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_ENQUEUED" ' + via.via_method +' cycles enqueued";\n')
+        if(GENERATE_ROUTER_STATS):
+          multiplexor_definition += 'STAT enqueued_' + via.via_method + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED);\n'
+
+      multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_MERGED"' + moduleName +' cycles enqueued";\n')
+      if(GENERATE_ROUTER_STATS):
+        multiplexor_definition += 'STAT merged_' + moduleName + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_MERGED);\n'
+
       multiplexor_definition += '  rule mergeData('
 
       first = 1
@@ -144,8 +150,12 @@ class MultiFPGAConnect():
         first = 0 
 
       multiplexor_definition += ');//Only if there\'s data...\n'
-      multiplexor_definition += '    $display("mergeData ' + moduleName  +'  fires");\n'
-      multiplexor_definition += '    fifo.enq(zeroExtendNP(pack(' + moduleAggregateTypeName + '{\n'
+      #multiplexor_definition += '    $display("mergeData ' + moduleName  +'  fires");\n'
+
+      if(GENERATE_ROUTER_STATS):
+        multiplexor_definition += 'merged_' + moduleName + '.incr();\n'
+
+      multiplexor_definition += '    write(zeroExtendNP(pack(' + moduleAggregateTypeName + '{\n'
       first = 1
       for via in egressVias:
         comma = ','
@@ -157,20 +167,23 @@ class MultiFPGAConnect():
       multiplexor_definition += '  endrule\n'
 
       for via in egressVias:
-        multiplexor_definition += '  method Action ' + via.via_method + '(Bit#(' + str(via.via_width)  + ') data) if(fifo.notFull());\n'
-        multiplexor_definition += '    $display("' + via.via_method + '_wire fires");\n'
+        multiplexor_definition += '  method Action ' + via.via_method + '(Bit#(' + str(via.via_width)  + ') data) if(write_ready);\n'
+        #multiplexor_definition += '    $display("' + via.via_method + '_wire fires");\n'
         multiplexor_definition += '    ' + via.via_method + '_wire <= tagged Valid data;\n'
         multiplexor_definition += '    ' + via.via_method + '_pulse.send;\n'
+        if(GENERATE_ROUTER_STATS):
+          multiplexor_definition += 'enqueued_' + via.via_method + '.incr();\n'
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
-    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
+    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names, multiplexor_dictionary]
             
 
   def generateIngressMultiplexor(self, platform):
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
+    multiplexor_dictionary = ""
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
       hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
@@ -197,13 +210,15 @@ class MultiFPGAConnect():
  
       multiplexor_definition += 'endinterface\n\n'
 
-      multiplexor_definition += 'module ' + moduleName + '#(function ActionValue#(Bit#(' + str(ingressViaWidth) + ')) read()) (' + interfaceName + ');\n'
+      multiplexor_definition += 'module [CONNECTED_MODULE] ' + moduleName + '#(function ActionValue#(Bit#(' + str(ingressViaWidth) + ')) read()) (' + interfaceName + ');\n'
       # mkDwire with empty string signifier...
       for via in ingressVias:
-        multiplexor_definition += '  let ' + via.via_method + '_fifo <- mkFIFOF();\n' 
-      
+        multiplexor_definition += '  let ' + via.via_method + '_fifo <- mkBypassFIFOF();\n' 
+        multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_DEQUED"' + via.via_method +' cycles dequeued";\n')
+        if(GENERATE_ROUTER_STATS):
+          multiplexor_definition += 'STAT dequeued_' + via.via_method + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_' + via.via_method + '_DEQUED);\n'
       multiplexor_definition += '  rule sendData;\n'
-      multiplexor_definition += '    $display("ingress mergeData ' + moduleName  +'  fires");\n'
+      # multiplexor_definition += '    $display("ingress mergeData ' + moduleName  +'  fires");\n'
       multiplexor_definition += '  let data_uncut <- read();\n'
       multiplexor_definition += ' ' + moduleAggregateTypeName + '  data_tuple = unpack(truncateNP(data_uncut));\n'
 
@@ -219,12 +234,14 @@ class MultiFPGAConnect():
 
       for via in ingressVias:
         multiplexor_definition += '  method ActionValue#(Bit#(' + str(via.via_width) + ')) ' + via.via_method + '() if (' + via.via_method + '_fifo.first() matches tagged Valid .data );\n'
+        if(GENERATE_ROUTER_STATS):
+          multiplexor_definition += 'dequeued_' + via.via_method + '.incr();\n'
         multiplexor_definition += '    ' + via.via_method + '_fifo.deq();\n'
         multiplexor_definition += '    return data;\n'
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
-    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
+    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names,multiplexor_dictionary]
     
   def synthesizeRouters(self, target, source, env):    
     self.processDanglingConnections()
@@ -443,9 +460,11 @@ class MultiFPGAConnect():
 
           # everything down here should be code generation.  Eventually it should be split out.  
           # probably also need to instantiate stats in a different modules
-          [egress_multiplexor_definition, egress_multiplexor_instantiation, egress_multiplexor_names] = self.generateEgressMultiplexor(platform)
-          [ingress_multiplexor_definition, ingress_multiplexor_instantiation, ingress_multiplexor_names] = self.generateIngressMultiplexor(platform)
+          [egress_multiplexor_definition, egress_multiplexor_instantiation, egress_multiplexor_names, egress_multiplexor_dictionary] = self.generateEgressMultiplexor(platform)
+          [ingress_multiplexor_definition, ingress_multiplexor_instantiation, ingress_multiplexor_names, ingress_multiplexor_dictionary] = self.generateIngressMultiplexor(platform)
 
+          dictionary += egress_multiplexor_dictionary
+          dictionary += ingress_multiplexor_dictionary
           header.write(egress_multiplexor_definition + ingress_multiplexor_definition)
 
           # toss out the mapping functions first
@@ -474,7 +493,7 @@ class MultiFPGAConnect():
 
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
               if(dangling.sc_type == 'Recv'):
-                  header.write('CONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
+                  header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
                   dictionary += ('def STATS.ROUTER.' + dangling.name + '_BLOCKED "' + dangling.name +' cycles blocked";\n')
                   dictionary += ('def STATS.ROUTER.' + dangling.name + '_SENT "' + dangling.name +' cycles sent";\n')
 
@@ -484,12 +503,24 @@ class MultiFPGAConnect():
 
                   recvs += 1 
               if(dangling.sc_type == 'Send'):
+                  dictionary += ('def STATS.ROUTER.' + dangling.name + '_RECEIVED "' + dangling.name +' received cycles";\n')
+                  if(GENERATE_ROUTER_STATS):
+                    header.write('STAT received_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.name + '_RECEIVED);\n')
+
                   header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
 
                   sends += 1
               # only create a chain when we see the source
               if(dangling.sc_type == 'ChainSrc'):
                 chains += 1 
+                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.name + '_RECEIVED "' + dangling.name +' received cycles";\n')
+                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.name + '_BLOCKED "' + dangling.name +' cycles blocked";\n')
+                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.name + '_SENT "' + dangling.name +' cycles sent";\n')
+                if(GENERATE_ROUTER_STATS):
+                    header.write('STAT received_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_RECEIVED);\n')
+                    header.write('STAT blocked_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_BLOCKED);\n')
+                    header.write('STAT sent_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_SENT);\n')
+
                 # we must create a logical chain information
                 chainsStr += 'let chain_' + dangling.name + ' = LOGICAL_CHAIN_INFO{logicalName: "' + dangling.name + '", logicalType: "' + \
                              dangling.raw_type + '", computePlatform: "' + platform + '", incoming: pack_chain_' + dangling.name + \
@@ -524,15 +555,30 @@ class MultiFPGAConnect():
                   header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ', width_recv_' + dangling.name +  ',blocked_'+ dangling.name +', sent_'+ dangling.name +');\n')
                 else:
                   header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive(recv_' + dangling.name+',' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ', width_recv_' + dangling.name + ', ?, ?);\n\n')
+
+
               if(dangling.sc_type == 'Send'):
 	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.name +' = ?;\n\n')
-                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+');\n')
+                if(GENERATE_ROUTER_STATS):
+                  header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+',received_'+ dangling.name +');\n')
+                else:
+                  header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend(send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+',?);\n')
+
+
               if(dangling.sc_type == 'ChainSrc' ):
-                header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + ']);\n\n')
+                if(GENERATE_ROUTER_STATS):
+                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],' + 'received_' + dangling.name + ');\n\n') 
+                else:
+                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],?);\n\n')
+
+
               if(dangling.sc_type == 'ChainSink' ):
-                header.write('PHYSICAL_CHAIN_IN pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ');\n\n')
-          
-     
+                if(GENERATE_ROUTER_STATS):
+                  header.write('PHYSICAL_CHAIN_IN pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ',blocked_'+ dangling.name +', sent_'+ dangling.name  +');\n\n')
+                else:
+                  header.write('PHYSICAL_CHAIN_IN pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ',?,?);\n\n')
+
+
           # Add in chain insertion code 
           header.write(chainsStr + '\n')
 

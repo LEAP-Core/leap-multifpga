@@ -154,3 +154,7 @@ Packagehint=multifpga
 [Alpha Inorder ACP Mapping Timing/Functional partition]
 File=modules/multifpga/alpha_inorder/acp_mapping_time_func.awb
 Packagehint=multifpga
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=1
+

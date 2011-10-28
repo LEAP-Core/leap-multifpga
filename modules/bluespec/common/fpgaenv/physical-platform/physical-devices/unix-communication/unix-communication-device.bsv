@@ -18,9 +18,16 @@
 
 import FIFOF::*;
 import Vector::*;
+import GetPut::*;
+import Connectable::*;
+import Clocks::*;
 
-`include "umf.bsh"
-`include "physical_platform_utils.bsh"
+`include "awb/provides/umf.bsh"
+`include "awb/provides/physical_platform_utils.bsh"
+`include "awb/provides/fpga_components.bsh"
+`include "awb/provides/clocks_device.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
+`include "awb/provides/librl_bsv_storage.bsh"
 
 `define PIPE_NULL       1
 `define POLL_INTERVAL   0
@@ -48,8 +55,9 @@ STATE
 
 interface UNIX_COMM_DRIVER;
 
-    method ActionValue#(Bit#(64)) read();
-    method Action                  write(Bit#(64) chunk);
+    method ActionValue#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) read();
+    method Action                 write(Bit#(TMul#(`UNIX_COMM_WIDTH,64)) chunk);
+    method Bool                   write_ready();
         
 endinterface
 
@@ -68,18 +76,50 @@ interface UNIX_COMM_DEVICE;
 endinterface
                   
 // UNIX pipe module
-module mkUNIXCommDevice#(String outgoing, String incoming)
+// We need to provide the illusion that this module is faster inorder to accomodate shifting data out.
+module mkUNIXCommDevice#(String outgoing, String incoming) (UNIX_COMM_DEVICE);
+ 
+   Clock rawClock <- mkAbsoluteClock(0, max(1,`MAGIC_SIMULATION_CLOCK_FACTOR/(`CRYSTAL_CLOCK_FREQ*`UNIX_COMM_WIDTH*64)));
+   Reset rawReset <- mkInitialReset(10, clocked_by rawClock);
+   
+   let comm <- mkUNIXCommDeviceShift(outgoing, incoming, clocked_by(rawClock), reset_by(rawReset));
+
+   SyncFIFOIfc#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) rxfifo <- mkSyncFIFOToCC( 16, rawClock, rawReset);
+   SyncFIFOIfc#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) txfifo <- mkSyncFIFOFromCC( 16, rawClock);
+
+   mkConnection(toPut(rxfifo),toGet(comm.driver.read)); 
+   mkConnection(toGet(txfifo),toPut(comm.driver.write)); 
+
+    // driver interface
+    interface UNIX_COMM_DRIVER driver;
+        
+        method read = toGet(rxfifo).get;
+        method write = toPut(txfifo).put;
+        method Bool write_ready = txfifo.notFull;
+        
+    endinterface
+    
+    // wires interface
+    interface UNIX_COMM_WIRES wires;
+        
+    endinterface   
+
+endmodule
+
+module mkUNIXCommDeviceShift#(String outgoing, String incoming)
     // interface
                   (UNIX_COMM_DEVICE);
     
+    
+
     // state
     Reg#(Bit#(8))  handle      <- mkReg(0);
     Reg#(Bit#(32)) pollCounter <- mkReg(0);
     Reg#(STATE)    state       <- mkReg(STATE_init0);
     
     // buffers
-    FIFOF#(Bit#(64)) readBuffer  <- mkFIFOF();
-    FIFOF#(Bit#(64)) writeBuffer <- mkFIFOF();
+    MARSHALLER#(`UNIX_COMM_WIDTH,Bit#(64)) marshaller <- mkSimpleMarshaller();
+    DEMARSHALLER#(`UNIX_COMM_WIDTH,Bit#(64)) demarshaller <- mkSimpleDemarshaller();
 
     // ==============================================================
     //                            Rules
@@ -112,7 +152,7 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
             Bit#(64) chunk <- comm_read(handle);
             
             //$display("UNIX Comm RX %h", chunk);
-            readBuffer.enq(chunk);
+            demarshaller.enq(chunk);
             pollCounter <= `POLL_INTERVAL;
          end
     endrule
@@ -122,8 +162,8 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
         let guard <- comm_can_write(handle);
         if(unpack(guard))
           begin 
-            Bit#(64) chunk = writeBuffer.first();
-            writeBuffer.deq();
+            Bit#(64) chunk = marshaller.first();
+            marshaller.deq();
             //$display("UNIX Comm TX %h", chunk);
             comm_write(handle, chunk);
           end
@@ -138,16 +178,17 @@ module mkUNIXCommDevice#(String outgoing, String incoming)
     interface UNIX_COMM_DRIVER driver;
         
         // read
-        method ActionValue#(Bit#(64)) read();
-            Bit#(64) chunk = readBuffer.first();
-            readBuffer.deq();
-            return chunk;
+        method ActionValue#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) read();
+            demarshaller.deq();
+            return pack(demarshaller.first);
         endmethod
 
         // write
-        method Action write(Bit#(64) chunk);
-            writeBuffer.enq(chunk);
+        method Action write(Bit#(TMul#(`UNIX_COMM_WIDTH,64)) chunk);
+            marshaller.enq(unpack(chunk));
         endmethod
+
+        method Bool write_ready = marshaller.notFull;
         
     endinterface
     

@@ -190,3 +190,6 @@ Packagehint=leap
 
 [Central Cache Service/Params]
 CENTRAL_CACHE_STATS=0
+
+[MultiFPGA Switch with Flowcontrol/Params]
+SWITCH_DEBUG=1

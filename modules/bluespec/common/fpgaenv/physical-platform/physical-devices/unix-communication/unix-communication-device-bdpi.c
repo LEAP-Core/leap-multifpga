@@ -159,7 +159,7 @@ int send_block(int fd, CommBlock *block, Channel *channel) {
         // system. 
         exit(0); 
     }
-    else if (bytes_written < sizeof(CommBlock))
+  else if (bytes_written < sizeof(CommBlock))
     {
         fprintf(stderr, "could not write complete chunk.\n");
     }

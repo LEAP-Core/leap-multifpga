@@ -194,3 +194,6 @@ Packagehint=leap
 [MultiFPGA Simulation FPGA0 Distributed Cache Environment]
 File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0-dist-cache.apm
 Packagehint=multifpga
+
+[MultiFPGA Switch with Flowcontrol/Params]
+SWITCH_DEBUG=1

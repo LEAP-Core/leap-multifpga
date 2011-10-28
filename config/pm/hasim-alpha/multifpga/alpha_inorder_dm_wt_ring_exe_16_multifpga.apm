@@ -81,3 +81,9 @@ Packagehint=multifpga
 [Alpha Inorder Sim Mapping Timing/Functional partition with Cache]
 File=modules/multifpga/alpha_inorder/sim_mapping_time_func_cache.awb
 Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=3
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=1

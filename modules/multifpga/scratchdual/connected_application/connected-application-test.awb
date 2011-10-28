@@ -1,0 +1,15 @@
+%name MultiFPGA Scratchpad Test Connected Application
+%desc MultiFPGA Scratchpad Test Connected Application
+
+%attributes slave connected hybrid
+
+%provides connected_application
+
+%requires hardware_system
+
+%public  connected-application-test.bsv
+%public  connected-application-test.h
+%public  connected-application-test.cpp
+
+%param SYNTH_BOUNDARY mkConnectedApplication "name of synthesis boundary"
+

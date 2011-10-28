@@ -20,4 +20,4 @@
 %generated -t BA comm_write.ba
 
 
-
+%param UNIX_COMM_WIDTH 4 "Width of unix comm device in 64-bit words.  Device will scale its clock to provide upgraded bandwidth"

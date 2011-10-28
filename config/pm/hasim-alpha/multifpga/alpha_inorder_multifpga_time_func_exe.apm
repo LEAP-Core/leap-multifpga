@@ -18,7 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=HAsim Performance Model
-environment_description=Simulation Dual FPGA Environment
+environment_description=Simulation Dual FPGA Environment with Dual Cache
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Alpha Inorder Simulation Mapping Timing/Functional partition
 
@@ -48,10 +48,6 @@ fpgamap_parser=FPGAMap
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
-Packagehint=multifpga
-
-[Simulation Dual FPGA Environment]
-File=modules/leap-platforms/fpga-environments/sim/sim_fpga_env.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation]
@@ -153,4 +149,8 @@ Packagehint=hasim-models
 
 [Alpha Inorder Simulation Mapping Timing/Functional partition]
 File=modules/multifpga/alpha_inorder/sim_mapping_time_func.awb
+Packagehint=multifpga
+
+[Simulation Dual FPGA Environment with Dual Cache]
+File=modules/leap-platforms/fpga-environments/sim/sim_fpga_cache_env.awb
 Packagehint=multifpga

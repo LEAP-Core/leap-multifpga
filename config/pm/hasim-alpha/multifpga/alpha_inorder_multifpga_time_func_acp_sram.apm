@@ -154,3 +154,7 @@ Packagehint=multifpga
 [ACP Dual FPGA Environment with SRAM]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_sram.awb
 Packagehint=multifpga
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=1
+

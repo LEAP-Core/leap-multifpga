@@ -20,6 +20,7 @@ module [CONNECTED_MODULE] mkC (Empty);
   Reg#(MEM_ADDRESS) addrResps <- mkReg(0);
   Reg#(Bool) writesComplete <- mkReg(False);  
   Reg#(Bool) readsComplete <- mkReg(False);  
+  Reg#(Bool) sentDone <- mkReg(False);
 
   rule tryWrite(!writesComplete);
     addr <= addr + 1;
@@ -51,11 +52,11 @@ module [CONNECTED_MODULE] mkC (Empty);
       end
   endrule
 
-  rule fini(readsComplete);
+  rule fini(readsComplete && !sentDone);
     sendDone.deq;
     finishConn.send(0);
+    sentDone <= True;
     $display("PASSED");
-    $finish;    
   endrule
 
 endmodule
