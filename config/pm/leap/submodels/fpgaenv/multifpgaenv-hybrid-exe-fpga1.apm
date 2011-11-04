@@ -219,3 +219,10 @@ fpga_environment_parser=FPGA Environment Datatype
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
 Packagehint=leap
+
+[Null Channel IO Module/Requires]
+physical_channel=Null Physical Channel
+
+[Null Physical Channel]
+File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
+Packagehint=leap

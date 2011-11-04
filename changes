@@ -656,3 +656,50 @@ Several changes
 2) Statistics collection for shared portions of multi-fpga routers
 
 3) More realistic unix simulation, which, incidentally, greatly improves simulation speed. 
+
+----------
+kfleming    Date: Thu Nov  3 21:59:46 EDT 2011  CSN: CSN-multifpga-68
+                  Fri Nov  4 01:59:46 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_chains_acp.apm Locally Modified           67 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga1.apm Locally Modified           67 
+ multifpgaenv-hybrid-exe-fpga1-dist-cache.apm Locally Modified           67 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_ring_acp_32_multifpga.apm Locally Modified           67 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified           67 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-switch.awb    Locally Modified           67 
+ flowcontrol-egress.bsv    Locally Modified           67 
+ flowcontrol-ingress.bsv   Locally Modified           67 
+ flowcontrol-switch-regs.awb Locally Modified           67 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           67 
+ danglingConnection.py     Locally Modified           67 
+
+Directory modules/multifpga/longChain
+ test-d.bsv                Locally Modified           67 
+
+Directory modules/multifpga/synthTest
+ test-c-chains.bsv         Locally Modified           67 
+ test-d-chains.bsv         Locally Modified           67 
+
+
+Two changes in this check in:
+
+1) Fixed bug in flow control algorithm where packets lengths were
+limited to 8.  These calculations are now done off a parameter. 
+
+2) More intelligent marshalling scheme wherein we bit-pack as many
+data bits in the header as possible.  This is useful in reducing
+latencies/improving throughput in some multilane scenarios. 
+
+

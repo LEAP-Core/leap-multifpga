@@ -9,7 +9,7 @@ class DanglingConnection():
       self.idx = -1 # we don't care about the physical indexes yet. They get assigned during the match operation
       self.platform = platform
       self.optional = optional
-      self.bitwidth = bitwidth
+      self.bitwidth = int(bitwidth)
       self.matched = False
       self.chainPartner = -1
       self.via = -1

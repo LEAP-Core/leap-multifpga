@@ -17,41 +17,20 @@
 
 `include "awb/provides/multifpga_router_service.bsh"
 
-module mkPacketizeConnectionSend#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id, NumTypeParam#(bitwidth) width, STAT received) (Empty)
-   provisos(Div#(SizeOf#(t_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
-            Bits#(t_DATA, t_DATA_SZ),
-            /*Add#(fill_EXTRA, filler_bits, t_DATA_SZ),*/
-            Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)))/*,
-            Add#(n_DATA_EXTRA, SizeOf#(umf_chunk), t_DATA_SZ)*/);
-
-  Empty m = ?;
-       messageM("Choosing packetizer numChunks: " + integerToString(valueof(t_NUM_CHUNKS))  + " width: "+ integerToString(valueof(bitwidth)) + " is less than " + integerToString(valueof(filler_bits)));
-  if(valueof(bitwidth) <= valueof(SizeOf#(umf_chunk))) // don't instantiate a marshaller!
-    begin
-      m <- mkPacketizeConnectionSendUnmarshalled(send,port,id,width,received);
-    end
-  else
-    begin
-      m <- mkPacketizeConnectionSendMarshalled(send,port,id,received);
-    end
-
-  return m;
-endmodule
-
 // At some point we're going to need flow control up here
 // We may not need marsh/demarsh!!!!  If all connections are the CHUNK size!
 module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id, STAT received) (Empty)
-   provisos(Div#(SizeOf#(t_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
-            Bits#(t_DATA, t_DATA_SZ),
-            Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id, NumTypeParam#(bitwidth) width, STAT received) (Empty)
+   provisos(Bits#(t_DATA, t_DATA_SZ),
+            Div#(TSub#(t_DATA_SZ, filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
+            Add#(n_EXTRA_SZ_2, t_DATA_SZ, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
+            Add#(n_EXTRA_SZ, TSub#(t_DATA_SZ, filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
 
     Reg#(Bool) waiting <- mkReg(True);
+    Reg#(Bit#(filler_bits)) fillerBits <- mkReg(?);
+ 
     DEMARSHALLER#(t_NUM_CHUNKS, umf_chunk) dem <- mkSimpleDemarshaller();  
 
     rule sendReady(waiting || send.notFull());
@@ -65,6 +44,7 @@ module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITC
                            umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
         //$display("Connection RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
         waiting <= False;
+        fillerBits <= packet.UMF_PACKET_header.filler;        
         received.incr();
     endrule
 
@@ -78,9 +58,11 @@ module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITC
         //$display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
     endrule
 
+    // Lurking latency here...
+    // Should try to fix at some point. 
     rule sendData(!waiting && send.notFull());
         dem.deq();
-        send.send(unpack(truncate(pack(dem.first))));
+        send.send(unpack(truncate({pack(dem.first),fillerBits})));
         if(`SWITCH_DEBUG == 1)
           begin
             $display("Connection RX %d emits out: %h", id, dem.first);
@@ -165,45 +147,23 @@ module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWI
      end
 endmodule
 
-
-module mkPacketizeConnectionReceive#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) port, 
-                                     Integer id, NumTypeParam#(bitwidth) width, STAT blocked, STAT sent) (Empty)
-   provisos(Div#(SizeOf#(t_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
-            Bits#(t_DATA, t_DATA_SZ),
-	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)))
-            /*Add#(fill_EXTRA, filler_bits, t_DATA_SZ),
-            Add#(n_CHUNK_EXTRA_SZ, SizeOf#(umf_chunk), t_DATA_SZ)*/);
-
-  Empty m = ?;
-  if(valueof(bitwidth) <= valueof(SizeOf#(umf_chunk))) // don't instantiate a marshaller!
-    begin
-      m <- mkPacketizeConnectionReceiveUnmarshalled(recv,port, id, width, blocked, sent);
-    end
-  else
-    begin
-      m <- mkPacketizeConnectionReceiveMarshalled(recv,port,id, blocked, sent);
-    end
-
-  return m;
-endmodule
-
-
 module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv, SWITCH_EGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id,
-               STAT blocked, STAT sent) (Empty)
-   provisos(Div#(SizeOf#(t_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
-            Bits#(t_DATA, t_DATA_SZ),
-	    Add#(n_EXTRA_SZ, t_DATA_SZ, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id, 
+                                               NumTypeParam#(bitwidth) width,
+                                               STAT blocked, STAT sent) (Empty)
+   provisos(Bits#(t_DATA, t_DATA_SZ),
+            Div#(TSub#(t_DATA_SZ,filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
+            Add#(filler_EXTRA_SZ, filler_bits, t_DATA_SZ),
+            Add#(n_EXTRA_SZ_2, t_DATA_SZ, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
+	    Add#(n_EXTRA_SZ, TSub#(t_DATA_SZ,filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+
    PulseWire continueRequestFired <- mkPulseWire(); 
    PulseWire startRequestFired <- mkPulseWire(); 
 
    MARSHALLER#(t_NUM_CHUNKS, umf_chunk) mar <- mkSimpleMarshaller();
-
+   
    rule continueRequest (True);
         umf_chunk chunk = mar.first();
         mar.deq();
@@ -224,12 +184,14 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
    rule startRequest (recv.notEmpty());
        sent.incr();
        startRequestFired.send();
+       Tuple2#(Bit#(TSub#(t_DATA_SZ,filler_bits)),Bit#(filler_bits)) data_split = split(pack(recv.receive));
+       mar.enq(unpack(zeroExtend(tpl_1(data_split))));
        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
                            umf_phy_pvt,    filler_bits), umf_chunk) header = tagged UMF_PACKET_header GENERIC_UMF_PACKET_HEADER
                             {
-                                filler: ?,
+                                filler: tpl_2(data_split),
                                 phyChannelPvt: ?,
                                 channelID: 0, // we use this elsewhere to refer to flow control messages
                                 serviceID: fromInteger(id),
@@ -243,7 +205,7 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
             $display("Connection TX %d  emits out: %h", id, recv.receive);
         end
 
-        mar.enq(unpack(zeroExtend(pack(recv.receive))));
+    
    endrule
 endmodule
 

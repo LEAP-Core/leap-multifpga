@@ -224,3 +224,10 @@ Packagehint=leap
 [Base Common Devices]
 File=modules/leap/virtual-platform/virtual-devices/devices/common/common-utility-devices.awb
 Packagehint=leap
+
+[Null Channel IO Module/Requires]
+physical_channel=Null Physical Channel
+
+[Null Physical Channel]
+File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
+Packagehint=leap

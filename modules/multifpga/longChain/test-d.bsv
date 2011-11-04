@@ -23,6 +23,7 @@ module [CONNECTED_MODULE] mkD (Empty);
     if(truncate(recvLast.receive) != rxCounter)
       begin
         $display("Error last: got %d expected %d", recvLast.receive, rxCounter);
+        $finish;
       end
     if(rxCounter + 1 == 0)
       begin

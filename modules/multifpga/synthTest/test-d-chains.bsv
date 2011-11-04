@@ -11,19 +11,29 @@ module [CONNECTED_MODULE] mkD (Empty);
 
   Connection_Send#(Bit#(32)) aliveOut <- mkConnection_Send("fromD");
   Connection_Receive#(Bit#(32)) aliveIn <- mkConnection_Receive("fromB");
+  Connection_Send#(Bit#(320)) aliveOutWide <- mkConnection_Send("fromD_Wide");
+  Connection_Receive#(Bit#(320)) aliveInWide <- mkConnection_Receive("fromB_Wide");
   STAT statCount  <- mkStatCounter(`STATS_TESTD_COUNT);
 
   rule getFromSW;
     let data <- serverStub.acceptRequest_TakeOneInput();
     aliveOut.send(data);
+    aliveOutWide.send(zeroExtend(data));
     $display("FPGA1 Takes request: %d", data);
     statCount.incr;
   endrule
   
   rule sendToSW;
     aliveIn.deq();
-    serverStub.sendResponse_TakeOneInput(aliveIn.receive);    
+    aliveInWide.deq();
+    serverStub.sendResponse_TakeOneInput(aliveIn.receive & truncate(aliveInWide.receive));    
     $display("FPGA1 Gets Response: %d", aliveIn.receive);
+
+    if(aliveIn.receive != truncate(aliveInWide.receive))
+      begin
+        $display("Error %d != %d", aliveIn.receive, aliveInWide.receive);
+        $finish;
+      end
     statCount.incr;
   endrule
 

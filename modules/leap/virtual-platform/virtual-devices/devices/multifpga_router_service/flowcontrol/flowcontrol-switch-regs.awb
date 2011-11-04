@@ -14,6 +14,5 @@
 
 
 %param --global MULTIFPGA_FIFO_SIZES 128 "True if we can expect that the router has been generated"
-%param --global MAX_TRANSACTION_SIZE 8 "True if we can expect that the router has been generated"
 %param  SWITCH_DEBUG 0 "Enables copious switch debug printing"
 

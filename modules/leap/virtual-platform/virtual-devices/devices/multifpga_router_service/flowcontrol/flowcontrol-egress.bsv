@@ -54,6 +54,7 @@ module mkEgressSwitch#(function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PAC
              Bits#(umf_chunk_r, umf_chunk_r_SZ),
              Bits#(umf_chunk_w, umf_chunk_w_SZ),
              Bits#(umf_chunk_r, umf_chunk_r_SZ), 
+             Add#(umf_message_len_w, size_extra,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),
              Add#(chunk_extra, TAdd#(umf_service_id_w,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))), umf_chunk_r_SZ),
              Add#(serviceExcess, n_SAFE_FIFOS_SZ, umf_service_id_w));
   EGRESS_SWITCH#(n,GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -88,6 +89,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
               Bits#(umf_chunk_r, umf_chunk_r_SZ), 
               Add#(chunk_extra, TAdd#(umf_service_id,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))), umf_chunk_r_SZ),
               Log#(n_FIFOS_SAFE, n_FIFOS_SAFE_SZ),
+              Add#(umf_message_len, size_extra,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),
               Add#(extraServices, n_FIFOS_SAFE_SZ, umf_service_id));
 
     // ==============================================================
@@ -191,8 +193,8 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
          let responseActiveQueue  = tpl_1(payload);
          let currentCredits = portCredits.sub(truncate(responseActiveQueue));
          let creditsNext = tpl_2(payload) + currentCredits;
-
-         bufferAvailable[responseActiveQueue] <= creditsNext >= `MAX_TRANSACTION_SIZE; // This should always be true...
+         Bit#(umf_message_len)  max = maxBound;
+         bufferAvailable[responseActiveQueue] <= creditsNext >= zeroExtend(max) + 1; // This should always be true...
          portCredits.upd(truncate(responseActiveQueue), creditsNext);
       
          if(`SWITCH_DEBUG == 1)
@@ -200,17 +202,17 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
              $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
            end
 
-         if(creditsNext < `MAX_TRANSACTION_SIZE)
+         if(creditsNext < zeroExtend(max))
            begin
              $display("Setting credits to zero... this is a bug");
-             $display("creditNext %d creditsRX %d currentCredits %d", creditsNext, tpl_2(payload), currentCredits);
+             $display("For link %d creditNext %d creditsRX %d currentCredits %d", responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
              $finish;
            end      
 
          if(creditsNext > `MULTIFPGA_FIFO_SIZES)
            begin
              $display("Credits have overflowed fifo size... this is a bug");
-             $display("creditNext %d creditsRX %d currentCredits %d", creditsNext, tpl_2(payload), currentCredits);
+             $display("For link %d creditNext %d creditsRX %d currentCredits %d", responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
              $finish;
            end      
 
@@ -238,15 +240,15 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
               let responseActiveQueue  = tpl_1(payload);
               let currentCredits = portCredits.sub(truncate(responseActiveQueue));
               let creditsNext = tpl_2(payload) + currentCredits;
-
-              bufferAvailable[responseActiveQueue] <= creditsNext >= `MAX_TRANSACTION_SIZE; // This should always be true...
+              Bit#(umf_message_len) max = maxBound;
+              bufferAvailable[responseActiveQueue] <= creditsNext >= zeroExtend(max); // This should always be true...
               portCredits.upd(truncate(responseActiveQueue), creditsNext);
               if(`SWITCH_DEBUG == 1)
                 begin
                   $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, payload, currentCredits, creditsNext);
                 end
 
-              if(creditsNext < `MAX_TRANSACTION_SIZE)
+              if(creditsNext < zeroExtend(max))
               begin
                 $display("Setting credits to zero... this is a bug");
                 $finish;
@@ -337,7 +339,8 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
 
             Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  oldCredits - zeroExtendNP(requestChunks);
             portCredits.upd(fromInteger(s),newCount);
-            bufferAvailable[fromInteger(s)] <= newCount >= `MAX_TRANSACTION_SIZE;
+            Bit#(umf_message_len) max = maxBound;
+            bufferAvailable[fromInteger(s)] <= newCount >= zeroExtend(max) + 1; // XXX this needs to be calculated off of umf_message_len
             if(`SWITCH_DEBUG == 1)
               begin
                 $display("Setting portCredits for %d to %d", s, newCount);
@@ -345,7 +348,7 @@ module mkFlowControlSwitchEgressNonZero#(function ActionValue#(GENERIC_UMF_PACKE
 
            if(oldCredits < zeroExtendNP(requestChunks))
              begin
-               $display("Bizzarre Credit Underflow oldCredit %d messageSize %d newCount %d", oldCredits, requestChunks, newCount);
+               $display("Bizzarre Credit Underflow oldCredit %d messageSize %d newCount %d max %d", oldCredits, requestChunks, newCount, max);
                $finish;               
              end
 

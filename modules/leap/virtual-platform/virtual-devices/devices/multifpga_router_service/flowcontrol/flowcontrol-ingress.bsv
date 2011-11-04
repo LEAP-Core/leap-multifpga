@@ -156,7 +156,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
            end
 
          // If we get too free, we need to send come cedits down the pipe.
-         if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES - `MAX_TRANSACTION_SIZE)
+         if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2)
            begin 
              if(`SWITCH_DEBUG == 1)
                begin
@@ -203,7 +203,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
            end
 
          // If we get too free, we need to send come cedits down the pipe.
-         if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES - `MAX_TRANSACTION_SIZE)
+         if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2)
            begin 
              if(`SWITCH_DEBUG == 1)
                begin
