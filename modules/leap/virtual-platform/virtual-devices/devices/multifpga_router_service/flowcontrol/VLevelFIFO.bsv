@@ -24,6 +24,15 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 //----------------------------------------------------------------------//
 
+/******** 
+ * This contains a an interface definition for the VLevelFIFO, a complex data 
+ * structure used in the ingress switch.  This structue logical represents a set of 
+ * fifos, but these fifos are folded and mapped onto a single BRAM. As a result, 
+ * bandwidth is limited to a single read and write per cycle.  In the world of 
+ * chip to chip communication, this is a good abstraction
+ */
+
+
 // import standard library
 import DReg::*;
 import FIFO::*;
@@ -35,31 +44,28 @@ interface VLevelFIFO#(numeric type no_fifo,
                       numeric type fifo_sz, 
                       type data_t);
    
-   // enq fifo idx
-   method Action enq(Bit#(TLog#(no_fifo)) idx, data_t data);
+    // enq fifo idx
+    method Action enq(Bit#(TLog#(no_fifo)) idx, data_t data);
       
-   // deq fifo idx
-   method Action deq(Bit#(TLog#(no_fifo)) idx);
+    // deq fifo idx
+    method Action deq(Bit#(TLog#(no_fifo)) idx);
       
-   // read_req for first of fifo idx
-   method Action firstReq(Bit#(TLog#(no_fifo)) idx);
+    // read_req for first of fifo idx
+    method Action firstReq(Bit#(TLog#(no_fifo)) idx);
       
-   // first_resp
-   method ActionValue#(data_t) firstResp();
+    // first_resp
+    method ActionValue#(data_t) firstResp();
       
-   // clear all fifos
-   method Action clear();
+    // clear all fifos
+    method Action clear();
      
-   // return no. elements in each fifo at the beginning of cycle
-   method Vector#(no_fifo,Bit#(TLog#(TAdd#(fifo_sz,1)))) used();
+    // return no. elements in each fifo at the beginning of cycle
+    method Vector#(no_fifo,Bit#(TLog#(TAdd#(fifo_sz,1)))) used();
             
-   // return no. elements in each fifo at the end of cycle
-//   method Vector#(no_fifo,Bit#(TLog#(TAdd#(fifo_sz,1)))) used2();
-            
-   // return no. enq credit tokens in each fifo
-   method Vector#(no_fifo,Bit#(TLog#(TAdd#(fifo_sz,1)))) free();
+    // return no. enq credit tokens in each fifo
+    method Vector#(no_fifo,Bit#(TLog#(TAdd#(fifo_sz,1)))) free();
       
-   // decrement amnt of "enq credit tokens" of fifo idx
-   method Action decrFree(Bit#(TLog#(no_fifo)) idx, Bit#(TLog#(TAdd#(fifo_sz,1))) amnt);   
+    // decrement amnt of "enq credit tokens" of fifo idx
+    method Action decrFree(Bit#(TLog#(no_fifo)) idx, Bit#(TLog#(TAdd#(fifo_sz,1))) amnt);   
          
 endinterface

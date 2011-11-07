@@ -70,12 +70,12 @@ import Vector::*;
 // from the next level and the current level of the sort and then decide which
 // stream to process next  
 interface Scheduler#(numeric type k, type tok_t, type next_tok_t);
-   // give the scheduler usage information so that it can pick the next to process
-   (* always_ready *) method Action putInfo(Vector#(k,next_tok_t) nextTok,
+    // give the scheduler usage information so that it can pick the next to process
+    (* always_ready *) method Action putInfo(Vector#(k,next_tok_t) nextTok,
                                             Vector#(k,tok_t)      tok0);
                          
-   // return the next stream to be processed, if return tagged Invalid = do nothing
-   (* always_ready *) method Maybe#(Bit#(TLog#(k))) getNext();
+    // return the next stream to be processed, if return tagged Invalid = do nothing
+    (* always_ready *) method Maybe#(Bit#(TLog#(k))) getNext();
 endinterface 
 
 
@@ -84,40 +84,40 @@ endinterface
 // auxiliary functions
 
 function Bool notValid(Maybe#(a) i);
-   return !isValid(i);
+    return !isValid(i);
 endfunction
 
 function Bool largerThan(Bit#(sz) a, Bit#(sz) val);
-   return val > a;
+    return val > a;
 endfunction
 
 function Bool and3(Bool a, Bool b, Bool c);
-   return a && b && c;
+    return a && b && c;
 endfunction
 
 function Tuple2#(Bool,a) chooseFirstIfPossible(Tuple2#(Bool,a) fst,
                                                Tuple2#(Bool,a) snd);
-   return tpl_1(fst) ? fst : snd;
+    return tpl_1(fst) ? fst : snd;
 endfunction
 
 function Bool isSmaller(d_t a, d_t b)
-   provisos (Bits#(d_t,d_sz),
-             Mul#(8,q_sz,d_sz),
-             Add#(1,xxA,d_sz));
+    provisos (Bits#(d_t,d_sz),
+              Mul#(8,q_sz,d_sz),
+              Add#(1,xxA,d_sz));
    
-   Vector#(8,Bit#(q_sz)) aVec = reverse(unpack(pack(a)));
-   Vector#(8,Bit#(q_sz)) bVec = reverse(unpack(pack(b)));
+    Vector#(8,Bit#(q_sz)) aVec = reverse(unpack(pack(a)));
+    Vector#(8,Bit#(q_sz)) bVec = reverse(unpack(pack(b)));
    
-   function Tuple2#(Bool,Bool) getLargerAndEqual(Tuple2#(Bool,Bool) aTup, Tuple2#(Bool,Bool) bTup);
-      return tuple2((tpl_1(aTup) || (tpl_2(aTup) && tpl_1(bTup))), 
+    function Tuple2#(Bool,Bool) getLargerAndEqual(Tuple2#(Bool,Bool) aTup, Tuple2#(Bool,Bool) bTup);
+        return tuple2((tpl_1(aTup) || (tpl_2(aTup) && tpl_1(bTup))), 
                     (tpl_2(aTup) && tpl_2(bTup)));
-   endfunction
+     endfunction
    
-   let res = tpl_1(fold(getLargerAndEqual, 
-                        zip(zipWith(\< ,aVec,bVec),
-                            zipWith(\== ,aVec,bVec))));
+    let res = tpl_1(fold(getLargerAndEqual, 
+                         zip(zipWith(\< ,aVec,bVec),
+                             zipWith(\== ,aVec,bVec))));
    
-   return res;
+    return res;
    
 endfunction
 
@@ -126,166 +126,145 @@ endfunction
 
 // a scheduler which the scheduling decision is return in the same cycle
 module mkZeroCycleScheduler (Scheduler#(k_next,Bit#(sz),Bit#(sz_next)))
-   provisos (Add#(1,xxA,k_next));
+    provisos (Add#(1,xxA,k_next));
    
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  last     <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  last     <- mkReg(tagged Invalid);
 
-   Wire#(Maybe#(Bit#(TLog#(k_next)))) getNextW <- mkDWire(tagged Invalid); 
+    Wire#(Maybe#(Bit#(TLog#(k_next)))) getNextW <- mkDWire(tagged Invalid); 
    
-   method Action putInfo(Vector#(k_next,Bit#(sz_next)) nextTok,
-                         Vector#(k_next,Bit#(sz))      tok0);
+    method Action putInfo(Vector#(k_next,Bit#(sz_next)) nextTok,
+                          Vector#(k_next,Bit#(sz))      tok0);
 
-      let idx    = fromMaybe(?,last);
-      let okNext = map(largerThan(0),nextTok);
-      let ok0    = map(largerThan(0),tok0);
-      ok0[idx]   = isValid(last) ? False : ok0[idx];
-      let okVec0 = zipWith( \&& ,okNext,ok0);
-      Vector#(k_next,Integer) intVec = genVector();
-      let vec0   = zip(okVec0,intVec);
-      let res0   = fold(chooseFirstIfPossible,vec0);
-      let dec    = tpl_1(res0) ? tagged Valid fromInteger(tpl_2(res0)) : 
+        let idx    = fromMaybe(?,last);
+        let okNext = map(largerThan(0),nextTok);
+        let ok0    = map(largerThan(0),tok0);
+        ok0[idx]   = isValid(last) ? False : ok0[idx];
+        let okVec0 = zipWith( \&& ,okNext,ok0);
+        Vector#(k_next,Integer) intVec = genVector();
+        let vec0   = zip(okVec0,intVec);
+        let res0   = fold(chooseFirstIfPossible,vec0);
+        let dec    = tpl_1(res0) ? tagged Valid fromInteger(tpl_2(res0)) : 
                                  tagged Invalid;  
-      last <= dec;
-      getNextW <= dec;
+        last <= dec;
+        getNextW <= dec;
 
-      if(isValid(dec))
-        if(`SortDebug0) $display("%m scheduler choose ok %d idx %d",isValid(dec),fromMaybe(?,dec));
-   endmethod
+        if(isValid(dec))
+            if(`SortDebug0) $display("%m scheduler choose ok %d idx %d",isValid(dec),fromMaybe(?,dec));
+    endmethod
       
-   method Maybe#(Bit#(TLog#(k_next))) getNext();
-      return getNextW;
-   endmethod
+    method Maybe#(Bit#(TLog#(k_next))) getNext();
+        return getNextW;
+    endmethod
 
 endmodule
 
 // a scheduler which the scheduling decision is returned one cycle later
 module mkOneCycleScheduler (Scheduler#(k_next,Bit#(sz),Bit#(sz_next)))
-   provisos (Add#(1,xxA,k_next));
+    provisos (Add#(1,xxA,k_next));
    
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  last     <- mkReg(tagged Invalid);
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  sndLast  <- mkReg(tagged Invalid);
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes0    <- mkReg(tagged Invalid);
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes1    <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  last     <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  sndLast  <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes0    <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes1    <- mkReg(tagged Invalid);
 
-   Wire#(Maybe#(Bit#(TLog#(k_next)))) getNextW <- mkDWire(tagged Invalid); 
+    Wire#(Maybe#(Bit#(TLog#(k_next)))) getNextW <- mkDWire(tagged Invalid); 
    
-   rule choose(True);
-      let chk1 = (sRes1 != last) && (sRes1 != sndLast);
-      let next = chk1 ? sRes1 : sRes0;
-      sndLast <= last;
-      last <= next;
-      getNextW <= next;
-      if(`SortDebug0) $display("%m scheduler choose ok %d idx %d",isValid(next),fromMaybe(?,next));
-   endrule   
+    rule choose(True);
+        let chk1 = (sRes1 != last) && (sRes1 != sndLast);
+        let next = chk1 ? sRes1 : sRes0;
+        sndLast <= last;
+        last <= next;
+        getNextW <= next;
+        if(`SortDebug0) $display("%m scheduler choose ok %d idx %d",isValid(next),fromMaybe(?,next));
+    endrule   
    
-   method Action putInfo(Vector#(k_next,Bit#(sz_next)) nextTok,
-                         Vector#(k_next,Bit#(sz))      tok0);
+    method Action putInfo(Vector#(k_next,Bit#(sz_next)) nextTok,
+                          Vector#(k_next,Bit#(sz))      tok0);
 
-      let okNext = map(largerThan(2),nextTok);
-      let ok0    = map(largerThan(2),tok0);
-      let okVec0 = zipWith( \&& ,okNext,ok0);
-      Vector#(k_next,Integer) intVec = genVector();
-      let vec0   = zip(okVec0,intVec);
-      let res0   = fold(chooseFirstIfPossible,vec0);
-      let dec0   = tpl_1(res0) ? tagged Valid fromInteger(tpl_2(res0)) : 
-                                 tagged Invalid;  
+        let okNext = map(largerThan(2),nextTok);
+        let ok0    = map(largerThan(2),tok0);
+        let okVec0 = zipWith( \&& ,okNext,ok0);
+        Vector#(k_next,Integer) intVec = genVector();
+        let vec0   = zip(okVec0,intVec);
+        let res0   = fold(chooseFirstIfPossible,vec0);
+        let dec0   = tpl_1(res0) ? tagged Valid fromInteger(tpl_2(res0)) : 
+                                   tagged Invalid;  
 
-      let okNext1 = map(largerThan(0),nextTok);
-      let ok2     = map(largerThan(0),tok0);
-      let okVec1  = zipWith( \&& ,okNext1,ok2);
-      let vec1    = zip(okVec1,intVec);
-      let res1    = fold(chooseFirstIfPossible,vec1);
-      let dec1    = tpl_1(res1) ? tagged Valid fromInteger(tpl_2(res1)) : 
-                                  tagged Invalid;  
+        let okNext1 = map(largerThan(0),nextTok);
+        let ok2     = map(largerThan(0),tok0);
+        let okVec1  = zipWith( \&& ,okNext1,ok2);
+        let vec1    = zip(okVec1,intVec);
+        let res1    = fold(chooseFirstIfPossible,vec1);
+        let dec1    = tpl_1(res1) ? tagged Valid fromInteger(tpl_2(res1)) : 
+                                    tagged Invalid;  
    
-      sRes0 <= dec0;
-      sRes1 <= dec1;
-   endmethod
+        sRes0 <= dec0;
+        sRes1 <= dec1;
+    endmethod
       
-   method Maybe#(Bit#(TLog#(k_next))) getNext();
-      return getNextW;
-   endmethod
+    method Maybe#(Bit#(TLog#(k_next))) getNext();
+       return getNextW;
+    endmethod
 
 endmodule
 
 // a scheduler which the scheduling decision is returned one cycle later
 module mkOneCycleScheduler2 (Scheduler#(k_next,Bit#(sz),Bit#(sz_next)))
-   provisos (Add#(1,xxA,k_half),
-             Div#(k_next,2,k_half),
-             Add#(k_half,k_half,k_next));
+    provisos (Add#(1,xxA,k_half),
+              Div#(k_next,2,k_half),
+              Add#(k_half,k_half,k_next));
    
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  last     <- mkReg(tagged Invalid);
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  sndLast  <- mkReg(tagged Invalid);
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes0    <- mkReg(tagged Invalid);
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes1    <- mkReg(tagged Invalid);
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes2    <- mkReg(tagged Invalid);
-   Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes3    <- mkReg(tagged Invalid);
-   Reg#(Bool)                         round    <- mkReg(False);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  last     <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  sndLast  <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes0    <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes1    <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes2    <- mkReg(tagged Invalid);
+    Reg#(Maybe#(Bit#(TLog#(k_next))))  sRes3    <- mkReg(tagged Invalid);
+    Reg#(Bool)                         round    <- mkReg(False);
    
-   Wire#(Maybe#(Bit#(TLog#(k_next)))) getNextW <- mkDWire(tagged Invalid); 
+    Wire#(Maybe#(Bit#(TLog#(k_next)))) getNextW <- mkDWire(tagged Invalid); 
    
-   rule choose(True);
-//       let chk2 = (sRes2 != last) && (sRes2 != sndLast);
-//       let chk3 = (sRes3 != last) && (sRes3 != sndLast);
-//       let next0 = chk2 ? sRes2 : sRes0;
-//       let next1 = chk3 ? sRes3 : sRes1;
-//       let next3 = isValid(next0) ? next0 : next1;
-//       let next4 = isValid(next1) ? next1 : next0;
-//       let next = round ? next3 : next4;
+    rule choose(True);
 
-      let chk2 = (sRes2 != last) && (sRes2 != sndLast);
-      let chk3 = (sRes3 != last) && (sRes3 != sndLast);
-      let next0 = chk2 ? sRes2 : sRes0;
-      let next1 = chk3 ? sRes3 : sRes1;
-      let next  = round ? next0 : next1;
+        let chk2 = (sRes2 != last) && (sRes2 != sndLast);
+        let chk3 = (sRes3 != last) && (sRes3 != sndLast);
+        let next0 = chk2 ? sRes2 : sRes0;
+        let next1 = chk3 ? sRes3 : sRes1;
+        let next  = round ? next0 : next1;
 
-      sndLast <= last;
-      last <= next;
-      getNextW <= next;
-      round <= !round;
+        sndLast <= last;
+        last <= next;
+        getNextW <= next;
+        round <= !round;
       
-      if(`SortDebug0) $display("%m scheduler choose ok %d idx %d",isValid(next),fromMaybe(?,next));
-   endrule   
+        if(`SortDebug0) $display("%m scheduler choose ok %d idx %d",isValid(next),fromMaybe(?,next));
+    endrule   
    
-   method Action putInfo(Vector#(k_next,Bit#(sz_next)) nextTok,
+    method Action putInfo(Vector#(k_next,Bit#(sz_next)) nextTok,
                          Vector#(k_next,Bit#(sz))      tok0);
-//       let okNext = map(largerThan(2),nextTok);
-//       let ok0    = map(largerThan(2),tok0);
-//       let ok1    = map(largerThan(2),tok1);   
-//       let okVec = zipWith3(and3,okNext,ok0,ok1);
-      Vector#(k_next,Integer) intVec = genVector();
-//       let vec   = zip(okVec,intVec);
-//       Vector#(k_half,Tuple2#(Bool,Integer)) vec0 = take(vec);
-//       Vector#(k_half,Tuple2#(Bool,Integer)) vec1 = takeTail(vec);
-//       let res0   = fold(chooseFirstIfPossible,vec0);
-//       let res1   = fold(chooseFirstIfPossible,vec1);
-//       let dec0   = tpl_1(res0) ? tagged Valid fromInteger(tpl_2(res0)) : 
-//                                  tagged Invalid;  
-//       let dec1   = tpl_1(res1) ? tagged Valid fromInteger(tpl_2(res1)) : 
-//                                  tagged Invalid;  
 
-      let okNext1 = map(largerThan(0),nextTok);
-      let ok2     = map(largerThan(0),tok0);
-      let okVec1  = zipWith( \&& ,okNext1,ok2);
-      let vecc    = zip(okVec1,intVec);
-      Vector#(k_half,Tuple2#(Bool,Integer)) vec2 = take(vecc);
-      Vector#(k_half,Tuple2#(Bool,Integer)) vec3 = takeTail(vecc);
-      let res2   = fold(chooseFirstIfPossible,vec2);
-      let res3   = fold(chooseFirstIfPossible,vec3);
-      let dec2   = tpl_1(res2) ? tagged Valid fromInteger(tpl_2(res2)) : 
-                                 tagged Invalid;  
-      let dec3   = tpl_1(res3) ? tagged Valid fromInteger(tpl_2(res3)) : 
-                                 tagged Invalid;  
+        Vector#(k_next,Integer) intVec = genVector();
+
+        let okNext1 = map(largerThan(0),nextTok);
+        let ok2     = map(largerThan(0),tok0);
+        let okVec1  = zipWith( \&& ,okNext1,ok2);
+        let vecc    = zip(okVec1,intVec);
+        Vector#(k_half,Tuple2#(Bool,Integer)) vec2 = take(vecc);
+        Vector#(k_half,Tuple2#(Bool,Integer)) vec3 = takeTail(vecc);
+        let res2   = fold(chooseFirstIfPossible,vec2);
+        let res3   = fold(chooseFirstIfPossible,vec3);
+        let dec2   = tpl_1(res2) ? tagged Valid fromInteger(tpl_2(res2)) : 
+                                   tagged Invalid;  
+        let dec3   = tpl_1(res3) ? tagged Valid fromInteger(tpl_2(res3)) : 
+                                   tagged Invalid;  
    
-//      sRes0 <= dec0;
-//      sRes1 <= dec1;
-      sRes2 <= dec2;
-      sRes3 <= dec3;
-   endmethod
+        sRes2 <= dec2;
+        sRes3 <= dec3;
+    endmethod
       
-   method Maybe#(Bit#(TLog#(k_next))) getNext();
-      return getNextW;
-   endmethod
+    method Maybe#(Bit#(TLog#(k_next))) getNext();
+        return getNextW;
+    endmethod
 
 endmodule
 
