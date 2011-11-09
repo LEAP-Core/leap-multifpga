@@ -1,0 +1,10 @@
+%AWB_START
+
+%name XUPV5 Dual FPGA Environment (SATA)
+%desc XUPV5 Dual FPGA Environment (SATA)
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC xupv5-dual-sata.env
+
+
+%AWB_END

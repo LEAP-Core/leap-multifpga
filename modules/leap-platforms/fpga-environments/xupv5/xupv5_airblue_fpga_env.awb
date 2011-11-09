@@ -1,0 +1,10 @@
+%AWB_START
+
+%name Airblue USRP XUPV5 Dual FPGA Environment
+%desc Airblue USRP XUPV5 Dual FPGA Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC xupv5-airblue-dual.env
+
+
+%AWB_END

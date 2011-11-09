@@ -29,6 +29,12 @@ class MultiFPGAGenerateBitfile():
     def makePlatformBuildDir(name):
       return 'multi_fpga/' + makePlatformBitfileName(name,APM_NAME) + '/pm'
 
+    def makePlatformDictDir(name):
+      return makePlatformBuildDir(name) + '/iface/src/dict'
+
+    def makePlatformRRRDir(name):
+      return makePlatformBuildDir(name) + '/iface/src/rrr'
+
     envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
     if(len(envFile) != 1):
       print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
@@ -48,20 +54,6 @@ class MultiFPGAGenerateBitfile():
            platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
            platformPath = 'config/pm/private/' + platformAPMName
            platformBuildDir = makePlatformBuildDir(platform.name)
-           # and now we can build them
-           # what we want to gather here is dangling top level connections
-           # so we should depend on the model log
-           # Ugly - we need to physically reconstruct the apm path
-           # set the fpga parameter
-           # for the first pass, we will ignore mismatched platforms
-           execute('asim-shell --batch set parameter ' + platformPath + ' MULTI_FPGA_PLATFORM \\"' + platform.name + '\\"')
-           execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 0 ')
-           execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
-           execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')     
-           execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_DICTS \\"multifpga_routing.dic\\"')        
-           execute('asim-shell --batch set parameter ' + platformPath + ' SCRATCHPAD_PLATFORM_ID ' + str((self.environment.getSynthesisBoundaryPlatformID(platform.name))))
-           execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
-           execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
 
            print "alive in call platform log " + platformPath
 
@@ -105,6 +97,88 @@ class MultiFPGAGenerateBitfile():
       execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
       execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
       execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)
+
+
+      # and now we can build them
+      # what we want to gather here is dangling top level connections
+      # so we should depend on the model log
+      # Ugly - we need to physically reconstruct the apm path
+      # set the fpga parameter
+      # for the first pass, we will ignore mismatched platforms
+      execute('asim-shell --batch set parameter ' + platformPath + ' MULTI_FPGA_PLATFORM \\"' + platform.name + '\\"')
+      execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 0 ')
+      execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
+      execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')    
+
+
+      # Dictionaries are global.  Therefore, all builds must see the same context or bad things 
+      # will happen.   
+      missingDicts = "multifpga_routing.dic"
+      firstPass = True
+      platformDicts = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependencies('GIVEN_DICTS')     
+      for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
+        if(not dict in platformDicts):
+          seperator = ':'
+          missingDicts += seperator+dict
+          firstPass = False
+
+      print "missingDictsBitfile: " + missingDicts
+    
+      # RRRs can appear in services sometimes and thereby lack global 
+      # visibility.  We need to treat them in the same way we treat dictionaries. 
+      missingRRRs = ""
+      firstPass = True
+      platformRRRs = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_RRRS')     
+      for rrr in moduleList.topModule.moduleDependency['MISSING_RRRS'].keys():
+        if(not rrr in platformRRRs):
+          seperator = ':'
+          if(firstPass):
+            seperator = ''
+          missingRRRs += seperator+rrr
+          firstPass = False
+
+      print "missingRRRsBitfiles: " + missingRRRs
+  
+      execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_DICTS \\"' + missingDicts  + '\\"')
+      execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"')                      
+      execute('asim-shell --batch set parameter ' + platformPath + ' SCRATCHPAD_PLATFORM_ID ' + str((self.environment.getSynthesisBoundaryPlatformID(platform.name))))
+      execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
+
+      if not os.path.exists(platformBuildDir): os.makedirs(platformBuildDir) 
+
+      execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
+
+
+      # set up the symlink - it'll be broken at first, but as we fill in the platforms, they'll come up      
+      for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
+        if(not dict in platformDicts):
+          # lexists works on broken symlinks...
+          path = os.getcwd()
+          dictPath = os.path.realpath( makePlatformDictDir(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict]) + '/' + dict)
+          linkDir  = makePlatformDictDir(platform.name)  
+          linkPath = linkDir  + '/' + dict
+          relDictPath = os.path.relpath(dictPath, linkDir)
+
+          if(os.path.lexists(linkPath)):
+            print("This symlink already exists: " + makePlatformDictDir(platform.name)  + '/' + dict)
+          else:
+            os.symlink(relDictPath, linkPath)
+
+      # do the same for missing RRRs - this code is similar to that above and should be refactored. 
+      for rrr in moduleList.topModule.moduleDependency['MISSING_RRRS'].keys():
+        if(not rrr in platformRRRs):
+          # lexists works on broken symlinks...
+          path = os.getcwd()
+          if(os.path.lexists(makePlatformRRRDir(platform.name)  + '/' + rrr)):
+            print("This symlink already exists: " + makePlatformRRRDir(platform.name)  + '/' + rrr)
+          else:
+            rrrPath = os.path.realpath( makePlatformRRRDir(moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr]) + '/' + rrr)
+            #the rrr values have some hierarchical information in them...
+            linkPath  = makePlatformRRRDir(platform.name)  + '/' + rrr
+            linkDir = os.path.dirname(linkPath)
+            print ('Link dir is ' + linkDir)
+            os.symlink(os.path.relpath(rrrPath, linkDir), linkPath)
+
 
       # this dependency on platform logs is coarse.  we could do better, but it may not be necessary
       subbuild = moduleList.env.Command( 

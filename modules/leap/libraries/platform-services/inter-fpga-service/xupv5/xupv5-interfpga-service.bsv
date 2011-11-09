@@ -27,7 +27,7 @@ import Complex::*;
 
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/physical_platform.bsh"
-`include "asim/provides/sata_device.bsh"
+//`include "asim/provides/sata_device.bsh"
 `include "asim/provides/soft_services.bsh"
 `include "asim/provides/soft_connections.bsh"
 `include "asim/provides/soft_clocks.bsh"
@@ -40,7 +40,7 @@ import Complex::*;
 
 module [CONNECTED_MODULE] mkInterFPGAService#(PHYSICAL_DRIVERS drivers) (); 
 
-   XUPV5_SERDES_DRIVER       sataDriver = drivers.sataDriver;
+   AURORA_DRIVER       auroraDriver = drivers.auroraDriver;
    ServerStub_INTER_FPGA serverStub <- mkServerStub_INTER_FPGA();
 
    FIFOF#(Bit#(16)) serdes_infifo <- mkSizedBRAMFIFOF(64);
@@ -59,25 +59,25 @@ module [CONNECTED_MODULE] mkInterFPGAService#(PHYSICAL_DRIVERS drivers) ();
 
    rule getPHYStatus;
      let dummy <- serverStub.acceptRequest_GetPHYStatus();
-     Bit#(8) rx_fifo_count = zeroExtend(pack(sataDriver.rx_fifo_count));
-     Bit#(8) tx_fifo_count = zeroExtend(pack(sataDriver.tx_fifo_count));
+     Bit#(8) rx_fifo_count = zeroExtend(pack(auroraDriver.rx_fifo_count));
+     Bit#(8) tx_fifo_count = zeroExtend(pack(auroraDriver.tx_fifo_count));
      serverStub.sendResponse_GetPHYStatus(zeroExtend({rx_fifo_count,
                                                       tx_fifo_count,
-                                                      sataDriver.channel_up,
-                                                      sataDriver.lane_up,
-                                                      sataDriver.hard_err,
-                                                      sataDriver.soft_err,
-                                                      sataDriver.status}));
+                                                      auroraDriver.channel_up,
+                                                      auroraDriver.lane_up,
+                                                      auroraDriver.hard_err,
+                                                      auroraDriver.soft_err,
+                                                      auroraDriver.status}));
    endrule
 
    rule getPHYTX;
      let dummy <- serverStub.acceptRequest_GetPHYTXCount();
-     serverStub.sendResponse_GetPHYTXCount(sataDriver.tx_count);
+     serverStub.sendResponse_GetPHYTXCount(auroraDriver.tx_count);
    endrule
 
    rule getPHYRX;
      let dummy <- serverStub.acceptRequest_GetPHYRXCount();
-     serverStub.sendResponse_GetPHYRXCount(sataDriver.rx_count);
+     serverStub.sendResponse_GetPHYRXCount(auroraDriver.rx_count);
    endrule
 
    rule getSampleDropped;
@@ -101,7 +101,7 @@ module [CONNECTED_MODULE] mkInterFPGAService#(PHYSICAL_DRIVERS drivers) ();
    endrule
 
     rule sendToSW (serdes_infifo.notFull);
-      Bit#(16) dataIn <- sataDriver.read();
+      Bit#(16) dataIn <- auroraDriver.read();
       rxCount <= rxCount + 1;
       // This may be a bug Alfred will know what to do. XXX
       sampleSent <= sampleSent + 1;
@@ -109,7 +109,7 @@ module [CONNECTED_MODULE] mkInterFPGAService#(PHYSICAL_DRIVERS drivers) ();
     endrule
 
     rule dropdata (!serdes_infifo.notFull);
-       Bit#(16) dataIn <- sataDriver.read();
+       Bit#(16) dataIn <- auroraDriver.read();
        rxCount <= rxCount + 1;
        // This may be a bug Alfred will know what to do. XXX
        sampleDropped <= sampleDropped + 1;
@@ -144,7 +144,7 @@ module [CONNECTED_MODULE] mkInterFPGAService#(PHYSICAL_DRIVERS drivers) ();
     endrule
 
     rule sendToSERDESData;
-      sataDriver.write(serdes_send.first());  // Byte endian issue?
+      auroraDriver.write(serdes_send.first());  // Byte endian issue?
       txCount <= txCount + 1;
       serdes_send.deq();
     endrule

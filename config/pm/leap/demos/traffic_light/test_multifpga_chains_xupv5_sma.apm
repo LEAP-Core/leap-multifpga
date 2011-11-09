@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_chains_xupv5
+File=test_multifpga_chains_xupv5_sma
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=

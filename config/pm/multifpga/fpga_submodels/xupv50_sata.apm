@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=SIM FPGA 0 compute platform for multiple FPGA
-File=xupv51
+Description=ACP FPGA 0 compute platform for multiple FPGA
+File=xupv50_sata
 Version=2.2
-Name=SIM FPGA 0
+Name=ACP FPGA 0
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -21,7 +21,7 @@ File=modules/leap/build-support/project/application-env/soft-services/applicatio
 Packagehint=leap
 
 [Soft Services Hybrid Application Environment/Requires]
-platform_services=MultiFPGA NULL Platform Services
+platform_services=MultiFPGA Platform Services
 soft_services=Soft Services
 connected_application=Null Connected Application
 
@@ -93,7 +93,7 @@ Packagehint=multifpga
 [MultiFPGA Platform/Requires]
 fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=XUPV5 FPGA 1 (USRP RF)
+fpgaenv=XUPV5 FPGA 0 (Aurora SATA)
 application_env=Soft Services Hybrid Application Environment
 environment_description=Null FPGA Environment
 
@@ -101,74 +101,84 @@ environment_description=Null FPGA Environment
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=multifpga
 
+[Scratchpad Memory Service]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service.awb
+Packagehint=leap
+
+[Common Services/Requires]
+stats_service=Stats Service
+assertions_service=Assertions Service
+debug_scan_service=Debug Scan Services
+streams_service=Streams Service
+dynamic_parameters_service=Dynamic Parameter Service
+
+[Standard Mem Services]
+File=modules/leap/libraries/platform-services/mem-services/mem-services-standard.awb
+Packagehint=leap
+
+[Front Panel Service]
+File=modules/leap/libraries/platform-services/front-panel-service/front-panel-service.awb
+Packagehint=leap
+
+[Streams Service]
+File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service.awb
+Packagehint=leap
+
+[Debug Scan Services]
+File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service.awb
+Packagehint=leap
+
+[Dynamic Parameter Service]
+File=modules/leap/libraries/platform-services/common-services/dynamic-parameters-service/dynamic-parameters-service.awb
+Packagehint=leap
+
+[Starter Service]
+File=modules/leap/libraries/platform-services/starter-service/starter-service.awb
+Packagehint=leap
+
+[Stats Service]
+File=modules/leap/libraries/platform-services/common-services/stats-service/stats-service.awb
+Packagehint=leap
+
+[Common Services]
+File=modules/leap/libraries/platform-services/common-services/common-services-standard.awb
+Packagehint=leap
+
+[Standard Mem Services/Requires]
+shared_memory_service=Shared Memory Services
+scratchpad_memory_service=Scratchpad Memory Service
+central_cache_service=Central Cache Service
+
+[Assertions Service]
+File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service.awb
+Packagehint=leap
+
+[MultiFPGA Platform Services/Requires]
+common_services=Common Services
+mem_services=Standard Mem Services
+multifpga_router_service=MultiFPGA Router Service
+front_panel_service=Front Panel Service
+starter_service=Starter Service
+
+[MultiFPGA Platform Services]
+File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-standard.awb
+Packagehint=multifpga
+
+[Central Cache Service]
+File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service.awb
+Packagehint=leap
+
 [MultiFPGA Router Service]
 File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/multifpga-router-service.awb
 Packagehint=multifpga
 
-[MultiFPGA NULL Platform Services/Requires]
-multifpga_router_service=MultiFPGA Router Service
-common_services=Common Services Null
-mem_services=Null Standard Mem Services
-
-[MultiFPGA NULL Platform Services]
-File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-null.awb
-Packagehint=multifpga
+[Shared Memory Services]
+File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service.awb
+Packagehint=leap
 
 [SoftService Soft Connections Algorithm MultiFPGA]
 File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-multifpga.awb
 Packagehint=leap
-
-[Stats Service Null]
-File=modules/leap/libraries/platform-services/common-services/stats-service/stats-service-null.awb
-Packagehint=leap
-
-[Debug Scan Services Null]
-File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service-null.awb
-Packagehint=leap
-
-[Assertions Service Null]
-File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service-null.awb
-Packagehint=leap
-
-[Streams Service Null]
-File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service-null.awb
-Packagehint=leap
-
-[Dynamic Parameter Service Null]
-File=modules/leap/libraries/platform-services/common-services/dynamic-parameters-service/dynamic-parameters-service-null.awb
-Packagehint=leap
-
-[Null Standard Mem Services/Requires]
-shared_memory_service=Null Shared Memory Services
-scratchpad_memory_service=Null Scratchpad Memory Service
-central_cache_service=Null Central Cache Service
-
-[Null Standard Mem Services]
-File=modules/leap/libraries/platform-services/mem-services/mem-services-standard-null.awb
-Packagehint=leap
-
-[Null Shared Memory Services]
-File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
-Packagehint=leap
-
-[Null Scratchpad Memory Service]
-File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-null.awb
-Packagehint=leap
-
-[Null Central Cache Service]
-File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service-null.awb
-Packagehint=leap
-
-[Common Services Null]
-File=modules/leap/libraries/platform-services/common-services/common-services-standard-null.awb
-Packagehint=leap
-
-[Common Services Null/Requires]
-stats_service=Stats Service Null
-assertions_service=Assertions Service Null
-debug_scan_service=Debug Scan Services Null
-streams_service=Streams Service Null
-dynamic_parameters_service=Dynamic Parameter Service Null
 
 [MultiFPGA Router Service/Requires]
 multifpga_switch=MultiFPGA Switch with Flowcontrol
@@ -181,10 +191,9 @@ Packagehint=multifpga
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
 
-[XUPV5 FPGA 1 (USRP RF)]
-File=config/pm/airblue/multifpga/fpga_submodels/multifpgaenv-hybrid-xupv5-rf.apm
-Packagehint=leap-platforms-usrp
-
-[XUPV5 FPGA 1 (USRP RF)/Params]
-BUILD_LOGS_ONLY=1
+[XUPV5 FPGA 0 (Aurora SATA)/Params]
 MODEL_CLOCK_FREQ=25
+
+[XUPV5 FPGA 0 (Aurora SATA)]
+File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-xupv5-fpga0-sata.apm
+Packagehint=multifpga

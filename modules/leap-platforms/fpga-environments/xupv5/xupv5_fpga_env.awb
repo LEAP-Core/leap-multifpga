@@ -1,7 +1,7 @@
 %AWB_START
 
-%name XUPV5 Dual FPGA Environment
-%desc XUPV5 Dual FPGA Environment
+%name XUPV5 Dual FPGA Environment (SMA)
+%desc XUPV5 Dual FPGA Environment (SMA)
 %provides environment_description
 
 %sources -t FPGAENV -v PUBLIC xupv5-dual.env

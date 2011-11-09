@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_chains_xupv5
+File=test_multifpga_chains_xupv5_sata
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -18,7 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=MultiFPGA Test Connected Application
-environment_description=XUPV5 Dual FPGA Environment (SMA)
+environment_description=XUPV5 Dual FPGA Environment (SATA)
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Test ACP Mapping
 
@@ -103,6 +103,6 @@ Packagehint=multifpga
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
 
-[XUPV5 Dual FPGA Environment (SMA)]
-File=modules/leap-platforms/fpga-environments/xupv5/xupv5_fpga_env.awb
+[XUPV5 Dual FPGA Environment (SATA)]
+File=modules/leap-platforms/fpga-environments/xupv5/xupv5_fpga_env_sata.awb
 Packagehint=multifpga

@@ -30,6 +30,9 @@ int
 CONNECTED_APPLICATION_CLASS::Main()
 {
   // Eventually we'll call the frontend initialization here.                                                                        
+  printf("Preparing to set up stats\n");
+  fflush(stdout);  
+
   STATS_DEVICE_SERVER_CLASS::GetInstance()->SetupStats();
 
   for(UINT32 i = 0; i < 500; i++) {

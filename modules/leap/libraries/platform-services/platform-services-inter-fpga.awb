@@ -7,7 +7,7 @@
 
 %notes README
 
-%public platform-services-standard.bsv
+%public platform-services-inter-fpga.bsv
 
 %requires inter_fpga_service common_services
 

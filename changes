@@ -703,3 +703,65 @@ data bits in the header as possible.  This is useful in reducing
 latencies/improving throughput in some multilane scenarios. 
 
 
+
+----------
+kfleming    Date: Wed Nov  9 18:19:16 EST 2011  CSN: CSN-multifpga-70
+                  Wed Nov  9 23:19:16 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_chains_xupv5.apm Locally Modified           69 
+ test_multifpga_chains_xupv5_sma.apm Locally Added               0 
+ test_multifpga_chains_xupv5_sata.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ xupv50.apm                Locally Modified           69 
+ xupv51.apm                Locally Modified           69 
+ xupv50_sata.apm           Locally Added               0 
+ xupv51_sata.apm           Locally Added               0 
+ multifpgaenv-hybrid-xupv5-fpga0-sata.apm Locally Added               0 
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Added               0 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified           69 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified           69 
+
+Directory config/pm/multifpga/inter_fpga_test/xupv5
+ inter_test_0_xupv5.apm    Locally Modified           69 
+ inter_test_1_xupv5.apm    Locally Modified           69 
+ inter_test_0_xupv5_sma_3.125gbps.apm Locally Added               0 
+ inter_test_1_xupv5_sma_3.125gbps.apm Locally Added               0 
+ inter_test_0_xupv5_sata_3gbps.apm Locally Added               0 
+ inter_test_1_xupv5_sata_3gbps.apm Locally Added               0 
+
+Directory config/pm/multifpga/inter_fpga_test
+ submodels/                Locally Added               0 
+
+Directory config/pm/multifpga/inter_fpga_test/submodels
+ fpgaenv-hybrid-xup-v5-pcie-sma.apm Locally Added               0 
+ fpgaenv-hybrid-xup-v5-pcie-sata.apm Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile
+ multiFPGAGenerateBitfile.py Locally Modified           69 
+
+Directory modules/leap/libraries/platform-services
+ platform-services-inter-fpga.awb Locally Modified           69 
+
+Directory modules/leap/libraries/platform-services/inter-fpga-service/xupv5
+ xupv5-interfpga-service.bsv Locally Modified           69 
+
+Directory modules/leap-platforms/fpga-environments/xupv5
+ xupv5-dual.env            Locally Modified           69 
+ xupv5-airblue-dual.env    Locally Added               0 
+ xupv5_fpga_env.awb        Locally Modified           69 
+ xupv5_airblue_fpga_env.awb Locally Added               0 
+ xupv5-dual-sata.env       Locally Added               0 
+ xupv5_fpga_env_sata.awb   Locally Added               0 
+
+Directory modules/multifpga/synthTest/connected_application
+ connected-application-test.cpp Locally Modified           69 
+
+
+Added support for multi-fpga Airblue compilation.  The biggest
+structural change here is that we now construct a coherent global view
+of RRR and DICT files through the compilation process.  Previously,
+support for this was limited. 
+

@@ -4,7 +4,7 @@ SaveParameters=0
 DefaultBenchmark=
 Version=2.2
 Type=Leap
-File=inter_test_0_xupv5
+File=inter_test_1_xupv5_sata_3gbps
 Class=Asim::Model
 Name=WiFi Phy RX Testbench
 Description=Wifi Phy RX Testbench 
@@ -84,12 +84,15 @@ Packagehint=leap
 File=modules/multifpga/inter-fpga-test/inter-fpga-test.awb
 Packagehint=multifpga
 
-[Null Shared Memory Services]
-File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
+[Inter FPGA Communications Test/Params]
+ID=1
+
+[Scratchpad Memory Service]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service.awb
 Packagehint=leap
 
-[Null Scratchpad Memory Service]
-File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-null.awb
+[Null Shared Memory Services]
+File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
 Packagehint=leap
 
 [Null Standard Mem Services]
@@ -102,7 +105,7 @@ Packagehint=leap
 
 [Null Standard Mem Services/Requires]
 shared_memory_service=Null Shared Memory Services
-scratchpad_memory_service=Null Scratchpad Memory Service
+scratchpad_memory_service=Scratchpad Memory Service
 central_cache_service=Null Central Cache Service
 
 [Front Panel Service]
