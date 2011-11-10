@@ -103,3 +103,7 @@ hardware_system=MultiFPGA Synthesis test module top
 [MultiFPGA Synthesis test module d for benchmarking link]
 File=modules/multifpga/synthTest/test_d_perf.awb
 Packagehint=multifpga
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_DEBUG=1
+GENERATE_ROUTER_STATS=1

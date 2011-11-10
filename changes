@@ -765,3 +765,25 @@ structural change here is that we now construct a coherent global view
 of RRR and DICT files through the compilation process.  Previously,
 support for this was limited. 
 
+
+----------
+kfleming    Date: Thu Nov 10 12:17:16 EST 2011  CSN: CSN-multifpga-71
+                  Thu Nov 10 17:17:16 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_perf_acp.apm Locally Modified           70 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_time_func_acp_sram.apm Locally Modified           70 
+ alpha_inorder_multifpga_time_func_acp.apm Locally Modified           70 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           70 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device.bsv Locally Modified           70 
+
+
+Added support for debug chains, and also several different styles of
+multilane router, also primarily for debug purposes.

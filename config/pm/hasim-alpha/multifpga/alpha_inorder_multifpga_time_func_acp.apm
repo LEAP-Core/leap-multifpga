@@ -157,4 +157,5 @@ Packagehint=multifpga
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
+GENERATE_ROUTER_DEBUG=1
 

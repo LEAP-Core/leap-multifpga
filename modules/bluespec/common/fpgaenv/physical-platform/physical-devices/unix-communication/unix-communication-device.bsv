@@ -55,9 +55,10 @@ STATE
 
 interface UNIX_COMM_DRIVER;
 
-    method ActionValue#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) read();
-    method Action                 write(Bit#(TMul#(`UNIX_COMM_WIDTH,64)) chunk);
-    method Bool                   write_ready();
+    method Action                           deq();
+    method Bit#(TMul#(`UNIX_COMM_WIDTH,64)) first();
+    method Action                           write(Bit#(TMul#(`UNIX_COMM_WIDTH,64)) chunk);
+    method Bool                             write_ready();
         
 endinterface
 
@@ -87,14 +88,19 @@ module mkUNIXCommDevice#(String outgoing, String incoming) (UNIX_COMM_DEVICE);
    SyncFIFOIfc#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) rxfifo <- mkSyncFIFOToCC( 16, rawClock, rawReset);
    SyncFIFOIfc#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) txfifo <- mkSyncFIFOFromCC( 16, rawClock);
 
-   mkConnection(toPut(rxfifo),toGet(comm.driver.read)); 
+   rule connectRX;
+     rxfifo.enq(comm.driver.first);
+     comm.driver.deq;
+   endrule 
+
    mkConnection(toGet(txfifo),toPut(comm.driver.write)); 
 
     // driver interface
     interface UNIX_COMM_DRIVER driver;
         
-        method read = toGet(rxfifo).get;
-        method write = toPut(txfifo).put;
+        method first            = rxfifo.first;
+        method deq              = rxfifo.deq;
+        method write            = toPut(txfifo).put;
         method Bool write_ready = txfifo.notFull;
         
     endinterface
@@ -176,11 +182,13 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
     
     // driver interface
     interface UNIX_COMM_DRIVER driver;
-        
-        // read
-        method ActionValue#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) read();
-            demarshaller.deq();
+               
+        method Bit#(TMul#(`UNIX_COMM_WIDTH,64)) first();
             return pack(demarshaller.first);
+        endmethod
+
+        method Action deq();
+            demarshaller.deq();
         endmethod
 
         // write
