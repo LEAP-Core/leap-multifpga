@@ -26,7 +26,7 @@ fpgaenv=Hybrid Simulation FPGA Environment
 application_env=Soft Services Hybrid Application Environment
 
 [Soft Services Hybrid Application Environment/Requires]
-platform_services=InterFPGA Test Platform Services
+platform_services=Platform Services
 connected_application=Inter FPGA Communications Test
 soft_services=Soft Services Submodel
 
@@ -73,22 +73,49 @@ Packagehint=leap
 File=config/pm/leap/submodels/common/soft-services.apm
 Packagehint=leap
 
-[InterFPGA Test Platform Services/Requires]
-common_services=Common Services
-inter_fpga_service=Unix Comm InterFPGA Service
-
-[InterFPGA Test Platform Services]
-File=modules/leap/libraries/platform-services/platform-services-standard.awb
-Packagehint=multifpga
-
 [Inter FPGA Communications Test]
 File=modules/multifpga/inter-fpga-test/inter-fpga-test.awb
-Packagehint=multifpga
-
-[Unix Comm InterFPGA Service]
-File=modules/leap/libraries/platform-services/inter-fpga-service/simulation/simulation-interfpga-service.awb
 Packagehint=multifpga
 
 [Hybrid Simulation FPGA Environment]
 File=config/pm/leap/submodels/fpgaenv/fpgaenv-hybrid-exe.apm
 Packagehint=leap
+
+[Null Shared Memory Services]
+File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
+Packagehint=leap
+
+[Null Scratchpad Memory Service]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-null.awb
+Packagehint=leap
+
+[Null Standard Mem Services]
+File=modules/leap/libraries/platform-services/mem-services/mem-services-standard-null.awb
+Packagehint=leap
+
+[Platform Services]
+File=modules/leap/libraries/platform-services/platform-services-standard.awb
+Packagehint=leap
+
+[Null Standard Mem Services/Requires]
+shared_memory_service=Null Shared Memory Services
+scratchpad_memory_service=Null Scratchpad Memory Service
+central_cache_service=Null Central Cache Service
+
+[Front Panel Service]
+File=modules/leap/libraries/platform-services/front-panel-service/front-panel-service.awb
+Packagehint=leap
+
+[Null Central Cache Service]
+File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service-null.awb
+Packagehint=leap
+
+[Starter Service]
+File=modules/leap/libraries/platform-services/starter-service/starter-service.awb
+Packagehint=leap
+
+[Platform Services/Requires]
+common_services=Common Services
+mem_services=Null Standard Mem Services
+front_panel_service=Front Panel Service
+starter_service=Starter Service

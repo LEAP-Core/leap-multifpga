@@ -54,7 +54,7 @@ Packagehint=multifpga
 fpgamap_parser=FPGAMap
 
 [multiFPGA Generate bitfle]
-File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
 [Simulation Dual FPGA Environment]
@@ -66,12 +66,12 @@ File=modules/multifpga/synthTest/sim_mapping.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation]
-File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
-Packagehint=leap
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
+Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
-Packagehint=leap
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype

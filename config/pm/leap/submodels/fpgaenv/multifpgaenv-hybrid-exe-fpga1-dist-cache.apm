@@ -175,8 +175,8 @@ fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
-Packagehint=leap
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
 
 [Hybrid Scratchpad Memory Device (MultiFPGA)/Requires]
 scratchpad_memory_common=Scratchpad Memory Common Definitions

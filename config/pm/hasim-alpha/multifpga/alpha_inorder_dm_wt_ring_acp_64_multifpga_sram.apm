@@ -24,11 +24,11 @@ File=modules/leap/build-support/project/project-multifpga.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation]
-File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
-Packagehint=leap
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
+Packagehint=multifpga
 
 [multiFPGA Generate bitfle]
-File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
@@ -60,8 +60,8 @@ File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
-Packagehint=leap
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
 
 [multiFPGA Build Pipeline/Requires]
 multi_fpga_generate_bitfile=multiFPGA Generate bitfle

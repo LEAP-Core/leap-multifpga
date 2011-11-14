@@ -18,7 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=HAsim Performance Model
-environment_description=XUPV5 Dual FPGA Environment
+environment_description=XUPV5 Dual FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition
 
@@ -47,16 +47,16 @@ Packagehint=multifpga
 fpgamap_parser=FPGAMap
 
 [multiFPGA Generate bitfle]
-File=modules/leap/build-support/build-pipelines/stages/multifpga-generate-bitfile/multifpga-generate-bitfile.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation]
-File=modules/leap/build-support/build-pipelines/stages/multifpga/multi_fpga_parse.awb
-Packagehint=leap
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
+Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga/fpgaenvironment.awb
-Packagehint=leap
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype
@@ -151,9 +151,10 @@ Packagehint=hasim-models
 File=modules/multifpga/alpha_inorder/acp_mapping_time_func.awb
 Packagehint=multifpga
 
-[XUPV5 Dual FPGA Environment]
-File=modules/leap-platforms/fpga-environments/xupv5/xupv5_fpga_env.awb
-Packagehint=multifpga
 
 [Alpha Functional Model/Params]
 MAX_NUM_CONTEXTS=2
+
+[XUPV5 Dual FPGA Environment (SMA)]
+File=modules/leap-platforms/fpga-environments/xupv5/xupv5_fpga_env.awb
+Packagehint=multifpga
