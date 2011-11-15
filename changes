@@ -873,3 +873,31 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga-generate-b
 
 Moved log generator phase of the multifpga compiler into the multifpga
 package. Patched codes.
+
+----------
+kfleming    Date: Tue Nov 15 13:29:36 EST 2011  CSN: CSN-multifpga-73
+                  Tue Nov 15 18:29:36 UTC 2011
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_time_func_acp_sram.apm Locally Modified           72 
+ alpha_inorder_multifpga_time_func_acp_sram_2.apm Locally Modified           72 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified           72 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified           72 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ via.py                    Locally Modified           72 
+ multiFPGAConnect.py       Locally Modified           72 
+
+
+Removed fifos from egress-switch. These fifos were a holdover from the
+original RRR implementation.  Now we just use the FIFOs in the
+SoftConnection packetizer logic.  Removing this latency improves the
+IPS of HAsim models by about 5%. 
+
+There might be some impact on frequency quality, but I haven't seen it yet. 
+

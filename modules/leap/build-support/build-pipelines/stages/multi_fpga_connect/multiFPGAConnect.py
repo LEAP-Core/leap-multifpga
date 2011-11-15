@@ -597,17 +597,31 @@ class MultiFPGAConnect():
               spareLink = 1
             ingressLinks = ((sends + chains)/numberOfVias) + spareLink
 
-            egressType = "GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(\n" + \
+            # I should make these a function
+            egressHeaderType = "GENERIC_UMF_PACKET_HEADER#(\n" + \
                            "             1, TLog#(TAdd#(1," + str(egressLinks) + ")) ,\n" + \
                            "             0,  TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(egressViaWidth) + ")))),\n" + \
-                           "             `UMF_PHY_CHANNEL_RESERVED_BITS, TSub#(" + str(egressViaWidth)  + ", TAdd#(TAdd#(1,TLog#(TAdd#(1," + str(egressLinks) + "))),TAdd#(`UMF_PHY_CHANNEL_RESERVED_BITS, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," +  str(egressViaWidth) + ")))))))), Bit#(" +  str(egressViaWidth) + "))"
-            ingressType = "GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(\n" + \
-                            "             1, TLog#(TAdd#(1," + str(ingressLinks) + ")) ,\n" + \
-                            "             0,  TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(ingressViaWidth)  + ")))),\n" + \
-                            "             `UMF_PHY_CHANNEL_RESERVED_BITS, TSub#(" + str(ingressViaWidth) + ", TAdd#(TAdd#(1,TLog#(TAdd#(1," + str(ingressLinks) + "))),TAdd#(`UMF_PHY_CHANNEL_RESERVED_BITS, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(ingressViaWidth)  + ")))))))), Bit#(" + str(ingressViaWidth)  + "))"
+                           "             `UMF_PHY_CHANNEL_RESERVED_BITS, TSub#(" + str(egressViaWidth)  + ", TAdd#(TAdd#(1,TLog#(TAdd#(1," + str(egressLinks) + ")))," + \
+                           "TAdd#(`UMF_PHY_CHANNEL_RESERVED_BITS, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," +  str(egressViaWidth) + "))))))))"
 
-            self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress",egressType,egressViaWidth,egressLinks, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via)))
-            self.platformData[platform]['INGRESS_VIAS'][targetPlatform].append(Via("ingress",ingressType,ingressViaWidth,ingressLinks, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via)))
+            egressBodyType = "Bit#(" +  str(egressViaWidth) + ")"
+
+            egressType = "GENERIC_UMF_PACKET#(" + egressHeaderType + ", " + egressBodyType + ")"
+
+
+            ingressHeaderType = "GENERIC_UMF_PACKET_HEADER#(\n" + \
+                           "             1, TLog#(TAdd#(1," + str(ingressLinks) + ")) ,\n" + \
+                           "             0,  TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(ingressViaWidth) + ")))),\n" + \
+                           "             `UMF_PHY_CHANNEL_RESERVED_BITS, TSub#(" + str(ingressViaWidth)  + ", TAdd#(TAdd#(1,TLog#(TAdd#(1," + str(ingressLinks) + ")))," + \
+                           "TAdd#(`UMF_PHY_CHANNEL_RESERVED_BITS, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," +  str(ingressViaWidth) + "))))))))"
+
+            ingressBodyType = "Bit#(" +  str(ingressViaWidth) + ")"
+
+            ingressType = "GENERIC_UMF_PACKET#(" + ingressHeaderType + ", " + ingressBodyType + ")"
+
+
+            self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", egressHeaderType, egressBodyType, egressType,egressViaWidth,egressLinks, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via)))
+            self.platformData[platform]['INGRESS_VIAS'][targetPlatform].append(Via("ingress", ingressHeaderType, ingressBodyType, ingressType,ingressViaWidth,ingressLinks, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via)))
 
 
           # now that we have decided on the vias, we must assign links to vias
@@ -722,7 +736,7 @@ class MultiFPGAConnect():
 
                 # we must create a logical chain information
                 chainsStr += 'let chain_' + dangling.name + ' = LOGICAL_CHAIN_INFO{logicalName: "' + dangling.name + '", logicalType: "' + \
-                             dangling.raw_type + '", computePlatform: "' + platform + '", incoming: pack_chain_' + dangling.name + \
+                             dangling.raw_type + '", computePlatform: "' + platform + '", incoming: tpl_2(pack_chain_' + dangling.name + ')' +\
                              ', outgoing: unpack_chain_' + dangling.name + '};\n'
                       
                 chainsStr += 'registerChain(chain_' + dangling.name + ');\n'
@@ -743,13 +757,55 @@ class MultiFPGAConnect():
             for via in ingressVias:
                 header.write('CHANNEL_VIRTUALIZER#(2,0,' + via.via_type + ') virtual_in_' + targetPlatform  +  '_' + str(via.via_switch) + '<- mkChannelVirtualizer(' + ingress_multiplexor_names[targetPlatform] + '.' + via.via_method + ',?);\n')
 
+            # The egress links now take as input a list of incoming connections
+            # that can be manipulated like fifos.  
+            egressVectors = []
+            for via_idx in range(len(egressVias)):
+              egressVectors.append(["?" for x in range(egressVias[via_idx].via_links)]) # we could also do a double list comprehension.
+
+            # the egress links need to go first, since they are provided as an argument to the 
+            # switches           
+            for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
+              if(dangling.sc_type == 'Recv'):
+                packetizerType = 'Marshalled'
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.name +' = ?;\n')
+                egressVectors[dangling.via_idx][dangling.via_link] = 'pack_recv_' + dangling.name
+                if(dangling.bitwidth < egressVias[dangling.via_idx].via_width):
+                  packetizerType = 'Unmarshalled'
+                if(GENERATE_ROUTER_STATS):
+                  header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType  + '(recv_' + dangling.name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.name +  ',blocked_'+ dangling.name +', sent_'+ dangling.name +');// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                else:
+                  header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType + '(recv_' + dangling.name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.name + ', ?, ?); // Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+
+              if(dangling.sc_type == 'ChainSink' ):
+                egressVectors[dangling.via_idx][dangling.via_link] = 'tpl_1(pack_chain_' + dangling.name + ')'
+                if(GENERATE_ROUTER_STATS):
+                  header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + str(dangling.via_link) + ',blocked_'+ dangling.name +', sent_'+ dangling.name  +');\n\n')
+                else:
+                  header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + str(dangling.via_link) + ',?,?);\n\n')
+
+          
             # we now need switches for each via.  Need modular arithmetic here to make sure that everyone has a link.  
             # for now we will assume that flow control is twinned - that is the egress 2 uses ingress 2 for its flow control
             # this might well need to change as we introduce assymetry x_X
             # we actually should be allocating the feedback channel as part of the analysis phase, but that can happen later. 
             for via_idx in range(len(egressVias)):
               if(egressVias[via_idx].via_links > 0):
-                header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ',' + egressVias[via_idx].via_type + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch(virtual_in_' + targetPlatform +  '_' + str(ingressVias[via_idx].via_switch) + '.readPorts[1].read, virtual_out_' + targetPlatform +  '_' + str(egressVias[via_idx].via_switch) + '.writePorts[0].write);\n')
+                # create array of links for constructor
+                linkArray = "{"
+                firstPass = True
+                for link_idx in range(egressVias[via_idx].via_links):
+                  seperator = ','
+                  if(firstPass):
+                    seperator = ''
+                  linkArray += seperator + egressVectors[via_idx][link_idx]  
+                  firstPass = False
+                  
+                linkArray += "}"
+
+                header.write('EGRESS_PACKET_GENERATOR#(' + egressVias[via_idx].via_header_type + ', ' +  egressVias[via_idx].via_body_type + ')links_' + egressVias[via_idx].via_switch + '[' + str(egressVias[via_idx].via_links) + '] = ' + linkArray + ';\n') 
+
+                header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ',virtual_in_' + targetPlatform +  '_' + str(ingressVias[via_idx].via_switch) + '.readPorts[1].read, virtual_out_' + targetPlatform +  '_' + str(egressVias[via_idx].via_switch) + '.writePorts[0].write);\n')
 
                 if(GENERATE_ROUTER_DEBUG):   
                   # lay down a couple of debug scan chains here and insert crap in dictionary
@@ -762,17 +818,6 @@ class MultiFPGAConnect():
 
             # hook 'em up
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-              if(dangling.sc_type == 'Recv'):
-                packetizerType = 'Marshalled'
-	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.name +' = ?;\n')
-                if(dangling.bitwidth < egressVias[dangling.via_idx].via_width):
-                  packetizerType = 'Unmarshalled'
-                if(GENERATE_ROUTER_STATS):
-                  header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType  + '(recv_' + dangling.name+',' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ', width_recv_' + dangling.name +  ',blocked_'+ dangling.name +', sent_'+ dangling.name +');// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
-                else:
-                  header.write('Empty pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType + '(recv_' + dangling.name+',' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ', width_recv_' + dangling.name + ', ?, ?); // Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
-
-
               if(dangling.sc_type == 'Send'):
                 packetizerType = 'Marshalled'
 	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.name +' = ?;\n\n')
@@ -790,12 +835,6 @@ class MultiFPGAConnect():
                 else:
                   header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],?);\n\n')
 
-
-              if(dangling.sc_type == 'ChainSink' ):
-                if(GENERATE_ROUTER_STATS):
-                  header.write('PHYSICAL_CHAIN_IN pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ',blocked_'+ dangling.name +', sent_'+ dangling.name  +');\n\n')
-                else:
-                  header.write('PHYSICAL_CHAIN_IN pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + egressVias[dangling.via_idx].via_switch  + '.egressPorts[' + str(dangling.via_link) + '],' + str(dangling.via_link) + ',?,?);\n\n')
 
 
           # Add in chain insertion code 

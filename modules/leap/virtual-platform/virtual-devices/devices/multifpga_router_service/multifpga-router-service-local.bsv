@@ -181,17 +181,18 @@ module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWI
      end
 endmodule
 
-module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv, 
-                                               SWITCH_EGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                                                           umf_channel_id, umf_service_id,
-                                                                                           umf_method_id,  umf_message_len,
-                                                                                           umf_phy_pvt,    filler_bits), 
-                                                                                       umf_chunk)) port, 
+// These guys need a FOF interface
+// This one requires some thought 
+module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,                                             
                                                Integer id, 
                                                NumTypeParam#(bitwidth) width,
                                                STAT blocked, 
                                                STAT sent) 
-                                                             (Empty) // Interface
+    (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                    umf_channel_id, umf_service_id,
+                                    umf_method_id,  umf_message_len,
+                                    umf_phy_pvt,    filler_bits),
+                                umf_chunk)) // Interface
     provisos(Bits#(t_DATA, t_DATA_SZ),
              Div#(TSub#(t_DATA_SZ,filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
              Add#(filler_EXTRA_SZ, filler_bits, t_DATA_SZ),
@@ -206,67 +207,80 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
 
     // Strong assumption that the marshaller holds only one data at a time
     MARSHALLER#(t_NUM_CHUNKS, umf_chunk) mar <- mkSimpleMarshaller();
+
+    Tuple2#(Bit#(TSub#(t_DATA_SZ,filler_bits)),Bit#(filler_bits)) data_split = split(pack(recv.receive));
    
-    rule continueRequest (True);
-        umf_chunk chunk = mar.first();
-        mar.deq();
-        sent.incr();
-        port.write(tagged UMF_PACKET_dataChunk chunk);
-        if(`SWITCH_DEBUG == 1)
-        begin
-            $display("Marshalled Connection TX sends: %h", chunk);
-        end
-
-        continueRequestFired.send();
-    endrule
-
-    rule checkBlocked(recv.notEmpty() && !(continueRequestFired || startRequestFired));
-        blocked.incr();
-    endrule
-
-    rule startRequest (recv.notEmpty());
+    method Action deqHeader() if(recv.notEmpty());
+        recv.deq;
+        mar.enq(unpack(zeroExtend(tpl_1(data_split))));
         sent.incr();
         startRequestFired.send();
-        Tuple2#(Bit#(TSub#(t_DATA_SZ,filler_bits)),Bit#(filler_bits)) data_split = split(pack(recv.receive));
-        mar.enq(unpack(zeroExtend(tpl_1(data_split))));
-
-        // The following blob instantiates a packet header.
-        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk) header = tagged UMF_PACKET_header GENERIC_UMF_PACKET_HEADER
-                           {
-                                filler: tpl_2(data_split),
-                                phyChannelPvt: ?,
-                                channelID: 0, // we use this elsewhere to refer to flow control messages
-                                serviceID: fromInteger(id),
-                                methodID : ?, 
-                                numChunks: fromInteger(valueof(t_NUM_CHUNKS))
-                          };
-
-        port.write(header);
-        recv.deq;
         if(`SWITCH_DEBUG == 1)
         begin
             $display("Connection TX %d  emits out: %h", id, recv.receive);
         end
+    endmethod
 
-   endrule
+    method GENERIC_UMF_PACKET_HEADER#(
+               umf_channel_id, umf_service_id,
+               umf_method_id,  umf_message_len,
+               umf_phy_pvt,    filler_bits) firstHeader() if(recv.notEmpty());
+
+        return GENERIC_UMF_PACKET_HEADER
+               {
+                   filler: tpl_2(data_split),
+                   phyChannelPvt: ?,
+                   channelID: 0, // we use this elsewhere to refer to flow control messages
+                   serviceID: fromInteger(id),
+                   methodID : ?, 
+                   numChunks: fromInteger(valueof(t_NUM_CHUNKS))
+               };
+
+
+    endmethod
+
+    method Bool notEmptyHeader;
+        return recv.notEmpty();
+    endmethod
+ 
+    method Action deqBody();
+        mar.deq();
+        sent.incr();
+        if(`SWITCH_DEBUG == 1)
+        begin
+            $display("Marshalled Connection TX sends: %h", mar.first);
+        end
+        continueRequestFired.send();
+    endmethod
+
+    method firstBody = mar.first;
+
+    method notEmptyBody = mar.notEmpty;
+
 endmodule
 
+// Actually this is insufficiently aggressive
 module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) recv, 
-                                                 SWITCH_EGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                                                             umf_channel_id, umf_service_id,
-                                                                                             umf_method_id,  umf_message_len,
-                                                                                             umf_phy_pvt,    filler_bits), umf_chunk)) port, 
                                                  Integer id, 
                                                  NumTypeParam#(bitwidth) width,  
                                                  STAT blocked, 
                                                  STAT sent) 
-    (Empty) // Module interface
+
+    (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                    umf_channel_id, umf_service_id,
+                                    umf_method_id,  umf_message_len,
+                                    umf_phy_pvt,    filler_bits),
+                                umf_chunk)) // Interface
+
     provisos(Bits#(t_DATA, t_DATA_SZ),
              Bits#(umf_chunk,umf_chunk_SZ));
 
+    EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                    umf_channel_id, umf_service_id,
+                                    umf_method_id,  umf_message_len,
+                                    umf_phy_pvt,    filler_bits),
+                                umf_chunk) unmarshalled = ?;
+    
     // If the payload bitwidth is small, fit it in the header
     // Otherwise, we need will get one payload chunk
     if(valueof(bitwidth) < valueof(filler_bits))
@@ -278,37 +292,50 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
             blocked.incr();
         endrule
 
-        rule startRequest(recv.notEmpty); 
+        function GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits) firstHeader;
+
+            Bit#(bitwidth) value = resize(pack(recv.receive));
+
+            // The following blob instantiates a packet header. 
+            return GENERIC_UMF_PACKET_HEADER
+                   {
+                       filler: zeroExtendNP(value),  // Woot
+                       phyChannelPvt: ?,
+                       channelID: 0, // we use this elsewhere to refer to flow control messages
+                       serviceID: fromInteger(id),
+                       methodID : ?,
+                       numChunks: 0
+                   };
+        endfunction
+
+        function Action deqHeader();
+        action
             recv.deq;
             sent.incr();
             startRequestFired.send();
-            Bit#(bitwidth) value = resize(pack(recv.receive));
-
-            // The following blob instantiates a packet header.
-            GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk) header = tagged UMF_PACKET_header GENERIC_UMF_PACKET_HEADER
-                            {
-                                filler: zeroExtendNP(value),  // Woot
-                                phyChannelPvt: ?,
-                                channelID: 0, // we use this elsewhere to refer to flow control messages
-                                serviceID: fromInteger(id),
-                                methodID : ?,
-                                numChunks: 0
-                            };
 
             if(`SWITCH_DEBUG == 1)
             begin
                 $display("Connection TX %d (HO)  emits out: %h", id, recv.receive);
-                $display("Small guy sends %h", header.UMF_PACKET_header.filler);
                 $display("Our packet is: channel %d, service %d, method %d, message %d, phy %d, filler %d", 
                          valueof(umf_channel_id), valueof(umf_service_id), valueof(umf_method_id), valueof(umf_message_len), 
                          valueof(umf_phy_pvt), valueof(filler_bits));
             end
+        endaction
+        endfunction 
 
-            port.write(header);
-        endrule
+        unmarshalled = interface EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                                              umf_channel_id, umf_service_id,
+                                                              umf_method_id,  umf_message_len,
+                                                              umf_phy_pvt,    filler_bits),
+                                                          umf_chunk);
+                           method notEmptyHeader = recv.notEmpty;
+                           method deqHeader = deqHeader;
+                           method firstHeader = firstHeader;
+                       endinterface;
     end
     else
     begin
@@ -320,59 +347,65 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
             blocked.incr();
         endrule
 
-        rule continueRequest (!waitHeader && recv.notEmpty);
-            umf_chunk chunk = unpack(resize(pack(recv.receive)));
-            recv.deq();
+        unmarshalled = interface EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                                              umf_channel_id, umf_service_id,
+                                                              umf_method_id,  umf_message_len,
+                                                              umf_phy_pvt,    filler_bits),
+                                                          umf_chunk);
 
-            if(`SWITCH_DEBUG == 1)
-            begin
-                $display("Connection TX %d (S)  emits out: %h", id, recv.receive);
-            end
+                           method notEmptyHeader = recv.notEmpty && waitHeader;
+                           method Action deqHeader() if(recv.notEmpty && waitHeader);
+                               sent.incr();
+                               startRequestFired.send();
 
-            waitHeader <= True;
-            port.write(tagged UMF_PACKET_dataChunk chunk);
+                               if(`SWITCH_DEBUG == 1)
+                               begin
+                                   $display("Unmarshalled Recv Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", 
+                                            valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) , fromInteger(valueof(bitwidth)));
+                               end 
 
-            if(`SWITCH_DEBUG == 1)
-            begin
-                $display("Unmarshalled Rev Connection TX sends: %h", chunk);
-            end
+                               waitHeader <= False;                                    
+                           endmethod
 
-            sent.incr();
-            continueRequestFired.send();
-        endrule
+                           method GENERIC_UMF_PACKET_HEADER#(
+                                      umf_channel_id, umf_service_id,
+                                      umf_method_id,  umf_message_len,
+                                      umf_phy_pvt,    filler_bits) firstHeader() if(recv.notEmpty && waitHeader);
+                                return GENERIC_UMF_PACKET_HEADER
+                                       {
+                                           filler: ?,
+                                           phyChannelPvt: ?,
+                                           channelID: 0, // we use this elsewhere to refer to flow control messages
+                                           serviceID: fromInteger(id),
+                                           methodID : ?, 
+                                           numChunks: 1
+                                       };
+       
+                           endmethod
 
-        rule startRequest (recv.notEmpty && waitHeader);
-            sent.incr();
-            startRequestFired.send();
+                           method notEmptyBody = !waitHeader && recv.notEmpty;
 
-            if(`SWITCH_DEBUG == 1)
-            begin
-                $display("Unmarshalled Recv Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) , fromInteger(valueof(bitwidth)));
-            end
+                           method Action deqBody() if(!waitHeader && recv.notEmpty);
+                               recv.deq();
+			       if(`SWITCH_DEBUG == 1)
+                               begin
+                                   $display("Connection TX %d (S)  emits out: %h", id, recv.receive);
+                               end
 
-            // The following blob instantiates a packet header.
-            GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                umf_channel_id, umf_service_id,
-                                umf_method_id,  umf_message_len,
-                                umf_phy_pvt,    filler_bits), umf_chunk) header = tagged UMF_PACKET_header GENERIC_UMF_PACKET_HEADER
-                                {
-                                    filler: ?,
-                                    phyChannelPvt: ?,
-                                    channelID: 0, // we use this elsewhere to refer to flow control messages
-                                    serviceID: fromInteger(id),
-                                    methodID : ?, 
-                                    numChunks: 1
-                                };
+                               waitHeader <= True;
+			       sent.incr();
+                               continueRequestFired.send();
+                           endmethod
 
-            if(`SWITCH_DEBUG == 1)
-            begin
-               $display("Our packet is: channel %d, service %d, method %d, message %d, phy %d, filler %d", valueof(umf_channel_id), valueof(umf_service_id), valueof(umf_method_id), valueof(umf_message_len), valueof(umf_phy_pvt), valueof(filler_bits));
-            end
+                           method umf_chunk firstBody() if(!waitHeader && recv.notEmpty);
+                               return unpack(resize(pack(recv.receive)));
+                           endmethod
 
-            port.write(header);
-            waitHeader <= False;
-        endrule
+                       endinterface; 
     end
+
+    return unmarshalled;
+
 endmodule
 
 
@@ -440,17 +473,20 @@ endmodule
 
 
 
-module mkPacketizeIncomingChain#(SWITCH_EGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                                             umf_channel_id, umf_service_id,
-                                                                             umf_method_id,  umf_message_len,
-                                                                             umf_phy_pvt,    filler_bits), umf_chunk)) port, 
-                                 Integer id,  
+module mkPacketizeIncomingChain#(Integer id,  
                                  STAT blocked, 
                                  STAT sent) 
-    (PHYSICAL_CHAIN_IN) // Module interface
+    (Tuple2#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                          umf_channel_id, umf_service_id,
+                                          umf_method_id,  umf_message_len,
+                                          umf_phy_pvt,    filler_bits),
+                 umf_chunk),
+             PHYSICAL_CHAIN_IN)) // Module interface
 
     provisos(Div#(SizeOf#(PHYSICAL_CHAIN_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
 	     Add#(n_EXTRA_SZ, SizeOf#(PHYSICAL_CHAIN_DATA), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+
+    // Egress interface to be filled in
 
     let myClock <- exposeCurrentClock;
     let myReset <- exposeCurrentReset;
@@ -464,41 +500,48 @@ module mkPacketizeIncomingChain#(SWITCH_EGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC
         blocked.incr();
     endrule
 
-    rule continueRequest (True);
-        umf_chunk chunk = mar.first();
-        mar.deq();
-        port.write(tagged UMF_PACKET_dataChunk chunk);
-        sent.incr();
-        continueRequestFired.send;        
-    endrule
-
-    rule startRequest (tryData.wget() matches tagged Valid .data);
-        
-        // The following blob instantiates a packet header.
-        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                            umf_channel_id, umf_service_id,
-                            umf_method_id,  umf_message_len,
-                            umf_phy_pvt,    filler_bits), umf_chunk) header = tagged UMF_PACKET_header GENERIC_UMF_PACKET_HEADER
-                            {
-                                 filler: ?,
-                                 phyChannelPvt: ?,
-                                 channelID: 0, // we use this elsewhere to refer to flow control messages
-                                 serviceID: fromInteger(id),
-                                 methodID : ?,
-                                 numChunks: fromInteger(valueof(t_NUM_CHUNKS))
-                            };
-        port.write(header);
-        trySuccess.send;
-        sent.incr();
-        mar.enq(unpack(zeroExtend(pack(data))));
-   endrule
-
-   interface clock = myClock;
-   interface reset = myReset;
+    let egress_packet_generator = interface EGRESS_PACKET_GENERATOR;
+                                      method notEmptyHeader = isValid(tryData.wget());
+                                      method Action deqHeader() if(tryData.wget() matches tagged Valid .data);
+                                          trySuccess.send;
+                                          sent.incr();
+                                          mar.enq(unpack(zeroExtend(pack(data))));         
+                                      endmethod
+                                      method GENERIC_UMF_PACKET_HEADER#(
+                                                 umf_channel_id, umf_service_id,
+                                                 umf_method_id,  umf_message_len,
+                                                 umf_phy_pvt,    filler_bits) firstHeader() if(tryData.wget() matches tagged Valid .data);
+                                          return GENERIC_UMF_PACKET_HEADER
+                                                 {
+                                                     filler: ?,
+                                                     phyChannelPvt: ?,
+                                                     channelID: 0, // we use this elsewhere to refer to flow control messages
+                                                     serviceID: fromInteger(id),
+                                                     methodID : ?,
+                                                     numChunks: fromInteger(valueof(t_NUM_CHUNKS))
+                                                 };
  
-   method Bool success() = trySuccess;
-   method Action try(PHYSICAL_CHAIN_DATA d);
-       tryData.wset(d);     
-   endmethod
+                                      endmethod
+ 
+                                      method notEmptyBody = mar.notEmpty();
+                                      method Action deqBody();
+                                          mar.deq();           
+                                          sent.incr();
+                                          continueRequestFired.send;        
+                                      endmethod
+                                      method firstBody = mar.first;
+                                  endinterface;
 
+   let physical_chain_in = interface PHYSICAL_CHAIN_IN;
+                               interface clock = myClock;
+                               interface reset = myReset;
+ 
+                               method Bool success() = trySuccess;
+
+                               method Action try(PHYSICAL_CHAIN_DATA d);
+                                   tryData.wset(d);     
+                               endmethod
+                           endinterface;
+
+   return tuple2(egress_packet_generator, physical_chain_in);
 endmodule
