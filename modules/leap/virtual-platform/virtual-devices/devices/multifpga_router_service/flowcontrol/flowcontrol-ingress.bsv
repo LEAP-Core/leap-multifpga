@@ -42,8 +42,9 @@ interface SWITCH_INGRESS_PORT#(type umf_packet);
     method Action read_ready();
 endinterface
 
-interface INGRESS_SWITCH#(numeric type n, type umf_packet);
+interface INGRESS_SWITCH#(numeric type n, type umf_packet, type umf_packet_header_w, type umf_body_w);
     interface Vector#(n, SWITCH_INGRESS_PORT#(umf_packet))  ingressPorts;
+    interface EGRESS_PACKET_GENERATOR#(umf_packet_header_w, umf_body_w) flowcontrol_response;
 endinterface
 
 // The ingress switch takes two arguments - a read and a write.   The read function is a stream 
@@ -52,16 +53,17 @@ endinterface
 module mkIngressSwitch#(function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                       umf_channel_id, umf_service_id,
                                                                       umf_method_id,  umf_message_len,
-                                                                      umf_phy_pvt,    filler_bits), umf_chunk)) read(), 
-                        function Action write(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                                      umf_channel_id_w, umf_service_id_w,
-                                                                      umf_method_id_w,  umf_message_len_w,
-                                                                      umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) data)) 
+                                                                      umf_phy_pvt,    filler_bits), umf_chunk)) read())
 
-    (INGRESS_SWITCH#(n, GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                umf_channel_id, umf_service_id,
-                                                umf_method_id,  umf_message_len,
-                                                umf_phy_pvt,    filler_bits), umf_chunk))) // Module interface
+    (INGRESS_SWITCH#(n, 
+                     GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                             umf_channel_id, umf_service_id,
+                                             umf_method_id,  umf_message_len,
+                                             umf_phy_pvt,    filler_bits), umf_chunk),
+                     GENERIC_UMF_PACKET_HEADER#(umf_channel_id_w, umf_service_id_w,
+                                                umf_method_id_w,  umf_message_len_w,
+                                                umf_phy_pvt_w,    filler_bits_w), 
+                     umf_chunk_w)) // Module interface
     
     provisos(Add#(serviceExcess, TLog#(n), umf_service_id),
                  Bits#(umf_chunk, TAdd#(filler_bits, TAdd#(umf_phy_pvt,
@@ -79,13 +81,18 @@ module mkIngressSwitch#(function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PA
             );
  
   // If we have no incoming links, then we won't instantiate a switch
-  INGRESS_SWITCH#(n,GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) m = ?;
+  INGRESS_SWITCH#(n,
+                  GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                        umf_channel_id, umf_service_id,
+                        umf_method_id,  umf_message_len,
+                        umf_phy_pvt,    filler_bits), umf_chunk),
+                  GENERIC_UMF_PACKET_HEADER#(umf_channel_id_w, umf_service_id_w,
+                                                umf_method_id_w,  umf_message_len_w,
+                                                umf_phy_pvt_w,    filler_bits_w),
+                  umf_chunk_w) m = ?;
   if(valueof(n) > 0)
     begin
-      m <- mkFlowControlSwitchIngressNonZero(read,write);
+      m <- mkFlowControlSwitchIngressNonZero(read);
     end
   return m;
 endmodule
@@ -96,16 +103,18 @@ endmodule
 module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                                         umf_channel_id, umf_service_id,
                                                                                         umf_method_id,  umf_message_len,
-                                                                                        umf_phy_pvt,    filler_bits), umf_chunk)) read(), 
-                                          function Action write(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                                                        umf_channel_id_w, umf_service_id_w,
-                                                                                        umf_method_id_w,  umf_message_len_w,
-                                                                                        umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) data)) 
+                                                                                        umf_phy_pvt,    filler_bits), umf_chunk)) read())
 
-    (INGRESS_SWITCH#(n, GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk))) // Module interface
+    (INGRESS_SWITCH#(n, 
+                     GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                        umf_channel_id, umf_service_id,
+                        umf_method_id,  umf_message_len,
+                        umf_phy_pvt,    filler_bits), umf_chunk),
+                     GENERIC_UMF_PACKET_HEADER#(umf_channel_id_w, umf_service_id_w,
+                                                umf_method_id_w,  umf_message_len_w,
+                                                umf_phy_pvt_w,    filler_bits_w),
+                     umf_chunk_w)) // Module interface
+
     provisos(
              Bits#(umf_chunk, TAdd#(filler_bits, TAdd#(umf_phy_pvt,
                                   TAdd#(umf_channel_id, TAdd#(umf_service_id,
@@ -142,6 +151,10 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
     RWire#(Bit#(TLog#(n))) idxExamined <-mkRWire;
     Reg#(Bit#(TLog#(n))) idxRR <- mkReg(0);
     FIFOF#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))) sendSize <- mkSizedFIFOF(1);
+    FIFOF#(GENERIC_UMF_PACKET_HEADER#(umf_channel_id_w, umf_service_id_w,
+                                     umf_method_id_w,  umf_message_len_w,
+                                     umf_phy_pvt_w,    filler_bits_w)) headerFIFO <- mkFIFOF();
+    FIFOF#(umf_chunk_w) bodyFIFO <- mkFIFOF();
 
     Reg#(Bit#(10)) count <- mkReg(0);
 
@@ -195,15 +208,15 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
                 Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) control_packet = tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx]));
 
                 // This blob is the header for a flow control packet (with the token information packed in the filler)
-                GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id_w, umf_service_id_w,
-                           umf_method_id_w,  umf_message_len_w,
-                           umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
+                GENERIC_UMF_PACKET_HEADER#(
+                    umf_channel_id_w, umf_service_id_w,
+                    umf_method_id_w,  umf_message_len_w,
+                    umf_phy_pvt_w,    filler_bits_w) header = GENERIC_UMF_PACKET_HEADER
                                        {
                                          filler: zeroExtendNP(pack(control_packet)),
                                          phyChannelPvt: ?,
-                                         channelID: 1,
-                                         serviceID: ?,
+                                         channelID: 1, // for now we must preserve this because the egress side expects it. 
+                                         serviceID: 0, // We're moving in this direction - the feed back uses channel 0
                                          methodID : ?,
                                          numChunks: 0
                                         };
@@ -211,7 +224,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
                 // hand out the whole pack of tokens  
                 requestQueues.decrFree(use_idx, requestQueues.free[use_idx]);
                 // send the header packet to channelio
-               write(newpacket);
+                headerFIFO.enq(header);
            end 
        endrule
     end
@@ -243,15 +256,15 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
                 end
 
                 // This is the flow control packet header. 
-                GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id_w, umf_service_id_w,
-                           umf_method_id_w,  umf_message_len_w,
-                           umf_phy_pvt_w,    filler_bits_w), umf_chunk_w) newpacket = tagged UMF_PACKET_header UMF_PACKET_HEADER
+                GENERIC_UMF_PACKET_HEADER#(
+                    umf_channel_id_w, umf_service_id_w,
+                    umf_method_id_w,  umf_message_len_w,
+                    umf_phy_pvt_w,    filler_bits_w) header = GENERIC_UMF_PACKET_HEADER
                                        {
                                          filler: ?,
                                          phyChannelPvt: ?,
-                                         channelID: 1,
-                                         serviceID: ?,
+                                         channelID: 1, // for now we must preserve this because the egress side expects it. 
+                                         serviceID: 0, // We're moving in this direction - the feed back uses channel 0
                                          methodID : ?,
                                          numChunks: 1
                                         };
@@ -260,7 +273,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
                 requestQueues.decrFree(use_idx, requestQueues.free[use_idx]);
 
                 // send the header packet to channelio
-                write(newpacket);
+                headerFIFO.enq(header);
                 sendSize.enq(tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx])));
             end 
         endrule
@@ -270,9 +283,9 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
             begin
                 $display("Finished sending tokens");
             end
- 
+            umf_chunk_w body = unpack(zeroExtend(pack(sendSize.first)));
             sendSize.deq;
-            write(tagged UMF_PACKET_dataChunk unpack((zeroExtend(pack(sendSize.first)))));
+            bodyFIFO.enq(body);
         endrule
     end
 
@@ -413,5 +426,17 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
     endrule
 
     interface ingressPorts  = ingress_ports;
+
+    interface EGRESS_PACKET_GENERATOR flowcontrol_response;
+        method notEmptyHeader = headerFIFO.notEmpty;
+        method deqHeader = headerFIFO.deq;
+        method firstHeader = headerFIFO.first;
+       
+        method notEmptyBody = bodyFIFO.notEmpty;
+        method deqBody = bodyFIFO.deq;
+        method umf_chunk_w firstBody;
+            return bodyFIFO.first;
+        endmethod
+    endinterface
 
 endmodule

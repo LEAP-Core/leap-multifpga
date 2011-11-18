@@ -901,3 +901,20 @@ IPS of HAsim models by about 5%.
 
 There might be some impact on frequency quality, but I haven't seen it yet. 
 
+
+----------
+kfleming    Date: Fri Nov 18 15:49:26 EST 2011  CSN: CSN-multifpga-74
+                  Fri Nov 18 20:49:26 UTC 2011
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified           73 
+ flowcontrol-ingress.bsv   Locally Modified           73 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           73 
+
+
+Removed the channelization layer from the egress side. This reduces
+hardware usage and removes a cycle of latency from the egress
+pipeline.  Next up is removing this layer from the ingress side. 
