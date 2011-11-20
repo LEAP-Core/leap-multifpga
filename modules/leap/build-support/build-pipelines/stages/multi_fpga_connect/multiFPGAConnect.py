@@ -599,9 +599,9 @@ class MultiFPGAConnect():
 
             # I should make these a function
             egressHeaderType = "GENERIC_UMF_PACKET_HEADER#(\n" + \
-                           "             1, TLog#(TAdd#(1," + str(egressLinks + 1) + ")) ,\n" + \
+                           "             0, TLog#(TAdd#(1," + str(egressLinks + 1) + ")) ,\n" + \
                            "             0,  TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(egressViaWidth) + ")))),\n" + \
-                           "             0, TSub#(" + str(egressViaWidth)  + ", TAdd#(TAdd#(1,TLog#(TAdd#(1," + str(egressLinks + 1) + ")))," + \
+                           "             0, TSub#(" + str(egressViaWidth)  + ", TAdd#(TAdd#(0,TLog#(TAdd#(1," + str(egressLinks + 1) + ")))," + \
                            "TAdd#(0, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," +  str(egressViaWidth) + "))))))))"
 
             egressBodyType = "Bit#(" +  str(egressViaWidth) + ")"
@@ -610,9 +610,9 @@ class MultiFPGAConnect():
 
 
             ingressHeaderType = "GENERIC_UMF_PACKET_HEADER#(\n" + \
-                           "             1, TLog#(TAdd#(1," + str(ingressLinks) + ")) ,\n" + \
+                           "             0, TLog#(TAdd#(1," + str(ingressLinks) + ")) ,\n" + \
                            "             0,  TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(ingressViaWidth) + ")))),\n" + \
-                           "             0, TSub#(" + str(ingressViaWidth)  + ", TAdd#(TAdd#(1,TLog#(TAdd#(1," + str(ingressLinks) + ")))," + \
+                           "             0, TSub#(" + str(ingressViaWidth)  + ", TAdd#(TAdd#(0,TLog#(TAdd#(1," + str(ingressLinks) + ")))," + \
                            "TAdd#(0, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," +  str(ingressViaWidth) + "))))))))"
 
             ingressBodyType = "Bit#(" +  str(ingressViaWidth) + ")"
@@ -749,13 +749,10 @@ class MultiFPGAConnect():
                     header.write('STAT blocked_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_BLOCKED);\n')
                     header.write('STAT sent_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_SENT);\n')
 
-            for via in ingressVias:
-                header.write('CHANNEL_VIRTUALIZER#(2,0,' + via.via_type + ') virtual_in_' + targetPlatform  +  '_' + str(via.via_switch) + '<- mkChannelVirtualizer(' + ingress_multiplexor_names[targetPlatform] + '.' + via.via_method + ',?);\n')
-
             # Ingress switches now feed directly into the egress switches to save latency.  
             for via_idx in range(len(ingressVias)):
               if(ingressVias[via_idx].via_links > 0):
-                header.write('INGRESS_SWITCH#(' + str(ingressVias[via_idx].via_links + 1) + ',' + ingressVias[via_idx].via_type + ',' + egressVias[via_idx].via_header_type + ',' + egressVias[via_idx].via_body_type + ') ' + ingressVias[via_idx].via_switch + '<- mkIngressSwitch(virtual_in_' + targetPlatform + '_' + str(ingressVias[via_idx].via_switch) + '.readPorts[0].read);\n')
+                header.write('INGRESS_SWITCH#(' + str(ingressVias[via_idx].via_links + 1) + ',' + ingressVias[via_idx].via_type + ',' + egressVias[via_idx].via_header_type + ',' + egressVias[via_idx].via_body_type + ') ' + ingressVias[via_idx].via_switch + '<- mkIngressSwitch(' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + ');\n')
 
             # The egress links now take as input a list of incoming connections
             # that can be manipulated like fifos.  
@@ -806,7 +803,7 @@ class MultiFPGAConnect():
 
                 header.write('EGRESS_PACKET_GENERATOR#(' + egressVias[via_idx].via_header_type + ', ' +  egressVias[via_idx].via_body_type + ')links_' + egressVias[via_idx].via_switch + '[' + str(egressVias[via_idx].via_links + 1) + '] = ' + linkArray + ';\n') 
 
-                header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links + 1) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ',virtual_in_' + targetPlatform +  '_' + str(ingressVias[via_idx].via_switch) + '.readPorts[1].read, compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack));\n')
+                header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links + 1) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ', ' + ingressVias[via_idx].via_switch + '.ingressPorts[0], compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack));\n')
 
                 if(GENERATE_ROUTER_DEBUG):   
                   # lay down a couple of debug scan chains here and insert crap in dictionary

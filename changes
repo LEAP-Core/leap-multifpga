@@ -918,3 +918,32 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 Removed the channelization layer from the egress side. This reduces
 hardware usage and removes a cycle of latency from the egress
 pipeline.  Next up is removing this layer from the ingress side. 
+
+----------
+
+----------
+kfleming    Date: Sat Nov 19 20:30:33 EST 2011  CSN: CSN-multifpga-75
+                  Sun Nov 20 01:30:33 UTC 2011
+
+
+Directory admin
+ mytags                    Locally Modified           74 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified           74 
+ flowcontrol-ingress.bsv   Locally Modified           74 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           74 
+
+Directory .
+ changes                   Locally Modified           74 
+
+
+Cut the final of 3 cycles from the multifpga routers. The
+channelization layer is completely gone, and flow control is treated
+as a special case of a normal channel. 
+
+This set of changes appears to have decreased area substantially and
+decreased runtimes by 11%.
+

@@ -50,10 +50,7 @@ endinterface
 // The ingress switch takes two arguments - a read and a write.   The read function is a stream 
 // of serialized incoming packets.  The write function is used to send flow control tokens back to 
 // the corresponding egress switch on another FPGA.
-module mkIngressSwitch#(function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                                      umf_channel_id, umf_service_id,
-                                                                      umf_method_id,  umf_message_len,
-                                                                      umf_phy_pvt,    filler_bits), umf_chunk)) read())
+module mkIngressSwitch#(function ActionValue#(umf_chunk) read())
 
     (INGRESS_SWITCH#(n, 
                      GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -100,10 +97,7 @@ endmodule
 
 // Here we are reading and sticking things into the BRAM buffer. 
 // We write back the credits periodically
-module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                                                        umf_channel_id, umf_service_id,
-                                                                                        umf_method_id,  umf_message_len,
-                                                                                        umf_phy_pvt,    filler_bits), umf_chunk)) read())
+module mkFlowControlSwitchIngressNonZero#(function ActionValue#(umf_chunk) read())
 
     (INGRESS_SWITCH#(n, 
                      GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -146,6 +140,11 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
                            umf_phy_pvt,    filler_bits), umf_chunk))) ingress_ports = newVector();
+
+    FIFO#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                           umf_channel_id, umf_service_id,
+                           umf_method_id,  umf_message_len,
+                           umf_phy_pvt,    filler_bits), umf_chunk)) flowcontrolQ <- mkFIFO; // might want more buffer here
 
     Vector#(n, Wire#(Bool)) readReady <- replicateM(mkDWire(False));
     RWire#(Bit#(TLog#(n))) idxExamined <-mkRWire;
@@ -215,7 +214,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
                                        {
                                          filler: zeroExtendNP(pack(control_packet)),
                                          phyChannelPvt: ?,
-                                         channelID: 1, // for now we must preserve this because the egress side expects it. 
+                                         channelID: ?, // for now we must preserve this because the egress side expects it. 
                                          serviceID: 0, // We're moving in this direction - the feed back uses channel 0
                                          methodID : ?,
                                          numChunks: 0
@@ -303,35 +302,48 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
     // scan channel for incoming request headers
     // the VLevelFIFO is a massive unguarded dance filled with potential miscalculation
     rule scan_requests (requestChunksRemaining == 0);
-
-        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk) packet <- read();
+        let bits <-read();
+        GENERIC_UMF_PACKET_HEADER#(
+           umf_channel_id, umf_service_id,
+           umf_method_id,  umf_message_len,
+           umf_phy_pvt,    filler_bits) packet = unpack(pack(bits));
         if(`SWITCH_DEBUG == 1)
           begin
-            $display("ingress got a packet for service %d", packet.UMF_PACKET_header.serviceID);
+            $display("ingress got a packet for service %d", packet.serviceID);
           end
+
+
+        // set up remaining chunks
+        requestChunksRemaining <= packet.numChunks;
+        requestActiveQueue     <= truncate(packet.serviceID);
+
 
         // enqueue header in service's queue
         // enqueues are always safe 
-        requestQueues.enq(truncate(packet.UMF_PACKET_header.serviceID),packet);
-
-        // set up remaining chunks
-        requestChunksRemaining <= packet.UMF_PACKET_header.numChunks;
-        requestActiveQueue     <= truncate(packet.UMF_PACKET_header.serviceID);
-
+        if(packet.serviceID != 0)
+        begin
+            requestQueues.enq(truncate(packet.serviceID), tagged UMF_PACKET_header packet);
+        end
+        else 
+        begin 
+            flowcontrolQ.enq(tagged UMF_PACKET_header packet); // We can probably optimize this a little bit.
+        end
     endrule
 
     // scan channel for request message chunks
     rule scan_params (requestChunksRemaining != 0);
 
         // grab a chunk from channelio and place it into the active request queue
-        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk) packet <- read();
-        requestQueues.enq(requestActiveQueue,packet);
+        umf_chunk packet <- read();
+        if(requestActiveQueue != 0)
+        begin
+            requestQueues.enq(requestActiveQueue, tagged UMF_PACKET_dataChunk packet);
+           end
+        else 
+        begin 
+            flowcontrolQ.enq(tagged UMF_PACKET_dataChunk packet); // We can probably optimize this a little bit.
+        end
+
         // one chunk processed
         requestChunksRemaining <= requestChunksRemaining - 1;
 
@@ -374,10 +386,33 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(GENERIC_UMF_PACK
     endrule
 
 
+    // ingress port 0 is used to handle flow control. 
+    ingress_ports[0] = interface SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                                                              umf_channel_id, umf_service_id,
+                                                                              umf_method_id,  umf_message_len,
+                                                                              umf_phy_pvt,    filler_bits), umf_chunk))
+
+                           // We should probably latch the newMsgqIdx and check that we actually have data before dequeuing
+                           method ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                                                       umf_channel_id, umf_service_id,
+                                                                       umf_method_id,  umf_message_len,
+                                                                       umf_phy_pvt,    filler_bits), umf_chunk)) 
+                               read();
+                                
+                               flowcontrolQ.deq;
+                               return flowcontrolQ.first;
+
+                           endmethod
+
+                           method Action read_ready();
+                               noAction;
+                           endmethod
+                       endinterface;
+
 
     // need to use the arbiter to choose who we dequeue from
     // the right selection policy probably involves choosing the eldest 
-    for (Integer s = 0; s < fromInteger(valueof(n)); s = s + 1)
+    for (Integer s = 1; s < fromInteger(valueof(n)); s = s + 1)
     begin
          // create a new request port and link it to the FIFO
         ingress_ports[s] = interface SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(

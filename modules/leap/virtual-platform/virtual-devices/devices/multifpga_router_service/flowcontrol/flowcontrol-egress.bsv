@@ -63,11 +63,11 @@ module mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                                     umf_phy_pvt,    filler_bits), 
                                                 umf_chunk)  requestQueues[],
 
-                       function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                                                                     umf_channel_id_r, umf_service_id_r,
-                                                                     umf_method_id_r,  umf_message_len_r,
-                                                                     umf_phy_pvt_r,    filler_bits_r), 
-                                                                 umf_chunk_r)) read(), 
+                       SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                                umf_channel_id_r, umf_service_id_r,
+                                                umf_method_id_r,  umf_message_len_r,
+                                                umf_phy_pvt_r,    filler_bits_r),
+                                           umf_chunk_r)) flowcontrol,
 
                        function Action write(umf_chunk data)) 
 
@@ -91,7 +91,7 @@ module mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
   EGRESS_SWITCH#(n) m = ?;
   if(valueof(n) > 0)
     begin
-      m <- mkFlowControlSwitchEgressNonZero(requestQueues, read, write);
+      m <- mkFlowControlSwitchEgressNonZero(requestQueues, flowcontrol, write);
     end
   return m;
 
@@ -108,11 +108,11 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                                     umf_phy_pvt,    filler_bits),
                                                 umf_chunk)  requestQueues[],
 
-                                         function ActionValue#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                         SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                                        umf_channel_id_r, umf_service_id_r,
                                                                                        umf_method_id_r,  umf_message_len_r,
                                                                                        umf_phy_pvt_r,    filler_bits_r), 
-                                                                                   umf_chunk_r)) read(), 
+                                                                                   umf_chunk_r)) flowcontrol, 
 
                                          function Action write(umf_chunk data)) 
 
@@ -193,7 +193,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                     umf_channel_id_r, umf_service_id_r,
                                     umf_method_id_r,  umf_message_len_r,
                                     umf_phy_pvt_r,    filler_bits_r), 
-                                umf_chunk_r) packet <- read();
+                                umf_chunk_r) packet <- flowcontrol.read();
 
             Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) payload = unpack(truncateNP(packet.UMF_PACKET_header.filler)); 
             creditDelay.enq(payload);
@@ -237,7 +237,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     begin
 
         rule dropHeader (deqHeader);
-            let packet <- read();
+            let packet <- flowcontrol.read();
             deqHeader <= !deqHeader;
         endrule
   
@@ -247,7 +247,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                     umf_channel_id_r, umf_service_id_r,
                                     umf_method_id_r,  umf_message_len_r,
                                     umf_phy_pvt_r,    filler_bits_r), 
-                                umf_chunk_r) packet <- read();
+                                umf_chunk_r) packet <- flowcontrol.read();
 
             // enqueue header in service's queue
             // set up remaining chunks
