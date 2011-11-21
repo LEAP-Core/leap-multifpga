@@ -947,3 +947,15 @@ as a special case of a normal channel.
 This set of changes appears to have decreased area substantially and
 decreased runtimes by 11%.
 
+
+----------
+kfleming    Date: Mon Nov 21 11:16:36 EST 2011  CSN: CSN-multifpga-76
+                  Mon Nov 21 16:16:36 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           75 
+
+
+Refactored multifpga-connect in preparation for new channel allocation
+algorithms.
