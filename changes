@@ -959,3 +959,22 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 Refactored multifpga-connect in preparation for new channel allocation
 algorithms.
+
+----------
+kfleming    Date: Tue Nov 22 15:49:42 EST 2011  CSN: CSN-multifpga-77
+                  Tue Nov 22 20:49:42 UTC 2011
+
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified           76 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified           76 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified           76 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-ingress.bsv   Locally Modified           76 
+
+
+1) Updated some stale xupv5 apms.
+2) Removed channel ID from headers in flow control code.  Header information should not be used any longer.

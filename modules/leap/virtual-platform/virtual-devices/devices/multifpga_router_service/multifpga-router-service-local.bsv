@@ -230,7 +230,7 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
                {
                    filler: tpl_2(data_split),
                    phyChannelPvt: ?,
-                   channelID: 0, // we use this elsewhere to refer to flow control messages
+                   channelID: ?, // we use this elsewhere to refer to flow control messages
                    serviceID: fromInteger(id),
                    methodID : ?, 
                    numChunks: fromInteger(valueof(t_NUM_CHUNKS))
@@ -304,7 +304,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
                    {
                        filler: zeroExtendNP(value),  // Woot
                        phyChannelPvt: ?,
-                       channelID: 0, // we use this elsewhere to refer to flow control messages
+                       channelID: ?, // we use this elsewhere to refer to flow control messages
                        serviceID: fromInteger(id),
                        methodID : ?,
                        numChunks: 0
@@ -375,7 +375,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
                                        {
                                            filler: ?,
                                            phyChannelPvt: ?,
-                                           channelID: 0, // we use this elsewhere to refer to flow control messages
+                                           channelID: ?, // we use this elsewhere to refer to flow control messages
                                            serviceID: fromInteger(id),
                                            methodID : ?, 
                                            numChunks: 1
@@ -515,7 +515,7 @@ module mkPacketizeIncomingChain#(Integer id,
                                                  {
                                                      filler: ?,
                                                      phyChannelPvt: ?,
-                                                     channelID: 0, // we use this elsewhere to refer to flow control messages
+                                                     channelID: ?, // we use this elsewhere to refer to flow control messages
                                                      serviceID: fromInteger(id),
                                                      methodID : ?,
                                                      numChunks: fromInteger(valueof(t_NUM_CHUNKS))

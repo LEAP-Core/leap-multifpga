@@ -27,8 +27,7 @@
 
 
 import Vector::*;
-import FIFOF::*;
-import DReg::*;
+import FIFOF::*;import DReg::*;
 
 `include "awb/provides/channelio.bsh"
 `include "awb/provides/rrr.bsh"
@@ -262,7 +261,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(umf_chunk) read(
                                        {
                                          filler: ?,
                                          phyChannelPvt: ?,
-                                         channelID: 1, // for now we must preserve this because the egress side expects it. 
+                                         channelID: ?, // for now we must preserve this because the egress side expects it. 
                                          serviceID: 0, // We're moving in this direction - the feed back uses channel 0
                                          methodID : ?,
                                          numChunks: 1
