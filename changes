@@ -978,3 +978,17 @@ Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router
 
 1) Updated some stale xupv5 apms.
 2) Removed channel ID from headers in flow control code.  Header information should not be used any longer.
+
+----------
+mcadler     Date: Mon Nov 28 07:22:58 EST 2011  CSN: CSN-multifpga-78
+                  Mon Nov 28 12:22:58 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           77 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ tool.py                   Locally Modified           77 
+
+Use consistent options for building logfile step since the inter-FPGA connections
+may vary with compilation options.

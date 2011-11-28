@@ -69,7 +69,7 @@ class MultiFPGAConnect():
       moduleList.topDependency += [subbuild]
 
   def assignIndices(self,sourceConn,sinkConn):
-    print "Now processing a connection between " + sourceConn.platform + " <->" + sinkConn.platform
+    print "Now processing connection %s between %s <-> %s" % (sourceConn.name, sourceConn.platform, sinkConn.platform)
     if(sinkConn.platform in self.platformData[sourceConn.platform]['INDEX']):
       # only increment the sourceConn.  
       self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] += 1

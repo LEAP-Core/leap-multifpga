@@ -67,9 +67,17 @@ class MultiFPGAGenerateLogfile():
            # for the first pass, we will ignore mismatched platforms
 
            print "tool.py: alive in call platform log " + platform.name
-           # Always pass raw scons command here without DEBUG, OPT, COST_TABLE,
-           # etc.  This rule is only for model topology, not the final build.
-           sts = execute('cd ' + platformBuildDir + '; scons')
+
+           # Compute command line arguments in case they affect topology
+           compile_cmd = 'scons'
+           compile_cmd += ' DEBUG=1' if getDebug(moduleList) else ' OPT=1'
+           compile_cmd += ' TRACE=' + str(getTrace(moduleList))
+           compile_cmd += ' EVENTS=' + str(getEvents(moduleList))
+
+           compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
+           print compile_cmd
+
+           sts = execute(compile_cmd)
            print "tool.py: dead in call platform log" + platform.name
            return sts
          return compile_platform_log
