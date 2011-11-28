@@ -1010,3 +1010,14 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 
 Fixed the *broken* code refactoring.  Connections were being mis-linked.  
+
+----------
+mcadler     Date: Mon Nov 28 14:18:09 EST 2011  CSN: CSN-multifpga-80
+                  Mon Nov 28 19:18:09 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           79 
+
+Fix specification of explicit dependence of generated router on the Python
+source file.  I don't understand how this worked as checked in.

@@ -60,9 +60,13 @@ class MultiFPGAConnect():
  
       subbuild = moduleList.env.Command( 
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
-          moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] + [moduleList.env['DEFS']['BUILD_DIR'] + '/site_scons/multi_fpga_connect/multiFPGAConnect.py'],
+          moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]],
           self.synthesizeRouters
           )                   
+
+      # Note dependence on this script (not detected by SCons)
+      moduleList.env.Depends(subbuild, 'site_scons/multi_fpga_connect/multiFPGAConnect.py')
+
       print "subbuild: " + str(subbuild)
 
 
