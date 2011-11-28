@@ -1,5 +1,18 @@
 import sys
 
+def inverseSCType(sc_type):
+  if(sc_type == 'Send'):
+    return 'Recv'
+  if(sc_type == 'Recv'):
+    return 'Send'
+  if(sc_type == 'ChainSink'):
+    return 'ChainSrc'
+  if(sc_type == 'ChainSrc'):
+    return 'ChainSink'
+
+  # not matching is a bad idea
+  raise Error
+
 class DanglingConnection():
   
   def __init__(self, sc_type, raw_type, idx, name, platform, optional, bitwidth):
@@ -12,8 +25,9 @@ class DanglingConnection():
       self.bitwidth = int(bitwidth)
       self.matched = False
       self.chainPartner = -1
-      self.via = -1
+      self.via_idx = -1
       self.via_link = -1
+      self.activity = 0 # this is used in lane allocation
 
   # can probably extend matches to support chains
   def matches(self, other):

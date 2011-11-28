@@ -143,7 +143,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(umf_chunk) read(
     FIFO#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                            umf_channel_id, umf_service_id,
                            umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) flowcontrolQ <- mkFIFO; // might want more buffer here
+                           umf_phy_pvt,    filler_bits), umf_chunk)) flowcontrolQ <- mkSizedFIFO(8); // might want more buffer here
 
     Vector#(n, Wire#(Bool)) readReady <- replicateM(mkDWire(False));
     RWire#(Bit#(TLog#(n))) idxExamined <-mkRWire;
@@ -180,7 +180,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(umf_chunk) read(
             // We do a round robin to decide which link should have flow control tokens sent back
             if(idxRR == fromInteger(valueof(n)-1)) 
             begin
-                idxRR <= 0;
+                idxRR <= 1;
             end 
             else
             begin
@@ -195,7 +195,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(umf_chunk) read(
             end
 
             // If we get too free, we need to send come cedits down the pipe.
-            if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2)
+            if((requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2) && (use_idx != 0))
             begin 
 
                 if(`SWITCH_DEBUG == 1)
@@ -231,7 +231,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(umf_chunk) read(
         rule startSendEmpty(!sendSize.notEmpty);
             if(idxRR == fromInteger(valueof(n)-1)) 
             begin
-                idxRR <= 0;
+                idxRR <= 1;
             end 
             else
             begin
@@ -246,7 +246,7 @@ module mkFlowControlSwitchIngressNonZero#(function ActionValue#(umf_chunk) read(
             end
 
             // If we get too free, we need to send come cedits down the pipe.
-            if(requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2)
+            if((requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2)  && (use_idx != 0))
             begin 
                 if(`SWITCH_DEBUG == 1)
                 begin

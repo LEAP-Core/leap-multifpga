@@ -992,3 +992,21 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 
 Use consistent options for building logfile step since the inter-FPGA connections
 may vary with compilation options.
+
+----------
+kfleming    Date: Mon Nov 28 11:45:02 EST 2011  CSN: CSN-multifpga-79
+                  Mon Nov 28 16:45:02 UTC 2011
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_time_func_exe.apm Locally Modified           78 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-ingress.bsv   Locally Modified           78 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           78 
+ danglingConnection.py     Locally Modified           78 
+
+
+Fixed the *broken* code refactoring.  Connections were being mis-linked.  
