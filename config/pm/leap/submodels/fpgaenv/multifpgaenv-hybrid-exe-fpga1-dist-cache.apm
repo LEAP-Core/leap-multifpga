@@ -25,6 +25,7 @@ virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
 librl_bsv=RL Bluespec Library Submodel
 build_pipeline=MultiFPGA BlueSim Platform Build Pipeline
+soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
 File=modules/leap/virtual-platform/std-virtual-platform.awb
@@ -34,6 +35,7 @@ Packagehint=leap
 virtual_devices=Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
+platform_services=MultiFPGA Subordinate Platform Services
 
 [RRR Clients and Servers]
 File=modules/leap/virtual-platform/rrr/basic/basic-rrr.awb
@@ -231,3 +233,19 @@ physical_channel=Null Physical Channel
 [Null Physical Channel]
 File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
 Packagehint=leap
+
+[Soft Services for MultiFPGA Submodel]
+File=config/pm/leap/submodels/common/multifpga-soft-services.apm
+Packagehint=multifpga
+
+[Soft Services for MultiFPGA Submodel/Params]
+CON_CWIDTH=128
+
+
+
+[MultiFPGA Subordinate Platform Services]
+File=config/pm/leap/submodels/platform-services/multifpga-platform-services-subordinate.apm
+Packagehint=multifpga
+
+[MultiFPGA Subordinate Platform Services/Params]
+SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096

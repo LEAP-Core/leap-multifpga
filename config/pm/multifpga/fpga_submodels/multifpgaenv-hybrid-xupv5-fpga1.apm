@@ -21,6 +21,7 @@ virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for Virtex 5
 librl_bsv=RL Bluespec Library Submodel
 build_pipeline=FPGA Platform Build Pipeline
+soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
 File=modules/leap/virtual-platform/std-virtual-platform.awb
@@ -30,6 +31,7 @@ Packagehint=leap
 virtual_devices=Null Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
+platform_services=MultiFPGA Subordinate Platform Services
 
 [FPGA Environment]
 File=modules/leap/virtual-platform/fpga-environment.awb
@@ -44,20 +46,11 @@ File=modules/leap/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
 Packagehint=leap
 
 [Low Level Platform Interface Hybrid/Requires]
-physical_platform=XUP Virtex 5 PCIE SATA AURORA
 channelio=Null Channel IO Module
 rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=NULL Local Memory Interface
 remote_memory=Null Remote Memory
-
-[Single-Ended Crystal Clocks Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
-Packagehint=leap-platforms
-
-[Common Physical Platform Utilities]
-File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
-Packagehint=leap-platforms
 
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
@@ -240,28 +233,6 @@ physical_channel=Null Physical Channel
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
 Packagehint=leap
 
-[Single-Ended Crystal Clocks Device/Params]
-CRYSTAL_CLOCK_FREQ=100
-MODEL_CLOCK_FREQ=25
-
-[XUP Virtex 5 PCIE SATA AURORA]
-File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-sata-aurora/xilinx-xup-pcie-sata.awb
-Packagehint=leap-platforms-usrp
-
-[Aurora Device, Single Lane, 3.125gbps]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps/sata-aurora.awb
-Packagehint=leap-platforms
-
-[XUP Virtex 5 PCIE SATA AURORA/Requires]
-clocks_device=Single-Ended Crystal Clocks Device
-sata_device=Bluespec SATA Device
-physical_platform_utils=Common Physical Platform Utilities
-aurora_device=Aurora Device, Single Lane, 3.125gbps
-
-[Bluespec SATA Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-usrp/sata-bluespec.awb
-Packagehint=leap-platforms
-
 [Synplify/XST Synthesis Tool]
 File=modules/leap/build-support/build-pipelines/stages/synplify/synplify-sub.awb
 Packagehint=leap
@@ -280,3 +251,15 @@ Packagehint=leap
 
 [Local Memory Scratchpad Memory Device/Requires]
 scratchpad_memory_common=Scratchpad Memory Common Definitions
+
+
+[Soft Services for MultiFPGA Submodel]
+File=config/pm/leap/submodels/common/multifpga-soft-services.apm
+Packagehint=multifpga
+
+[MultiFPGA Subordinate Platform Services]
+File=config/pm/leap/submodels/platform-services/multifpga-platform-services-subordinate.apm
+Packagehint=multifpga
+
+[Soft Services for MultiFPGA Submodel/Params]
+CON_CWIDTH=128

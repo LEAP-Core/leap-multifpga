@@ -105,7 +105,10 @@ class MultiFPGAGenerateBitfile():
       # Ugly - we need to physically reconstruct the apm path
       # set the fpga parameter
       # for the first pass, we will ignore mismatched platforms
-      execute('asim-shell --batch set parameter ' + platformPath + ' MULTI_FPGA_PLATFORM \\"' + platform.name + '\\"')
+      execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_ID ' + str((self.environment.getSynthesisBoundaryPlatformID(platform.name))))
+      execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_NAME \\"' + platform.name + '\\"')
+      execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_NUM_PLATFORMS ' + str(len(self.environment.getPlatformNames())))
+
       execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 0 ')
       execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
       execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')    
@@ -141,7 +144,6 @@ class MultiFPGAGenerateBitfile():
   
       execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_DICTS \\"' + missingDicts  + '\\"')
       execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"')                      
-      execute('asim-shell --batch set parameter ' + platformPath + ' SCRATCHPAD_PLATFORM_ID ' + str((self.environment.getSynthesisBoundaryPlatformID(platform.name))))
       execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
 
       if not os.path.exists(platformBuildDir): os.makedirs(platformBuildDir) 

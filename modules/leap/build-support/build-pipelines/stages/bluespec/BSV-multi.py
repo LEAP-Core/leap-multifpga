@@ -24,7 +24,7 @@ class BSV():
 
   def __init__(self, moduleList):
 
-    # Parse the mapping file, using it to define the `MULTI_FPGA_PLATFORM
+    # Parse the mapping file, using it to define the `FPGA_PLATFORM
        
     # build the compiler
     lex.lex()

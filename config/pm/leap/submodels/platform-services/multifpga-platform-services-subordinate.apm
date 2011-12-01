@@ -1,0 +1,100 @@
+
+[Global]
+SaveParameters=0
+Description=Minimal platform services for a subordinate FPGA
+File=multifpga-platform-services-subordinate
+Version=2.2
+Name=MultiFPGA Subordinate Platform Services
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=MultiFPGA Minimal Platform Services
+RootProvides=platform_services
+
+[Model]
+DefaultAttributes=connected hybrid
+model=MultiFPGA Minimal Platform Services
+
+[Assertions Service]
+File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service.awb
+Packagehint=leap
+
+[MultiFPGA Router Service/Requires]
+multifpga_switch=MultiFPGA Switch with Flowcontrol
+
+[MultiFPGA Router Service]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/multifpga-router-service.awb
+Packagehint=multifpga
+
+[MultiFPGA Switch with Flowcontrol]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
+Packagehint=multifpga
+
+
+[Debug Scan Services Null]
+File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service-null.awb
+Packagehint=leap
+
+[MultiFPGA Minimal Platform Services/Requires]
+common_services=Common Services Null
+mem_services=Standard Mem Services
+multifpga_router_service=MultiFPGA Router Service
+
+
+[Common Services Null]
+File=modules/leap/libraries/platform-services/common-services/common-services-standard-null.awb
+Packagehint=leap
+
+[Null Shared Memory Services]
+File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
+Packagehint=leap
+
+
+[Stats Service Null]
+File=modules/leap/libraries/platform-services/common-services/stats-service/stats-service-null.awb
+Packagehint=leap
+
+[Streams Service Null]
+File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service-null.awb
+Packagehint=leap
+
+[Dynamic Parameter Service Null]
+File=modules/leap/libraries/platform-services/common-services/dynamic-parameters-service/dynamic-parameters-service-null.awb
+Packagehint=leap
+
+
+[Common Services Null/Requires]
+stats_service=Stats Service Null
+assertions_service=Assertions Service
+debug_scan_service=Debug Scan Services Null
+streams_service=Streams Service Null
+dynamic_parameters_service=Dynamic Parameter Service Null
+
+[MultiFPGA Minimal Platform Services]
+File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-null.awb
+Packagehint=multifpga
+
+[Scratchpad Memory Service (MultiFPGA, Ring)/Params]
+SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
+SCRATCHPAD_PLATFORM="FPGA1"
+
+[Standard Mem Services]
+File=modules/leap/libraries/platform-services/mem-services/mem-services-standard.awb
+Packagehint=leap
+
+[Standard Mem Services/Requires]
+shared_memory_service=Null Shared Memory Services
+scratchpad_memory_service=Scratchpad Memory Service (MultiFPGA, Ring)
+central_cache_service=Central Cache Service
+
+[Scratchpad Memory Service (MultiFPGA, Ring)]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-multi.awb
+Packagehint=leap
+
+[Central Cache Service]
+File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service.awb
+Packagehint=leap
+
+[Central Cache Service/Params]
+CENTRAL_CACHE_STATS=0

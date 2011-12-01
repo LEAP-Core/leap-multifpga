@@ -1,4 +1,4 @@
-%name MultiFPGA NULL Platform Services
+%name MultiFPGA Minimal Platform Services
 %desc Translates Virtual Devices into Soft Connections
 
 %provides platform_services
@@ -8,9 +8,9 @@
 
 %public platform-services-null.bsv
 
-%requires  multifpga_router_service
-%requires  common_services
 %requires  mem_services
+%requires  common_services
+%requires  multifpga_router_service
 
 
 
