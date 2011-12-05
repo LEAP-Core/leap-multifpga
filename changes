@@ -1090,3 +1090,26 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 
 - Reduce multi-FPGA soft services to two cases:  primary (has RRR connection to
   host) and subordinate (only intra and inter-FPGA services).
+
+----------
+kfleming    Date: Mon Dec  5 17:27:25 EST 2011  CSN: CSN-multifpga-82
+                  Mon Dec  5 22:27:25 UTC 2011
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified           81 
+ flowcontrol-ingress.bsv   Locally Modified           81 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ via.py                    Locally Modified           81 
+ multiFPGAConnect.py       Locally Modified           81 
+
+
+Removed the cycles of latency introduced in last commit.  
+
+Reorganized the switches to allow flowcontrol across a parametric
+link.  Previously, link 0 was used for flowcontrol. However, with
+asymetric lane allocation, the virtual channle used for flow control
+can't be hard coded.  
+
+

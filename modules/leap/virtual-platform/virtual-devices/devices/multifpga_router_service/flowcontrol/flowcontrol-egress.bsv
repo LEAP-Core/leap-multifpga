@@ -187,6 +187,11 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     if(valueof(filler_bits_r) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))
 )))     
     begin
+
+	rule creditReadReady (creditDelay.notFull());
+ 	    flowcontrol.read_ready(); // Needed for VLevelFIFO
+        endrule
+
         rule delayCredits;
             // Pick up the flow control packet header (which contains credit information in the filler bits)
             GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -235,6 +240,12 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     end
     else // In this case, the header doesn't have enough space for flow control bits. The come in the second chunk.
     begin
+
+        // We appear always ready to read....
+        // it might be that we want a fifo here also just to simplfy things. 
+	rule creditReadReady;
+ 	    flowcontrol.read_ready();
+        endrule
 
         rule dropHeader (deqHeader);
             let packet <- flowcontrol.read();
@@ -315,7 +326,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
         rule write_request_newmsg2 (newMsgQIdx matches tagged Valid .idx &&&
                                     fromInteger(s) == idx &&&
                                     requestChunksRemaining == 0 &&&
-                                    !creditDelay.notEmpty());
+                                    !creditDelay.notEmpty() &&&
+				    deqHeader);
             if(`SWITCH_DEBUG == 1)
             begin
                 $display("scheduled %d", idx);
