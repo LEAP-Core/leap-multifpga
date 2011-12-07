@@ -103,6 +103,7 @@ central_cache=NULL Central Cache
 scratchpad_memory=Local Memory Scratchpad Memory Device
 shared_memory=Null Shared Memory
 common_utility_devices=Null Base Common Devices
+local_memory_device=Soft Connection Local Memory Device
 
 [Null Base Common Devices]
 File=modules/leap/virtual-platform/virtual-devices/devices/common/common-utility-devices-null.awb
@@ -283,7 +284,6 @@ clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 aurora_device=Aurora SATA Device, Single Lane, 3gbps
 
-
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=multifpga
@@ -294,3 +294,11 @@ CON_CWIDTH=128
 [MultiFPGA Subordinate Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-subordinate.apm
 Packagehint=multifpga
+
+
+[MultiFPGA Subordinate Platform Services/Params]
+SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
+
+[Soft Connection Local Memory Device]
+File=modules/leap/virtual-platform/virtual-devices/devices/local-memory/soft/local-memory-device-soft.awb
+Packagehint=leap

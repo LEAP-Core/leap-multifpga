@@ -218,6 +218,7 @@ scratchpad_memory=Hybrid Scratchpad Memory Device (MultiFPGA)
 shared_memory=Null Shared Memory
 common_utility_devices=Base Common Devices
 front_panel=Hybrid Front Panel
+local_memory_device=Soft Connection Local Memory Device
 
 [Hybrid Front Panel]
 File=modules/leap/virtual-platform/virtual-devices/devices/front-panel/hybrid/hybrid-fp.awb
@@ -241,11 +242,13 @@ Packagehint=multifpga
 [Soft Services for MultiFPGA Submodel/Params]
 CON_CWIDTH=128
 
-
-
 [MultiFPGA Subordinate Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-subordinate.apm
 Packagehint=multifpga
 
 [MultiFPGA Subordinate Platform Services/Params]
 SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
+
+[Soft Connection Local Memory Device]
+File=modules/leap/virtual-platform/virtual-devices/devices/local-memory/soft/local-memory-device-soft.awb
+Packagehint=leap

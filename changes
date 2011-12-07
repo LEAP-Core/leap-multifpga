@@ -1113,3 +1113,20 @@ asymetric lane allocation, the virtual channle used for flow control
 can't be hard coded.  
 
 
+
+----------
+mcadler     Date: Wed Dec  7 11:54:09 EST 2011  CSN: CSN-multifpga-83
+                  Wed Dec  7 16:54:09 UTC 2011
+
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga1.apm Locally Modified           82 
+ multifpgaenv-hybrid-exe-fpga0-dist-cache.apm Locally Modified           82 
+ multifpgaenv-hybrid-exe-fpga1-dist-cache.apm Locally Modified           82 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified           82 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified           82 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified           82 
+
+Virtual devices no requires a local memory device.
