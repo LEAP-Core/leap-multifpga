@@ -200,14 +200,10 @@ Packagehint=leap
 pcie_device=Bluespec PCIE Device
 clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
-aurora_device=Aurora Device, Single Lane, 3.125gbps
+aurora_device=Aurora Device, Single Lane, 3.125gbps (SMA)
 
 [XUP Virtex 5 PCIE AURORA]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora/xilinx-xup-pcie-sata.awb
-Packagehint=leap-platforms
-
-[Aurora Device, Single Lane, 3.125gbps]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps/sata-aurora.awb
 Packagehint=leap-platforms
 
 [Synplify/XST Synthesis Tool]
@@ -285,6 +281,10 @@ Packagehint=leap
 File=modules/leap/virtual-platform/virtual-devices/devices/scratchpad-memory/hybrid/hybrid-mem-scratch-multi.awb
 Packagehint=leap
 
+[Aurora Device, Single Lane, 3.125gbps (SMA)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps/sata-aurora.awb
+Packagehint=leap-platforms
+
 [MultiFPGA Standard Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-standard.apm
 Packagehint=multifpga
@@ -302,3 +302,4 @@ CON_CWIDTH=128
 [Soft Connection Local Memory Device]
 File=modules/leap/virtual-platform/virtual-devices/devices/local-memory/soft/local-memory-device-soft.awb
 Packagehint=leap
+

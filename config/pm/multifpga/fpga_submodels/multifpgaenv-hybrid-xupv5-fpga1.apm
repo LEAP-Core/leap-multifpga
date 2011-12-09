@@ -5,7 +5,7 @@ Description=Uses a single sata link to communicate between FPGAs
 File=multifpgaenv-hybrid-xupv5-fpga1
 Version=2.2
 Type=HAsim
-Name=XUPV5 FPGA 1 (USRP RF)
+Name=XUPV5 FPGA 1 
 Class=Asim::Model
 DefaultBenchmark=
 DefaultRunOpts=
@@ -31,7 +31,7 @@ Packagehint=leap
 virtual_devices=Null Standard Virtual Devices
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
-platform_services=MultiFPGA Subordinate Platform Services
+platform_services=MultiFPGA Minimal Platform Services
 
 [FPGA Environment]
 File=modules/leap/virtual-platform/fpga-environment.awb
@@ -51,6 +51,7 @@ rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=NULL Local Memory Interface
 remote_memory=Null Remote Memory
+physical_platform=XUP Virtex 5 PCIE AURORA
 
 [Null Physical Platform Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
@@ -91,7 +92,7 @@ Packagehint=leap
 [Null Standard Virtual Devices/Requires]
 starter_device=Null Starter Virtual Device
 central_cache=NULL Central Cache
-scratchpad_memory=Local Memory Scratchpad Memory Device
+scratchpad_memory=Hybrid Scratchpad Memory Device (MultiFPGA)
 shared_memory=Null Shared Memory
 common_utility_devices=Null Base Common Devices
 local_memory_device=Soft Connection Local Memory Device
@@ -206,9 +207,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-[BSV Build Tool MultiFPGA/Params]
-BUILD_LOGS_ONLY=1
-
 [FPGA Platform Build Pipeline]
 File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
 Packagehint=multifpga
@@ -246,28 +244,121 @@ Packagehint=leap
 File=modules/leap/virtual-platform/virtual-devices/devices/starter/null/null-starter-device.awb
 Packagehint=leap
 
-[Local Memory Scratchpad Memory Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/scratchpad-memory/local/local-mem-scratch.awb
-Packagehint=leap
-
-[Local Memory Scratchpad Memory Device/Requires]
-scratchpad_memory_common=Scratchpad Memory Common Definitions
-
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
-Packagehint=multifpga
-
-[MultiFPGA Subordinate Platform Services]
-File=config/pm/leap/submodels/platform-services/multifpga-platform-services-subordinate.apm
 Packagehint=multifpga
 
 [Soft Services for MultiFPGA Submodel/Params]
 CON_CWIDTH=128
 
-
-[MultiFPGA Subordinate Platform Services/Params]
-SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
-
 [Soft Connection Local Memory Device]
 File=modules/leap/virtual-platform/virtual-devices/devices/local-memory/soft/local-memory-device-soft.awb
+Packagehint=leap
+
+[Single-Ended Crystal Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/single-ended/single-ended-clocks-device.awb
+Packagehint=leap-platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=leap-platforms
+
+[Single-Ended Crystal Clocks Device/Params]
+CRYSTAL_CLOCK_FREQ=100
+
+[Aurora Device, Single Lane, 3.125gbps (SMA)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3.125gbps/sata-aurora.awb
+Packagehint=leap-platforms
+
+[XUP Virtex 5 PCIE AURORA]
+File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora/xilinx-xup-pcie-sata.awb
+Packagehint=leap-platforms
+
+[Bluespec PCIE Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec/pcie-bluespec.awb
+Packagehint=leap-platforms
+
+[XUP Virtex 5 PCIE AURORA/Requires]
+pcie_device=Bluespec PCIE Device
+clocks_device=Single-Ended Crystal Clocks Device
+physical_platform_utils=Common Physical Platform Utilities
+aurora_device=Aurora Device, Single Lane, 3.125gbps (SMA)
+
+[Debug Scan Services Null]
+File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service-null.awb
+Packagehint=leap
+
+[MultiFPGA Minimal Platform Services/Requires]
+common_services=Common Services Null
+mem_services=Null Standard Mem Services
+multifpga_router_service=MultiFPGA Router Service
+
+[Assertions Service Null]
+File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service-null.awb
+Packagehint=leap
+
+[Common Services Null]
+File=modules/leap/libraries/platform-services/common-services/common-services-standard-null.awb
+Packagehint=leap
+
+[Null Shared Memory Services]
+File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
+Packagehint=leap
+
+[Stats Service Null]
+File=modules/leap/libraries/platform-services/common-services/stats-service/stats-service-null.awb
+Packagehint=leap
+
+[MultiFPGA Router Service/Requires]
+multifpga_switch=MultiFPGA Switch with Flowcontrol
+
+[Hybrid Scratchpad Memory Device (MultiFPGA)/Requires]
+scratchpad_memory_common=Scratchpad Memory Common Definitions
+
+[Null Central Cache Service]
+File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service-null.awb
+Packagehint=leap
+
+[Common Services Null/Requires]
+stats_service=Stats Service Null
+assertions_service=Assertions Service Null
+debug_scan_service=Debug Scan Services Null
+streams_service=Streams Service Null
+dynamic_parameters_service=Dynamic Parameter Service Null
+
+[Null Scratchpad Memory Service]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-null.awb
+Packagehint=leap
+
+[Null Standard Mem Services/Requires]
+shared_memory_service=Null Shared Memory Services
+scratchpad_memory_service=Null Scratchpad Memory Service
+central_cache_service=Null Central Cache Service
+
+[Null Standard Mem Services]
+File=modules/leap/libraries/platform-services/mem-services/mem-services-standard-null.awb
+Packagehint=leap
+
+[Streams Service Null]
+File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service-null.awb
+Packagehint=leap
+
+[Dynamic Parameter Service Null]
+File=modules/leap/libraries/platform-services/common-services/dynamic-parameters-service/dynamic-parameters-service-null.awb
+Packagehint=leap
+
+[MultiFPGA Router Service]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/multifpga-router-service.awb
+Packagehint=multifpga
+
+[MultiFPGA Switch with Flowcontrol]
+File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
+Packagehint=multifpga
+
+[MultiFPGA Minimal Platform Services]
+File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-null.awb
+Packagehint=multifpga
+
+[Hybrid Scratchpad Memory Device (MultiFPGA)]
+File=modules/leap/virtual-platform/virtual-devices/devices/scratchpad-memory/hybrid/hybrid-mem-scratch-multi.awb
 Packagehint=leap

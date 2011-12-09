@@ -185,6 +185,3 @@ Packagehint=multifpga
 File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-xupv5-fpga1-sata.apm
 Packagehint=multifpga
 
-[XUPV5 FPGA 1 (AURORA SATA)/Params]
-BUILD_LOGS_ONLY=1
-MODEL_CLOCK_FREQ=25
