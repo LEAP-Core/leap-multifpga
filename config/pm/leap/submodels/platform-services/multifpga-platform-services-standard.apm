@@ -55,17 +55,13 @@ Packagehint=leap
 File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service.awb
 Packagehint=leap
 
-[Scratchpad Memory Service (MultiFPGA, RRR)]
-File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-multi-rrr.awb
-Packagehint=leap
-
 [Standard Mem Services]
 File=modules/leap/libraries/platform-services/mem-services/mem-services-standard.awb
 Packagehint=leap
 
 [Standard Mem Services/Requires]
 shared_memory_service=Shared Memory Services
-scratchpad_memory_service=Scratchpad Memory Service (MultiFPGA, RRR)
+scratchpad_memory_service=Scratchpad Memory Service
 central_cache_service=Central Cache Service
 
 [MultiFPGA Platform Services/Requires]
@@ -98,6 +94,21 @@ Packagehint=leap
 File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
 Packagehint=multifpga
 
+[Scratchpad Memory Service]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service.awb
+Packagehint=leap
 
-[Scratchpad Memory Service (MultiFPGA, RRR)/Params]
+[Scratchpad Memory Common Definitions]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/common/mem-scratch-common.awb
+Packagehint=leap
+
+[Scratchpad Memory Service/Params]
 SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
+
+[Hybrid Scratchpad Memory Device]
+File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/hybrid/hybrid-mem-scratch.awb
+Packagehint=leap
+
+[Scratchpad Memory Service/Requires]
+scratchpad_memory_common=Scratchpad Memory Common Definitions
+scratchpad_memory=Hybrid Scratchpad Memory Device

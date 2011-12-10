@@ -1145,3 +1145,23 @@ Directory config/pm/multifpga/fpga_submodels
 
 
 Forward ported the XUPv5 enviroments to Adler's reorganized platforms.  
+
+----------
+mcadler     Date: Sat Dec 10 16:46:47 EST 2011  CSN: CSN-multifpga-85
+                  Sat Dec 10 21:46:47 UTC 2011
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-subordinate.apm Locally Modified           84 
+ multifpga-platform-services-standard.apm Locally Modified           84 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           84 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ environment.py            Locally Modified           84 
+
+- FPGA platform numbering now must start with 0 (environment.py).
+
+- Squash yet another use of absolute build directory paths.  I expect to be
+  able to move a build tree and have all SCons paths be relative.
