@@ -1165,3 +1165,47 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 
 - Squash yet another use of absolute build directory paths.  I expect to be
   able to move a build tree and have all SCons paths be relative.
+
+----------
+kfleming    Date: Sun Dec 11 22:38:33 EST 2011  CSN: CSN-multifpga-86
+                  Mon Dec 12 03:38:33 UTC 2011
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_throughput_acp.apm Locally Added               0 
+ test_multifpga_throughput_exe.apm Locally Added               0 
+ test_multifpga_throughput_xupv5.apm Locally Added               0 
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-subordinate.apm Locally Modified           85 
+
+Directory config/pm/multifpga/fpga_submodels
+ fpga0-airblue.apm         Locally Modified           85 
+ fpga1-airblue.apm         Locally Modified           85 
+ fpga1.apm                 Locally Modified           85 
+ fpga0-dist-cache.apm      Locally Modified           85 
+ fpga1-dist-cache.apm      Locally Modified           85 
+
+Directory modules/multifpga
+ throughputTest/           Locally Added               0 
+
+Directory modules/multifpga/throughputTest
+ test-c-throughput.bsv     Locally Added               0 
+ test-d-throughput.bsv     Locally Added               0 
+ test_c_throughput.awb     Locally Added               0 
+ test_d_throughput.awb     Locally Added               0 
+ test-c-throughput.dic     Locally Added               0 
+ connected_application/    Locally Added               0 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.h Locally Added               0 
+ connected-application-throughput.awb Locally Added               0 
+ connected-application-throughput.bsv Locally Added               0 
+ connected-application-throughput.cpp Locally Added               0 
+
+Directory modules/multifpga/throughputTest
+ test-d-throughput.dic     Locally Added               0 
+ test-d-throughput.rrr     Locally Added               0 
+
+
+Added a generic platform throughput test.  Also fixed stalness in modules. 

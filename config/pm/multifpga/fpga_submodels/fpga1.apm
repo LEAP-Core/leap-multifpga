@@ -21,8 +21,6 @@ File=modules/leap/build-support/project/application-env/soft-services/applicatio
 Packagehint=leap
 
 [Soft Services Hybrid Application Environment/Requires]
-platform_services=MultiFPGA NULL Platform Services
-soft_services=Soft Services
 connected_application=Null Connected Application
 
 [Default Hybrid Project Common Utilities]
@@ -32,59 +30,6 @@ Packagehint=leap
 [Null Connected Application]
 File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
 Packagehint=leap-platforms
-
-[Shared Tree Physical Interconnect]
-File=modules/leap/libraries/soft-services/services/soft-connections/physical-interconnects/shared-tree/shared-tree.awb
-Packagehint=leap
-
-[Soft Services Library Dependencies]
-File=modules/leap/libraries/soft-services/util/soft-services-deps.awb
-Packagehint=leap
-
-[Soft Services Dependencies]
-File=modules/leap/libraries/soft-services/soft-service-sets/soft-connections-soft-clocks/soft-services-deps-small.awb
-Packagehint=leap
-
-[SoftService Soft Connections for MultiFPGA/Requires]
-soft_connections_common=Soft Service Soft Connections Common
-physical_interconnect=Shared Tree Physical Interconnect
-soft_connections_alg=SoftService Soft Connections Algorithm MultiFPGA
-
-[Basic Soft Clock Algorithm]
-File=modules/leap/libraries/soft-services/services/soft-clocks/basic-clock.awb
-Packagehint=leap
-
-[Soft Services/Requires]
-soft_services_deps=Soft Services Dependencies
-soft_services_lib=Soft Services Library
-soft_clocks=Basic Soft Clock Algorithm
-soft_connections=SoftService Soft Connections for MultiFPGA
-
-[Basic Soft Clock Algorithm/Requires]
-soft_clocks_lib=Basic Soft Clock Library
-
-[Soft Services Library]
-File=modules/leap/libraries/soft-services/util/soft-services-lib.awb
-Packagehint=leap
-
-[SoftService Soft Connections for MultiFPGA]
-File=modules/leap/libraries/soft-services/services/soft-connections/soft-connections-module-context-multifpga.awb
-Packagehint=leap
-
-[Soft Services Library/Requires]
-smart_synth_boundaries=Soft Services Library Dependencies
-
-[Soft Services]
-File=modules/leap/libraries/soft-services/soft-service-sets/soft-connections-soft-clocks/soft-services.awb
-Packagehint=leap
-
-[Basic Soft Clock Library]
-File=modules/leap/libraries/soft-services/services/soft-clocks/basic-clock-lib.awb
-Packagehint=leap
-
-[Soft Service Soft Connections Common]
-File=modules/leap/libraries/soft-services/services/soft-connections/soft-connections-common-module-context.awb
-Packagehint=leap
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
@@ -101,84 +46,8 @@ environment_description=Null FPGA Environment
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=multifpga
 
-[MultiFPGA Router Service]
-File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/multifpga-router-service.awb
-Packagehint=multifpga
-
 [MultiFPGA Simulation FPGA1 Environment]
 File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga1.apm
-Packagehint=multifpga
-
-[MultiFPGA NULL Platform Services/Requires]
-multifpga_router_service=MultiFPGA Router Service
-common_services=Common Services Null
-mem_services=Null Standard Mem Services
-
-[MultiFPGA NULL Platform Services]
-File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-null.awb
-Packagehint=multifpga
-
-[SoftService Soft Connections Algorithm MultiFPGA]
-File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-multifpga.awb
-Packagehint=leap
-
-[Stats Service Null]
-File=modules/leap/libraries/platform-services/common-services/stats-service/stats-service-null.awb
-Packagehint=leap
-
-[Debug Scan Services Null]
-File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service-null.awb
-Packagehint=leap
-
-[Assertions Service Null]
-File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service-null.awb
-Packagehint=leap
-
-[Streams Service Null]
-File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service-null.awb
-Packagehint=leap
-
-[Dynamic Parameter Service Null]
-File=modules/leap/libraries/platform-services/common-services/dynamic-parameters-service/dynamic-parameters-service-null.awb
-Packagehint=leap
-
-[Null Standard Mem Services/Requires]
-shared_memory_service=Null Shared Memory Services
-scratchpad_memory_service=Null Scratchpad Memory Service
-central_cache_service=Null Central Cache Service
-
-[Null Standard Mem Services]
-File=modules/leap/libraries/platform-services/mem-services/mem-services-standard-null.awb
-Packagehint=leap
-
-[Null Shared Memory Services]
-File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
-Packagehint=leap
-
-[Null Scratchpad Memory Service]
-File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-null.awb
-Packagehint=leap
-
-[Null Central Cache Service]
-File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service-null.awb
-Packagehint=leap
-
-[Common Services Null]
-File=modules/leap/libraries/platform-services/common-services/common-services-standard-null.awb
-Packagehint=leap
-
-[Common Services Null/Requires]
-stats_service=Stats Service Null
-assertions_service=Assertions Service Null
-debug_scan_service=Debug Scan Services Null
-streams_service=Streams Service Null
-dynamic_parameters_service=Dynamic Parameter Service Null
-
-[MultiFPGA Router Service/Requires]
-multifpga_switch=MultiFPGA Switch with Flowcontrol
-
-[MultiFPGA Switch with Flowcontrol]
-File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
 Packagehint=multifpga
 
 [Null FPGA Environment]

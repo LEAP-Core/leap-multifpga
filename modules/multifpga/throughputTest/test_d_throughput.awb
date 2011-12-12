@@ -1,0 +1,14 @@
+%AWB_START
+
+%name MultiFPGA Throughput Test (D) 
+%desc MultiFPGA	Throughput Test (D)
+
+%provides test_d
+
+%sources -t RRR -v PUBLIC test-d-throughput.rrr
+%sources -t BSV -v PUBLIC test-d-throughput.bsv
+
+
+%param SYNTH_BOUNDARY mkD "name of synthesis boundary"
+
+%AWB_END
