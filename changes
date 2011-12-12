@@ -1209,3 +1209,13 @@ Directory modules/multifpga/throughputTest
 
 
 Added a generic platform throughput test.  Also fixed stalness in modules. 
+
+----------
+mcadler     Date: Mon Dec 12 14:59:26 EST 2011  CSN: CSN-multifpga-87
+                  Mon Dec 12 19:59:26 UTC 2011
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-subordinate.apm Locally Modified           86 
+
+Set subordinate platform services configuration back to the correct state.
