@@ -194,7 +194,7 @@ class MultiFPGAGenerateLogfile():
           dictPath = os.path.realpath(makePlatformDictDir(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict]) + '/' + dict)
           linkDir  = makePlatformDictDir(platform.name)  
           linkPath = linkDir  + '/' + dict
-          relDictPath = os.path.relpath(dictPath, linkDir)
+          relDictPath = relpath(dictPath, linkDir)
           print "missing link: " + linkPath + ' -> ' + relDictPath
           if(os.path.lexists(linkPath)):
             print("This symlink already exists: " + makePlatformDictDir(platform.name)  + '/' + dict)
@@ -214,7 +214,7 @@ class MultiFPGAGenerateLogfile():
             linkPath  = makePlatformRRRDir(platform.name)  + '/' + rrr
             linkDir = os.path.dirname(linkPath)
             print ('Link dir is ' + linkDir)
-            os.symlink(os.path.relpath(rrrpath, linkDir), linkPath)
+            os.symlink(relpath(rrrpath, linkDir), linkPath)
 
 
       subbuild = moduleList.env.Command( 

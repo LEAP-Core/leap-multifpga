@@ -1219,3 +1219,17 @@ Directory config/pm/leap/submodels/platform-services
  multifpga-platform-services-subordinate.apm Locally Modified           86 
 
 Set subordinate platform services configuration back to the correct state.
+
+----------
+mcadler     Date: Tue Dec 13 13:52:34 EST 2011  CSN: CSN-multifpga-88
+                  Tue Dec 13 18:52:34 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified           87 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ tool.py                   Locally Modified           87 
+
+Use relpath() in LEAP Utils.py instead of os.path.relpath.  The latter isn't
+in the version of Python currently used in Hudson.

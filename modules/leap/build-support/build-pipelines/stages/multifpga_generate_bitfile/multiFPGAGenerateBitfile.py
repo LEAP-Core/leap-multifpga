@@ -159,7 +159,7 @@ class MultiFPGAGenerateBitfile():
           dictPath = os.path.realpath( makePlatformDictDir(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict]) + '/' + dict)
           linkDir  = makePlatformDictDir(platform.name)  
           linkPath = linkDir  + '/' + dict
-          relDictPath = os.path.relpath(dictPath, linkDir)
+          relDictPath = relpath(dictPath, linkDir)
 
           if(os.path.lexists(linkPath)):
             print("This symlink already exists: " + makePlatformDictDir(platform.name)  + '/' + dict)
@@ -179,7 +179,7 @@ class MultiFPGAGenerateBitfile():
             linkPath  = makePlatformRRRDir(platform.name)  + '/' + rrr
             linkDir = os.path.dirname(linkPath)
             print ('Link dir is ' + linkDir)
-            os.symlink(os.path.relpath(rrrPath, linkDir), linkPath)
+            os.symlink(relpath(rrrPath, linkDir), linkPath)
 
 
       # this dependency on platform logs is coarse.  we could do better, but it may not be necessary
