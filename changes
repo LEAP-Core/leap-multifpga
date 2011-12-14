@@ -1233,3 +1233,14 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 
 Use relpath() in LEAP Utils.py instead of os.path.relpath.  The latter isn't
 in the version of Python currently used in Hudson.
+
+----------
+mcadler     Date: Wed Dec 14 16:14:06 EST 2011  CSN: CSN-multifpga-89
+                  Wed Dec 14 21:14:06 UTC 2011
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-subordinate.apm Locally Modified           88 
+ multifpga-platform-services-standard.apm Locally Modified           88 
+
+The central cache implementation is now part of platform services.
