@@ -99,9 +99,6 @@ Packagehint=leap
 
 [Null Standard Virtual Devices/Requires]
 starter_device=Null Starter Virtual Device
-central_cache=NULL Central Cache
-scratchpad_memory=Local Memory Scratchpad Memory Device
-shared_memory=Null Shared Memory
 common_utility_devices=Null Base Common Devices
 local_memory_device=Soft Connection Local Memory Device
 
@@ -136,13 +133,7 @@ Packagehint=leap
 File=modules/leap/virtual-platform/virtual-devices/virtual-device-sets/std/std-virtual-devices-null.awb
 Packagehint=leap
 
-[Scratchpad Memory Common Definitions]
-File=modules/leap/virtual-platform/virtual-devices/devices/scratchpad-memory/common/mem-scratch-common.awb
-Packagehint=leap
 
-[Null Shared Memory]
-File=modules/leap/virtual-platform/virtual-devices/devices/shared-memory/null/null-shared-memory.awb
-Packagehint=leap
 
 [Stats Device]
 File=modules/leap/virtual-platform/virtual-devices/devices/common/stats-device/stats-device.awb
@@ -251,20 +242,12 @@ MODEL_CLOCK_FREQ=25
 File=modules/leap/build-support/build-pipelines/stages/synplify/synplify-sub.awb
 Packagehint=leap
 
-[NULL Central Cache]
-File=modules/leap/virtual-platform/virtual-devices/devices/central-cache/null-central-cache.awb
-Packagehint=leap
 
 [Null Starter Virtual Device]
 File=modules/leap/virtual-platform/virtual-devices/devices/starter/null/null-starter-device.awb
 Packagehint=leap
 
-[Local Memory Scratchpad Memory Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/scratchpad-memory/local/local-mem-scratch.awb
-Packagehint=leap
 
-[Local Memory Scratchpad Memory Device/Requires]
-scratchpad_memory_common=Scratchpad Memory Common Definitions
 
 [XUP Virtex 5 PCIE AURORA]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora/xilinx-xup-pcie-sata.awb
@@ -294,7 +277,6 @@ CON_CWIDTH=128
 [MultiFPGA Subordinate Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-subordinate.apm
 Packagehint=multifpga
-
 
 [MultiFPGA Subordinate Platform Services/Params]
 SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096

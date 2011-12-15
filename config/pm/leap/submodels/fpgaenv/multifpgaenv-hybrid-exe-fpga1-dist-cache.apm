@@ -132,13 +132,7 @@ Packagehint=multifpga
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
 Packagehint=leap
 
-[Local Memory Central Cache]
-File=modules/leap/virtual-platform/virtual-devices/devices/central-cache/local-mem-central-cache.awb
-Packagehint=leap
 
-[Scratchpad Memory Common Definitions]
-File=modules/leap/virtual-platform/virtual-devices/devices/scratchpad-memory/common/mem-scratch-common.awb
-Packagehint=leap
 
 [Assertions Device]
 File=modules/leap/virtual-platform/virtual-devices/devices/common/assertions-device/assertions-device.awb
@@ -180,12 +174,7 @@ fpga_environment_parser=FPGA Environment Datatype
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
 Packagehint=multifpga
 
-[Hybrid Scratchpad Memory Device (MultiFPGA)/Requires]
-scratchpad_memory_common=Scratchpad Memory Common Definitions
 
-[Hybrid Scratchpad Memory Device (MultiFPGA)]
-File=modules/leap/virtual-platform/virtual-devices/devices/scratchpad-memory/hybrid/hybrid-mem-scratch-multi.awb
-Packagehint=leap
 
 [Local Memory Interface using BRAM/Params]
 LOCAL_MEM_ADDR_BITS=10
@@ -196,9 +185,6 @@ LOCAL_MEM_READ_LATENCY=8
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-bram.awb
 Packagehint=leap
 
-[Null Shared Memory]
-File=modules/leap/virtual-platform/virtual-devices/devices/shared-memory/null/null-shared-memory.awb
-Packagehint=leap
 
 [Standard Virtual Devices]
 File=modules/leap/virtual-platform/virtual-devices/virtual-device-sets/std/std-virtual-devices.awb
@@ -213,9 +199,6 @@ debug_scan_device=Debug Scan Device
 
 [Standard Virtual Devices/Requires]
 starter_device=Starter Virtual Device
-central_cache=Local Memory Central Cache
-scratchpad_memory=Hybrid Scratchpad Memory Device (MultiFPGA)
-shared_memory=Null Shared Memory
 common_utility_devices=Base Common Devices
 front_panel=Hybrid Front Panel
 local_memory_device=Soft Connection Local Memory Device

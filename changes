@@ -1244,3 +1244,27 @@ Directory config/pm/leap/submodels/platform-services
  multifpga-platform-services-standard.apm Locally Modified           88 
 
 The central cache implementation is now part of platform services.
+
+----------
+mcadler     Date: Wed Dec 14 23:29:38 EST 2011  CSN: CSN-multifpga-90
+                  Thu Dec 15 04:29:38 UTC 2011
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-standard.apm Locally Modified           89 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpga0.apm Locally Modified           89 
+ multifpgaenv-hybrid-exe-fpga1.apm Locally Modified           89 
+ multifpgaenv-hybrid-exe-fpga0-dist-cache.apm Locally Modified           89 
+ multifpgaenv-hybrid-exe-fpga1-dist-cache.apm Locally Modified           89 
+
+Directory config/pm/multifpga/fpga_submodels
+ xupv50_sata.apm           Locally Modified           89 
+ xupv51_sata.apm           Locally Modified           89 
+ multifpgaenv-hybrid-xupv5-fpga0-sata.apm Locally Modified           89 
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified           89 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified           89 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified           89 
+
+Clean up.
