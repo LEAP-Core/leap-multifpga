@@ -1268,3 +1268,14 @@ Directory config/pm/multifpga/fpga_submodels
  multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified           89 
 
 Clean up.
+
+----------
+kfleming    Date: Fri Dec 16 13:44:41 EST 2011  CSN: CSN-multifpga-91
+                  Fri Dec 16 18:44:41 UTC 2011
+
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.cpp Locally Modified           90 
+
+
+Fixed print out in multifpga throughput test. 

@@ -37,7 +37,7 @@ CONNECTED_APPLICATION_CLASS::Main()
     for(width = 16; width < 512; width = width * 2) {
         for(count = 1; count < 10000000; count = count * 10) {
 	  OUT_TYPE_RunTest result = clientStub->RunTest(count, width);
-            printf("Transfer %d in %d Ticks %d -- Tokens/s:%f\tMB/s:%f\tErrors:%d\n", 
+            printf("Transfer %d in %d Ticks -- Tokens/s:%f\tMB/s:%f\tErrors:%d\n", 
                    count, 
                    result.cycles, 
                    count/((float)result.cycles/(MODEL_CLOCK_FREQ*1000000)), 
