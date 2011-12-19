@@ -1315,3 +1315,16 @@ Directory modules/leap/virtual-platform/virtual-devices/platform-services
 
 Use a single virtual devices configuration, taking advantage of automatic
 master/slave configuration in virtual devices.
+
+----------
+mcadler     Date: Mon Dec 19 12:22:22 EST 2011  CSN: CSN-multifpga-93
+                  Mon Dec 19 17:22:22 UTC 2011
+
+
+Directory config/pm/leap/submodels/fpgaenv/inter-fpga-test
+ inter-fpga-test-hybrid-exe-fpga0.apm Locally Modified           92 
+
+Directory config/pm/multifpga/inter_fpga_test/submodels
+ fpgaenv-hybrid-xup-v5-pcie-sma.apm Locally Modified           92 
+
+Clean up after moving modules.
