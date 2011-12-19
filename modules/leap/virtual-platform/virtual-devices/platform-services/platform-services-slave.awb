@@ -1,12 +1,12 @@
-%name MultiFPGA Minimal Platform Services
-%desc Translates Virtual Devices into Soft Connections
+%name MultiFPGA Slave Platform Services
+%desc Reduced platform services for slave FPGAs
 
 %provides platform_services
 
 
 %attributes leap
 
-%public platform-services-null.bsv
+%public platform-services-slave.bsv
 
 %requires  mem_services
 %requires  common_services

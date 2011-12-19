@@ -2,19 +2,19 @@
 [Global]
 SaveParameters=0
 Description=Collection of Services Corresponding to Standard Virtual Devices
-File=multifpga-platform-services-standard
+File=multifpga-platform-services-master
 Version=2.2
-Name=MultiFPGA Standard Platform Services
+Name=MultiFPGA Master Platform Services
 DefaultBenchmark=
 Type=Leap
 Class=Asim::Model
 DefaultRunOpts=
-RootName=MultiFPGA Platform Services
+RootName=MultiFPGA Master Platform Services
 RootProvides=platform_services
 
 [Model]
 DefaultAttributes=connected hybrid
-model=MultiFPGA Platform Services
+model=MultiFPGA Master Platform Services
 
 [Common Services]
 File=modules/leap/libraries/platform-services/common-services/common-services-standard.awb
@@ -64,19 +64,10 @@ shared_memory_service=Null Shared Memory Services
 scratchpad_memory_service=Scratchpad Memory Service
 central_cache_service=Central Cache Service
 
-[MultiFPGA Platform Services/Requires]
-common_services=Common Services
-mem_services=Standard Mem Services
-multifpga_router_service=MultiFPGA Router Service
-front_panel_service=Front Panel Service
-starter_service=Starter Service
 
 [MultiFPGA Router Service/Requires]
 multifpga_switch=MultiFPGA Switch with Flowcontrol
 
-[MultiFPGA Platform Services]
-File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-standard.awb
-Packagehint=multifpga
 
 [MultiFPGA Router Service]
 File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/multifpga-router-service.awb
@@ -85,7 +76,6 @@ Packagehint=multifpga
 [Central Cache Service]
 File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service.awb
 Packagehint=leap
-
 
 [MultiFPGA Switch with Flowcontrol]
 File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
@@ -125,3 +115,14 @@ Packagehint=leap
 [Null Shared Memory Services]
 File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
 Packagehint=leap
+
+[MultiFPGA Master Platform Services]
+File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-master.awb
+Packagehint=multifpga
+
+[MultiFPGA Master Platform Services/Requires]
+common_services=Common Services
+mem_services=Standard Mem Services
+multifpga_router_service=MultiFPGA Router Service
+front_panel_service=Front Panel Service
+starter_service=Starter Service

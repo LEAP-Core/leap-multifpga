@@ -1,20 +1,20 @@
 
 [Global]
 SaveParameters=0
-Description=Minimal platform services for a subordinate FPGA
-File=multifpga-platform-services-subordinate
+Description=Platform services for a slave FPGA
+File=multifpga-platform-services-slave
 Version=2.2
-Name=MultiFPGA Subordinate Platform Services
+Name=MultiFPGA Slave Platform Services
 DefaultBenchmark=
 Type=Leap
 Class=Asim::Model
 DefaultRunOpts=
-RootName=MultiFPGA Minimal Platform Services
+RootName=MultiFPGA Slave Platform Services
 RootProvides=platform_services
 
 [Model]
 DefaultAttributes=connected hybrid
-model=MultiFPGA Minimal Platform Services
+model=MultiFPGA Slave Platform Services
 
 [Assertions Service]
 File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service.awb
@@ -34,11 +34,6 @@ Packagehint=multifpga
 [Debug Scan Services Null]
 File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service-null.awb
 Packagehint=leap
-
-[MultiFPGA Minimal Platform Services/Requires]
-common_services=Common Services Null
-mem_services=Standard Mem Services
-multifpga_router_service=MultiFPGA Router Service
 
 [Common Services Null]
 File=modules/leap/libraries/platform-services/common-services/common-services-standard-null.awb
@@ -66,10 +61,6 @@ assertions_service=Assertions Service
 debug_scan_service=Debug Scan Services Null
 streams_service=Streams Service Null
 dynamic_parameters_service=Dynamic Parameter Service Null
-
-[MultiFPGA Minimal Platform Services]
-File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-null.awb
-Packagehint=multifpga
 
 [Standard Mem Services]
 File=modules/leap/libraries/platform-services/mem-services/mem-services-standard.awb
@@ -118,3 +109,12 @@ central_cache_common=Central Cache Common Definitions
 [Central Cache Common Definitions]
 File=modules/leap/libraries/platform-services/mem-services/central-cache-service/common/central-cache-common.awb
 Packagehint=leap
+
+[MultiFPGA Slave Platform Services]
+File=modules/leap/virtual-platform/virtual-devices/platform-services/platform-services-slave.awb
+Packagehint=multifpga
+
+[MultiFPGA Slave Platform Services/Requires]
+common_services=Common Services Null
+mem_services=Standard Mem Services
+multifpga_router_service=MultiFPGA Router Service

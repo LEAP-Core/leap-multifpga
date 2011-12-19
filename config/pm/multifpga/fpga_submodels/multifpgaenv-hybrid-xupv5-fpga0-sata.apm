@@ -31,7 +31,7 @@ Packagehint=leap
 virtual_devices=Standard Virtual Devices Submodel
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
-platform_services=MultiFPGA Standard Platform Services
+platform_services=MultiFPGA Master Platform Services
 
 [FPGA Environment]
 File=modules/leap/virtual-platform/fpga-environment.awb
@@ -218,16 +218,18 @@ Packagehint=leap
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3gbps/sata-aurora.awb
 Packagehint=leap-platforms
 
-[MultiFPGA Standard Platform Services]
-File=config/pm/leap/submodels/platform-services/multifpga-platform-services-standard.apm
-Packagehint=multifpga
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=multifpga
 
-[MultiFPGA Standard Platform Services/Params]
-SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
 
 [Soft Services for MultiFPGA Submodel/Params]
 CON_CWIDTH=128
+
+[MultiFPGA Master Platform Services/Params]
+SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
+
+[MultiFPGA Master Platform Services]
+File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master.apm
+Packagehint=multifpga

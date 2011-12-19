@@ -32,10 +32,10 @@ File=modules/leap/virtual-platform/std-virtual-platform.awb
 Packagehint=leap
 
 [Standard Virtual Platform/Requires]
-virtual_devices=Null Standard Virtual Devices
+virtual_devices=Standard Virtual Devices Submodel
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
-platform_services=MultiFPGA Subordinate Platform Services
+platform_services=MultiFPGA Slave Platform Services
 
 [RRR Clients and Servers]
 File=modules/leap/virtual-platform/rrr/basic/basic-rrr.awb
@@ -136,27 +136,7 @@ Packagehint=multifpga
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
 Packagehint=leap
 
-[Null Base Common Devices]
-File=modules/leap/virtual-platform/virtual-devices/devices/common/common-utility-devices-null.awb
-Packagehint=leap
 
-[Null Base Common Devices/Requires]
-stats_device=Stats Device
-dynamic_parameters_device=Dynamic Parameters Device
-streams_device=Hybrid Streams Device
-assertions_device=Assertions Device
-debug_scan_device=Debug Scan Device
-
-[Null Standard Virtual Devices/Requires]
-starter_device=Starter Virtual Device
-common_utility_devices=Null Base Common Devices
-local_memory_device=Soft Connection Local Memory Device
-
-
-
-[Null Standard Virtual Devices]
-File=modules/leap/virtual-platform/virtual-devices/virtual-device-sets/std/std-virtual-devices-null.awb
-Packagehint=leap
 
 
 
@@ -165,30 +145,11 @@ LOCAL_MEM_WORDS_PER_LINE=4
 LOCAL_MEM_WORD_BITS=64
 LOCAL_MEM_ADDR_BITS=10
 
-[Assertions Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/common/assertions-device/assertions-device.awb
-Packagehint=leap
 
 
-[Hybrid Streams Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/common/streams-device/hybrid-streams.awb
-Packagehint=leap
 
-[Debug Scan Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/common/debug-scan-device/debug-scan-device.awb
-Packagehint=leap
 
-[Dynamic Parameters Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/common/dynamic-parameters-device/dynamic-parameters-device.awb
-Packagehint=leap
 
-[Stats Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/common/stats-device/stats-device.awb
-Packagehint=leap
-
-[Starter Virtual Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/starter/hybrid/starter-device.awb
-Packagehint=leap
 
 [Null software build tool]
 File=modules/leap/build-support/build-pipelines/stages/null_software/null_software.awb
@@ -217,16 +178,17 @@ Packagehint=leap
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=multifpga
 
-[MultiFPGA Subordinate Platform Services]
-File=config/pm/leap/submodels/platform-services/multifpga-platform-services-subordinate.apm
-Packagehint=multifpga
-
 [Soft Services for MultiFPGA Submodel/Params]
 CON_CWIDTH=128
 
-[MultiFPGA Subordinate Platform Services/Params]
+
+[MultiFPGA Slave Platform Services/Params]
 SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
 
-[Soft Connection Local Memory Device]
-File=modules/leap/virtual-platform/virtual-devices/devices/local-memory/soft/local-memory-device-soft.awb
+[MultiFPGA Slave Platform Services]
+File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave.apm
+Packagehint=multifpga
+
+[Standard Virtual Devices Submodel]
+File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
