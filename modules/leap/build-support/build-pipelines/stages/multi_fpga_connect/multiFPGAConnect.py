@@ -53,7 +53,7 @@ class MultiFPGAConnect():
           except OSError:
             oserr = 0
                
-          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DIC': dictionaryFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'INGRESS_VIAS': {}, 'EGRESS_VIAS': {}}
+          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DIC': dictionaryFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'INGRESS_VIAS': {}, 'EGRESS_VIAS': {}, 'INGRESS_VIAS_PASS_ONE': {}, 'EGRESS_VIAS_PASS_ONE': {}}
 
 
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
@@ -71,7 +71,7 @@ class MultiFPGAConnect():
   def assignIndices(self,sourceConn,sinkConn):
     print "Now processing connection %s between %s <-> %s" % (sourceConn.name, sourceConn.platform, sinkConn.platform)
     if(sinkConn.platform in self.platformData[sourceConn.platform]['INDEX']):
-      # only increment the sourceConn.  
+      # only increment the sourceConn.  5B
       self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] += 1
       index = self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform]
       sourceConn.idx = index 
@@ -587,7 +587,15 @@ class MultiFPGAConnect():
   # which do not exist in the processor scheduling problem and that must be dealt with.    
   def analyzeNetworkLJF(self):
 
-
+    # set up intermediate data structures.  We need a couple of passes to resolve link allocation. 
+    egressViasInitial = {}
+    ingressViasInitial = {}
+    for platform in self.environment.getPlatformNames():      
+      egressViasInitial[platform] = {}
+      ingressViasInitial[platform] = {}
+      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+        egressViasInitial[platform][targetPlatform] = []
+        ingressViasInitial[platform][targetPlatform] = []
 
     for platform in self.environment.getPlatformNames():
       for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
@@ -625,38 +633,51 @@ class MultiFPGAConnect():
         firstAllocationPass = True; # We can't terminate in the first pass 
         viaWidthsFinal = [] # at some point, we'll want to derive this.  
         viaLinksFinal = [] 
+        viaLoadsFinal = [] 
         maxLoad = 0;
 
         sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
+
+        for link in sortedLinks:
+          print "Link" + dangling.name + "activiy: " + str(dangling.activity)
 
         # The general strategy here is 
         # 1) hueristically pick lane widths
         # 2) Assign links to lanes using Longest Job First hueristic
         # Repeat until maximum link occupancy increases (although we might just try repeatedly and keep all the results) 
 
-        # We can't allow the code to become totally assymetric yet. 
-        # To make the code assymetric, ingress vias would need to handle a parametric number
-        # of feed back loops. 
-        for numberOfVias in [MAX_NUMBER_OF_VIAS]:
+        for numberOfVias in range(1,10):
           viaLoads = []
           viaSizingIdx = 0
           viaLinks = []
           viaWidths = []
-          
+          noViasRemaining = 0
           # pick our via links deterministically
+          
           for via in range(numberOfVias):
-            viaLinks.append(1) # We need flow control..
+            viaLinks.append(0)
             viaLoads.append(0)
             if(via == 0):
               viaWidths.append(self.platformData[platform]['WIDTHS'][egressVia] - 1)
             else: # carve off a lane for the longest running job
+              
               while(viaWidths[0] < (sortedLinks[viaSizingIdx].bitwidth + headerSize)): # Give extra for header sizing
-                viaSizingIdx += 1
-              # found minimum, ajust the top guy
-              viaWidths[0] = viaWidths[0] - (sortedLinks[viaSizingIdx].bitwidth + headerSize)
-              viaWidths.append(sortedLinks[viaSizingIdx].bitwidth + headerSize -1) # need one bit for the header
-              viaSizingIdx += 1
+                if(viaSizingIdx + 1 == len(sortedLinks)):
+                  noViasRemaining = 1
+                  break
+                else:
+                  viaSizingIdx += 1
 
+              # found minimum, ajust the top guy
+              if(not noViasRemaining):
+                viaWidths[0] = viaWidths[0] - (sortedLinks[viaSizingIdx].bitwidth + headerSize)
+                viaWidths.append(sortedLinks[viaSizingIdx].bitwidth + headerSize -1) # need one bit for the header
+                viaSizingIdx += 1
+
+          # We've exhausted the supply of feasible vias.
+          if(noViasRemaining):
+            print "There are no suitable mapping candidates"
+            break
 
           # send/recv pairs had better be matched.
           # so let's match them up
@@ -665,8 +686,6 @@ class MultiFPGAConnect():
           platformConnectionsProvisional = []
           targetPlatformConnectionsProvisional = []
           for danglingIdx in range(len(sortedLinks)):           
-
-
             if((sortedLinks[danglingIdx].sc_type == 'Recv') or (sortedLinks[danglingIdx].sc_type == 'ChainSink')):
               # depending on the width of the vias, and the width of our type we get different loads on different processors
               # need to choose the minimum
@@ -674,14 +693,16 @@ class MultiFPGAConnect():
               minLoad = 0
               for via in range(numberOfVias):
                 extraChunk = 0
-                if((sortedLinks[danglingIdx].bitwidth - headerSize )%viaWidths[via] > 0):
+                if((sortedLinks[danglingIdx].bitwidth + headerSize )%viaWidths[via] > 0):
                   extraChunk = 1
 
-                load = dangling.activity * (1 + (sortedLinks[danglingIdx].bitwidth - headerSize )/viaWidths[via] + extraChunk) + viaLoads[via]
-                
+                load = sortedLinks[danglingIdx].activity * ( (sortedLinks[danglingIdx].bitwidth + headerSize )/viaWidths[via] + extraChunk) + viaLoads[via]
+
+                print "new load is " + str(load) + " activity: " + str(sortedLinks[danglingIdx].activity)
                 # We don't do a great job here of evaluating opportunity cost.  Picking the longest running on the fastest processor 
                 # might be a bad choice.
-                if(load < minLoad or minIdx == -1):
+                if((load < minLoad) or (minIdx == -1)):
+                  print "Setting min load as " +str(minLoad)  + " idx: " + str(via)
                   minIdx = via
                   minLoad = load
               
@@ -696,10 +717,15 @@ class MultiFPGAConnect():
           targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)
           print "Lengths: "  + str(len(platformConnections)) + " " + str(len(targetPlatformConnections))  
           #Did we do better than last time?
-          if(maxLoad < max(viaLoads) or firstAllocationPass):
+          for idx in range(len(viaLoads)):
+            print "Load " + str(idx) + ": " + str(viaLoads[idx]) 
+          print "For " + str(len(viaLoads)) + " vias maximum load is: " + str(max(viaLoads))
+          if(max(viaLoads) < maxLoad or firstAllocationPass):
+            print "Better allocation with  " + str(len(viaLoads)) + " vias found."
             maxLoad = max(viaLoads)
             viaWidthsFinal = viaWidths
             viaLinksFinal = viaLinks
+            viaLoadsFinal = viaLoads
             for provisional in platformConnectionsProvisional:
               for idx in range(len(platformConnections)): # we can probably do better than this n^2 loop. 
                 # Watch out for chain Sinks and sources
@@ -715,28 +741,97 @@ class MultiFPGAConnect():
                   targetPlatformConnections[idx].via_link = provisional[3]
 
                   print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional[2]) + ' ' + str(provisional[3])
-          else:
+#          else:
             #Quit while we're ahead
-            break
+#            break
           firstAllocationPass = False
 
         self.platformData[platform]['EGRESS_VIAS'][targetPlatform] = []
         self.platformData[targetPlatform]['INGRESS_VIAS'][platform] = []
-            
-                                         
-        # We're dropping some bits here
-        # now that we have link assignment, we can enumerate the vias
-        for via in range(len(viaWidths)):
+
+        # We don't yet have information about how to handle flowcontrol
+        # But we will fill in the data structure temporarily.  
+        # Once all data via assignments have been handeled, we will do flowcontrol.
+        for via in range(len(viaWidthsFinal)):
           [headerType, bodyType, type] = self.generateRouterTypes(viaWidthsFinal[via], viaLinksFinal[via])
 
-          egress = Via("egress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via] - 1, 1, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via), 0, via)
+          egress = Via("egress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via), -1, -1, viaLoadsFinal[via])
 
-          ingress = Via("ingress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via] - 1, 1, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via), 0, via)
+          ingress = Via("ingress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via), -1, -1, viaLoadsFinal[via])
+
+          egressViasInitial[platform][targetPlatform].append(egress)
+          ingressViasInitial[targetPlatform][platform].append(ingress) 
+          print "Via pair " + egress.via_switch + ": " + str(via) + ' width: '  + str(viaWidthsFinal[via]) + ' links" ' + str(viaLinksFinal[via])
+
+
+
+    # We finished lane allocation. 
+    # Now we need to assign flow control and build the final metadata structures. 
+    # We can't do this in the previous loop because the algorithm will select
+    # potentially assymetric links for each target.
+    ingressFlowcontrolAssignment = {}
+    egressLinks = {}
+    viaLoads = {}
+    for platform in self.environment.getPlatformNames():
+      ingressFlowcontrolAssignment[platform] = {}
+      egressLinks[platform] = {}
+      viaLoads[platform] = {}
+      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+        # We need to first consider the other platform's ingress.  It gets mapped to our egress
+        localIngress = ingressViasInitial[platform][targetPlatform]
+        localEgress = egressViasInitial[platform][targetPlatform]
+
+
+        egressLinks[platform][targetPlatform] = []
+        ingressFlowcontrolAssignment[platform][targetPlatform] = []
+        viaLoads[platform][targetPlatform] = []
+        viaLoadsOld = []
+        for via in range(len(localEgress)):
+          egressLinks[platform][targetPlatform].append(localEgress[via].via_links)
+          viaLoads[platform][targetPlatform].append(localEgress[via].via_load)
+          viaLoadsOld.append(localEgress[via].via_load)
+
+        for ingress in localIngress:
+          minIdx = -1 
+          minLoad = 0
+          for via in range(len(localEgress)):
+            extraChunk = 0
+            bitwidth = 8
+            if((bitwidth + headerSize)%localEgress[via].via_width != 0):
+              extraChunk = 1
+
+            load = viaLoadsOld[via]/128 * ((bitwidth + headerSize )/localEgress[via].via_width + extraChunk) + viaLoads[platform][targetPlatform][via]
+                
+            # We don't do a great job here of evaluating opportunity cost.  Picking the longest running on the fastest processor 
+            # might be a bad choice.
+            if(load < minLoad or minIdx == -1):
+              minIdx = via
+              minLoad = load
+               
+          viaLoads[platform][targetPlatform][minIdx] = minLoad
+
+          # after this assignment we can finalize the ingress 
+          ingressFlowcontrolAssignment[platform][targetPlatform].append([minIdx, egressLinks[platform][targetPlatform][minIdx]])
+          print "Assigning Flowcontrol ingress " + ingress.via_method + " to " + egressViasInitial[platform][targetPlatform][minIdx].via_method  + " Idx " + str(minIdx) + " Link " + str(egressLinks[platform][targetPlatform][minIdx]) + "\n"
+          egressLinks[platform][targetPlatform][minIdx] += 1
+
+    #And now we can finally finish the synthesized routers
+    for platform in self.environment.getPlatformNames(): 
+      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():                                        
+        for via in range(len(egressLinks[platform][targetPlatform])):
+          egress_first_pass = egressViasInitial[platform][targetPlatform][via]
+          ingress_first_pass = ingressViasInitial[targetPlatform][platform][via]
+
+          print "Idx " + str(via) + " links " + str(len(egressLinks[platform][targetPlatform])) + " loads " + str(len(viaLoads[platform][targetPlatform]))
+          [headerType, bodyType, type] = self.generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via])
+
+          egress = Via("egress", headerType, bodyType, type, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via])
+
+          ingress = Via("ingress", headerType, bodyType, type, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via])
 
           self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(egress)
           self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(ingress) 
-          print "Via pair " + egress.via_switch + ": " + str(via) + ' width: '  + str(viaWidthsFinal[via]) + ' links" ' + str(viaLinksFinal[via])
-
+          print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
 
 
 
@@ -797,8 +892,8 @@ class MultiFPGAConnect():
           viaLinks +=1 # allocate flowcontrol link
           [headerType, bodyType, type] = self.generateRouterTypes(viaWidth, viaLinks)
 
-          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via), 0, via))
-          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via), 0, via))
+          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via), 0, via, 0))
+          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via), 0, via, 0))
 
 
         # now that we have decided on the vias, we must assign links to vias
@@ -930,7 +1025,7 @@ class MultiFPGAConnect():
             # Ingress switches now feed directly into the egress switches to save latency.  
             for via_idx in range(len(ingressVias)):
               if(ingressVias[via_idx].via_links > 0):
-                header.write('INGRESS_SWITCH#(' + str(ingressVias[via_idx].via_links) + ',' + ingressVias[via_idx].via_type + ',' + egressVias[via_idx].via_header_type + ',' + egressVias[via_idx].via_body_type + ') ' + ingressVias[via_idx].via_switch + '<- mkIngressSwitch(' + str(ingressVias[via_idx].via_outgoing_flowcontrol_link) + ',' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + '_first, ' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + '_deq);\n\n')
+                header.write('INGRESS_SWITCH#(' + str(ingressVias[via_idx].via_links) + ',' + ingressVias[via_idx].via_type + ',' + egressVias[ingressVias[via_idx].via_outgoing_flowcontrol_via].via_header_type + ',' + egressVias[ingressVias[via_idx].via_outgoing_flowcontrol_via].via_body_type + ') ' + ingressVias[via_idx].via_switch + '<- mkIngressSwitch(' + str(ingressVias[via_idx].via_outgoing_flowcontrol_link) + ',' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + '_first, ' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + '_deq);\n\n')
 
             # The egress links now take as input a list of incoming connections
             # that can be manipulated like fifos.  
@@ -985,10 +1080,12 @@ class MultiFPGAConnect():
                   firstPass = False
                   
                 linkArray += "}// link idx: " + str(egressVias[via_idx].via_links - 1)  + '\n'
+                print "Idx: " + str(via_idx) + " eg vias len" + str(len(egressVias)) + " in vias len" + str(len(ingressVias))
 
                 header.write('EGRESS_PACKET_GENERATOR#(' + egressVias[via_idx].via_header_type + ', ' +  egressVias[via_idx].via_body_type + ')links_' + egressVias[via_idx].via_switch + '[' + str(egressVias[via_idx].via_links) + '] = ' + linkArray + ';\n') 
 
-                header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ', ' + ingressVias[via_idx].via_switch + '.ingressPorts[0], compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack));\n')
+                
+                header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ', ' + ingressVias[egressVias[via_idx].via_outgoing_flowcontrol_via].via_switch + '.ingressPorts[' + str(egressVias[via_idx].via_outgoing_flowcontrol_link) +'], compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack));\n')
 
                 if(GENERATE_ROUTER_DEBUG):   
                   # lay down a couple of debug scan chains here and insert crap in dictionary

@@ -283,9 +283,10 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
     
     // If the payload bitwidth is small, fit it in the header
     // Otherwise, we need will get one payload chunk
+    messageM(" Unmarshalled Recv #" + integerToString(id) + " bitwidth " + integerToString(valueof(bitwidth)) + " filler " + integerToString(valueof(filler_bits)));
+
     if(valueof(bitwidth) < valueof(filler_bits))
     begin
-        
         PulseWire startRequestFired <- mkPulseWire();  
  
         rule checkBlocked(recv.notEmpty() && !(startRequestFired));
@@ -298,7 +299,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
                            umf_phy_pvt,    filler_bits) firstHeader;
 
             Bit#(bitwidth) value = resize(pack(recv.receive));
-
+	    
             // The following blob instantiates a packet header. 
             return GENERIC_UMF_PACKET_HEADER
                    {

@@ -168,7 +168,7 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
     
     // Depending on packet header parameters, we can be clever and pack flow control tokens along with the header
     // saving a cycle.
-    if(valueof(filler_bits) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))))))
+    if(valueof(filler_bits_w) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))))))
     begin
  
         rule startSendEmpty;
@@ -199,7 +199,7 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
                 end
 
                 Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) control_packet = tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx]));
-
+                messageM(" Flowcontrol Recv #" + integerToString(flowcontrolID) + " filler " + integerToString(valueof(filler_bits_w)));
                 // This blob is the header for a flow control packet (with the token information packed in the filler)
                 GENERIC_UMF_PACKET_HEADER#(
                     umf_channel_id_w, umf_service_id_w,

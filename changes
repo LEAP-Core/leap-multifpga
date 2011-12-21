@@ -1328,3 +1328,28 @@ Directory config/pm/multifpga/inter_fpga_test/submodels
  fpgaenv-hybrid-xup-v5-pcie-sma.apm Locally Modified           92 
 
 Clean up after moving modules.
+
+----------
+kfleming    Date: Wed Dec 21 15:49:05 EST 2011  CSN: CSN-multifpga-94
+                  Wed Dec 21 20:49:05 UTC 2011
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified           93 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-ingress.bsv   Locally Modified           93 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ via.py                    Locally Modified           93 
+ multiFPGAConnect.py       Locally Modified           93 
+
+
+Fixed bug in flowcontrol-ingess thatq could lead the flow control
+packets to be mis-sized in some cases.
+
+Longest job first link allocation and scheduling now operational.  It
+uses default values to determin longest job, which actually
+underperforms some static schedules.  The feedback-driven version is
+coming soon.
+
