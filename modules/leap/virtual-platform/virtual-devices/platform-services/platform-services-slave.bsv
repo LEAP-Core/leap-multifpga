@@ -36,6 +36,6 @@ module [CONNECTED_MODULE] mkPlatformServices#(VIRTUAL_PLATFORM virtualPlatform)
 
     // auto-generated submodules for RRR connections
     let multifpgaRouterService  <- mkMultifpgaRouterServices(virtualPlatform);    
-    let memoryServices <- mkMemServices(virtualPlatform.virtualDevices);
+    let memoryServices <- mkMemServices();
 
 endmodule

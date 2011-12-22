@@ -1353,3 +1353,14 @@ uses default values to determin longest job, which actually
 underperforms some static schedules.  The feedback-driven version is
 coming soon.
 
+
+----------
+mcadler     Date: Wed Dec 21 23:47:40 EST 2011  CSN: CSN-multifpga-95
+                  Thu Dec 22 04:47:40 UTC 2011
+
+
+Directory modules/leap/virtual-platform/virtual-devices/platform-services
+ platform-services-slave.bsv Locally Modified           94 
+ platform-services-master.bsv Locally Modified           94 
+
+mkMemServices() no longer takes parameters.
