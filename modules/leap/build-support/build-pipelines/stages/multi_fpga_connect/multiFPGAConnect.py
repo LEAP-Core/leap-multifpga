@@ -12,6 +12,20 @@ from multi_fpga_log_generator import *
 from danglingConnection import *
 from via import *
 
+# Notice that chains will have their platform direction labelled
+def parseStats(filename):
+  logfile = open(filename,'r')
+  stats = {}
+  print "Processing Stats:  " + filename
+  for line in logfile:
+    if(re.match('.*ROUTER_.*_SENT.*',line)):           
+      match = re.search(r'.*ROUTER_(\w+)_SENT,.*,(\d+)',line)
+      if(match):
+        print "Stat " + match.group(1) + " got " + match.group(2)
+        stats[match.group(1)] = int(match.group(2))
+    
+  return stats
+
 class MultiFPGAConnect():
 
   def __init__(self, moduleList):
@@ -597,6 +611,15 @@ class MultiFPGAConnect():
         egressViasInitial[platform][targetPlatform] = []
         ingressViasInitial[platform][targetPlatform] = []
 
+
+    # let's read in a stats file
+    statsFile = self.moduleList.getAllDependenciesWithPaths('GIVEN_STATS')    
+    stats = {}
+    print "StatsFile " + str(statsFile)
+    if(len(statsFile) > 0):
+      stats = parseStats(self.moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + statsFile[0])
+
+
     for platform in self.environment.getPlatformNames():
       for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
 
@@ -614,16 +637,38 @@ class MultiFPGAConnect():
         # lengths, initializing everything to equal weight.
         # Since chains have relatively little cost, we give them much less weight than 
         # normal links
-        # XXX here is where we want to look at activity factors
+        # We need two passes to fill in potentially missing links
+        totalTraffic = 0;
         for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
           if(dangling.sc_type == 'Recv'):
             recvs += 1 
-            dangling.activity = 100 
+            if(dangling.name in stats):
+              dangling.activity = stats[dangling.name]
+              totalTraffic += stats[dangling.name]
+              print "Assigning " + dangling.name + " " + str(stats[dangling.name])
 
-          # only create a chain when we see the source
+          # only create a chain when we see the source                    
           if(dangling.sc_type == 'ChainSrc'):
             chains += 1 
-            dangling.activity = 1 
+            chainName = platform + "_" + targetPlatform + "_" + dangling.name
+            if(chainName in stats):
+              dangling.activity = stats[chainName]
+              totalTraffic += stats[chainName]
+
+        if(totalTraffic == 0):
+          totalTraffic = 2*(chains+recvs)
+
+        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
+          if(dangling.sc_type == 'Recv'):
+            if(not(dangling.name in stats)):
+              dangling.activity = totalTraffic/(chains+recvs)
+            
+          # only create a chain when we see the source          
+          if(dangling.sc_type == 'ChainSrc'):
+            chains += 1 
+            chainName = platform + "_" + targetPlatform + "_" + dangling.name
+            if(not (chainName in stats)):
+              dangling.activity = totalTraffic/(2*(chains+recvs))
 
         hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
         egressVia = hopFromTarget.replace(".","_") + '_write'
@@ -661,9 +706,10 @@ class MultiFPGAConnect():
               viaWidths.append(self.platformData[platform]['WIDTHS'][egressVia] - 1)
             else: # carve off a lane for the longest running job
               
-              while(viaWidths[0] < (sortedLinks[viaSizingIdx].bitwidth + headerSize)): # Give extra for header sizing
+              while(viaWidths[0] < (sortedLinks[viaSizingIdx].bitwidth + 2*headerSize)): # Give extra for header sizing - the base via should also have space
                 if(viaSizingIdx + 1 == len(sortedLinks)):
                   noViasRemaining = 1
+                  print "No suitable vias remain"
                   break
                 else:
                   viaSizingIdx += 1
@@ -893,7 +939,7 @@ class MultiFPGAConnect():
           [headerType, bodyType, type] = self.generateRouterTypes(viaWidth, viaLinks)
 
           self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via), 0, via, 0))
-          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via), 0, via, 0))
+          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via), 0, via, 0)) 
 
 
         # now that we have decided on the vias, we must assign links to vias

@@ -1364,3 +1364,21 @@ Directory modules/leap/virtual-platform/virtual-devices/platform-services
  platform-services-master.bsv Locally Modified           94 
 
 mkMemServices() no longer takes parameters.
+
+----------
+kfleming    Date: Wed Dec 28 09:05:10 EST 2011  CSN: CSN-multifpga-96
+                  Wed Dec 28 14:05:10 UTC 2011
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           95 
+
+Directory modules/multifpga/alpha_inorder
+ acp-mapping-time-func-cache.stats Locally Added               0 
+ acp_mapping_time_func_cache.awb Locally Modified           95 
+
+
+Added support for feedback driven link allocation.  User must provide
+a stats file from a previous run and use the LFJ channel allocation
+alogrithm.  This code isn't well-characterized yet. 
+

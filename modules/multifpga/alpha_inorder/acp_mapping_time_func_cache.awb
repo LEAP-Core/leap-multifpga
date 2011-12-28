@@ -10,6 +10,7 @@
 %provides fpga_mapping
 
 %sources -t FPGAENV_MAPPING -v PUBLIC acp-mapping-time-func-cache.map
+%sources -t STAT -v PUBLIC acp-mapping-time-func-cache.stats
 
 
 
