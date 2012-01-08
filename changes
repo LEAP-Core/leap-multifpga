@@ -1382,3 +1382,19 @@ Added support for feedback driven link allocation.  User must provide
 a stats file from a previous run and use the LFJ channel allocation
 alogrithm.  This code isn't well-characterized yet. 
 
+
+----------
+mcadler     Date: Sun Jan  8 16:16:50 EST 2012  CSN: CSN-multifpga-97
+                  Sun Jan  8 21:16:50 UTC 2012
+
+
+Directory config/pm/leap/submodels/common
+ multifpga-soft-services.apm Locally Modified           96 
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ BSVmulti.py               Locally Modified           96 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ multifpga_wrapper_gen.py  Locally Modified           96 
+
+Multi-FPGA support for global string tables.

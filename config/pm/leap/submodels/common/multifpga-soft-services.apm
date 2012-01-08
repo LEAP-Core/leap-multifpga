@@ -25,6 +25,7 @@ soft_services_lib=Soft Services Library
 soft_services_deps=Soft Services Dependencies
 soft_clocks=Basic Soft Clock Algorithm
 soft_connections=SoftService Soft Connections for MultiFPGA
+soft_strings=Global Strings
 
 [Soft Services Library]
 File=modules/leap/libraries/soft-services/util/soft-services-lib.awb
@@ -75,3 +76,7 @@ Packagehint=leap
 
 [Soft Service Soft Connections Common/Params]
 CON_CWIDTH=128
+
+[Global Strings]
+File=modules/leap/libraries/soft-services/services/soft-strings/global-strings.awb
+Packagehint=leap
