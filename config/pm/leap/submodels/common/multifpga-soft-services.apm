@@ -65,6 +65,7 @@ Packagehint=leap
 soft_connections_alg=SoftService Soft Connections Algorithm MultiFPGA
 soft_connections_common=Soft Service Soft Connections Common
 physical_interconnect=Shared Tree Physical Interconnect
+soft_connections_debug=Soft Connections Debugging
 
 [SoftService Soft Connections Algorithm MultiFPGA]
 File=modules/leap/libraries/soft-services/services/soft-connections/alg/connection-alg-multifpga.awb
@@ -79,4 +80,8 @@ CON_CWIDTH=128
 
 [Global Strings]
 File=modules/leap/libraries/soft-services/services/soft-strings/global-strings.awb
+Packagehint=leap
+
+[Soft Connections Debugging]
+File=modules/leap/libraries/soft-services/services/soft-connections/debug/connections-debug.awb
 Packagehint=leap

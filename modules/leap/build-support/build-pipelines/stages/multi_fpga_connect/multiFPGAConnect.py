@@ -1042,7 +1042,7 @@ class MultiFPGAConnect():
                     header.write('STAT received_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.name + '_RECEIVED);\n')
                     dictionary += ('def STATS.ROUTER.' + dangling.name + '_RECEIVED "' + dangling.name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' received cycles";\n')
 
-                  header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
+                  header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
 
                   sends += 1
               # only create a chain when we see the source

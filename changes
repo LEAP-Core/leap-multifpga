@@ -1398,3 +1398,19 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
  multifpga_wrapper_gen.py  Locally Modified           96 
 
 Multi-FPGA support for global string tables.
+
+----------
+mcadler     Date: Sun Jan 15 09:25:06 EST 2012  CSN: CSN-multifpga-98
+                  Sun Jan 15 14:25:06 UTC 2012
+
+
+Directory config/pm/leap/submodels/common
+ multifpga-soft-services.apm Locally Modified           97 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified           97 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ multifpga_wrapper_gen.py  Locally Modified           97 
+
+Soft connections notFull and notEmpty debug scanning for multi-FPGA.
