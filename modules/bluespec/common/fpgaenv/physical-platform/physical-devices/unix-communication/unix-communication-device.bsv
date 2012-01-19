@@ -124,8 +124,8 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
     Reg#(STATE)    state       <- mkReg(STATE_init0);
     
     // buffers
-    MARSHALLER#(`UNIX_COMM_WIDTH,Bit#(64)) marshaller <- mkSimpleMarshaller();
-    DEMARSHALLER#(`UNIX_COMM_WIDTH,Bit#(64)) demarshaller <- mkSimpleDemarshaller();
+    MARSHALLER#(Bit#(64), Vector#(`UNIX_COMM_WIDTH, Bit#(64))) marshaller <- mkSimpleMarshaller();
+    DEMARSHALLER#(Bit#(64), Vector#(`UNIX_COMM_WIDTH, Bit#(64))) demarshaller <- mkSimpleDemarshaller();
 
     // ==============================================================
     //                            Rules

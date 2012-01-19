@@ -24,6 +24,8 @@
  *
  */
 
+import Vector::*;
+
 `include "awb/provides/virtual_platform.bsh"
 `include "awb/provides/virtual_devices.bsh"
 `include "awb/provides/low_level_platform_interface.bsh"
@@ -62,7 +64,7 @@ module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITC
      Reg#(Bool) waiting <- mkReg(True);
      Reg#(Bit#(filler_bits)) fillerBits <- mkReg(?);
  
-     DEMARSHALLER#(t_NUM_CHUNKS, umf_chunk) dem <- mkSimpleDemarshaller();  
+     DEMARSHALLER#(umf_chunk, Vector#(t_NUM_CHUNKS, umf_chunk)) dem <- mkSimpleDemarshaller();  
 
      rule sendReady(waiting || send.notFull());
          port.read_ready();
@@ -206,7 +208,7 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
     PulseWire startRequestFired <- mkPulseWire(); 
 
     // Strong assumption that the marshaller holds only one data at a time
-    MARSHALLER#(t_NUM_CHUNKS, umf_chunk) mar <- mkSimpleMarshaller();
+    MARSHALLER#(umf_chunk, Vector#(t_NUM_CHUNKS, umf_chunk)) mar <- mkSimpleMarshaller();
 
     Tuple2#(Bit#(TSub#(t_DATA_SZ,filler_bits)),Bit#(filler_bits)) data_split = split(pack(recv.receive));
    
@@ -425,15 +427,14 @@ module mkPacketizeOutgoingChain#(SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERI
                                                       STAT received) 
     (PHYSICAL_CHAIN_OUT) // module interface 
 
-    provisos(Div#(SizeOf#(PHYSICAL_CHAIN_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
-             Add#(n_EXTRA_SZ, SizeOf#(PHYSICAL_CHAIN_DATA), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+    provisos (Bits#(umf_chunk, umf_chunk_SZ));
 
     // We need a clock and reset due to MCD code
     let myClock <- exposeCurrentClock;
     let myReset <- exposeCurrentReset;
 
     Reg#(Bool) waiting <- mkReg(True);
-    DEMARSHALLER#(t_NUM_CHUNKS, umf_chunk) dem <- mkSimpleDemarshaller();  
+    DEMARSHALLER#(umf_chunk, PHYSICAL_CHAIN_DATA) dem <- mkSimpleDemarshaller();  
 
     rule sendReady(waiting || !dem.notEmpty()); 
         port.read_ready();
@@ -467,7 +468,7 @@ module mkPacketizeOutgoingChain#(SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERI
         waiting <= True;
     endmethod
 
-    method PHYSICAL_CHAIN_DATA first = unpack(truncate(pack(dem.first)));
+    method PHYSICAL_CHAIN_DATA first = dem.first();
     method Bool notEmpty() = dem.notEmpty;
 
 endmodule
@@ -484,15 +485,15 @@ module mkPacketizeIncomingChain#(Integer id,
                  umf_chunk),
              PHYSICAL_CHAIN_IN)) // Module interface
 
-    provisos(Div#(SizeOf#(PHYSICAL_CHAIN_DATA),SizeOf#(umf_chunk),t_NUM_CHUNKS),
-	     Add#(n_EXTRA_SZ, SizeOf#(PHYSICAL_CHAIN_DATA), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+    provisos (Bits#(umf_chunk, umf_chunk_SZ),
+              Bits#(PHYSICAL_CHAIN_DATA, t_PHYSICAL_CHAIN_DATA_SZ));
 
     // Egress interface to be filled in
 
     let myClock <- exposeCurrentClock;
     let myReset <- exposeCurrentReset;
 
-    MARSHALLER#(t_NUM_CHUNKS, umf_chunk) mar <- mkSimpleMarshaller();
+    MARSHALLER#(umf_chunk, PHYSICAL_CHAIN_DATA) mar <- mkSimpleMarshaller();
     RWire#(PHYSICAL_CHAIN_DATA) tryData <- mkRWire();
     PulseWire trySuccess <- mkPulseWire();
     PulseWire continueRequestFired <- mkPulseWire(); 
@@ -506,7 +507,7 @@ module mkPacketizeIncomingChain#(Integer id,
                                       method Action deqHeader() if(tryData.wget() matches tagged Valid .data);
                                           trySuccess.send;
                                           sent.incr();
-                                          mar.enq(unpack(zeroExtend(pack(data))));         
+                                          mar.enq(data);
                                       endmethod
                                       method GENERIC_UMF_PACKET_HEADER#(
                                                  umf_channel_id, umf_service_id,
@@ -519,7 +520,7 @@ module mkPacketizeIncomingChain#(Integer id,
                                                      channelID: ?, // we use this elsewhere to refer to flow control messages
                                                      serviceID: fromInteger(id),
                                                      methodID : ?,
-                                                     numChunks: fromInteger(valueof(t_NUM_CHUNKS))
+                                                     numChunks: fromInteger(valueof(MARSHALLER_MSG_LEN#(umf_chunk_SZ, t_PHYSICAL_CHAIN_DATA_SZ)))
                                                  };
  
                                       endmethod

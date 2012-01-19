@@ -1414,3 +1414,16 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
  multifpga_wrapper_gen.py  Locally Modified           97 
 
 Soft connections notFull and notEmpty debug scanning for multi-FPGA.
+
+----------
+mcadler     Date: Thu Jan 19 08:12:11 EST 2012  CSN: CSN-multifpga-99
+                  Thu Jan 19 13:12:11 UTC 2012
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified           98 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device.bsv Locally Modified           98 
+
+Update for changed LibRL marshaller interface.
