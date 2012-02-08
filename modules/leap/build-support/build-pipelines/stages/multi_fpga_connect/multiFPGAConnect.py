@@ -383,7 +383,7 @@ class MultiFPGAConnect():
           via_empty_string += seperator + 'pack(' +via.via_method +'_fifo.notEmpty)'
           # lay down a couple of debug scan chains here and insert crap in dictionary
           firstPass = False          
-        multiplexor_definition += '\tDEBUG_SCAN#(Bit#(' + str(2*(len(ingressVias))) + ')) ' + moduleName + '_DEBUG <- mkDebugScanNode(`DEBUG_SCAN_ROUTER_' +moduleName + '_DEBUG, {' + via_full_string + ',' + via_empty_string + '});\n' 
+        multiplexor_definition += 'mkDebugScanRaw("' + moduleName + ' multi-FPGA router", {' + via_full_string + ',' + via_empty_string + '});\n' 
           
 
 
@@ -1136,7 +1136,7 @@ class MultiFPGAConnect():
                 if(GENERATE_ROUTER_DEBUG):   
                   # lay down a couple of debug scan chains here and insert crap in dictionary
                   dictionary += ('def DEBUG_SCAN.ROUTER.' + egressVias[via_idx].via_switch + '_DEBUG "' + egressVias[via_idx].via_switch  +' debug";\n')
-                  header.write('DEBUG_SCAN#(Bit#(' + str(2*(egressVias[via_idx].via_links)) + ')) ' + egressVias[via_idx].via_switch + '_DEBUG <- mkDebugScanNode(`DEBUG_SCAN_ROUTER_'+ egressVias[via_idx].via_switch + '_DEBUG, {pack(' + egressVias[via_idx].via_switch +'.bufferStatus), pack('+ egressVias[via_idx].via_switch + '.fifoStatus)});\n')
+                  header.write('mkDebugScanRaw("' + egressVias[via_idx].via_switch + ' multi-FPGA router", {pack(' + egressVias[via_idx].via_switch +'.bufferStatus), pack('+ egressVias[via_idx].via_switch + '.fifoStatus)});\n')
 
             # Hook up the ingress links
             # We also want to build a listing of the mapping in an easy to consume 

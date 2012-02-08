@@ -246,7 +246,7 @@ class MultiFPGAGenerateLogfile():
         header.write('let stat <- mkStatCounter(?);\n')   
 
       if(GENERATE_ROUTER_DEBUG):    
-        header.write('DEBUG_SCAN#(Bit#(1)) debug <- mkDebugScanNode(?,?);\n')   
+        header.write('mkDebugScanNode("dummy",List::nil);\n')   
 
       header.write('endmodule\n')
 
