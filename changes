@@ -1448,3 +1448,13 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 - Interface to debug scan changed.  Made changes that are legal in the two
   Python files, but not optimal.  Should define actual fields instead of
   just dumping raw data.
+
+----------
+mcadler     Date: Wed Feb  8 01:20:43 EST 2012  CSN: CSN-multifpga-101
+                  Wed Feb  8 06:20:43 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          100 
+
+Stop generating pointless DEBUG_SCAN dictionary entries.

@@ -371,7 +371,6 @@ class MultiFPGAConnect():
           multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_DEQUEUED "' + via.via_method +' cycles dequeued";\n')
 
       if(GENERATE_ROUTER_DEBUG):   
-        multiplexor_dictionary += ('def DEBUG_SCAN.ROUTER.' + moduleName + '_DEBUG "' + moduleName  +' debug";\n')
         via_full_string = ''
         via_empty_string = ''
         firstPass = True
@@ -990,9 +989,6 @@ class MultiFPGAConnect():
           if(GENERATE_ROUTER_STATS):
              header.write('`include "awb/dict/STATS_ROUTER.bsh"\n')
 
-          if(GENERATE_ROUTER_DEBUG):
-             header.write('`include "awb/dict/DEBUG_SCAN_ROUTER.bsh"\n\n')
-
           # everything down here should be code generation.  Eventually it should be split out.  
           # probably also need to instantiate stats in a different modules
           [egress_multiplexor_definition, egress_multiplexor_instantiation, egress_multiplexor_names, egress_multiplexor_dictionary] = self.generateEgressMultiplexor(platform) 
@@ -1135,7 +1131,6 @@ class MultiFPGAConnect():
 
                 if(GENERATE_ROUTER_DEBUG):   
                   # lay down a couple of debug scan chains here and insert crap in dictionary
-                  dictionary += ('def DEBUG_SCAN.ROUTER.' + egressVias[via_idx].via_switch + '_DEBUG "' + egressVias[via_idx].via_switch  +' debug";\n')
                   header.write('mkDebugScanRaw("' + egressVias[via_idx].via_switch + ' multi-FPGA router", {pack(' + egressVias[via_idx].via_switch +'.bufferStatus), pack('+ egressVias[via_idx].via_switch + '.fifoStatus)});\n')
 
             # Hook up the ingress links
