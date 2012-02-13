@@ -1086,17 +1086,17 @@ class MultiFPGAConnect():
                 if(dangling.bitwidth < egressVias[dangling.via_idx].via_width):
                   packetizerType = 'Unmarshalled'
                 if(GENERATE_ROUTER_STATS):
-                  header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType  + '(recv_' + dangling.name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.name +  ',blocked_'+ dangling.name +', sent_'+ dangling.name +');// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                  header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType  + '("' + dangling.name + '", recv_' + dangling.name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.name +  ',blocked_'+ dangling.name +', sent_'+ dangling.name +');// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
                 else:
-                  header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType + '(recv_' + dangling.name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.name + ', ?, ?); // Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                  header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType + '("' + dangling.name + '", recv_' + dangling.name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.name + ', ?, ?); // Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
 
               if(dangling.sc_type == 'ChainSink' ):
                 print "Chain Sink " + dangling.name + ": Idx " + str(dangling.via_idx) + " Link: " + str(dangling.via_link) + " Length: " + str(len(egressVectors[dangling.via_idx]))  
                 egressVectors[dangling.via_idx][dangling.via_link] = 'tpl_1(pack_chain_' + dangling.name + ')'
                 if(GENERATE_ROUTER_STATS):
-                  header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + str(dangling.via_link) + ',blocked_'+ dangling.name +', sent_'+ dangling.name  +');\n\n')
+                  header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain("' + dangling.name + '", ' + str(dangling.via_link) + ',blocked_'+ dangling.name +', sent_'+ dangling.name  +');\n\n')
                 else:
-                  header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain(' + str(dangling.via_link) + ',?,?);\n\n')
+                  header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain("' + dangling.name + '", ' + str(dangling.via_link) + ',?,?);\n\n')
 
           
             # we now need switches for each via.  Need modular arithmetic here to make sure that everyone has a link.  
@@ -1152,16 +1152,16 @@ class MultiFPGAConnect():
                 if(dangling.bitwidth < ingressVias[dangling.via_idx].via_width):
                   packetizerType = 'Unmarshalled'
                 if(GENERATE_ROUTER_STATS):
-                  header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend' + packetizerType  + '(send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+',received_'+ dangling.name +');// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                  header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend' + packetizerType  + '("' + dangling.name + '", send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+',received_'+ dangling.name +');// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
                 else:
-                  header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend' + packetizerType  + '(send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+',?);// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth)+ '\n')
+                  header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend' + packetizerType  + '("' + dangling.name + '", send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+',?);// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth)+ '\n')
 
 
               if(dangling.sc_type == 'ChainSrc' ):
                 if(GENERATE_ROUTER_STATS):
-                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],' + 'received_' + dangling.name + ');\n\n') 
+                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain("' + dangling.name + '", ' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],' + 'received_' + dangling.name + ');\n\n') 
                 else:
-                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain(' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],?);\n\n')
+                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain("' + dangling.name + '", ' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],?);\n\n')
 
 
 

@@ -154,13 +154,17 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
     rule read_bdpi (state == STATE_ready && pollCounter == 0);
         let guard <- comm_can_read(handle);
         if(unpack(guard))
-          begin 
+        begin 
             Bit#(64) chunk <- comm_read(handle);
-            
-            //$display("UNIX Comm RX %h", chunk);
+
+            if(`UNIX_COMM_DEBUG > 0)
+            begin
+                $display("UNIX Comm RX %h", chunk);
+            end
+
             demarshaller.enq(chunk);
             pollCounter <= `POLL_INTERVAL;
-         end
+       end
     endrule
 
     // write chunk from write buffer into C code
@@ -170,7 +174,12 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
           begin 
             Bit#(64) chunk = marshaller.first();
             marshaller.deq();
-            //$display("UNIX Comm TX %h", chunk);
+
+            if(`UNIX_COMM_DEBUG > 0)
+            begin
+                $display("UNIX Comm TX %h", chunk);
+            end 
+
             comm_write(handle, chunk);
           end
     endrule

@@ -19,12 +19,16 @@ def p_platform_list(p):
     """
     platform_list :
     platform_list : PLATFORM NAME STRING SEMICOLON connection_list ENDPLATFORM platform_list
+    platform_list : MASTER NAME STRING SEMICOLON connection_list ENDMASTER platform_list
     """
     if len(p) == 1:
         p[0] = []  # end of list - may want to do stuff here.
+    elif p[1] == "master":
+        # the eval strips out the "" on the string
+        p[0] = [Platform(p[2],True,eval(p[3]),p[5])] + p[7] 
     else:
         # the eval strips out the "" on the string
-        p[0] = [Platform(p[2],eval(p[3]),p[5])] + p[7] 
+        p[0] = [Platform(p[2],False,eval(p[3]),p[5])] + p[7] 
         
 def p_connection_list(p):
     """

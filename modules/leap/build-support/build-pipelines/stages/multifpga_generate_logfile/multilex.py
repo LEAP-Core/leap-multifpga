@@ -6,12 +6,14 @@
 
 reserved = {
     'platform': 'PLATFORM',
+    'master': 'MASTER',
+    'endmaster': 'ENDMASTER',
     'endplatform': 'ENDPLATFORM',
     'unknown': 'UNKOWN',
     }
 
 tokens = [ 'RARROW', 'LARROW', 'SEMICOLON',
-           'NAME', 'STRING', 'PERIOD', 'FSLASH'
+           'ID', 'NAME', 'STRING', 'PERIOD', 'FSLASH'
          ] + list(reserved.values())
 
 
@@ -22,6 +24,8 @@ t_FSLASH = r'/'
 t_SEMICOLON = r';'
 t_PLATFORM = r'platform'
 t_ENDPLATFORM = r'endplatform'
+t_MASTER = r'master'
+t_ENDMASTER = r'endmaster'
 #t_ENDPLATFORM = r'unknown'
 
 def t_NAME(t):

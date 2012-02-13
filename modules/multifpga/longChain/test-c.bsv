@@ -9,11 +9,12 @@ module [CONNECTED_MODULE] mkC (Empty);
     begin   
       Connection_Send#(Bit#(`WIDTH)) sendX <- mkConnection_Send("fromB" + integerToString(i+1));
       Connection_Receive#(Bit#(`WIDTH)) recvX <- mkConnection_Receive("fromD" + integerToString(i));
-      Reg#(Bit#(10)) reflectCounter <- mkReg(0);
+      Reg#(Bit#(32)) reflectCounter <- mkReg(0);
       rule reflect;
          sendX.send(recvX.receive);
          reflectCounter <= reflectCounter + 1;
          recvX.deq;
+         $display("TESTC:  %d fired", i);
          if(truncate(recvX.receive) != reflectCounter)
            begin
              $display("Error (Module C) %d: got %d expected %d", i,  recvX.receive, reflectCounter);

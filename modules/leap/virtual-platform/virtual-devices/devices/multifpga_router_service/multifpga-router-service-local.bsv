@@ -52,10 +52,16 @@ import Vector::*;
 // * the user code.  
 // *******
 
-module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id, NumTypeParam#(bitwidth) width, STAT received) (Empty)
+module mkPacketizeConnectionSendMarshalled#(String name, 
+                                            Connection_Send#(t_DATA) send, 
+                                            SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                                                                         umf_channel_id, umf_service_id,
+                                                                                         umf_method_id,  umf_message_len,
+                                                                                         umf_phy_pvt,    filler_bits), 
+                                                                     umf_chunk)) port, 
+                                            Integer id, 
+                                            NumTypeParam#(bitwidth) width, 
+                                            STAT received) (Empty)
    provisos(Bits#(t_DATA, t_DATA_SZ),
             Div#(TSub#(t_DATA_SZ, filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
             Add#(n_EXTRA_SZ_2, t_DATA_SZ, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
@@ -75,7 +81,11 @@ module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITC
                              umf_channel_id, umf_service_id,
                              umf_method_id,  umf_message_len,
                              umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
-         //$display("Connection RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+         if(`MARSHALLING_DEBUG == 1)
+         begin
+             $display("Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+         end
+
          waiting <= False;
          fillerBits <= packet.UMF_PACKET_header.filler;        
          received.incr();
@@ -88,7 +98,11 @@ module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITC
                            umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
         dem.enq(packet.UMF_PACKET_dataChunk);
         received.incr();
-        //$display("Connection RX receives: %h", packet.UMF_PACKET_dataChunk);
+        if(`MARSHALLING_DEBUG == 1)
+        begin
+            $display("Connection RX %s receives: %h", name, packet.UMF_PACKET_dataChunk);
+        end
+
     endrule
 
     // Lurking latency here...
@@ -96,9 +110,9 @@ module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITC
     rule sendData(!waiting && send.notFull());
         dem.deq();
         send.send(unpack(truncate({pack(dem.first),fillerBits})));
-        if(`SWITCH_DEBUG == 1)
+        if(`MARSHALLING_DEBUG == 1)
         begin
-            $display("Connection RX %d emits out: %h", id, dem.first);
+            $display("Connection %s RX %d emits out: %h", name, id, dem.first);
         end
 
         waiting <= True;         
@@ -106,10 +120,16 @@ module mkPacketizeConnectionSendMarshalled#(Connection_Send#(t_DATA) send, SWITC
 
 endmodule
 
-module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk)) port, Integer id, NumTypeParam#(bitwidth) width, STAT received) (Empty)
+module mkPacketizeConnectionSendUnmarshalled#(String name, 
+                                              Connection_Send#(t_DATA) send, 
+                                              SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                                                                           umf_channel_id, umf_service_id,
+                                                                                           umf_method_id,  umf_message_len,
+                                                                                           umf_phy_pvt,    filler_bits), 
+                                                                       umf_chunk)) port, 
+                                              Integer id, 
+                                              NumTypeParam#(bitwidth) width, 
+                                              STAT received) (Empty)
     provisos(Bits#(t_DATA, t_DATA_SZ),
              Bits#(umf_chunk,umf_chunk_SZ));
 
@@ -133,12 +153,12 @@ module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWI
             send.send(data);
             received.incr();
 
-            if(`SWITCH_DEBUG == 1)
+            if(`MARSHALLING_DEBUG == 1)
             begin
-                $display("Our packet is: channel %d, service %d, method %d, message %d, phy %d, filler %d", 
-                         valueof(umf_channel_id), valueof(umf_service_id), valueof(umf_method_id), 
+                $display("Connection %s RX packet is: channel %d, service %d, method %d, message %d, phy %d, filler %d", 
+                         name, valueof(umf_channel_id), valueof(umf_service_id), valueof(umf_method_id), 
                          valueof(umf_message_len), valueof(umf_phy_pvt), valueof(filler_bits));
-                $display("Connection RX %d (HO) emits out: %h", id, data);
+                $display("Connection %s RX %d (HO) emits out: %h", name, id, data);
             end
         endrule
     end
@@ -156,9 +176,11 @@ module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWI
                                 umf_method_id,  umf_message_len,
                                 umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
  
-            if(`SWITCH_DEBUG == 1)
+            if(`MARSHALLING_DEBUG == 1)
             begin
-                $display("Our packet is: channel %d, service %d, method %d, message %d, phy %d, filler %d", valueof(umf_channel_id), valueof(umf_service_id), valueof(umf_method_id), valueof(umf_message_len), valueof(umf_phy_pvt), valueof(filler_bits));
+                $display("Connection %s RX our packet is: channel %d, service %d, method %d, message %d, phy %d, filler %d", 
+                         name, valueof(umf_channel_id), valueof(umf_service_id), valueof(umf_method_id), 
+                         valueof(umf_message_len), valueof(umf_phy_pvt), valueof(filler_bits));
             end
 
             waiting <= False;
@@ -175,9 +197,9 @@ module mkPacketizeConnectionSendUnmarshalled#(Connection_Send#(t_DATA) send, SWI
             waiting <= True;
             received.incr();
 
-            if(`SWITCH_DEBUG == 1)
+            if(`MARSHALLING_DEBUG == 1)
             begin
-                $display("Connection RX %d (S) emits out: %h", id, data);
+                $display("Connection %s RX %d (S) emits out: %h", name, id, data);
             end
         endrule
      end
@@ -185,7 +207,8 @@ endmodule
 
 // These guys need a FOF interface
 // This one requires some thought 
-module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,                                             
+module mkPacketizeConnectionReceiveMarshalled#(String name,
+                                               Connection_Receive#(t_DATA) recv,                                             
                                                Integer id, 
                                                NumTypeParam#(bitwidth) width,
                                                STAT blocked, 
@@ -217,9 +240,9 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
         mar.enq(unpack(zeroExtend(tpl_1(data_split))));
         sent.incr();
         startRequestFired.send();
-        if(`SWITCH_DEBUG == 1)
+        if(`MARSHALLING_DEBUG == 1)
         begin
-            $display("Connection TX %d  emits out: %h", id, recv.receive);
+            $display("Connection %s TX %d  emits out: %h", name, id, recv.receive);
         end
     endmethod
 
@@ -248,9 +271,9 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
     method Action deqBody();
         mar.deq();
         sent.incr();
-        if(`SWITCH_DEBUG == 1)
+        if(`MARSHALLING_DEBUG == 1)
         begin
-            $display("Marshalled Connection TX sends: %h", mar.first);
+            $display("Connection %s TX sends: %h", name, mar.first);
         end
         continueRequestFired.send();
     endmethod
@@ -262,7 +285,8 @@ module mkPacketizeConnectionReceiveMarshalled#(Connection_Receive#(t_DATA) recv,
 endmodule
 
 // Actually this is insufficiently aggressive
-module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) recv, 
+module mkPacketizeConnectionReceiveUnmarshalled#(String name,
+                                                 Connection_Receive#(t_DATA) recv, 
                                                  Integer id, 
                                                  NumTypeParam#(bitwidth) width,  
                                                  STAT blocked, 
@@ -320,11 +344,11 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
             sent.incr();
             startRequestFired.send();
 
-            if(`SWITCH_DEBUG == 1)
+            if(`MARSHALLING_DEBUG == 1)
             begin
-                $display("Connection TX %d (HO)  emits out: %h", id, recv.receive);
-                $display("Our packet is: channel %d, service %d, method %d, message %d, phy %d, filler %d", 
-                         valueof(umf_channel_id), valueof(umf_service_id), valueof(umf_method_id), valueof(umf_message_len), 
+                $display("Connection %s TX %d (HO)  emits out: %h", name, id, recv.receive);
+                $display("Connection %s TX Our packet is: channel %d, service %d, method %d, message %d, phy %d, filler %d", 
+                         name, valueof(umf_channel_id), valueof(umf_service_id), valueof(umf_method_id), valueof(umf_message_len), 
                          valueof(umf_phy_pvt), valueof(filler_bits));
             end
         endaction
@@ -360,11 +384,10 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
                            method Action deqHeader() if(recv.notEmpty && waitHeader);
                                sent.incr();
                                startRequestFired.send();
-
-                               if(`SWITCH_DEBUG == 1)
+                               if(`MARSHALLING_DEBUG == 1)
                                begin
-                                   $display("Unmarshalled Recv Connection TX starting request dataSz: %d chunkSz: %d  listed: %d", 
-                                            valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) , fromInteger(valueof(bitwidth)));
+                                   $display("Connection %s TX starting request dataSz: %d chunkSz: %d  listed: %d", 
+                                            name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) , fromInteger(valueof(bitwidth)));
                                end 
 
                                waitHeader <= False;                                    
@@ -390,9 +413,9 @@ module mkPacketizeConnectionReceiveUnmarshalled#(Connection_Receive#(t_DATA) rec
 
                            method Action deqBody() if(!waitHeader && recv.notEmpty);
                                recv.deq();
-			       if(`SWITCH_DEBUG == 1)
+                               if(`MARSHALLING_DEBUG == 1)
                                begin
-                                   $display("Connection TX %d (S)  emits out: %h", id, recv.receive);
+                                   $display("Connection %s TX %d (S)  emits out: %h", name, id, recv.receive);
                                end
 
                                waitHeader <= True;
@@ -420,11 +443,12 @@ endmodule
 // *******
 
 
-module mkPacketizeOutgoingChain#(SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+module mkPacketizeOutgoingChain#(String name, 
+                                 SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                           umf_channel_id, umf_service_id,
                                                                           umf_method_id,  umf_message_len,
                                                                           umf_phy_pvt,    filler_bits), umf_chunk)) port, 
-                                                      STAT received) 
+                                 STAT received) 
     (PHYSICAL_CHAIN_OUT) // module interface 
 
     provisos (Bits#(umf_chunk, umf_chunk_SZ));
@@ -447,6 +471,10 @@ module mkPacketizeOutgoingChain#(SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERI
                            umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();    
         waiting <= False;
         received.incr();
+        if(`MARSHALLING_DEBUG == 1)
+        begin
+            $display("Chain Outgoing %s starts request", name);
+        end
     endrule
 
     rule continueRequest (!waiting);
@@ -475,7 +503,8 @@ endmodule
 
 
 
-module mkPacketizeIncomingChain#(Integer id,  
+module mkPacketizeIncomingChain#(String name,
+                                 Integer id,  
                                  STAT blocked, 
                                  STAT sent) 
     (Tuple2#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
@@ -503,16 +532,26 @@ module mkPacketizeIncomingChain#(Integer id,
     endrule
 
     let egress_packet_generator = interface EGRESS_PACKET_GENERATOR;
+
                                       method notEmptyHeader = isValid(tryData.wget());
+
                                       method Action deqHeader() if(tryData.wget() matches tagged Valid .data);
                                           trySuccess.send;
                                           sent.incr();
                                           mar.enq(data);
+                                          if(`MARSHALLING_DEBUG == 1)
+                                          begin
+                                              $display("Chain Incoming %s starts request", name);
+                                          end
                                       endmethod
+
+
+                                      // Buggy?
                                       method GENERIC_UMF_PACKET_HEADER#(
                                                  umf_channel_id, umf_service_id,
                                                  umf_method_id,  umf_message_len,
                                                  umf_phy_pvt,    filler_bits) firstHeader() if(tryData.wget() matches tagged Valid .data);
+
                                           return GENERIC_UMF_PACKET_HEADER
                                                  {
                                                      filler: ?,
@@ -526,11 +565,13 @@ module mkPacketizeIncomingChain#(Integer id,
                                       endmethod
  
                                       method notEmptyBody = mar.notEmpty();
+
                                       method Action deqBody();
                                           mar.deq();           
                                           sent.incr();
                                           continueRequestFired.send;        
                                       endmethod
+
                                       method firstBody = mar.first;
                                   endinterface;
 

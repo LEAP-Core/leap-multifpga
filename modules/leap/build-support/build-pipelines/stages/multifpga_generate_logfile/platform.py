@@ -14,9 +14,10 @@ class Platform(object):
     def insertSource(self,target,via):
         self.sources[target] = via
     
-    def __init__(self, name, path, connectionList):
+    def __init__(self, name, isMaster, path, connectionList):
         self.name = name
         self.path = path
+        self.master = isMaster
         self.sources = {}
         self.sinks = {}
         for connection in connectionList:

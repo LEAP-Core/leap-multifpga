@@ -5,7 +5,9 @@
 
 %provides test_d
 
-%public test-d.bsv
+%sources -t RRR -v PUBLIC test-d.rrr
+%sources -t BSV -v PUBLIC test-d.bsv
+
 
 %param SYNTH_BOUNDARY mkD "name of synthesis boundary"
 

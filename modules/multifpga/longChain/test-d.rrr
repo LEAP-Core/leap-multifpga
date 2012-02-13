@@ -1,0 +1,8 @@
+service TESTDRRR
+{
+   server hw (bsv, connection) <- sw (cpp, method)
+   {
+      method RunTest(in UINT32[32] count, out UINT32[32] errors, out UINT32[32] cycles);
+   };
+}
+

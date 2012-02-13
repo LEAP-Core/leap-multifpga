@@ -1458,3 +1458,74 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
  multiFPGAConnect.py       Locally Modified          100 
 
 Stop generating pointless DEBUG_SCAN dictionary entries.
+
+----------
+kfleming    Date: Mon Feb 13 11:30:39 EST 2012  CSN: CSN-multifpga-102
+                  Mon Feb 13 16:30:39 UTC 2012
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_loop_acp.apm Locally Added               0 
+ test_multifpga_loop.apm   Locally Modified          101 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          101 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified          101 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service.awb Locally Modified          101 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          101 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ multilex.py               Locally Modified          101 
+ environment.py            Locally Modified          101 
+ platform.py               Locally Modified          101 
+ multiparse.py             Locally Modified          101 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device.awb Locally Modified          101 
+ unix-communication-device.bsv Locally Modified          101 
+
+Directory modules/leap-platforms/fpga-environments/acp
+ acp-dual-sram-dual.env    Locally Modified          101 
+ acp-dual-sram.env         Locally Modified          101 
+ acp-dual.env              Locally Modified          101 
+ acp-dual-airblue.env      Locally Modified          101 
+
+Directory modules/leap-platforms/fpga-environments/xupv5
+ xupv5-dual.env            Locally Modified          101 
+ xupv5-airblue-dual.env    Locally Modified          101 
+ xupv5-dual-sata.env       Locally Modified          101 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-dual.env              Locally Modified          101 
+ sim-cache-dual.env        Locally Modified          101 
+ sim-airblue-env.env       Locally Modified          101 
+
+Directory modules/multifpga/longChain
+ longChain.stats           Locally Added               0 
+ test-d.rrr                Locally Added               0 
+ connected_application/    Locally Added               0 
+
+Directory modules/multifpga/longChain/connected_application
+ connected-application-throughput.h Locally Added               0 
+ connected-application-throughput.awb Locally Added               0 
+ connected-application-throughput.bsv Locally Added               0 
+ connected-application-throughput.cpp Locally Added               0 
+
+Directory modules/multifpga/longChain
+ test-c.bsv                Locally Modified          101 
+ test-d.bsv                Locally Modified          101 
+ test_d.awb                Locally Modified          101 
+ top.awb                   Locally Modified          101 
+
+
+Added a more elaborate lop test, driven by software. Also, fixed small
+bug where FPGA ID's were assumed to be semantically meaningful.  We
+now explicitly identify the master FPGA (i.e. the one connected to the
+host) in the platform configuration file.  this decision should
+probably be debated more fully.

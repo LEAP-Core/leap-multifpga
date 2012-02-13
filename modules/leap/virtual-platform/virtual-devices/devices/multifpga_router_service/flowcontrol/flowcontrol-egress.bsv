@@ -309,10 +309,11 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             request[s] = pack(requestQueues[s].notEmptyHeader() && (bufferAvailable[s] || s == 0)); // Channel 0 is flow control, and has no buffer
         end
 
-        newMsgQIdx <= arbiter.arbitrate(request); 
-        if(request != 0 && `SWITCH_DEBUG == 1)
+        let arbitedRequest = arbiter.arbitrate(request); 
+        newMsgQIdx <= arbitedRequest;
+        if(arbitedRequest matches tagged Valid .idx &&& request != 0 && `SWITCH_DEBUG == 1)
         begin
-	    $display("Egress BufferAvailible %b Reqs %b", pack(readVReg(bufferAvailable)), request);
+	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), request, idx);
         end
     endrule
 

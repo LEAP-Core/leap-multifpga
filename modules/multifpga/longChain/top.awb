@@ -8,6 +8,7 @@
 %requires test_d
 
 %public test_top.bsv
+%sources -t STAT -v PUBLIC longChain.stats
 
 %param SYNTH_BOUNDARY mkSystem "name of synthesis boundary"
 

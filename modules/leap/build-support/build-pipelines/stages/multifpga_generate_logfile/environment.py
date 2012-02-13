@@ -22,7 +22,6 @@ class FPGAEnvironment(object):
         self.graphize()
         self.buildTransitTables()
 
-
     def addPlatform(self,platform):
         self.platforms[platform.name] = platform;
 
@@ -34,7 +33,16 @@ class FPGAEnvironment(object):
 
     def getSynthesisBoundaryPlatformID(self,boundary):
         print 'Looking up: ' + boundary
-        return self.platforms.keys().index(boundary)
+        # Master platform must be assinged the 0 id
+        # TODO: remove this requirement
+        def checkMaster(plat):
+          return not self.platforms[plat].master
+
+        if self.platforms[boundary].master:
+          return 0
+        else:
+          # remove the master and assign unique ids
+          return sorted(filter(checkMaster,self.platforms.keys())).index(boundary) + 1
 
     # build a graph. This will make life easier
     # graph legalization consists of ensuring that if a platform claims to 

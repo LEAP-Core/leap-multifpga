@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_loop
+File=test_multifpga_loop_acp
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -18,9 +18,9 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=MultiFPGA Loop Test Connected Application
-environment_description=Simulation Dual FPGA Environment
+environment_description=ACP Dual FPGA Env with Dual SRAM
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Test Sim Mapping
+fpga_mapping=Test ACP Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -50,14 +50,6 @@ fpgamap_parser=FPGAMap
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
-[Simulation Dual FPGA Environment]
-File=modules/leap-platforms/fpga-environments/sim/sim_fpga_env.awb
-Packagehint=multifpga
-
-[Test Sim Mapping]
-File=modules/multifpga/synthTest/sim_mapping.awb
-Packagehint=multifpga
-
 [multiFPGA Log Generation]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
 Packagehint=multifpga
@@ -84,6 +76,14 @@ Packagehint=multifpga
 [MultiFPGA Loop Synthesis test module top/Requires]
 test_c=Configurable Crossing test module c
 test_d=Configurable Crossing test module d
+
+[Test ACP Mapping]
+File=modules/multifpga/synthTest/acp_mapping.awb
+Packagehint=multifpga
+
+[ACP Dual FPGA Env with Dual SRAM]
+File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
+Packagehint=multifpga
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1

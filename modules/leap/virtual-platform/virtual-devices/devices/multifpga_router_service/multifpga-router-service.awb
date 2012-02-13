@@ -11,6 +11,7 @@
 
 
 %param --global USE_ROUTING_KNOWN 0 "True if we can expect that the router has been generated"
+%param MARSHALLING_DEBUG 0 "Should we enable router debug?"
 
 
 
