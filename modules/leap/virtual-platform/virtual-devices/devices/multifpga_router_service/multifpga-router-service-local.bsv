@@ -282,6 +282,8 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
 
     method notEmptyBody = mar.notEmpty;
 
+    method bypassFlowcontrol = False;
+
 endmodule
 
 // Actually this is insufficiently aggressive
@@ -362,6 +364,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
                            method notEmptyHeader = recv.notEmpty;
                            method deqHeader = deqHeader;
                            method firstHeader = firstHeader;
+                           method bypassFlowcontrol = False;
                        endinterface;
     end
     else
@@ -426,6 +429,8 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
                            method umf_chunk firstBody() if(!waitHeader && recv.notEmpty);
                                return unpack(resize(pack(recv.receive)));
                            endmethod
+
+                           method bypassFlowcontrol = False;
 
                        endinterface; 
     end
@@ -573,6 +578,7 @@ module mkPacketizeIncomingChain#(String name,
                                       endmethod
 
                                       method firstBody = mar.first;
+                                      method bypassFlowcontrol = False;
                                   endinterface;
 
    let physical_chain_in = interface PHYSICAL_CHAIN_IN;

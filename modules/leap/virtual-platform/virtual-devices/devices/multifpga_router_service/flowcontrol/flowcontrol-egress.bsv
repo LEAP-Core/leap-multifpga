@@ -51,6 +51,8 @@ interface EGRESS_PACKET_GENERATOR#(type header, type body);
     method body   firstBody();
     method Bool   notEmptyBody();
 
+    method Bool   bypassFlowcontrol(); // Some of these are flowcontrol, so they must be declared
+
 endinterface
 
 
@@ -216,19 +218,19 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             bufferAvailable[responseActiveQueue] <= creditsNext >= zeroExtend(max) + 1; // This should always be true...
             portCredits.upd(truncate(responseActiveQueue), creditsNext);
       
-            if(`SWITCH_DEBUG == 1)
-            begin
+            //if(`SWITCH_DEBUG == 1)
+            //begin
                 $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
-            end
+            //end
 
-            if(creditsNext < zeroExtend(max) && (responseActiveQueue != 0))
+            if(creditsNext < zeroExtend(max))
             begin
                 $display("Setting credits to zero... this is a bug");
                 $display("For link %d creditNext %d creditsRX %d currentCredits %d", responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
                 $finish;
             end      
 
-            if(creditsNext > `MULTIFPGA_FIFO_SIZES && (responseActiveQueue != 0))
+            if(creditsNext > `MULTIFPGA_FIFO_SIZES)
             begin
                 $display("Credits have overflowed fifo size... this is a bug");
                 $display("For link %d creditNext %d creditsRX %d currentCredits %d", responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
@@ -306,12 +308,12 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
         Bit#(n_FIFOS_SAFE) request = '0;
         for (Integer s = 0; s < valueof(n); s = s + 1)
         begin
-            request[s] = pack(requestQueues[s].notEmptyHeader() && (bufferAvailable[s] || s == 0)); // Channel 0 is flow control, and has no buffer
+            request[s] = pack(requestQueues[s].notEmptyHeader() && (bufferAvailable[s] || requestQueues[s].bypassFlowcontrol)); // FC Queues are always ready
         end
 
         let arbitedRequest = arbiter.arbitrate(request); 
         newMsgQIdx <= arbitedRequest;
-        if(arbitedRequest matches tagged Valid .idx &&& request != 0 && `SWITCH_DEBUG == 1)
+        if(arbitedRequest matches tagged Valid .idx &&&`SWITCH_DEBUG == 1)
         begin
 	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), request, idx);
         end

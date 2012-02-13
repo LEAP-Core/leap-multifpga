@@ -1529,3 +1529,38 @@ bug where FPGA ID's were assumed to be semantically meaningful.  We
 now explicitly identify the master FPGA (i.e. the one connected to the
 host) in the platform configuration file.  this decision should
 probably be debated more fully.
+
+----------
+kfleming    Date: Mon Feb 13 17:32:46 EST 2012  CSN: CSN-multifpga-103
+                  Mon Feb 13 22:32:46 UTC 2012
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          102 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified          102 
+ flowcontrol-ingress.bsv   Locally Modified          102 
+
+Directory modules/multifpga/longChain
+ longChain.stats           Locally Modified          102 
+
+Directory modules/multifpga/longChain/connected_application
+ connected-application-throughput.cpp Locally Modified          102 
+
+Directory modules/multifpga/longChain
+ test-c.bsv                Locally Modified          102 
+ test-d.bsv                Locally Modified          102 
+
+
+
+Fixed some obvious and glaring bugs in LJF - namely we had some
+holdovers from the old days when link 0 of a lane was always
+flowcontrol.  As a result, whatever link was assigned to that lane had
+no flow control run on it, leading to the occasional droppin of
+data. This is fixed now. 
+
+LJF gives a 2.75x speedup on the ACP over the Random, single lane for
+the loop test.  I feel like this number should be closer to 5x though,
+so there's probably a performance bug in the allocation algorithm.
+

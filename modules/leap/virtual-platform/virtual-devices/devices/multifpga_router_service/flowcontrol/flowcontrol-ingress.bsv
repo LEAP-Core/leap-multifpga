@@ -175,7 +175,7 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
             // We do a round robin to decide which link should have flow control tokens sent back
             if(idxRR == fromInteger(valueof(n)-1)) 
             begin
-                idxRR <= 1;
+                idxRR <= 0;
             end 
             else
             begin
@@ -190,12 +190,12 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
             end
 
             // If we get too free, we need to send come cedits down the pipe.
-            if((requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2) && (use_idx != 0))
+            if((requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2))
             begin 
 
                 if(`SWITCH_DEBUG == 1)
                 begin
-                    $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
+                    $display("Sending %d tokens to %d my id %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
                 end
 
                 Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) control_packet = tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx]));
@@ -226,7 +226,7 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
         rule startSendEmpty(!sendSize.notEmpty);
             if(idxRR == fromInteger(valueof(n)-1)) 
             begin
-                idxRR <= 1;
+                idxRR <= 0;
             end 
             else
             begin
@@ -241,12 +241,12 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
             end
 
             // If we get too free, we need to send come cedits down the pipe.
-            if((requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2)  && (use_idx != 0))
+            if((requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2))
             begin 
-                if(`SWITCH_DEBUG == 1)
-                begin
-                    $display("Sending %d tokens to %d",requestQueues.free[use_idx],use_idx);
-                end
+                //if(`SWITCH_DEBUG == 1)
+                //begin
+                    $display("Sending %d tokens to %d my idx %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
+                //end
 
                 // This is the flow control packet header. 
                 GENERIC_UMF_PACKET_HEADER#(
@@ -431,6 +431,7 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
         method umf_chunk_w firstBody;
             return bodyFIFO.first;
         endmethod
+        method bypassFlowcontrol = True; // FC responses don't need flow control. Or do they?
     endinterface
 
 endmodule

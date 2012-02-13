@@ -14,7 +14,7 @@ module [CONNECTED_MODULE] mkC (Empty);
          sendX.send(recvX.receive);
          reflectCounter <= reflectCounter + 1;
          recvX.deq;
-         $display("TESTC:  %d fired", i);
+         $display("TESTC:  %d fired got %d", i, recvX.receive);
          if(truncate(recvX.receive) != reflectCounter)
            begin
              $display("Error (Module C) %d: got %d expected %d", i,  recvX.receive, reflectCounter);

@@ -69,7 +69,7 @@ module [CONNECTED_MODULE] mkD (Empty);
          sendX.send(recvX.receive);
          reflectCounter <= reflectCounter + 1;
          recvX.deq;
-         $display("TESTD:  %d fired", i);
+         $display("TESTD:  %d fired got %d", i, recvX.receive);
          if(truncate(recvX.receive) != reflectCounter)
            begin
              $display("Error (Module D) %d: got %d expected %d", i,  recvX.receive, reflectCounter);
