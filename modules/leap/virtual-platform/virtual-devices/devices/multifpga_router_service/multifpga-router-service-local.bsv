@@ -63,9 +63,9 @@ module mkPacketizeConnectionSendMarshalled#(String name,
                                             NumTypeParam#(bitwidth) width, 
                                             STAT received) (Empty)
    provisos(Bits#(t_DATA, t_DATA_SZ),
-            Div#(TSub#(t_DATA_SZ, filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
-            Add#(n_EXTRA_SZ_2, t_DATA_SZ, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
-            Add#(n_EXTRA_SZ, TSub#(t_DATA_SZ, filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+            Div#(TSub#(bitwidth, filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
+            Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
+            Add#(n_EXTRA_SZ, TSub#(bitwidth, filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
 
      Reg#(Bool) waiting <- mkReg(True);
      Reg#(Bit#(filler_bits)) fillerBits <- mkReg(?);
@@ -109,7 +109,8 @@ module mkPacketizeConnectionSendMarshalled#(String name,
     // Should try to fix at some point. 
     rule sendData(!waiting && send.notFull());
         dem.deq();
-        send.send(unpack(truncate({pack(dem.first),fillerBits})));
+        Bit#(bitwidth) truncatedData = truncate({pack(dem.first),fillerBits});
+        send.send(unpack(zeroExtendNP(truncatedData)));
         if(`MARSHALLING_DEBUG == 1)
         begin
             $display("Connection %s RX %d emits out: %h", name, id, dem.first);
@@ -218,14 +219,14 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
                                     umf_method_id,  umf_message_len,
                                     umf_phy_pvt,    filler_bits),
                                 umf_chunk)) // Interface
-    provisos(Bits#(t_DATA, t_DATA_SZ),
-             Div#(TSub#(t_DATA_SZ,filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
-             Add#(filler_EXTRA_SZ, filler_bits, t_DATA_SZ),
+    provisos(Bits#(t_DATA, t_DATA_SZ),             
+             Div#(TSub#(bitwidth,filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
+             Add#(filler_EXTRA_SZ, filler_bits, bitwidth),
 
              // this proviso allows us to stuff payload bits into the packet header which sometimes saves a 
              // a cycle
-             Add#(n_EXTRA_SZ_2, t_DATA_SZ, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)), 
-	     Add#(n_EXTRA_SZ, TSub#(t_DATA_SZ,filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+             Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)), 
+	     Add#(n_EXTRA_SZ, TSub#(bitwidth,filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
 
     PulseWire continueRequestFired <- mkPulseWire(); 
     PulseWire startRequestFired <- mkPulseWire(); 
@@ -233,7 +234,9 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
     // Strong assumption that the marshaller holds only one data at a time
     MARSHALLER#(umf_chunk, Vector#(t_NUM_CHUNKS, umf_chunk)) mar <- mkSimpleMarshaller();
 
-    Tuple2#(Bit#(TSub#(t_DATA_SZ,filler_bits)),Bit#(filler_bits)) data_split = split(pack(recv.receive));
+    Bit#(bitwidth) truncatedData = truncateNP(pack(recv.receive));
+
+    Tuple2#(Bit#(TSub#(bitwidth,filler_bits)),Bit#(filler_bits)) data_split = split(truncatedData);
    
     method Action deqHeader() if(recv.notEmpty());
         recv.deq;
@@ -242,7 +245,9 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
         startRequestFired.send();
         if(`MARSHALLING_DEBUG == 1)
         begin
-            $display("Connection %s TX %d  emits out: %h", name, id, recv.receive);
+            $display("Connection %s TX %d            chunks %d       emits out: %h", name, id, valueof(t_NUM_CHUNKS), recv.receive);
+            $display("              umf_chunk %d     filler_bits %d", valueof(SizeOf#(umf_chunk)), valueof(filler_bits));
+            $display("              extra_sz %d     extra_sz_2 %d    data_sz %d", valueof(n_EXTRA_SZ), valueof(n_EXTRA_SZ_2), valueof(t_DATA_SZ));
         end
     endmethod
 

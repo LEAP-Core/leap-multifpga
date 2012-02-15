@@ -218,10 +218,10 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             bufferAvailable[responseActiveQueue] <= creditsNext >= zeroExtend(max) + 1; // This should always be true...
             portCredits.upd(truncate(responseActiveQueue), creditsNext);
       
-            //if(`SWITCH_DEBUG == 1)
-            //begin
+            if(`SWITCH_DEBUG == 1)
+            begin
                 $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
-            //end
+            end
 
             if(creditsNext < zeroExtend(max))
             begin

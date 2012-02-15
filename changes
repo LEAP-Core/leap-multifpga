@@ -1564,3 +1564,44 @@ LJF gives a 2.75x speedup on the ACP over the Random, single lane for
 the loop test.  I feel like this number should be closer to 5x though,
 so there's probably a performance bug in the allocation algorithm.
 
+
+----------
+kfleming    Date: Wed Feb 15 13:04:03 EST 2012  CSN: CSN-multifpga-104
+                  Wed Feb 15 18:04:03 UTC 2012
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          103 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified          103 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          103 
+
+Directory modules/multifpga/alpha_inorder
+ acp_mapping_time_func.awb Locally Modified          103 
+
+
+Two perf bug fixes:
+
+1) Marshalled links were sending PHYSICAL_CONNECTION_SIZE bits, even
+if the link itself was narrower than this size.  This issue only
+appears when a large number of channels are allocated (probably more
+than 2).  In the LJF allocation it was a significant performance issue
+in some cases.
+
+2) LJF was setting lane widths without allocating an extra bit for
+valid signalling. As a result the priority link for which the lane was
+being sized was always forced to a marshalled implementation.  No
+wonder LJF performance had been bad.  
+
+There still seems to be some issue related to flow control priority in
+the LJF case.  This may be the largest remaining source of performance
+degredation remaining.  The solution is probably some combination of
+tweaking when FC tokens get returned, increasing buffer length, and
+giving priority to FC channels.  FC channels currently have very low
+priority (based on my reading of the arbiter code). 
+
+
+

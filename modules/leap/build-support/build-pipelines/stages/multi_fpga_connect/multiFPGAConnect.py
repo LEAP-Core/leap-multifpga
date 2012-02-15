@@ -593,7 +593,7 @@ class MultiFPGAConnect():
 
 
   def analyzeNetwork(self):
-    self.analyzeNetworkRandom()
+    self.analyzeNetworkLJF()
 
   # This via allocation algorithm selects the "longest" job for allocation and 
   # sticks it on the least loaded processor.  There are assymmetries in this problem
@@ -705,7 +705,7 @@ class MultiFPGAConnect():
               viaWidths.append(self.platformData[platform]['WIDTHS'][egressVia] - 1)
             else: # carve off a lane for the longest running job
               
-              while(viaWidths[0] < (sortedLinks[viaSizingIdx].bitwidth + 2*headerSize)): # Give extra for header sizing - the base via should also have space
+              while(viaWidths[0] < (sortedLinks[viaSizingIdx].bitwidth + 2*(headerSize + 1))): # Give extra for header sizing - the base via should also have space
                 if(viaSizingIdx + 1 == len(sortedLinks)):
                   noViasRemaining = 1
                   print "No suitable vias remain"
@@ -715,8 +715,8 @@ class MultiFPGAConnect():
 
               # found minimum, ajust the top guy
               if(not noViasRemaining):
-                viaWidths[0] = viaWidths[0] - (sortedLinks[viaSizingIdx].bitwidth + headerSize)
-                viaWidths.append(sortedLinks[viaSizingIdx].bitwidth + headerSize -1) # need one bit for the header
+                viaWidths[0] = viaWidths[0] - (sortedLinks[viaSizingIdx].bitwidth + headerSize + 1)
+                viaWidths.append(sortedLinks[viaSizingIdx].bitwidth + headerSize) # need one bit for the header
                 viaSizingIdx += 1
 
           # We've exhausted the supply of feasible vias.
@@ -734,16 +734,18 @@ class MultiFPGAConnect():
             if((sortedLinks[danglingIdx].sc_type == 'Recv') or (sortedLinks[danglingIdx].sc_type == 'ChainSink')):
               # depending on the width of the vias, and the width of our type we get different loads on different processors
               # need to choose the minimum
+              print "\n\n Analyzing " + sortedLinks[danglingIdx].name + " of width " + str(sortedLinks[danglingIdx].bitwidth)  + "\n"
+
               minIdx = -1 
               minLoad = 0
               for via in range(numberOfVias):
                 extraChunk = 0
-                if((sortedLinks[danglingIdx].bitwidth + headerSize )%viaWidths[via] > 0):
+                if(((sortedLinks[danglingIdx].bitwidth + headerSize )%viaWidths[via]) > 0):
                   extraChunk = 1
+                
+                load = (sortedLinks[danglingIdx].activity * ( (sortedLinks[danglingIdx].bitwidth + headerSize )/viaWidths[via] + extraChunk)) + viaLoads[via]
 
-                load = sortedLinks[danglingIdx].activity * ( (sortedLinks[danglingIdx].bitwidth + headerSize )/viaWidths[via] + extraChunk) + viaLoads[via]
-
-                print "new load is " + str(load) + " activity: " + str(sortedLinks[danglingIdx].activity)
+                print "link " + str(via) + " of width " + str(viaWidths[via]) + " header " + str(headerSize) + " extra " + str(extraChunk) +   " starts at " + str(viaLoads[via]) + ", new load is " + str(load) + " activity: " + str(sortedLinks[danglingIdx].activity)
                 # We don't do a great job here of evaluating opportunity cost.  Picking the longest running on the fastest processor 
                 # might be a bad choice.
                 if((load < minLoad) or (minIdx == -1)):
