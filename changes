@@ -1605,3 +1605,14 @@ priority (based on my reading of the arbiter code).
 
 
 
+
+----------
+mcadler     Date: Fri Feb 17 19:28:18 EST 2012  CSN: CSN-multifpga-105
+                  Sat Feb 18 00:28:18 UTC 2012
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave.apm Locally Modified          104 
+ multifpga-platform-services-master.apm Locally Modified          104 
+
+Update stale configurations.
