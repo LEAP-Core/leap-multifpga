@@ -1616,3 +1616,15 @@ Directory config/pm/leap/submodels/platform-services
  multifpga-platform-services-master.apm Locally Modified          104 
 
 Update stale configurations.
+
+----------
+mcadler     Date: Sun Feb 19 09:49:30 EST 2012  CSN: CSN-multifpga-106
+                  Sun Feb 19 14:49:30 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ BSVmulti.py               Locally Modified          105 
+
+A number of patches from BSV.py in leap were missing from the multi-FPGA version,
+including some dependence tracking and an update to global string tables.
+The latter caused string table corruption.

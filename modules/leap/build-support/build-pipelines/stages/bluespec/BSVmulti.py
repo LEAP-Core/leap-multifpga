@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import string
 import SCons.Script
 from model import  *
 from config import *
@@ -91,7 +92,7 @@ class BSV():
         all_logs.extend(module.moduleDependency['BSV_LOG'])
       str = moduleList.env.Command(TMP_BSC_DIR + '/' + moduleList.env['DEFS']['APM_NAME'] + '.str',
                                    all_logs,
-                                   [ 'grep GlobStr: $SOURCES | sed -e "s/.*GlobStr: //" > $TARGET',
+                                   [ self.gen_global_string_table,
                                      '@ln -fs $TARGET ' + moduleList.env['DEFS']['APM_NAME'] + '.str' ])
       moduleList.topModule.moduleDependency['STR'] += [str]
       moduleList.topDependency += [str]
@@ -130,8 +131,8 @@ class BSV():
 
     ROOT_DIR_HW_INC = env['DEFS']['ROOT_DIR_HW_INC']
  
-    LOG_BSVS = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/'+ get_log(module)
-    WRAPPER_BSVS = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/' + get_wrapper(module)
+    LOG_BSV = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/'+ get_log(module)
+    WRAPPER_BSV = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/' + get_wrapper(module)
 
     # We must depend on all sythesis boundaries. They can be instantiated anywhere.
     surrogate_children = moduleList.synthBoundaries()
@@ -148,8 +149,37 @@ class BSV():
       DERIVED = ''
 
     depends_bsv = MODULE_PATH + '/.depends-bsv'
-    compile_deps = 'leap-bsc-mkdepend -ignore ' + MODULE_PATH + '/.ignore' + ' -bdir ' + TMP_BSC_DIR + DERIVED + ' -p +:' + ROOT_DIR_HW_INC + ':' + ROOT_DIR_HW_INC + '/awb/provides:' + ALL_LIB_DIRS_FROM_ROOT + ' ' + LOG_BSVS + ' ' + WRAPPER_BSVS + ' > ' + depends_bsv
-    return moduleList.env.Command(depends_bsv, moduleList.topModule.moduleDependency['IFACE_HEADERS'], compile_deps)
+    compile_deps = 'leap-bsc-mkdepend -ignore ' + MODULE_PATH + '/.ignore' + ' -bdir ' + TMP_BSC_DIR + DERIVED + ' -p +:' + ROOT_DIR_HW_INC + ':' + ROOT_DIR_HW_INC + '/awb/provides:' + ALL_LIB_DIRS_FROM_ROOT + ' ' + LOG_BSV + ' ' + WRAPPER_BSV + ' > ' + depends_bsv
+
+    dep = moduleList.env.Command(depends_bsv,
+                                 [ LOG_BSV, WRAPPER_BSV ] +
+                                 moduleList.topModule.moduleDependency['IFACE_HEADERS'],
+                                 compile_deps)
+
+    # Load an old .depends-bsv file if it exists.  The file describes
+    # the previous dependence among Bluespec files, giving a clue of whether
+    # anything changed.  The file describes dependence between derived objects
+    # and sources.  Here, we need to know about all possible source changes.
+    # Scan the file looking for source file names.
+    if os.path.isfile(depends_bsv):
+      df = open(depends_bsv, 'r')
+      dep_lines = df.readlines()
+
+      # Match .bsv and .bsh files
+      bsv_file_pattern = re.compile('\S+.[bB][sS][vVhH]$')
+
+      all_bsc_files = []
+      for ln in dep_lines:
+        all_bsc_files += [f for f in re.split('[:\s]+', ln) if (bsv_file_pattern.match(f))]
+
+      # Sort dependence in case SCons cares
+      for f in sorted(all_bsc_files):
+        if os.path.exists(f):
+          moduleList.env.Depends(dep, f)
+
+      df.close()
+
+    return dep
 
 
   ##
@@ -172,9 +202,6 @@ class BSV():
     ALL_LIB_DIRS_FROM_ROOT = ALL_DIRS_FROM_ROOT + ':' + ALL_BUILD_DIRS_FROM_ROOT
 
     ROOT_DIR_HW_INC = env['DEFS']['ROOT_DIR_HW_INC']
-
-    LOG_BSVS = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/'+ get_log(module)
-    WRAPPER_BSVS = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/' + get_wrapper(module)
 
     BSVS = moduleList.getSynthBoundaryDependencies(module,'GIVEN_BSVS')
     # each submodel will have a generated BSV
@@ -295,7 +322,7 @@ class BSV():
         synth_stub_path = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/'
         synth_stub = synth_stub_path + module.name +'.bsv'
         c = env.Command(synth_stub, # target
-                        [stub,wrapper_bo],  
+                        [stub, wrapper_bo],
                         ['leap-connect --alternative_logfile ' + logfile  + ' --softservice ' + APM_FILE + ' $TARGET'])
 
 
@@ -427,3 +454,46 @@ class BSV():
       except ValueError:
         pass
     return string.join(t, sep)
+
+
+  ##
+  ## gen_global_string_table --
+  ##   Used as a build rule to parse Bluespec log files, looking for messages
+  ##   emitted by the compiler defining global strings.
+  ##
+  def gen_global_string_table(self, target, source, env):
+    str_file = open(str(target[0]), 'w')
+
+    for src in source:
+      log_file = open(str(src), 'r')
+
+      ##
+      ## Global strings begin with the tag "GlobStr:" and end with the tag
+      ## "X!gLb!X".  The end tag permits strings to have newlines.
+      ##
+      multi_line = False
+      for full_line in log_file:
+        if not multi_line:
+          # Look for the start of a new string
+          if (re.search(r'GlobStr', full_line)):
+            line = re.sub(r'.* GlobStr: ', '', full_line)
+            
+            # Single line string?
+            if (re.search(r'X!gLb!X$', line.rstrip())):
+              line = line.rstrip() + '\n'
+            else:
+              multi_line = True
+
+            str_file.write(line);
+
+        else:
+          # Continuation of a multi-line string
+          line = full_line
+          if (re.search(r'X!gLb!X$', line.rstrip())):
+            line = line.rstrip() + '\n'
+            multi_line = False
+          str_file.write(line);
+
+      log_file.close()
+
+    str_file.close()
