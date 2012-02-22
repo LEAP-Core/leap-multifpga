@@ -165,7 +165,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
 
 
-    ARBITER#(n_FIFOS_SAFE) arbiter <- mkRoundRobinArbiter();
+    ARBITER#(n_FIFOS_SAFE) arbiterNormal <- mkRoundRobinArbiter();
+    ARBITER#(n_FIFOS_SAFE) arbiterFC <- mkRoundRobinArbiter();
 
     // === other state ===
 
@@ -305,17 +306,25 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     rule write_request_newmsg1 (requestChunksRemaining == 0);
 
         // arbitrate
-        Bit#(n_FIFOS_SAFE) request = '0;
+        Bit#(n_FIFOS_SAFE) requestNormal = '0;
+        Bit#(n_FIFOS_SAFE) requestFC = '0;
         for (Integer s = 0; s < valueof(n); s = s + 1)
         begin
-            request[s] = pack(requestQueues[s].notEmptyHeader() && (bufferAvailable[s] || requestQueues[s].bypassFlowcontrol)); // FC Queues are always ready
+            requestNormal[s] = pack(requestQueues[s].notEmptyHeader() && (bufferAvailable[s] && !requestQueues[s].bypassFlowcontrol)); // Non-FC queues need buffer
+            requestFC[s] = pack(requestQueues[s].notEmptyHeader() && requestQueues[s].bypassFlowcontrol); // FC Queues are always ready
         end
 
-        let arbitedRequest = arbiter.arbitrate(request); 
-        newMsgQIdx <= arbitedRequest;
-        if(arbitedRequest matches tagged Valid .idx &&&`SWITCH_DEBUG == 1)
+        let arbitedRequestNormal = arbiterNormal.arbitrate(requestNormal); 
+        let arbitedRequestFC = arbiterFC.arbitrate(requestFC); 
+        newMsgQIdx <= (isValid(arbitedRequestFC))?arbitedRequestFC:arbitedRequestNormal;
+        if(arbitedRequestNormal matches tagged Valid .idx &&&`SWITCH_DEBUG == 1)
         begin
-	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), request, idx);
+	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), requestNormal, idx);
+        end
+
+        if(arbitedRequestFC matches tagged Valid .idx &&&`SWITCH_DEBUG == 1)
+        begin
+	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), requestFC, idx);
         end
     endrule
 
