@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "asim/provides/stats_device.h"
+#include "asim/provides/stats_service.h"
 #include "asim/provides/connected_application.h"
 #include "asim/rrr/client_stub_TESTDRRR.h"
 
@@ -30,7 +30,7 @@ int
 CONNECTED_APPLICATION_CLASS::Main()
 {
   // Eventually we'll call the frontend initialization here.                                                                        
-  STATS_DEVICE_SERVER_CLASS::GetInstance()->SetupStats();
+  STATS_SERVER_CLASS::GetInstance()->SetupStats();
   UINT32 total = 0, i;
   for(i = 0; i < 50; i++) {
     UINT32 result = clientStub->TakeOneInput(i);
@@ -40,8 +40,8 @@ CONNECTED_APPLICATION_CLASS::Main()
 
   printf("Average cycle %f\n", total/(float)i);
 
-  STATS_DEVICE_SERVER_CLASS::GetInstance()->DumpStats();
-  STATS_DEVICE_SERVER_CLASS::GetInstance()->EmitFile();
+  STATS_SERVER_CLASS::GetInstance()->DumpStats();
+  STATS_SERVER_CLASS::GetInstance()->EmitFile();
   STARTER_DEVICE_SERVER_CLASS::GetInstance()->End(0);
   
   return 0;

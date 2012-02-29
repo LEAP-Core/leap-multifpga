@@ -31,9 +31,6 @@ import Vector::*;
 `include "awb/provides/common_services.bsh"
 `include "awb/provides/multifpga_router_service.bsh"
 
-`include "awb/rrr/server_connections.bsh"
-`include "awb/rrr/client_connections.bsh"
-
 //
 // mkPlatformInterface: Wrap the LLPI and virtual devices in soft connections.
 //
@@ -49,12 +46,7 @@ module [CONNECTED_MODULE] mkPlatformServices#(VIRTUAL_PLATFORM virtualPlatform)
     let starterService  <- mkStarterService(vdevs);
     let fpService       <- mkFrontPanelService(vdevs);
     let memServices     <- mkMemServices();
-    let commonServices  <- mkCommonServices(vdevs);
+    let commonServices  <- mkCommonServices();
     let multifpgaRouterService <- mkMultifpgaRouterServices(virtualPlatform);
-
-    // auto-generated submodules for RRR connections
-    let rrrServerLinks <- mkServerConnections(virtualPlatform.llpint.rrrServer);
-    let rrrClientLinks <- mkClientConnections(virtualPlatform.llpint.rrrClient);
-    
 
 endmodule

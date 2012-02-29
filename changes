@@ -1628,3 +1628,32 @@ Directory modules/leap/build-support/build-pipelines/stages/bluespec
 A number of patches from BSV.py in leap were missing from the multi-FPGA version,
 including some dependence tracking and an update to global string tables.
 The latter caused string table corruption.
+
+----------
+mcadler     Date: Wed Feb 29 16:07:51 EST 2012  CSN: CSN-multifpga-108
+                  Wed Feb 29 21:07:51 UTC 2012
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave.apm Locally Modified          107 
+
+Directory modules/leap/virtual-platform/virtual-devices/platform-services
+ platform-services-master.bsv Locally Modified          107 
+
+Directory modules/multifpga/longChain/connected_application
+ connected-application-throughput.cpp Locally Modified          107 
+
+Directory modules/multifpga/synthTest/connected_application
+ connected-application-test.cpp Locally Modified          107 
+ connected-application-perf.cpp Locally Modified          107 
+
+Directory modules/multifpga/inter-fpga-test
+ inter-fpga-test.cpp       Locally Modified          107 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.cpp Locally Modified          107 
+
+Directory modules/multifpga/scratchdual/connected_application
+ connected-application-test.cpp Locally Modified          107 
+
+STATS_DEVICE is now STATS_SERVER.

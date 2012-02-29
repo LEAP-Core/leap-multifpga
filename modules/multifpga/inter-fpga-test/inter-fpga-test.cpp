@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "asim/provides/connected_application.h"
-#include "asim/provides/stats_device.h"
+#include "asim/provides/stats_service.h"
 #include "asim/provides/inter_fpga_service.h"
 
 using namespace std;
@@ -30,7 +30,7 @@ void
 CONNECTED_APPLICATION_CLASS::Main()
 {
 
-  (STATS_DEVICE_SERVER_CLASS::GetInstance())->SetupStats();
+  (STATS_SERVER_CLASS::GetInstance())->SetupStats();
 
   while(1) {
     UINT32 error;

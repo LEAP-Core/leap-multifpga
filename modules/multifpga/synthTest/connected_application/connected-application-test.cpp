@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "asim/provides/stats_device.h"
+#include "asim/provides/stats_service.h"
 #include "asim/provides/connected_application.h"
 #include "asim/rrr/client_stub_TESTDRRR.h"
 
@@ -33,7 +33,7 @@ CONNECTED_APPLICATION_CLASS::Main()
   printf("Preparing to set up stats\n");
   fflush(stdout);  
 
-  STATS_DEVICE_SERVER_CLASS::GetInstance()->SetupStats();
+  STATS_SERVER_CLASS::GetInstance()->SetupStats();
 
   for(UINT32 i = 0; i < 500; i++) {
     printf("Sending %d\n", i);
@@ -41,8 +41,8 @@ CONNECTED_APPLICATION_CLASS::Main()
     printf("%d + 7 = %d \n", i, result);
   }
 
-  STATS_DEVICE_SERVER_CLASS::GetInstance()->DumpStats();
-  STATS_DEVICE_SERVER_CLASS::GetInstance()->EmitFile();
+  STATS_SERVER_CLASS::GetInstance()->DumpStats();
+  STATS_SERVER_CLASS::GetInstance()->EmitFile();
   STARTER_DEVICE_SERVER_CLASS::GetInstance()->End(0);
   
   return 0;
