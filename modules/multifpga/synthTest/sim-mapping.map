@@ -1,4 +1,5 @@
 model -> FPGA0;
+common_services -> FPGA0;
 connected_application -> FPGA0;
 hardware_system -> FPGA0;
 test_a -> FPGA0;

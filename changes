@@ -1657,3 +1657,42 @@ Directory modules/multifpga/scratchdual/connected_application
  connected-application-test.cpp Locally Modified          107 
 
 STATS_DEVICE is now STATS_SERVER.
+
+----------
+mcadler     Date: Wed Feb 29 20:12:06 EST 2012  CSN: CSN-multifpga-109
+                  Thu Mar  1 01:12:06 UTC 2012
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave.apm Locally Modified          108 
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ BSVmulti.py               Locally Modified          108 
+
+Directory modules/multifpga/airblue
+ acp-mapping.map           Locally Modified          108 
+
+Directory modules/multifpga/h264
+ acp-mapping.map           Locally Modified          108 
+ sim-mapping.map           Locally Modified          108 
+
+Directory modules/multifpga/synthTest
+ sim-alternative.map       Locally Modified          108 
+ sim-mapping.map           Locally Modified          108 
+ acp-mapping.map           Locally Modified          108 
+ acp-perf.map              Locally Modified          108 
+
+Directory modules/multifpga/alpha_inorder
+ sim-mapping-time-func.map Locally Modified          108 
+ sim-mapping-time-func-cache.map Locally Modified          108 
+ acp-mapping-time-func-cache-2.map Locally Modified          108 
+ sim-mapping.map           Locally Modified          108 
+ acp-mapping-time-func.map Locally Modified          108 
+ acp-mapping-time-func-cache-3.map Locally Modified          108 
+ acp-mapping-time-func-cache.map Locally Modified          108 
+
+- Now that common services are a synthesis boundary, the code for slave FPGAs
+  is actually simpler.  We no longer need the "NULL" implementation.  Instead,
+  it is mapped to the master.
+
+- Merge changes from LEAP's BSV.py to BSVmulti.py

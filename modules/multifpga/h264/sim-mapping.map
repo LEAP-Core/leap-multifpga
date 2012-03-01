@@ -1,4 +1,5 @@
 model -> FPGA0;
+common_services -> FPGA0;
 connected_application -> FPGA0;
 h264_prediction -> FPGA0;
 h264_interpolator_synth -> FPGA0;

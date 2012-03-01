@@ -136,13 +136,12 @@ class BSV():
 
     # We must depend on all sythesis boundaries. They can be instantiated anywhere.
     surrogate_children = moduleList.synthBoundaries()
-    SUBDIRS = ''
+    SURROGATE_BSVS = ''
     for child in surrogate_children:
       # Make sure module doesn't self-depend
       if(child.name != module.name):
-        SUBDIRS += child.name + ' ' 
+        SURROGATE_BSVS += moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + child.buildPath +'/' + child.name + '.bsv '
 
-    SURROGATE_BSVS = transform_string_list(SUBDIRS, None, MODULE_PATH + '/', '.bsv')
     if (SURROGATE_BSVS != ''):
       DERIVED = ' -derived "' + SURROGATE_BSVS + '"'
     else:
@@ -401,29 +400,6 @@ class BSV():
       if(BUILD_LOGS_ONLY):
         print "Adding Top: " + str(logfile) + ":" + str(log)+"\n"
         moduleList.topDependency += [bb]
-
-      # Spam this file to all synthesis boundaries in case one of them wants it. 
-      boundaries = moduleList.synthBoundaries() + [moduleList.topModule]
-      for boundary in boundaries:
-        # Make sure module doesn't self-depend
-        boundarydir  = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath +'/'
-        boundarycopy = boundarydir +  module.name + '.bsv'
-        
-        if(module.name != boundary.name  and module.name != moduleList.topModule.name): 
-          if(getBuildPipelineDebug(moduleList) != 0):
-            print  " module: " + module.name + " boundary: " + boundary.name
-            print "command: cp " + str(synth_stub) + " " + boundarycopy
-          BOUNDARY_PATH =  moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + boundary.buildPath + '/' 
-          copy_bo = BOUNDARY_PATH + TMP_BSC_DIR + '/' + module.name + '.bo'
-          c_boundary = env.Command(boundarycopy,
-                                   [synth_stub,bld_ba,stub,wrapper_bo],
-                                   [SCons.Script.Copy('$TARGET', synth_stub)])
-
-          bo_dep = env.BSC_SUBD(copy_bo, boundarycopy)
-          
-          # If you need the child bo, then you will need its verilog also. 
-          if(getBuildPipelineDebug(moduleList) != 0):
-            print "bo_dep is: " + str(bo_dep)
 
       # because I'm not sure that we guarantee the wrappers can only be imported
       # by parents, 

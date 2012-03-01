@@ -1,4 +1,5 @@
 model -> ACP0;
+common_services -> ACP0;
 connected_application -> ACP0;
 hasim_funcp -> ACP0;
 hasim_isa_datapath -> ACP0;
