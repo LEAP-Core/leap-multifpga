@@ -1696,3 +1696,24 @@ Directory modules/multifpga/alpha_inorder
   it is mapped to the master.
 
 - Merge changes from LEAP's BSV.py to BSVmulti.py
+
+----------
+mcadler     Date: Thu Mar 15 15:28:25 EDT 2012  CSN: CSN-multifpga-110
+                  Thu Mar 15 19:28:25 UTC 2012
+
+
+Directory config/pm/multifpga/fpga_submodels
+ acp0-sram.apm             Locally Modified          109 
+ acp0.apm                  Locally Modified          109 
+ acp1-sram.apm             Locally Modified          109 
+ acp1.apm                  Locally Modified          109 
+ acp1-passthrough.apm      Locally Modified          109 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          109 
+
+- Generate debug scan data with named fields in the inter-FPGA router.
+- Clean up ACP configuration files using latest awb that doesn't save
+  global parameters with default values.
+
+  

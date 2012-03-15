@@ -371,22 +371,11 @@ class MultiFPGAConnect():
           multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_DEQUEUED "' + via.via_method +' cycles dequeued";\n')
 
       if(GENERATE_ROUTER_DEBUG):   
-        via_full_string = ''
-        via_empty_string = ''
-        firstPass = True
+        multiplexor_definition += '\n\tDEBUG_SCAN_FIELD_LIST via_dbg_list = List::nil;\n'
         for via in ingressVias:
-          seperator = ','
-          if(firstPass):
-            seperator = ''
-          via_full_string += seperator + 'pack(' +via.via_method +'_fifo.notFull)'
-          via_empty_string += seperator + 'pack(' +via.via_method +'_fifo.notEmpty)'
-          # lay down a couple of debug scan chains here and insert crap in dictionary
-          firstPass = False          
-        multiplexor_definition += 'mkDebugScanRaw("' + moduleName + ' multi-FPGA router", {' + via_full_string + ',' + via_empty_string + '});\n' 
-          
-
-
-
+          multiplexor_definition += '\tvia_dbg_list <- addDebugScanField(via_dbg_list, "' + via.via_method + ' notFull", ' + via.via_method + '_fifo.notFull);\n'
+          multiplexor_definition += '\tvia_dbg_list <- addDebugScanField(via_dbg_list, "' + via.via_method + ' notEmpty", ' + via.via_method + '_fifo.notEmpty);\n'
+        multiplexor_definition += '\tlet viaDbg <- mkDebugScanNode("multi-FPGA vias", via_dbg_list);\n'
 
 
       multiplexor_definition += '\n\trule sendData;\n\n'
@@ -593,7 +582,7 @@ class MultiFPGAConnect():
 
 
   def analyzeNetwork(self):
-    self.analyzeNetworkLJF()
+    self.analyzeNetworkRandom()
 
   # This via allocation algorithm selects the "longest" job for allocation and 
   # sticks it on the least loaded processor.  There are assymmetries in this problem
@@ -1105,6 +1094,9 @@ class MultiFPGAConnect():
             # for now we will assume that flow control is twinned - that is the egress 2 uses ingress 2 for its flow control
             # this might well need to change as we introduce assymetry x_X
             # we actually should be allocating the feedback channel as part of the analysis phase, but that can happen later.             
+            if (GENERATE_ROUTER_DEBUG):
+              header.write('\nDEBUG_SCAN_FIELD_LIST egress_via_dbg_list = List::nil;\n')
+
             for via_idx in range(len(egressVias)):
               if(egressVias[via_idx].via_links > 0):                
                 # create array of links for constructor
@@ -1127,13 +1119,14 @@ class MultiFPGAConnect():
                 print "Idx: " + str(via_idx) + " eg vias len" + str(len(egressVias)) + " in vias len" + str(len(ingressVias))
 
                 header.write('EGRESS_PACKET_GENERATOR#(' + egressVias[via_idx].via_header_type + ', ' +  egressVias[via_idx].via_body_type + ')links_' + egressVias[via_idx].via_switch + '[' + str(egressVias[via_idx].via_links) + '] = ' + linkArray + ';\n') 
-
-                
                 header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ', ' + ingressVias[egressVias[via_idx].via_outgoing_flowcontrol_via].via_switch + '.ingressPorts[' + str(egressVias[via_idx].via_outgoing_flowcontrol_link) +'], compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack));\n')
 
                 if(GENERATE_ROUTER_DEBUG):   
-                  # lay down a couple of debug scan chains here and insert crap in dictionary
-                  header.write('mkDebugScanRaw("' + egressVias[via_idx].via_switch + ' multi-FPGA router", {pack(' + egressVias[via_idx].via_switch +'.bufferStatus), pack('+ egressVias[via_idx].via_switch + '.fifoStatus)});\n')
+                  header.write('egress_via_dbg_list <- addDebugScanField(egress_via_dbg_list, "' + egressVias[via_idx].via_switch + ' buffer status", ' + egressVias[via_idx].via_switch + '.bufferStatus);\n')
+                  header.write('egress_via_dbg_list <- addDebugScanField(egress_via_dbg_list, "' + egressVias[via_idx].via_switch + ' fifo status", ' + egressVias[via_idx].via_switch + '.fifoStatus);\n')
+
+            if(GENERATE_ROUTER_DEBUG):   
+              header.write('let egressViaDbg <- mkDebugScanNode("Multi-FPGA Router Egress VIAs", egress_via_dbg_list);\n')
 
             # Hook up the ingress links
             # We also want to build a listing of the mapping in an easy to consume 

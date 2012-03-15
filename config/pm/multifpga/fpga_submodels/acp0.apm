@@ -31,19 +31,6 @@ Packagehint=leap
 File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
 Packagehint=leap-platforms
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
 Packagehint=multifpga
@@ -59,34 +46,12 @@ environment_description=Null FPGA Environment
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=multifpga
 
-
-
 [Hybrid ACP Dual Compute Environment  FPGA0 (Nallatech)]
 File=config/pm/leap/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-no-cache-fpga0.apm
 Packagehint=leap-platforms-acp
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 [Null FPGA Environment]
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
 
-[Hybrid ACP Dual Compute Environment  FPGA0 (Nallatech)/Params]
-MAPPER_OPTIONS="-cm balanced -global_opt on"
 

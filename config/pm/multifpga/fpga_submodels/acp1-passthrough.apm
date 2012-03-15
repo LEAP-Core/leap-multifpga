@@ -35,19 +35,6 @@ Packagehint=leap-platforms
 File=config/pm/leap/submodels/fpgaenv/fpgaenv-acp-m2c-nallatech-no-cache-fpga1.apm
 Packagehint=leap-platforms-acp
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
 Packagehint=multifpga
@@ -63,29 +50,7 @@ environment_description=Null FPGA Environment
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=multifpga
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 [Null FPGA Environment]
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
 
-
-[Hybrid ACP Dual Compute Environment  FPGA1 (Nallatech)/Params]
-MAPPER_OPTIONS="-cm balanced -global_opt on"
-SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
