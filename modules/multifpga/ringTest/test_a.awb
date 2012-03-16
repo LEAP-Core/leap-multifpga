@@ -1,0 +1,14 @@
+%AWB_START
+
+%name MultiFPGA Synthesis test module a
+%desc MultiFPGA	Synthesis test module a
+
+%provides test_a
+%requires test_d
+
+
+%public test-a.bsv
+
+%param SYNTH_BOUNDARY mkA "name of synthesis boundary"
+
+%AWB_END

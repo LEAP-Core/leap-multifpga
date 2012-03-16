@@ -1,0 +1,13 @@
+%AWB_START
+
+%name Configurable Spiral test module a
+%desc Configurable Spiral test module a
+
+%provides test_a
+
+%public test-a.bsv
+
+%param SYNTH_BOUNDARY mkA "name of synthesis boundary"
+
+
+%AWB_END

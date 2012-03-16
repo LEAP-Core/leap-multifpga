@@ -31,19 +31,6 @@ Packagehint=leap
 File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
 Packagehint=leap-platforms
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
 Packagehint=multifpga
@@ -59,30 +46,13 @@ environment_description=Null FPGA Environment
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=multifpga
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 [MultiFPGA Simulation FPGA0 Environment]
 File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0.apm
 Packagehint=multifpga
 
-
-
-
 [Null FPGA Environment]
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
+
+[MultiFPGA Simulation FPGA0 Environment/Params]
+NUM_FPGA=2

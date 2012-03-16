@@ -29,7 +29,7 @@ t_ENDMASTER = r'endmaster'
 #t_ENDPLATFORM = r'unknown'
 
 def t_NAME(t):
-    r'[a-zA-Z_][a-zA-Z0-9_]*'
+    r'[a-zA-Z_][]a-zA-Z0-9_[]*'
     t.type = reserved.get(t.value,'NAME')
     return t
 

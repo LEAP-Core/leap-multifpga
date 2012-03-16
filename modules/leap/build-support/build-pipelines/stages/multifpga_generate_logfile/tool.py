@@ -251,25 +251,26 @@ class MultiFPGAGenerateLogfile():
       header.write('endmodule\n')
 
       header.write('module [CONNECTED_MODULE] mkCommunicationModuleIfaces#(VIRTUAL_PLATFORM vplat ')
-        
+
       for target in  platform.getSinks().keys():
         # really I should disambiguate by way of a unique path
-        via  = (platform.getSinks()[target]).physicalName.replace(".","_") + '_write'
-        header.write(', function Action write_' + via + '_egress(Bit#(p' + via + '_egress_SZ) data),') 
+        via  = (platform.getSinks()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_write'
+        header.write(', function Action write_' + via + '_egress(Bit#(p' + via + '_egress_SZ) data)') 
+
       for target in  platform.getSources().keys():
         # really I should disambiguate by way of a unique path
-        via  = (platform.getSources()[target]).physicalName.replace(".","_") + '_read'
-        header.write('function Bit#(p'+ via + '_ingress_SZ) read_' + via + '_ingress()') 
+        via  = (platform.getSources()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_read'
+        header.write(', function Bit#(p'+ via + '_ingress_SZ) read_' + via + '_ingress()') 
 
       header.write(') (Empty);\n')
 
       for target in  platform.getSinks().keys():
-        via  = (platform.getSinks()[target]).physicalName.replace(".","_") + '_write'
+        via  = (platform.getSinks()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_write'
         header.write('messageM("SizeOfVia:'+via+':" + integerToString(valueof(p' + via + '_egress_SZ)));\n')
         
       for target in  platform.getSources().keys():
         # really I should disambiguate by way of a unique path
-        via  = (platform.getSources()[target]).physicalName.replace(".","_") + '_read' 
+        via  = (platform.getSources()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_read' 
         header.write('messageM("SizeOfVia:'+via+':" + integerToString(valueof(p' + via + '_ingress_SZ)));\n')
       header.write('endmodule\n')
 

@@ -1,0 +1,15 @@
+%AWB_START
+
+%name Configurable Spiral test module d
+%desc Configurable Spiral test module d
+
+%provides test_d
+
+%sources -t RRR -v PUBLIC test-d.rrr
+%sources -t BSV -v PUBLIC test-d.bsv
+
+
+%param SYNTH_BOUNDARY mkD "name of synthesis boundary"
+%param NUM_CONNS 16 "Number of loopbacks"
+
+%AWB_END

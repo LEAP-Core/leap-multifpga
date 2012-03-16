@@ -71,7 +71,8 @@ module mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                                 umf_phy_pvt_r,    filler_bits_r),
                                            umf_chunk_r)) flowcontrol,
 
-                       function Action write(umf_chunk data)) 
+                       function Action write(umf_chunk data),
+                       String name) 
 
     (EGRESS_SWITCH#(n)) // Module interface
 
@@ -93,7 +94,7 @@ module mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
   EGRESS_SWITCH#(n) m = ?;
   if(valueof(n) > 0)
     begin
-      m <- mkFlowControlSwitchEgressNonZero(requestQueues, flowcontrol, write);
+      m <- mkFlowControlSwitchEgressNonZero(requestQueues, flowcontrol, write, name);
     end
   return m;
 
@@ -116,7 +117,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                                                                        umf_phy_pvt_r,    filler_bits_r), 
                                                                                    umf_chunk_r)) flowcontrol, 
 
-                                         function Action write(umf_chunk data)) 
+                                         function Action write(umf_chunk data),
+                                         String name) 
 
     (EGRESS_SWITCH#(n)) // Module interface
 
@@ -227,14 +229,14 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             if(creditsNext < zeroExtend(max))
             begin
                 $display("Setting credits to zero... this is a bug");
-                $display("For link %d creditNext %d creditsRX %d currentCredits %d", responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
+                $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
                 $finish;
             end      
 
             if(creditsNext > `MULTIFPGA_FIFO_SIZES)
             begin
-                $display("Credits have overflowed fifo size... this is a bug");
-                $display("For link %d creditNext %d creditsRX %d currentCredits %d", responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
+                $display("Credits have overflowed fifo size... this is a bug %m");
+                $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
                 $finish;
             end      
 

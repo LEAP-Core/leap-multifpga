@@ -1717,3 +1717,133 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
   global parameters with default values.
 
   
+
+----------
+kfleming    Date: Fri Mar 16 16:49:30 EDT 2012  CSN: CSN-multifpga-111
+                  Fri Mar 16 20:49:30 UTC 2012
+
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_spiral_exe.apm Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN.apm Locally Added               0 
+ multifpgaenv-hybrid-exe-fpga0-quad.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ fpga0_4.apm               Locally Added               0 
+ fpga1_4.apm               Locally Added               0 
+ fpga2_4.apm               Locally Added               0 
+ fpga3_4.apm               Locally Added               0 
+ fpga0.apm                 Locally Modified          110 
+ fpga1.apm                 Locally Modified          110 
+ fpga0-dist-cache.apm      Locally Modified          110 
+ fpga1-dist-cache.apm      Locally Modified          110 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          110 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified          110 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          110 
+ danglingConnection.py     Locally Modified          110 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ tool.py                   Locally Modified          110 
+ multilex.py               Locally Modified          110 
+ environment.py            Locally Modified          110 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ fpgamaplex.py             Locally Modified          110 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ fpgaN/                    Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpgaN
+ sim-physical-platform-fpgaN.h Locally Added               0 
+ sim-physical-platform-fpgaN.awb Locally Added               0 
+ sim-physical-platform-fpgaN.bsv Locally Added               0 
+ sim-physical-platform-fpgaN.bsh Locally Added               0 
+ sim-physical-platform-fpgaN.cpp Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.awb Locally Modified          110 
+ sim-physical-platform-fpga0.bsv Locally Modified          110 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim_fpga_env_quad.awb     Locally Added               0 
+ sim-dual.env              Locally Modified          110 
+ sim-cache-dual.env        Locally Modified          110 
+ sim-quad-ring.env         Locally Added               0 
+ sim-quad.env              Locally Added               0 
+ sim_fpga_env_quad_ring.awb Locally Added               0 
+
+Directory modules/multifpga
+ ringTest/                 Locally Added               0 
+
+Directory modules/multifpga/ringTest
+ test_d_chains.awb         Locally Added               0 
+ test-a.bsv                Locally Added               0 
+ test-b.bsv                Locally Added               0 
+ test_a.awb                Locally Added               0 
+ test-d-rrr.rrr            Locally Added               0 
+ test_b.awb                Locally Added               0 
+ test-c-chains.bsv         Locally Added               0 
+ test-d-chains.bsv         Locally Added               0 
+ test-c.dic                Locally Added               0 
+ test-d.dic                Locally Added               0 
+ test_c_chains.awb         Locally Added               0 
+
+Directory modules/multifpga/longChain/connected_application
+ connected-application-throughput.cpp Locally Modified          110 
+
+Directory modules/multifpga/synthTest
+ sim_mapping_ring1.awb     Locally Added               0 
+ sim_mapping_ring2.awb     Locally Added               0 
+ sim-ring1.map             Locally Added               0 
+ sim-ring2.map             Locally Added               0 
+
+Directory modules/multifpga/synthTest/connected_application
+ connected-application-test.cpp Locally Modified          110 
+
+Directory modules/multifpga/alpha_inorder
+ sim_mapping_quad.awb      Locally Added               0 
+ sim-mapping-quad.map      Locally Added               0 
+
+Directory modules/multifpga
+ spiral/                   Locally Added               0 
+
+Directory modules/multifpga/spiral
+ test_common.bsv           Locally Added               0 
+ test-a.bsv                Locally Added               0 
+ test-b.bsv                Locally Added               0 
+ test_a.awb                Locally Added               0 
+ test_b.awb                Locally Added               0 
+ test-c.bsv                Locally Added               0 
+ test-d.bsv                Locally Added               0 
+ test_c.awb                Locally Added               0 
+ test_d.awb                Locally Added               0 
+ test_top.bsv              Locally Added               0 
+ test-common.bsv           Locally Added               0 
+ longChain.stats           Locally Added               0 
+ test_common.awb           Locally Added               0 
+ test-d.rrr                Locally Added               0 
+ top.awb                   Locally Added               0 
+
+
+This large commit adds support for FPGA platforms with more than two
+FPGAS.  This includes platforms with assymetric connections between FPGAs.
+
+1) Added a new simulation platforms which generates N links between
+simulation FPGAs.  This allows us to reuse the same physical platform
+for all simulation runs.
+
+2) Added route through links. If FPGAs are not physically connected,
+the compiler syntheisizes routing between them.  I currently don't do
+anything clever here.
+
+3) Added configurations and test cases to test the new code. Things
+seem to be working.
+

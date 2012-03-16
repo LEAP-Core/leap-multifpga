@@ -19,6 +19,7 @@
 // Simulation Physical Platform
 
 import Clocks::*;
+import Vector::*;
 
 `include "clocks_device.bsh"
 `include "unix_pipe_device.bsh"
@@ -35,7 +36,7 @@ interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER    clocksDriver;
     interface UNIX_PIPE_DRIVER unixPipeDriver;
-    interface UNIX_COMM_DRIVER unixCommDriver;
+    interface Vector#(`NUM_FPGA,UNIX_COMM_DRIVER) unixCommDrivers;
 
 endinterface
 
@@ -50,8 +51,8 @@ interface TOP_LEVEL_WIRES;
     
     interface CLOCKS_WIRES    clocksWires;
     interface UNIX_PIPE_WIRES unixPipeWires;
-    interface UNIX_COMM_WIRES unixCommWires;
-    
+    interface Vector#(`NUM_FPGA, UNIX_COMM_WIRES) unixCommWires;
+
 endinterface
 
 // PHYSICAL_PLATFORM
@@ -90,10 +91,20 @@ module mkPhysicalPlatform
                                                            clocked_by clk,
                                                            reset_by rst);
 
-    UNIX_COMM_DEVICE unix_comm_device  <- mkUNIXCommDevice(`SIM_WRITE_PORT,
-                                                           `SIM_READ_PORT,
-                                                           clocked_by clk,
-                                                           reset_by rst);
+    Vector#(`NUM_FPGA, UNIX_COMM_DRIVER) unixDrivers = newVector();
+    Vector#(`NUM_FPGA, UNIX_COMM_WIRES)  unixWires = newVector();
+    for(Integer i = 0; i < `NUM_FPGA; i = i +1)
+    begin 
+        if(i != `MY_ID)
+        begin
+	   let dev <- mkUNIXCommDevice("/tmp/FPGA" + integerToString(`MY_ID) +"ToFPGA" + integerToString(i),
+                                       "/tmp/FPGA" + integerToString(i) + "ToFPGA" + integerToString(`MY_ID),
+                                       clocked_by clk,
+                                       reset_by rst);
+           unixDrivers[i] = dev.driver;
+           unixWires[i]   = dev.wires;
+        end
+    end 
 
     // Finally, instantiate all other physical devices
 
@@ -103,7 +114,7 @@ module mkPhysicalPlatform
     
         interface clocksDriver   = clocks_device.driver;
         interface unixPipeDriver = unix_pipe_device.driver;
-        interface unixCommDriver = unix_comm_device.driver;
+        interface unixCommDrivers = unixDrivers;
 
     endinterface
     
@@ -113,7 +124,7 @@ module mkPhysicalPlatform
     
         interface clocksWires    = clocks_device.wires;
         interface unixPipeWires  = unix_pipe_device.wires;
-        interface unixCommWires  = unix_comm_device.wires;
+        interface unixCommWires  = unixWires;
 
     endinterface
                

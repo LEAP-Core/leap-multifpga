@@ -35,14 +35,16 @@ CONNECTED_APPLICATION_CLASS::Main()
 
   STATS_SERVER_CLASS::GetInstance()->SetupStats();
 
-  for(UINT32 i = 0; i < 500; i++) {
+  for(UINT32 i = 0; i < 50; i++) {
     printf("Sending %d\n", i);
     UINT32 result = clientStub->TakeOneInput(i);
-    printf("%d + 7 = %d \n", i, result);
+    printf("%d (%x) + 7 = %d (%x)\n", i, i, result,result);
+    sleep(2);
   }
 
   STATS_SERVER_CLASS::GetInstance()->DumpStats();
   STATS_SERVER_CLASS::GetInstance()->EmitFile();
+  sleep(2);
   STARTER_DEVICE_SERVER_CLASS::GetInstance()->End(0);
   
   return 0;

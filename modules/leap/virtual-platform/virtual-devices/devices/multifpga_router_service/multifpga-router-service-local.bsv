@@ -43,6 +43,8 @@ import Vector::*;
 
 `include "awb/provides/multifpga_router_service.bsh"
 
+
+
 // *******
 // * Point to Point Code
 // *
@@ -120,6 +122,8 @@ module mkPacketizeConnectionSendMarshalled#(String name,
     endrule
 
 endmodule
+
+
 
 module mkPacketizeConnectionSendUnmarshalled#(String name, 
                                               Connection_Send#(t_DATA) send, 
@@ -205,6 +209,7 @@ module mkPacketizeConnectionSendUnmarshalled#(String name,
         endrule
      end
 endmodule
+
 
 // These guys need a FOF interface
 // This one requires some thought 
@@ -445,19 +450,64 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
 endmodule
 
 
+
 // *******
+// *
 // * Chain Code
 // *
-// * Chains don't need particularly high performance, so their code is less optimized as compared to
-// * the point to point links.
 // *******
 
 
-module mkPacketizeOutgoingChain#(String name, 
+module mkPacketizeOutgoingChainMarshalled#(String name, 
                                  SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                           umf_channel_id, umf_service_id,
                                                                           umf_method_id,  umf_message_len,
                                                                           umf_phy_pvt,    filler_bits), umf_chunk)) port, 
+                                 Integer id, 
+                                 NumTypeParam#(bitwidth) width, 
+                                 STAT received) 
+    (PHYSICAL_CHAIN_OUT) // module interface 
+
+    provisos (Bits#(umf_chunk, umf_chunk_SZ),
+              Div#(TSub#(bitwidth, filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
+              Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
+              Add#(n_EXTRA_SZ, TSub#(bitwidth, filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+
+    // We need a clock and reset due to MCD code
+    let myClock <- exposeCurrentClock;
+    let myReset <- exposeCurrentReset;
+
+    let outfifo <- mkSizedFIFOF(2);
+
+    let send = interface Connection_Send#(PHYSICAL_CHAIN_DATA);
+                   method Action send(PHYSICAL_CHAIN_DATA data);
+                       outfifo.enq(data);
+                   endmethod
+
+		   method Bool notFull(); 
+		       return outfifo.notFull();
+		   endmethod
+
+               endinterface;
+
+    let unmarshaller <- mkPacketizeConnectionSendMarshalled(name, send, port, id, width, received);
+
+    interface clock = myClock;
+    interface reset = myReset;
+
+    method deq = outfifo.deq();
+    method first = outfifo.first();
+    method notEmpty = outfifo.notEmpty();
+
+endmodule
+
+module mkPacketizeOutgoingChainUnmarshalled#(String name, 
+                                 SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                                                          umf_channel_id, umf_service_id,
+                                                                          umf_method_id,  umf_message_len,
+                                                                          umf_phy_pvt,    filler_bits), umf_chunk)) port, 
+                                 Integer id, 
+                                 NumTypeParam#(bitwidth) width, 
                                  STAT received) 
     (PHYSICAL_CHAIN_OUT) // module interface 
 
@@ -467,54 +517,108 @@ module mkPacketizeOutgoingChain#(String name,
     let myClock <- exposeCurrentClock;
     let myReset <- exposeCurrentReset;
 
-    Reg#(Bool) waiting <- mkReg(True);
-    DEMARSHALLER#(umf_chunk, PHYSICAL_CHAIN_DATA) dem <- mkSimpleDemarshaller();  
+    let outfifo <- mkSizedFIFOF(2);
 
-    rule sendReady(waiting || !dem.notEmpty()); 
-        port.read_ready();
-    endrule
+    let send = interface Connection_Send#(PHYSICAL_CHAIN_DATA);
+                   method Action send(PHYSICAL_CHAIN_DATA data);
+	
+                       $display("Chain %s outgoing %h", name, data);
+   
+                       outfifo.enq(data);
+                   endmethod
 
-    rule startRequest (waiting);
-        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                           umf_channel_id, umf_service_id,
-                           umf_method_id,  umf_message_len,
-                           umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();    
-        waiting <= False;
-        received.incr();
-        if(`MARSHALLING_DEBUG == 1)
-        begin
-            $display("Chain Outgoing %s starts request", name);
-        end
-    endrule
+		   method Bool notFull(); 
+		       return outfifo.notFull();
+		   endmethod
 
-    rule continueRequest (!waiting);
-        GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
-                            umf_channel_id, umf_service_id,
-                            umf_method_id,  umf_message_len,
-                            umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
+               endinterface;
 
-        dem.enq(packet.UMF_PACKET_dataChunk);   
-	received.incr();
-    endrule
+    let unmarshaller <- mkPacketizeConnectionSendUnmarshalled(name, send, port, id, width, received);
 
- 
     interface clock = myClock;
     interface reset = myReset;
 
-    method Action deq();
-        dem.deq;
-        waiting <= True;
-    endmethod
-
-    method PHYSICAL_CHAIN_DATA first = dem.first();
-    method Bool notEmpty() = dem.notEmpty;
+    method deq = outfifo.deq();
+    method first = outfifo.first();
+    method notEmpty = outfifo.notEmpty();
 
 endmodule
 
 
 
-module mkPacketizeIncomingChain#(String name,
+module mkPacketizeIncomingChainMarshalled#(String name,
                                  Integer id,  
+                                 NumTypeParam#(bitwidth) width,
+                                 STAT blocked, 
+                                 STAT sent) 
+    (Tuple2#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                          umf_channel_id, umf_service_id,
+                                          umf_method_id,  umf_message_len,
+                                          umf_phy_pvt,    filler_bits),
+                 umf_chunk),
+             PHYSICAL_CHAIN_IN)) // Module interface
+
+    provisos (Bits#(umf_chunk, umf_chunk_SZ),
+              Bits#(PHYSICAL_CHAIN_DATA, t_PHYSICAL_CHAIN_DATA_SZ),
+              Div#(TSub#(bitwidth,filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
+              Add#(filler_EXTRA_SZ, filler_bits, bitwidth),
+
+              // this proviso allows us to stuff payload bits into the packet header which sometimes saves a
+              // a cycle
+              Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
+              Add#(n_EXTRA_SZ, TSub#(bitwidth,filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+
+    // Egress interface to be filled in
+
+    let myClock <- exposeCurrentClock;
+    let myReset <- exposeCurrentReset;
+
+    RWire#(PHYSICAL_CHAIN_DATA) tryData <- mkRWire();
+    PulseWire trySuccess <- mkPulseWire();
+    Bool tryValid = isValid(tryData.wget());
+    
+    let recv = interface Connection_Receive#(PHYSICAL_CHAIN_DATA);
+                   method PHYSICAL_CHAIN_DATA receive() if(tryData.wget matches tagged Valid .data);
+                       return data;    
+                   endmethod
+
+		   method Action deq if(tryValid);
+		       trySuccess.send;
+                   endmethod
+
+		   method Bool notEmpty(); 
+		       return tryValid;
+		   endmethod
+
+               endinterface;
+
+
+    let egress_packet_generator <- mkPacketizeConnectionReceiveMarshalled(name,
+                                                                         recv,            
+                                                                         id,
+                                                                         width,
+                                                                         blocked,
+                                                                         sent);
+
+
+    let physical_chain_in = interface PHYSICAL_CHAIN_IN;
+                                interface clock = myClock;
+                                interface reset = myReset;
+ 
+                                method Bool success() = trySuccess;
+
+                                method Action try(PHYSICAL_CHAIN_DATA d);
+                                   tryData.wset(d);     
+                                endmethod
+                            endinterface;
+
+   return tuple2(egress_packet_generator, physical_chain_in);
+endmodule
+
+
+module mkPacketizeIncomingChainUnmarshalled#(String name,
+                                 Integer id,  
+                                 NumTypeParam#(bitwidth) width,
                                  STAT blocked, 
                                  STAT sent) 
     (Tuple2#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
@@ -532,70 +636,48 @@ module mkPacketizeIncomingChain#(String name,
     let myClock <- exposeCurrentClock;
     let myReset <- exposeCurrentReset;
 
-    MARSHALLER#(umf_chunk, PHYSICAL_CHAIN_DATA) mar <- mkSimpleMarshaller();
     RWire#(PHYSICAL_CHAIN_DATA) tryData <- mkRWire();
     PulseWire trySuccess <- mkPulseWire();
-    PulseWire continueRequestFired <- mkPulseWire(); 
+    Bool tryValid = isValid(tryData.wget());
+    
+    let recv = interface Connection_Receive#(PHYSICAL_CHAIN_DATA);
+                   method PHYSICAL_CHAIN_DATA receive() if(tryData.wget matches tagged Valid .data);
+                       return data;    
+                   endmethod
 
-    rule checkBlocked((mar.notEmpty() && (!continueRequestFired)) || (isValid(tryData.wget) && !trySuccess));
-        blocked.incr();
+		   method Action deq if(tryValid);
+		       trySuccess.send;
+                   endmethod
+
+		   method Bool notEmpty(); 
+		       return tryValid;
+		   endmethod
+
+               endinterface;
+
+
+    rule debugR(tryData.wget matches tagged Valid .data &&& trySuccess);
+      $display("Chain %s incoming %h", name, data);
     endrule
 
-    let egress_packet_generator = interface EGRESS_PACKET_GENERATOR;
-
-                                      method notEmptyHeader = isValid(tryData.wget());
-
-                                      method Action deqHeader() if(tryData.wget() matches tagged Valid .data);
-                                          trySuccess.send;
-                                          sent.incr();
-                                          mar.enq(data);
-                                          if(`MARSHALLING_DEBUG == 1)
-                                          begin
-                                              $display("Chain Incoming %s starts request", name);
-                                          end
-                                      endmethod
+    let egress_packet_generator <- mkPacketizeConnectionReceiveUnmarshalled(name,
+                                                                         recv,            
+                                                                         id,
+                                                                         width,
+                                                                         blocked,
+                                                                         sent);
 
 
-                                      // Buggy?
-                                      method GENERIC_UMF_PACKET_HEADER#(
-                                                 umf_channel_id, umf_service_id,
-                                                 umf_method_id,  umf_message_len,
-                                                 umf_phy_pvt,    filler_bits) firstHeader() if(tryData.wget() matches tagged Valid .data);
-
-                                          return GENERIC_UMF_PACKET_HEADER
-                                                 {
-                                                     filler: ?,
-                                                     phyChannelPvt: ?,
-                                                     channelID: ?, // we use this elsewhere to refer to flow control messages
-                                                     serviceID: fromInteger(id),
-                                                     methodID : ?,
-                                                     numChunks: fromInteger(valueof(MARSHALLER_MSG_LEN#(umf_chunk_SZ, t_PHYSICAL_CHAIN_DATA_SZ)))
-                                                 };
+    let physical_chain_in = interface PHYSICAL_CHAIN_IN;
+                                interface clock = myClock;
+                                interface reset = myReset;
  
-                                      endmethod
- 
-                                      method notEmptyBody = mar.notEmpty();
+                                method Bool success() = trySuccess;
 
-                                      method Action deqBody();
-                                          mar.deq();           
-                                          sent.incr();
-                                          continueRequestFired.send;        
-                                      endmethod
-
-                                      method firstBody = mar.first;
-                                      method bypassFlowcontrol = False;
-                                  endinterface;
-
-   let physical_chain_in = interface PHYSICAL_CHAIN_IN;
-                               interface clock = myClock;
-                               interface reset = myReset;
- 
-                               method Bool success() = trySuccess;
-
-                               method Action try(PHYSICAL_CHAIN_DATA d);
+                                method Action try(PHYSICAL_CHAIN_DATA d);
                                    tryData.wset(d);     
-                               endmethod
-                           endinterface;
+                                endmethod
+                            endinterface;
 
    return tuple2(egress_packet_generator, physical_chain_in);
 endmodule

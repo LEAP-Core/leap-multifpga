@@ -83,28 +83,61 @@ class MultiFPGAConnect():
       moduleList.topDependency += [subbuild]
 
   def assignIndices(self,sourceConn,sinkConn):
-    print "Now processing connection %s between %s <-> %s" % (sourceConn.name, sourceConn.platform, sinkConn.platform)
+    print "Now processing connection %s between %s (%s) -> %s (%s)" % (sourceConn.name, sourceConn.platform, sourceConn.sc_type, sinkConn.platform, sinkConn.sc_type)
+
+    sourceConn.inverse_sc_type = sinkConn.sc_type
+    sinkConn.inverse_sc_type   = sourceConn.sc_type
+
+    sourceConn.inverse_name = sinkConn.name
+    sinkConn.inverse_name   = sourceConn.name
+
     if(sinkConn.platform in self.platformData[sourceConn.platform]['INDEX']):
-      # only increment the sourceConn.  5B
+      # only increment the sourceConn. 
       self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] += 1
       index = self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform]
       sourceConn.idx = index 
       sinkConn.idx = index 
+      print "Setting index :" + str(index)
     else:
       self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] = 0
       sourceConn.idx = 0
       sinkConn.idx = 0 
+      print "Setting index :" + str(0)
     
     # Tell the sink about the source.  The sink may have been processed already
     if(sinkConn.platform in self.platformData[sourceConn.platform]['CONNECTED']):
       self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] += [sinkConn]
+      print "Sink platform length: " + str(len(self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform]))
     else:   
       self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] = [sinkConn]
 
     if(sourceConn.platform in self.platformData[sinkConn.platform]['CONNECTED']):
       self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] += [sourceConn]
+      print "Source platform length: " + str(len(self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform]))
     else:   
       self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] = [sourceConn]
+
+  def connectPath(self, src, sink):
+
+      path = self.environment.getPath(src.platform, sink.platform)
+
+      srcs = [src]
+      sinks =[]
+      print "Analyzing path: " + str(path)
+      for hop in path:
+          print "Adding hop: " + src.name + "Hop" + hop        
+            
+          sinks.append(DanglingConnection("ChainRoutingRecv", src.raw_type, -1, src.name + "Routethrough" + hop, 
+                                          hop, "False", src.bitwidth))
+          srcs.append(DanglingConnection("ChainRoutingSend", src.raw_type, -1, src.name + "Routethrough" + hop, 
+                                         hop, "False", src.bitwidth))
+
+
+      sinks.append(sink)
+    
+      for pair in zip(srcs,sinks):
+          self.assignIndices(pair[0],pair[1])
+  
 
 
   def generateEgressMultiplexor(self, platform): 
@@ -115,7 +148,7 @@ class MultiFPGAConnect():
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-      egressMethod = hopFromTarget.replace(".","_") + '_write'
+      egressMethod = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
       egressViaWidth = self.platformData[platform]['WIDTHS'][egressMethod]
 
       interfaceName = 'EgressMultiplexor_' + platform + '_to_' + targetPlatform
@@ -203,7 +236,7 @@ class MultiFPGAConnect():
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-      egressMethod = hopFromTarget.replace(".","_") + '_write'
+      egressMethod = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
       egressViaWidth = self.platformData[platform]['WIDTHS'][egressMethod]
 
       interfaceName = 'EgressMultiplexor_' + platform + '_to_' + targetPlatform
@@ -276,7 +309,7 @@ class MultiFPGAConnect():
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-      egressMethod = hopFromTarget.replace(".","_") + '_write'
+      egressMethod = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
       egressViaWidth = self.platformData[platform]['WIDTHS'][egressMethod]
 
       interfaceName = 'EgressMultiplexor_' + platform + '_to_' + targetPlatform
@@ -336,7 +369,7 @@ class MultiFPGAConnect():
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
       hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
-      ingressMethod = hopToTarget.replace(".","_") + '_read'
+      ingressMethod = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
       ingressViaWidth = self.platformData[platform]['WIDTHS'][ingressMethod]
 
       interfaceName = 'IngressMultiplexor_' + platform + '_to_' + targetPlatform
@@ -416,7 +449,7 @@ class MultiFPGAConnect():
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
       hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
-      ingressMethod = hopToTarget.replace(".","_") + '_read'
+      ingressMethod = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
       ingressViaWidth = self.platformData[platform]['WIDTHS'][ingressMethod]
 
       interfaceName = 'IngressMultiplexor_' + platform + '_to_' + targetPlatform
@@ -502,18 +535,12 @@ class MultiFPGAConnect():
               for danglingOld in danglingGlobal:
                   if(danglingNew.matches(danglingOld)): # a potential match
                       # We should check to see that things are directly connected
-                      # we don't handle the multi hop case yet, and may need a fixed point to do so. 
-                      length = -1
-                                             
                       if(danglingNew.isSource()):
-                          length = self.environment.getPathLength(danglingNew.platform, danglingOld.platform)
-                          self.assignIndices(danglingNew,danglingOld)
-                      else:
-                          length = self.environment.getPathLength(danglingOld.platform, danglingNew.platform)
-                          self.assignIndices(danglingOld,danglingNew)
+                          self.connectPath(danglingNew,danglingOld)         
+                      else:                                                   
+                          self.connectPath(danglingOld,danglingNew)         
 
-                      if(length != 1):
-                          print "either there is no connection between the connections named " + danglingNew.name + " or the connection requires multiple hops, which is not yet supported" 
+ 
                       matched = 1
                       # need to fill in the connection
                       danglingOld.matched = True
@@ -555,7 +582,9 @@ class MultiFPGAConnect():
           chainSrcs[i].chainPartner = chainSinks[i]
           # get them indexes
           print "Trying to pair " + chainSrcs[i].platform + " and " + chainSinks[i].platform + " on chain " + chainName
-          self.assignIndices(chainSrcs[i],chainSinks[i])
+
+          self.connectPath(chainSrcs[i],chainSinks[i])
+ 
 
       #unmatched connections are bad
       for dangling in danglingGlobal:
@@ -628,12 +657,12 @@ class MultiFPGAConnect():
         # We need two passes to fill in potentially missing links
         totalTraffic = 0;
         for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-          if(dangling.sc_type == 'Recv'):
+          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
             recvs += 1 
             if(dangling.name in stats):
               dangling.activity = stats[dangling.name]
               totalTraffic += stats[dangling.name]
-              print "Assigning " + dangling.name + " " + str(stats[dangling.name])
+              print "Assigning " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])
 
           # only create a chain when we see the source                    
           if(dangling.sc_type == 'ChainSrc'):
@@ -647,7 +676,7 @@ class MultiFPGAConnect():
           totalTraffic = 2*(chains+recvs)
 
         for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-          if(dangling.sc_type == 'Recv'):
+          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
             if(not(dangling.name in stats)):
               dangling.activity = totalTraffic/(chains+recvs)
             
@@ -659,9 +688,9 @@ class MultiFPGAConnect():
               dangling.activity = totalTraffic/(2*(chains+recvs))
 
         hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-        egressVia = hopFromTarget.replace(".","_") + '_write'
+        egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
         hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
-        ingressVia = hopToTarget.replace(".","_") + '_read'
+        ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
         firstAllocationPass = True; # We can't terminate in the first pass 
         viaWidthsFinal = [] # at some point, we'll want to derive this.  
@@ -720,7 +749,7 @@ class MultiFPGAConnect():
           platformConnectionsProvisional = []
           targetPlatformConnectionsProvisional = []
           for danglingIdx in range(len(sortedLinks)):           
-            if((sortedLinks[danglingIdx].sc_type == 'Recv') or (sortedLinks[danglingIdx].sc_type == 'ChainSink')):
+            if((sortedLinks[danglingIdx].sc_type == 'Recv') or (sortedLinks[danglingIdx].sc_type == 'ChainSink') or (sortedLinks[danglingIdx].sc_type == 'ChainRoutingRecv')):
               # depending on the width of the vias, and the width of our type we get different loads on different processors
               # need to choose the minimum
               print "\n\n Analyzing " + sortedLinks[danglingIdx].name + " of width " + str(sortedLinks[danglingIdx].bitwidth)  + "\n"
@@ -744,7 +773,7 @@ class MultiFPGAConnect():
               
               viaLoads[minIdx] = minLoad
               platformConnectionsProvisional.append([sortedLinks[danglingIdx].name, sortedLinks[danglingIdx].sc_type, minIdx, viaLinks[minIdx]])
-              targetPlatformConnectionsProvisional.append([sortedLinks[danglingIdx].name, inverseSCType(sortedLinks[danglingIdx].sc_type), minIdx, viaLinks[minIdx]])  
+              targetPlatformConnectionsProvisional.append([sortedLinks[danglingIdx].name, sortedLinks[danglingIdx].inverse_sc_type, minIdx, viaLinks[minIdx]])  
               print "Assigning Recv " + sortedLinks[danglingIdx].name   + " Idx " + str(minIdx) + " Link " + str(viaLinks[minIdx]) + "\n"
               viaLinks[minIdx] += 1
 
@@ -791,9 +820,9 @@ class MultiFPGAConnect():
         for via in range(len(viaWidthsFinal)):
           [headerType, bodyType, type] = self.generateRouterTypes(viaWidthsFinal[via], viaLinksFinal[via])
 
-          egress = Via("egress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via), -1, -1, viaLoadsFinal[via])
+          egress = Via("egress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viaLoadsFinal[via])
 
-          ingress = Via("ingress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via), -1, -1, viaLoadsFinal[via])
+          ingress = Via("ingress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viaLoadsFinal[via])
 
           egressViasInitial[platform][targetPlatform].append(egress)
           ingressViasInitial[targetPlatform][platform].append(ingress) 
@@ -898,22 +927,26 @@ class MultiFPGAConnect():
         chains = 0           
 
         for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-          if(dangling.sc_type == 'Recv'):
+          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
             recvs += 1 
 
           # only create a chain when we see the source
-          if(dangling.sc_type == 'ChainSrc'):
+          if(dangling.sc_type == 'ChainSink'):
+            print "Got chain src named: " + dangling.name
             chains += 1 
-        
+
+          if(dangling.sc_type == 'ChainSrc'):
+            print "Got chain sink named: " + dangling.name        
+
           # the egress via determines the ingress via
           self.platformData[platform]['EGRESS_VIAS'][targetPlatform] = []
           self.platformData[targetPlatform]['INGRESS_VIAS'][platform] = []
             
                                          
         hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-        egressVia = hopFromTarget.replace(".","_") + '_write'
+        egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
         hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
-        ingressVia = hopToTarget.replace(".","_") + '_read'
+        ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
         # We're dropping some bits here
         # this loop should be refactored to split ingress and egress
@@ -927,9 +960,10 @@ class MultiFPGAConnect():
           viaLinks = ((recvs + chains)/numberOfVias) + spareLink
           viaLinks +=1 # allocate flowcontrol link
           [headerType, bodyType, type] = self.generateRouterTypes(viaWidth, viaLinks)
-
-          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_")  + str(via), 0, via, 0))
-          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_") + str(via), 0, via, 0)) 
+          
+          print "Creating Via " + 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  +str(via) + " : links " + str(viaLinks)
+          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), 0, via, 0))
+          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), 0, via, 0)) 
 
 
         # now that we have decided on the vias, we must assign links to vias
@@ -939,16 +973,16 @@ class MultiFPGAConnect():
         linkCount = len(linkVias) # need single flow control lane
 
         # send/recv pairs had better be matched.
-        # so let's match them up - we need to tweak the sorting order a little
-        # to induce a match.  
-        platformConnections = sorted(self.platformData[platform]['CONNECTED'][targetPlatform],key = lambda connection: connection.name + connection.sc_type)
-        targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name + inverseSCType(connection.sc_type)) # We want the ingress ChainSrcs to come first0
-         
+        # We want the slower chains to be evenly dispersed across the randomly assigned links
+        platformConnections = self.platformData[platform]['CONNECTED'][targetPlatform]
+        targetPlatformConnections = self.platformData[targetPlatform]['CONNECTED'][platform]
+
         # Now we assign lanes/links to ingress/egress pairs
         for danglingIdx in range(len(self.platformData[platform]['CONNECTED'][targetPlatform])):           
           # sanity check the world
-          if(platformConnections[danglingIdx].sc_type == 'Recv' or platformConnections[danglingIdx].sc_type == 'ChainSink'):              
-            if((platformConnections[danglingIdx].name != targetPlatformConnections[danglingIdx].name) or (platformConnections[danglingIdx].sc_type != inverseSCType(targetPlatformConnections[danglingIdx].sc_type))):
+          if(platformConnections[danglingIdx].sc_type == 'Recv' or platformConnections[danglingIdx].sc_type == 'ChainRoutingRecv'):              
+            if((platformConnections[danglingIdx].idx != targetPlatformConnections[danglingIdx].idx) or (platformConnections[danglingIdx].sc_type != targetPlatformConnections[danglingIdx].inverse_sc_type)):
+              print "Platform " + platform + " -> " + targetPlatform 
               print "Mis-matched connections: " + platformConnections[danglingIdx].name + " vs. " + targetPlatformConnections[danglingIdx].name
               print "Non-inverse connection types: " + platformConnections[danglingIdx].sc_type + " vs. " + targetPlatformConnections[danglingIdx].sc_type
               sys.exit(-1)
@@ -960,7 +994,26 @@ class MultiFPGAConnect():
             targetPlatformConnections[danglingIdx].via_link = linkCount / len(linkVias) # Accounting for feedback
 
             linkCount += 1
-            print "Assigning " + platformConnections[danglingIdx].name + "Type: " + platformConnections[danglingIdx].sc_type  + " Idx " + str(platformConnections[danglingIdx].via_idx) + " Link " + str(platformConnections[danglingIdx].via_link) + "\n"
+            print "Assigning  " + platform + "->" + targetPlatform + " " + platformConnections[danglingIdx].name + "Type: " + platformConnections[danglingIdx].sc_type  + " Idx " + str(platformConnections[danglingIdx].via_idx) + " Link " + str(platformConnections[danglingIdx].via_link) + "\n"
+
+        # This second pass is a hueristic that forces the lightly used chains to be evenly distributed 
+        for danglingIdx in range(len(self.platformData[platform]['CONNECTED'][targetPlatform])):           
+          # sanity check the world
+          if(platformConnections[danglingIdx].sc_type == 'ChainSink'):              
+            if((platformConnections[danglingIdx].idx != targetPlatformConnections[danglingIdx].idx) or (platformConnections[danglingIdx].sc_type != targetPlatformConnections[danglingIdx].inverse_sc_type)):
+              print "Platform " + platform + " -> " + targetPlatform 
+              print "Mis-matched connections: " + platformConnections[danglingIdx].name + " vs. " + targetPlatformConnections[danglingIdx].name
+              print "Non-inverse connection types: " + platformConnections[danglingIdx].sc_type + " vs. " + targetPlatformConnections[danglingIdx].sc_type
+              sys.exit(-1)
+
+        
+            platformConnections[danglingIdx].via_idx = linkCount % len(linkVias)
+            platformConnections[danglingIdx].via_link = linkCount / len(linkVias) # Accounting for feedback
+            targetPlatformConnections[danglingIdx].via_idx = linkCount % len(linkVias)
+            targetPlatformConnections[danglingIdx].via_link = linkCount / len(linkVias) # Accounting for feedback
+
+            linkCount += 1
+            print "Assigning  " + platform + "->" + targetPlatform + " " + platformConnections[danglingIdx].name + "Type: " + platformConnections[danglingIdx].sc_type  + " Idx " + str(platformConnections[danglingIdx].via_idx) + " Link " + str(platformConnections[danglingIdx].via_link) + "\n"
 
 
         
@@ -1006,6 +1059,8 @@ class MultiFPGAConnect():
 
           # handle the connections themselves
           for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+            print  "\n\nGenerating routing code " + platform + " -> " + targetPlatform + " in " + self.platformData[platform]['BSH'] + "\n\n"
+    
             egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
             ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
             header.write('// Connection to ' + targetPlatform + ' \n')
@@ -1014,46 +1069,47 @@ class MultiFPGAConnect():
             chains = 0           
 
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-              if(dangling.sc_type == 'Recv'):
-                  header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
+              print "Laying down " + dangling.inverse_name + " of type " + dangling.sc_type + " on " + dangling.platform
+              if(dangling.inverse_sc_type == 'Send' or dangling.inverse_sc_type == 'ChainRoutingSend'):
+                  header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.inverse_name + ' <- mkPhysicalConnectionRecv("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
                   if(GENERATE_ROUTER_STATS):
-                    header.write('STAT blocked_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.name + '_BLOCKED);\n')
-                    header.write('STAT sent_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.name + '_SENT);\n')   
-		    dictionary += ('def STATS.ROUTER.' + dangling.name + '_BLOCKED "' + dangling.name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +  'cycles blocked";\n')
-                    dictionary += ('def STATS.ROUTER.' + dangling.name + '_SENT "' + dangling.name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent";\n')
-
-
+                    header.write('STAT blocked_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.inverse_name + '_BLOCKED);\n')
+                    header.write('STAT sent_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.inverse_name + '_SENT);\n')   
+		    dictionary += ('def STATS.ROUTER.' + dangling.inverse_name + '_BLOCKED "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +  'cycles blocked";\n')
+                    dictionary += ('def STATS.ROUTER.' + dangling.inverse_name + '_SENT "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent";\n')
                   recvs += 1 
-              if(dangling.sc_type == 'Send'):
+
+
+              if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
                   if(GENERATE_ROUTER_STATS):
-                    header.write('STAT received_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.name + '_RECEIVED);\n')
-                    dictionary += ('def STATS.ROUTER.' + dangling.name + '_RECEIVED "' + dangling.name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' received cycles";\n')
+                    header.write('STAT received_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.inverse_name + '_RECEIVED);\n')
+                    dictionary += ('def STATS.ROUTER.' + dangling.inverse_name + '_RECEIVED "' + dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' received cycles";\n')
 
-                  header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
-
+                  header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.inverse_name + ' <- mkPhysicalConnectionSend("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
                   sends += 1
+
               # only create a chain when we see the source
-              if(dangling.sc_type == 'ChainSrc'):
+              if(dangling.inverse_sc_type == 'ChainSink'):
                 chains += 1 
 
                 if(GENERATE_ROUTER_STATS):
-                  dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.name + '_RECEIVED "' + dangling.name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +' received cycles";\n')
-                  header.write('STAT received_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_RECEIVED);\n')
+                  dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_RECEIVED "' + dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +' received cycles";\n')
+                  header.write('STAT received_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_RECEIVED);\n')
 
                 # we must create a logical chain information
-                chainsStr += 'let chain_' + dangling.name + ' = LOGICAL_CHAIN_INFO{logicalName: "' + dangling.name + '", logicalType: "' + \
-                             dangling.raw_type + '", computePlatform: "' + platform + '", incoming: tpl_2(pack_chain_' + dangling.name + ')' +\
-                             ', outgoing: unpack_chain_' + dangling.name + '};\n'
+                chainsStr += 'let chain_' + dangling.inverse_name + ' = LOGICAL_CHAIN_INFO{logicalName: "' + dangling.inverse_name + '", logicalType: "' + \
+                             dangling.raw_type + '", computePlatform: "' + platform + '", incoming: tpl_2(pack_chain_' + dangling.inverse_name + ')' +\
+                             ', outgoing: unpack_chain_' + dangling.inverse_name + '};\n'
                       
-                chainsStr += 'registerChain(chain_' + dangling.name + ');\n'
+                chainsStr += 'registerChain(chain_' + dangling.inverse_name + ');\n'
 
-              if(dangling.sc_type == 'ChainSink'):
-                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.name + '_BLOCKED "' + dangling.name +' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles blocked";\n')
-                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.name + '_SENT "' + dangling.name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent";\n')
+              if(dangling.inverse_sc_type == 'ChainSrc'):
+                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_BLOCKED "' + dangling.inverse_name +' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles blocked";\n')
+                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_SENT "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent";\n')
 
                 if(GENERATE_ROUTER_STATS):
-                    header.write('STAT blocked_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_BLOCKED);\n')
-                    header.write('STAT sent_' + dangling.name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_SENT);\n')
+                    header.write('STAT blocked_chain_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_BLOCKED);\n')
+                    header.write('STAT sent_chain_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_SENT);\n')
 
             # Ingress switches now feed directly into the egress switches to save latency.  
             for via_idx in range(len(ingressVias)):
@@ -1070,24 +1126,29 @@ class MultiFPGAConnect():
             # the egress links need to go first, since they are provided as an argument to the 
             # switches           
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-              if(dangling.sc_type == 'Recv'):
+              if(dangling.inverse_sc_type == 'Send' or dangling.inverse_sc_type == 'ChainRoutingSend'):
                 packetizerType = 'Marshalled'
-	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.name +' = ?;\n')
-                egressVectors[dangling.via_idx][dangling.via_link] = 'pack_recv_' + dangling.name
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.inverse_name +' = ?;\n')
+                egressVectors[dangling.via_idx][dangling.via_link] = 'pack_recv_' + dangling.inverse_name
                 if(dangling.bitwidth < egressVias[dangling.via_idx].via_width):
                   packetizerType = 'Unmarshalled'
                 if(GENERATE_ROUTER_STATS):
-                  header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType  + '("' + dangling.name + '", recv_' + dangling.name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.name +  ',blocked_'+ dangling.name +', sent_'+ dangling.name +');// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                  header.write('let pack_recv_' + dangling.inverse_name + ' <- mkPacketizeConnectionReceive' + packetizerType  + '("' + dangling.inverse_name + '", recv_' + dangling.inverse_name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.inverse_name +  ',blocked_'+ dangling.inverse_name +', sent_'+ dangling.inverse_name +');// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
                 else:
-                  header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType + '("' + dangling.name + '", recv_' + dangling.name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.name + ', ?, ?); // Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                  header.write('let pack_recv_' + dangling.inverse_name + ' <- mkPacketizeConnectionReceive' + packetizerType + '("' + dangling.inverse_name + '", recv_' + dangling.inverse_name + ',' + str(dangling.via_link) + ', width_recv_' + dangling.inverse_name + ', ?, ?); // Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
 
-              if(dangling.sc_type == 'ChainSink' ):
-                print "Chain Sink " + dangling.name + ": Idx " + str(dangling.via_idx) + " Link: " + str(dangling.via_link) + " Length: " + str(len(egressVectors[dangling.via_idx]))  
-                egressVectors[dangling.via_idx][dangling.via_link] = 'tpl_1(pack_chain_' + dangling.name + ')'
+              if(dangling.inverse_sc_type == 'ChainSrc' ):
+	        header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_chain_' + dangling.inverse_name +' = ?;\n')
+	        #header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_chain_' + dangling.inverse_name +' = ?;\n')
+                print "Chain Sink " + dangling.inverse_name + ": Idx " + str(dangling.via_idx) + " Link: " + str(dangling.via_link) + " Length: " + str(len(egressVectors[dangling.via_idx]))  
+                egressVectors[dangling.via_idx][dangling.via_link] = 'tpl_1(pack_chain_' + dangling.inverse_name + ')'
+                packetizerType = 'Marshalled'
+                if(dangling.bitwidth < ingressVias[dangling.via_idx].via_width):
+                  packetizerType = 'Unmarshalled'
                 if(GENERATE_ROUTER_STATS):
-                  header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain("' + dangling.name + '", ' + str(dangling.via_link) + ',blocked_'+ dangling.name +', sent_'+ dangling.name  +');\n\n')
+                  header.write('let pack_chain_' + dangling.inverse_name + ' <- mkPacketizeIncomingChain' + packetizerType +'("' + dangling.inverse_name + '", ' + str(dangling.via_link) + ', width_chain_' + dangling.inverse_name + ',blocked_chain_'+ dangling.inverse_name +', sent_chain_'+ dangling.inverse_name  +');\n\n')
                 else:
-                  header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain("' + dangling.name + '", ' + str(dangling.via_link) + ',?,?);\n\n')
+                  header.write('let pack_chain_' + dangling.inverse_name + ' <- mkPacketizeIncomingChain' + packetizerType + '("' + dangling.inverse_name + '", ' + str(dangling.via_link) + ', width_chain_' + dangling.inverse_name +',?,?);\n\n')
 
           
             # we now need switches for each via.  Need modular arithmetic here to make sure that everyone has a link.  
@@ -1119,7 +1180,7 @@ class MultiFPGAConnect():
                 print "Idx: " + str(via_idx) + " eg vias len" + str(len(egressVias)) + " in vias len" + str(len(ingressVias))
 
                 header.write('EGRESS_PACKET_GENERATOR#(' + egressVias[via_idx].via_header_type + ', ' +  egressVias[via_idx].via_body_type + ')links_' + egressVias[via_idx].via_switch + '[' + str(egressVias[via_idx].via_links) + '] = ' + linkArray + ';\n') 
-                header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ', ' + ingressVias[egressVias[via_idx].via_outgoing_flowcontrol_via].via_switch + '.ingressPorts[' + str(egressVias[via_idx].via_outgoing_flowcontrol_link) +'], compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack));\n')
+                header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ', ' + ingressVias[egressVias[via_idx].via_outgoing_flowcontrol_via].via_switch + '.ingressPorts[' + str(egressVias[via_idx].via_outgoing_flowcontrol_link) +'], compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack), "' + egressVias[via_idx].via_switch + '");\n')
 
                 if(GENERATE_ROUTER_DEBUG):   
                   header.write('egress_via_dbg_list <- addDebugScanField(egress_via_dbg_list, "' + egressVias[via_idx].via_switch + ' buffer status", ' + egressVias[via_idx].via_switch + '.bufferStatus);\n')
@@ -1136,27 +1197,32 @@ class MultiFPGAConnect():
             sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.via_link + maximumLinks * dangling.via_idx) # sorted is ascending
 
             for dangling in sortedLinks:
-              if(dangling.sc_type == 'Send' or dangling.sc_type == 'ChainSrc' ):
-                header.write('// ' + dangling.name + ' via_idx: ' + str(dangling.via_idx) + ' link_idx: ' +  str(dangling.via_link) + '\n')
+              if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainSink' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
+                header.write('// ' + dangling.inverse_name + ' via_idx: ' + str(dangling.via_idx) + ' link_idx: ' +  str(dangling.via_link) + '\n')
 
-            # and now we actually 
+            # and now we actually generate the connections
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-              if(dangling.sc_type == 'Send'):
+              if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.inverse_name +' = ?;\n\n')
                 packetizerType = 'Marshalled'
-	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.name +' = ?;\n\n')
                 if(dangling.bitwidth < ingressVias[dangling.via_idx].via_width):
                   packetizerType = 'Unmarshalled'
                 if(GENERATE_ROUTER_STATS):
-                  header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend' + packetizerType  + '("' + dangling.name + '", send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+',received_'+ dangling.name +');// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                  header.write('Empty unpack_send_' + dangling.inverse_name + ' <- mkPacketizeConnectionSend' + packetizerType  + '("' + dangling.inverse_name + '", send_' + dangling.inverse_name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.inverse_name+',received_'+ dangling.inverse_name +');// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
                 else:
-                  header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend' + packetizerType  + '("' + dangling.name + '", send_' + dangling.name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.name+',?);// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth)+ '\n')
+                  header.write('Empty unpack_send_' + dangling.inverse_name + ' <- mkPacketizeConnectionSend' + packetizerType  + '("' + dangling.inverse_name + '", send_' + dangling.inverse_name+',' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], ' + str(dangling.via_link) + ', width_send_' + dangling.inverse_name+',?);// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth)+ '\n')
 
 
-              if(dangling.sc_type == 'ChainSrc' ):
+              if(dangling.inverse_sc_type == 'ChainSink' ):
+	        header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_sink_' + dangling.inverse_name +' = ?;\n')
+	        #header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_sink_' + dangling.inverse_name +' = ?;\n')
+                packetizerType = 'Marshalled'
+                if(dangling.bitwidth < ingressVias[dangling.via_idx].via_width):
+                  packetizerType = 'Unmarshalled'
                 if(GENERATE_ROUTER_STATS):
-                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain("' + dangling.name + '", ' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],' + 'received_' + dangling.name + ');\n\n') 
+                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.inverse_name + ' <- mkPacketizeOutgoingChain' + packetizerType + '("' + dangling.inverse_name + '", ' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], '  + str(dangling.via_link) + ', width_sink_' + dangling.inverse_name + ', received_' + dangling.inverse_name + ');\n\n') 
                 else:
-                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain("' + dangling.name + '", ' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '],?);\n\n')
+                  header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.inverse_name + ' <- mkPacketizeOutgoingChain' + packetizerType + '("' + dangling.inverse_name + '", ' + ingressVias[dangling.via_idx].via_switch  +'.ingressPorts['+str(dangling.via_link) + '], '  + str(dangling.via_link) + ', width_sink_' + dangling.inverse_name + ', ?);\n\n')
 
 
 
@@ -1195,7 +1261,7 @@ class MultiFPGAConnect():
                   self.platformData[platformName]['DANGLING'] += [DanglingConnection(sc_type, 
                                                                                 match.group(2),
                                                                                 match.group(3),
-                                                                                match.group(4),
+                                                                                match.group(4),      
                                                                                 match.group(5),
                                                                                 match.group(6),
                                                                                 match.group(7))]

@@ -38,7 +38,7 @@ Packagehint=multifpga
 [MultiFPGA Platform/Requires]
 fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=MultiFPGA Simulation FPGA1 Distributed Cache Environment
+fpgaenv=MultiFPGA Simulation FPGAN Environment Quad
 application_env=Soft Services Hybrid Application Environment
 environment_description=Null FPGA Environment
 
@@ -50,7 +50,11 @@ Packagehint=multifpga
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
 
-[MultiFPGA Simulation FPGA1 Distributed Cache Environment]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga1-dist-cache.apm
-Packagehint=multifpga
+[MultiFPGA Simulation FPGAN Environment Quad/Params]
+SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
+NUM_FPGA=2
+CON_CWIDTH=128
 
+[MultiFPGA Simulation FPGAN Environment Quad]
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-fpgaN.apm
+Packagehint=multifpga

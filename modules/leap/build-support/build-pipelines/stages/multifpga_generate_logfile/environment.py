@@ -113,6 +113,18 @@ class FPGAEnvironment(object):
         else:
             return -1
 
+    def getPath(self, source, sink):
+        paths = pygraph.algorithms.minmax.shortest_path(self.graph,source)
+        path = []
+        hop = sink
+        lastNode = sink 
+        while paths[0][hop] != source:
+            hop = paths[0][hop]
+            path.append(hop)           
+        print "getPath: " + str(path)
+        path.reverse()
+        return path 
+
 
     #It would be worth considering how to handle the key error
     def getPathHopFirst(self, source, sink):

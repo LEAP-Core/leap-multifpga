@@ -1,0 +1,13 @@
+
+%name Alpha Inorder Sim Mapping Quad
+%desc This file describes the mapping of the alhpa inorder pipeline to the ACP
+
+%attributes tool
+
+%provides fpga_mapping
+
+%sources -t FPGAENV_MAPPING -v PUBLIC sim-mapping-quad.map
+
+
+
+

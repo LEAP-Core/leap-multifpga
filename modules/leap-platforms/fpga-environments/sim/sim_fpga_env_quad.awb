@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation Quad FPGA Environment
+%desc Simulation Quad FPGA Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-quad.env
+%AWB_END

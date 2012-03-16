@@ -1,0 +1,10 @@
+%AWB_START
+
+%name Configurable Spiral common
+%desc Configurable Spiral common
+
+%provides test_common
+
+%public test-common.bsv
+
+%AWB_END

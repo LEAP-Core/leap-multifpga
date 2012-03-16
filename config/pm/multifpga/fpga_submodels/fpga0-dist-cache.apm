@@ -54,3 +54,5 @@ Packagehint=multifpga
 File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0-dist-cache.apm
 Packagehint=multifpga
 
+[MultiFPGA Simulation FPGA0 Distributed Cache Environment/Params]
+NUM_FPGA=2

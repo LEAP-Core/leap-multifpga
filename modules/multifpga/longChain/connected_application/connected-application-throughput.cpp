@@ -30,9 +30,11 @@ CONNECTED_APPLICATION_CLASS::Init()
 int
 CONNECTED_APPLICATION_CLASS::Main()
 {
-    // Eventually we'll call the frontend initialization here.                                                                       
+    // Eventually we'll call the frontend initialization here.                    
+    printf("Calling Setup Stats\n");                                                   
     STATS_SERVER_CLASS::GetInstance()->SetupStats();
 
+    printf("Starting Test\n");                                                   
     OUT_TYPE_RunTest result = clientStub->RunTest(65000);
 
     printf("Test Complete cycles: %d, errors:%d\n", result.cycles, result.errors);
