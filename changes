@@ -1847,3 +1847,39 @@ anything clever here.
 3) Added configurations and test cases to test the new code. Things
 seem to be working.
 
+
+----------
+kfleming    Date: Sun Mar 18 18:33:50 EDT 2012  CSN: CSN-multifpga-112
+                  Sun Mar 18 22:33:50 UTC 2012
+
+
+Directory config/pm/leap/demos
+ traffic_light/            Locally Removed           111 
+
+Directory config/pm/leap/demos/traffic_light
+ test_multifpga_loop_acp.apm Locally Removed           111 
+ test_multifpga_throughput_acp.apm Locally Removed           111 
+ test_multifpga_perf_xupv5.apm Locally Removed           111 
+ test_multifpga_rrr_exe.apm Locally Removed           111 
+ test_multifpga_chains_exe.apm Locally Removed           111 
+ test_multifpga_loop.apm   Locally Removed           111 
+ test_multifpga_scratch_acp.apm Locally Removed           111 
+ test_multifpga_throughput_exe.apm Locally Removed           111 
+ test_multifpga_chains_xupv5_sma.apm Locally Removed           111 
+ test_multifpga_chains_xupv5.apm Locally Removed           111 
+ traffic_light_acp_synth_multifpga.apm Locally Removed           111 
+ test_multifpga_perf_acp.apm Locally Removed           111 
+ test_multifpga_alternative_exe.apm Locally Removed           111 
+ test_multifpga.apm        Locally Removed           111 
+ test_multifpga_throughput_xupv5.apm Locally Removed           111 
+ test_multifpga_perf_acp_single.apm Locally Removed           111 
+ test_multifpga_exe.apm    Locally Removed           111 
+ test_multifpga_chains_xupv5_sata.apm Locally Removed           111 
+ test_multifpga_scratch.apm Locally Removed           111 
+ test_multifpga_rrr_acp.apm Locally Removed           111 
+ test_multifpga_chains_acp.apm Locally Removed           111 
+ test_multifpga_spiral_exe.apm Locally Removed           111 
+
+
+Moved the multifpga test cases from traffic_light to multifpga.  Not
+great, but better than before.
