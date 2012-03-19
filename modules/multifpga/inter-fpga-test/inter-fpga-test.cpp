@@ -30,8 +30,6 @@ void
 CONNECTED_APPLICATION_CLASS::Main()
 {
 
-  (STATS_SERVER_CLASS::GetInstance())->SetupStats();
-
   while(1) {
     UINT32 error;
     // Dump out stats

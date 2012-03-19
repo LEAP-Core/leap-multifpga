@@ -30,7 +30,7 @@ int
 CONNECTED_APPLICATION_CLASS::Main()
 {
   // Eventually we'll call the frontend initialization here.                                                                        
-  STATS_SERVER_CLASS::GetInstance()->SetupStats();
+
   STARTER_DEVICE_SERVER_CLASS::GetInstance()->WaitForHardware();
   STATS_SERVER_CLASS::GetInstance()->DumpStats();
   STATS_SERVER_CLASS::GetInstance()->EmitFile();

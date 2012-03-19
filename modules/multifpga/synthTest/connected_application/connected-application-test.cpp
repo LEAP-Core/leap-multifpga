@@ -33,8 +33,6 @@ CONNECTED_APPLICATION_CLASS::Main()
   printf("Preparing to set up stats\n");
   fflush(stdout);  
 
-  STATS_SERVER_CLASS::GetInstance()->SetupStats();
-
   for(UINT32 i = 0; i < 50; i++) {
     printf("Sending %d\n", i);
     UINT32 result = clientStub->TakeOneInput(i);

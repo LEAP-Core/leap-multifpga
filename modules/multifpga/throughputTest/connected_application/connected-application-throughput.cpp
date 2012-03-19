@@ -31,7 +31,6 @@ int
 CONNECTED_APPLICATION_CLASS::Main()
 {
     // Eventually we'll call the frontend initialization here.                                                                        
-    STATS_SERVER_CLASS::GetInstance()->SetupStats();
 
     UINT32 width = 0, count = 1;
     for(width = 16; width < 512; width = width * 2) {

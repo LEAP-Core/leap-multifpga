@@ -30,7 +30,7 @@ int
 CONNECTED_APPLICATION_CLASS::Main()
 {
   // Eventually we'll call the frontend initialization here.                                                                        
-  STATS_SERVER_CLASS::GetInstance()->SetupStats();
+
   UINT32 total = 0, i;
   for(i = 0; i < 50; i++) {
     UINT32 result = clientStub->TakeOneInput(i);
