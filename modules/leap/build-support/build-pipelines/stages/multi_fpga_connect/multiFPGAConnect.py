@@ -59,15 +59,9 @@ class MultiFPGAConnect():
           platformBitfileBuildDir = 'multi_fpga/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
 
           wrapperLog =  platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
-          dictionaryFileDir =  platformBitfileBuildDir +'iface/src/dict/'  
           parameterFile =  platformBitfileBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
-          dictionaryFile =  platformBitfileBuildDir +'iface/src/dict/multifpga_routing.dic'
-          try:
-            os.makedirs(dictionaryFileDir) # why does the parameter file work?
-          except OSError:
-            oserr = 0
                
-          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DIC': dictionaryFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'INGRESS_VIAS': {}, 'EGRESS_VIAS': {}, 'INGRESS_VIAS_PASS_ONE': {}, 'EGRESS_VIAS_PASS_ONE': {}}
+          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'INGRESS_VIAS': {}, 'EGRESS_VIAS': {}, 'INGRESS_VIAS_PASS_ONE': {}, 'EGRESS_VIAS_PASS_ONE': {}}
 
 
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
@@ -144,7 +138,6 @@ class MultiFPGAConnect():
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_dictionary = ""
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
@@ -180,13 +173,13 @@ class MultiFPGAConnect():
         multiplexor_definition += '  let ' + via.via_method + '_pulse <- mkPulseWire();\n' 
         
         if(GENERATE_ROUTER_STATS):
-          multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_ENQUEUED " ' + via.via_method +' cycles enqueued";\n')
-          multiplexor_definition += '\tSTAT enqueued_' + via.via_method + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED);\n'
+          sname = 'statName("ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED", "' + via.via_method +' cycles enqueued")'
+          multiplexor_definition += '\tSTAT enqueued_' + via.via_method + ' <- mkStatCounter(' + sname + ');\n'
      
       #stats for the merger
       if(GENERATE_ROUTER_STATS):
-        multiplexor_definition += '\tSTAT merged_' + moduleName + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_MERGED);\n'
-        multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_MERGED"' + moduleName +' cycles enqueued";\n')
+        sname = 'statName("ROUTER_' + moduleName + '_MERGED", "' + moduleName +' cycles enqueued")'
+        multiplexor_definition += '\tSTAT merged_' + moduleName + ' <- mkStatCounter(' + sname + ');\n'
 
       multiplexor_definition += '\n\trule mergeData(\n'
 
@@ -225,14 +218,13 @@ class MultiFPGAConnect():
         multiplexor_definition += '\tendmethod\n\n'
 
       multiplexor_definition += 'endmodule\n\n'
-    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names, multiplexor_dictionary]
+    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
 
 
   def generateEgressMultiplexorParSerial(self, platform): 
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_dictionary = ""
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
@@ -264,13 +256,13 @@ class MultiFPGAConnect():
       multiplexor_definition += '                           function Bool write_ready() ) (' + interfaceName + ');\n'
       # mkDwire with empty string signifier...
       for via in egressVias:
-        multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_ENQUEUED" ' + via.via_method +' cycles enqueued";\n')
+        sname = 'statName("ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED", "' + via.via_method +' cycles enqueued")'
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\tSTAT enqueued_' + via.via_method + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED);\n'
+          multiplexor_definition += '\tSTAT enqueued_' + via.via_method + ' <- mkStatCounter(' + sname + ');\n'
 
-      multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_MERGED"' + moduleName +' cycles enqueued";\n')
+      sname = 'statName("ROUTER_' + moduleName + '_MERGED", "' + moduleName +' cycles enqueued")'
       if(GENERATE_ROUTER_STATS):
-        multiplexor_definition += '\tSTAT merged_' + moduleName + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_MERGED);\n'
+        multiplexor_definition += '\tSTAT merged_' + moduleName + ' <- mkStatCounter(' + sname + ');\n'
 
 
       for via in egressVias:
@@ -298,14 +290,13 @@ class MultiFPGAConnect():
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
-    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names, multiplexor_dictionary]
+    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
 
 
   def generateEgressMultiplexorSerial(self, platform): 
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_dictionary = ""
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
@@ -337,13 +328,13 @@ class MultiFPGAConnect():
       multiplexor_definition += '                           function Bool write_ready() ) (' + interfaceName + ');\n'
       # mkDwire with empty string signifier...
       for via in egressVias:
-        multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_ENQUEUED" ' + via.via_method +' cycles enqueued";\n')
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += 'STAT enqueued_' + via.via_method + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED);\n'
+          sname = 'statName("ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED", "' + via.via_method +' cycles enqueued")'
+          multiplexor_definition += 'STAT enqueued_' + via.via_method + ' <- mkStatCounter(' + sname + ');\n'
 
-      multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_MERGED"' + moduleName +' cycles enqueued";\n')
       if(GENERATE_ROUTER_STATS):
-        multiplexor_definition += 'STAT merged_' + moduleName + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_MERGED);\n'
+        sname = 'statName("ROUTER_' + moduleName + '_MERGED", "' + moduleName +' cycles enqueued")'
+        multiplexor_definition += 'STAT merged_' + moduleName + ' <- mkStatCounter(' + sname + ');\n'
 
       viaCount = 0
       for via in egressVias:
@@ -358,14 +349,13 @@ class MultiFPGAConnect():
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
-    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names, multiplexor_dictionary]
+    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
             
 
   def generateIngressMultiplexor(self, platform):
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_dictionary = ""
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
       hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
@@ -400,8 +390,8 @@ class MultiFPGAConnect():
         multiplexor_definition += '\tlet ' + via.via_method + '_fifo <- mkBypassFIFOF();\n' 
 
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\tSTAT dequeued_' + via.via_method + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_' + via.via_method + '_DEQUEUED);\n'
-          multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_DEQUEUED "' + via.via_method +' cycles dequeued";\n')
+          sname = 'statName("ROUTER_' + moduleName + '_' + via.via_method + '_DEQUEUED", "' + via.via_method +' cycles dequeued")'
+          multiplexor_definition += '\tSTAT dequeued_' + via.via_method + ' <- mkStatCounter(' + sname + ');\n'
 
       if(GENERATE_ROUTER_DEBUG):   
         multiplexor_definition += '\n\tDEBUG_SCAN_FIELD_LIST via_dbg_list = List::nil;\n'
@@ -439,13 +429,12 @@ class MultiFPGAConnect():
         multiplexor_definition += '\tendmethod\n\n'
 
       multiplexor_definition += 'endmodule\n\n'
-    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names,multiplexor_dictionary]
+    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
 
   def generateIngressMultiplexorSerial(self, platform):
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_dictionary = ""
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
       ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
       hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
@@ -479,9 +468,9 @@ class MultiFPGAConnect():
       via_count = 0
       for via in ingressVias:
         multiplexor_definition += '  let ' + via.via_method + '_fifo <- mkBypassFIFOF();\n' # Bypass fifo saves latency.
-        multiplexor_dictionary += ('def STATS.ROUTER.' + moduleName + '_' + via.via_method + '_DEQUEUED"' + via.via_method +' cycles dequeued";\n')
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += 'STAT dequeued_' + via.via_method + ' <- mkStatCounter(`STATS_ROUTER_' + moduleName + '_' + via.via_method + '_DEQUEUED);\n'
+          sname = 'statName("ROUTER_' + moduleName + '_' + via.via_method + '_DEQUEUED", "' + via.via_method +' cycles dequeued")'
+          multiplexor_definition += 'STAT dequeued_' + via.via_method + ' <- mkStatCounter(' + sname + ');\n'
         multiplexor_definition += '  rule sendData' + str(via_count) + '(tpl_1(rxdata) == ' + str(via_count) + ');\n'
         # multiplexor_definition += '    $display("ingress mergeData ' + moduleName  +'  fires");\n'
         multiplexor_definition += '      deq();\n'
@@ -498,7 +487,7 @@ class MultiFPGAConnect():
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
-    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names,multiplexor_dictionary]
+    return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
 
     
   def synthesizeRouters(self, target, source, env):    
@@ -506,7 +495,7 @@ class MultiFPGAConnect():
     self.analyzeNetwork()
     self.generateCode()
 
-  #First we parse the files, and then attempt to make all the connections.  Lots of dictionaries.
+  #First we parse the files, and then attempt to make all the connections.
   def processDanglingConnections(self):
       APM_FILE = self.moduleList.env['DEFS']['APM_FILE']
       APM_NAME = self.moduleList.env['DEFS']['APM_NAME']
@@ -1022,24 +1011,16 @@ class MultiFPGAConnect():
       # now that everything is matched we can ostensibly generate the header file
       # header must include device mapping as well
 
-      # we generate a set of router stats 
-      dictionary = "" 
-
       for platform in self.environment.getPlatformNames():
           header = open(self.platformData[platform]['BSH'],'w')
           header.write('// Generated by build pipeline\n\n')
           header.write('`include "awb/provides/common_services.bsh"\n')
 
-          if(GENERATE_ROUTER_STATS):
-             header.write('`include "awb/dict/STATS_ROUTER.bsh"\n')
-
           # everything down here should be code generation.  Eventually it should be split out.  
           # probably also need to instantiate stats in a different modules
-          [egress_multiplexor_definition, egress_multiplexor_instantiation, egress_multiplexor_names, egress_multiplexor_dictionary] = self.generateEgressMultiplexor(platform) 
-          [ingress_multiplexor_definition, ingress_multiplexor_instantiation, ingress_multiplexor_names, ingress_multiplexor_dictionary] = self.generateIngressMultiplexor(platform)
+          [egress_multiplexor_definition, egress_multiplexor_instantiation, egress_multiplexor_names] = self.generateEgressMultiplexor(platform) 
+          [ingress_multiplexor_definition, ingress_multiplexor_instantiation, ingress_multiplexor_names] = self.generateIngressMultiplexor(platform)
 
-          dictionary += egress_multiplexor_dictionary
-          dictionary += ingress_multiplexor_dictionary
           header.write(egress_multiplexor_definition + ingress_multiplexor_definition)
 
           # toss out the mapping functions first
@@ -1073,17 +1054,19 @@ class MultiFPGAConnect():
               if(dangling.inverse_sc_type == 'Send' or dangling.inverse_sc_type == 'ChainRoutingSend'):
                   header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.inverse_name + ' <- mkPhysicalConnectionRecv("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
                   if(GENERATE_ROUTER_STATS):
-                    header.write('STAT blocked_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.inverse_name + '_BLOCKED);\n')
-                    header.write('STAT sent_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.inverse_name + '_SENT);\n')   
-		    dictionary += ('def STATS.ROUTER.' + dangling.inverse_name + '_BLOCKED "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +  'cycles blocked";\n')
-                    dictionary += ('def STATS.ROUTER.' + dangling.inverse_name + '_SENT "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent";\n')
+		    sname = 'statName("ROUTER_' + dangling.inverse_name + '_BLOCKED", "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +  'cycles blocked")'
+                    header.write('STAT blocked_' + dangling.inverse_name + ' <- mkStatCounter(' + sname + ');\n')
+
+                    sname = 'statName("ROUTER_' + dangling.inverse_name + '_SENT", "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent")'
+                    header.write('STAT sent_' + dangling.inverse_name + ' <- mkStatCounter(' + sname + ');\n')   
+
                   recvs += 1 
 
 
               if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
                   if(GENERATE_ROUTER_STATS):
-                    header.write('STAT received_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + dangling.inverse_name + '_RECEIVED);\n')
-                    dictionary += ('def STATS.ROUTER.' + dangling.inverse_name + '_RECEIVED "' + dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' received cycles";\n')
+                    sname = 'statName("ROUTER_' + dangling.inverse_name + '_RECEIVED", "' + dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' received cycles")'
+                    header.write('STAT received_' + dangling.inverse_name + ' <- mkStatCounter(' + sname + ');\n')
 
                   header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.inverse_name + ' <- mkPhysicalConnectionSend("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
                   sends += 1
@@ -1093,8 +1076,8 @@ class MultiFPGAConnect():
                 chains += 1 
 
                 if(GENERATE_ROUTER_STATS):
-                  dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_RECEIVED "' + dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +' received cycles";\n')
-                  header.write('STAT received_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_RECEIVED);\n')
+                  sname = 'statName("ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_RECEIVED", "' + dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +' received cycles")'
+                  header.write('STAT received_' + dangling.inverse_name + ' <- mkStatCounter(' + sname + ');\n')
 
                 # we must create a logical chain information
                 chainsStr += 'let chain_' + dangling.inverse_name + ' = LOGICAL_CHAIN_INFO{logicalName: "' + dangling.inverse_name + '", logicalType: "' + \
@@ -1104,12 +1087,12 @@ class MultiFPGAConnect():
                 chainsStr += 'registerChain(chain_' + dangling.inverse_name + ');\n'
 
               if(dangling.inverse_sc_type == 'ChainSrc'):
-                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_BLOCKED "' + dangling.inverse_name +' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles blocked";\n')
-                dictionary += ('def STATS.ROUTER.' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_SENT "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent";\n')
-
                 if(GENERATE_ROUTER_STATS):
-                    header.write('STAT blocked_chain_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_BLOCKED);\n')
-                    header.write('STAT sent_chain_' + dangling.inverse_name + ' <- mkStatCounter(`STATS_ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_SENT);\n')
+                  sname = 'statName("ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_BLOCKED", "' + dangling.inverse_name +' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles blocked")'
+                  header.write('STAT blocked_chain_' + dangling.inverse_name + ' <- mkStatCounter(' + sname + ');\n')
+
+                  sname = 'statName("ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_SENT", "' + dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent")'
+                  header.write('STAT sent_chain_' + dangling.inverse_name + ' <- mkStatCounter(' + sname + ');\n')
 
             # Ingress switches now feed directly into the egress switches to save latency.  
             for via_idx in range(len(ingressVias)):
@@ -1230,12 +1213,6 @@ class MultiFPGAConnect():
           header.write(chainsStr + '\n')
 
           header.write('endmodule\n')
-          header.close();
-
-      #write out all the union dictionaries
-      for platform in self.environment.getPlatformNames():
-          header = open(self.platformData[platform]['DIC'],'w')
-          header.write(dictionary)
           header.close();
 
   def parseDangling(self, platformName):

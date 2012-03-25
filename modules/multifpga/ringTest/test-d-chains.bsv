@@ -2,7 +2,6 @@ import FIFO::*;
 
 `include "awb/provides/soft_connections.bsh"
 `include "awb/rrr/remote_server_stub_TESTDRRR.bsh"
-`include "asim/dict/STATS_TESTD.bsh"
 `include "asim/provides/stats_service.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 
@@ -11,7 +10,7 @@ module [CONNECTED_MODULE] mkD (Empty);
 
   ServerStub_TESTDRRR serverStub <- mkServerStub_TESTDRRR();
 
-  STAT statCount  <- mkStatCounter(`STATS_TESTD_COUNT);
+  STAT statCount <- mkStatCounter(statName("TESTD_COUNT", "Number of values processed by test d"));
   CONNECTION_ADDR_RING#(Bit#(1), Bit#(32)) node <- mkConnectionAddrRingNode("TestRing",0);
   CONNECTION_ADDR_RING#(Bit#(1), Bit#(320)) nodeWide <- mkConnectionAddrRingNode("TestRingWide",0);
   FIFO#(Bit#(32)) dataFIFO <- mkFIFO;

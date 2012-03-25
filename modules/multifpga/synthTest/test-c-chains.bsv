@@ -1,5 +1,4 @@
 `include "asim/provides/soft_connections.bsh"
-`include "asim/dict/STATS_TESTC.bsh"
 `include "asim/provides/stats_service.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 
@@ -8,7 +7,7 @@ module [CONNECTED_MODULE] mkC (Empty);
   Connection_Send#(Bit#(32)) aliveOut <- mkConnection_Send("fromB");
   Connection_Receive#(Bit#(320)) aliveInWide <- mkConnection_Receive("fromD_Wide");
   Connection_Send#(Bit#(320)) aliveOutWide <- mkConnection_Send("fromB_Wide");
-  STAT statCount  <- mkStatCounter(`STATS_TESTC_COUNT);
+  STAT statCount <- mkStatCounter(statName("TESTC_COUNT", "Number of values processed by test c"));
 
 
   rule sayHello;

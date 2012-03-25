@@ -243,7 +243,7 @@ class MultiFPGAGenerateLogfile():
       # we also need a stat here to make the stats work right.  
       # we don't care about the ID because it will get replaced later during the second compilation pass
       if(GENERATE_ROUTER_STATS):    
-        header.write('let stat <- mkStatCounter(?);\n')   
+        header.write('let stat <- mkStatCounter(statName("DUMMY", "Dummy stat"));\n')   
 
       if(GENERATE_ROUTER_DEBUG):    
         header.write('mkDebugScanNode("dummy",List::nil);\n')   

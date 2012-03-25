@@ -114,19 +114,6 @@ class MultiFPGAGenerateBitfile():
       execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')    
 
 
-      # Dictionaries are global.  Therefore, all builds must see the same context or bad things 
-      # will happen.   
-      missingDicts = "multifpga_routing.dic"
-      firstPass = True
-      platformDicts = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependencies('GIVEN_DICTS')     
-      for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
-        if(not dict in platformDicts):
-          seperator = ':'
-          missingDicts += seperator+dict
-          firstPass = False
-
-      print "missingDictsBitfile: " + missingDicts
-    
       # RRRs can appear in services sometimes and thereby lack global 
       # visibility.  We need to treat them in the same way we treat dictionaries. 
       missingRRRs = ""
@@ -142,7 +129,6 @@ class MultiFPGAGenerateBitfile():
 
       print "missingRRRsBitfiles: " + missingRRRs
   
-      execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_DICTS \\"' + missingDicts  + '\\"')
       execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"')                      
       execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
 
@@ -150,21 +136,6 @@ class MultiFPGAGenerateBitfile():
 
       execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
 
-
-      # set up the symlink - it'll be broken at first, but as we fill in the platforms, they'll come up      
-      for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
-        if(not dict in platformDicts):
-          # lexists works on broken symlinks...
-          path = os.getcwd()
-          dictPath = os.path.realpath( makePlatformDictDir(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict]) + '/' + dict)
-          linkDir  = makePlatformDictDir(platform.name)  
-          linkPath = linkDir  + '/' + dict
-          relDictPath = relpath(dictPath, linkDir)
-
-          if(os.path.lexists(linkPath)):
-            print("This symlink already exists: " + makePlatformDictDir(platform.name)  + '/' + dict)
-          else:
-            os.symlink(relDictPath, linkPath)
 
       # do the same for missing RRRs - this code is similar to that above and should be refactored. 
       for rrr in moduleList.topModule.moduleDependency['MISSING_RRRS'].keys():

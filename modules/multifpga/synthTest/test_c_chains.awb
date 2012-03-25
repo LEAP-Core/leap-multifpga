@@ -6,7 +6,6 @@
 %provides test_c
 
 %public test-c-chains.bsv
-%sources -t DICT -v PUBLIC test-c.dic
 
 %param SYNTH_BOUNDARY mkC "name of synthesis boundary"
 
