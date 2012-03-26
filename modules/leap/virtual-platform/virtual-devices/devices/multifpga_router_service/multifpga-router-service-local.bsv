@@ -63,7 +63,7 @@ module mkPacketizeConnectionSendMarshalled#(String name,
                                                                      umf_chunk)) port, 
                                             Integer id, 
                                             NumTypeParam#(bitwidth) width, 
-                                            STAT received) (Empty)
+                                            function Action statIncrReceived()) (Empty)
    provisos(Bits#(t_DATA, t_DATA_SZ),
             Div#(TSub#(bitwidth, filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
             Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
@@ -90,7 +90,7 @@ module mkPacketizeConnectionSendMarshalled#(String name,
 
          waiting <= False;
          fillerBits <= packet.UMF_PACKET_header.filler;        
-         received.incr();
+         statIncrReceived();
     endrule
 
     rule continueRequest (!waiting);
@@ -99,7 +99,7 @@ module mkPacketizeConnectionSendMarshalled#(String name,
                            umf_method_id,  umf_message_len,
                            umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
         dem.enq(packet.UMF_PACKET_dataChunk);
-        received.incr();
+        statIncrReceived();
         if(`MARSHALLING_DEBUG == 1)
         begin
             $display("Connection RX %s receives: %h", name, packet.UMF_PACKET_dataChunk);
@@ -134,7 +134,7 @@ module mkPacketizeConnectionSendUnmarshalled#(String name,
                                                                        umf_chunk)) port, 
                                               Integer id, 
                                               NumTypeParam#(bitwidth) width, 
-                                              STAT received) (Empty)
+                                              function Action statIncrReceived()) (Empty)
     provisos(Bits#(t_DATA, t_DATA_SZ),
              Bits#(umf_chunk,umf_chunk_SZ));
 
@@ -156,7 +156,7 @@ module mkPacketizeConnectionSendUnmarshalled#(String name,
             Bit#(bitwidth) value = truncateNP(packet.UMF_PACKET_header.filler);
             t_DATA data = (unpack(resize(value)));
             send.send(data);
-            received.incr();
+            statIncrReceived();
 
             if(`MARSHALLING_DEBUG == 1)
             begin
@@ -189,7 +189,7 @@ module mkPacketizeConnectionSendUnmarshalled#(String name,
             end
 
             waiting <= False;
-            received.incr();
+            statIncrReceived();
         endrule
 
         rule continueRequest (!waiting && send.notFull());
@@ -200,7 +200,7 @@ module mkPacketizeConnectionSendUnmarshalled#(String name,
             t_DATA data = unpack(resize(pack(packet.UMF_PACKET_dataChunk)));
             send.send(data);
             waiting <= True;
-            received.incr();
+            statIncrReceived();
 
             if(`MARSHALLING_DEBUG == 1)
             begin
@@ -217,8 +217,8 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
                                                Connection_Receive#(t_DATA) recv,                                             
                                                Integer id, 
                                                NumTypeParam#(bitwidth) width,
-                                               STAT blocked, 
-                                               STAT sent) 
+                                               function Action statIncrBlocked(),
+                                               function Action statIncrSent()) 
     (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                     umf_channel_id, umf_service_id,
                                     umf_method_id,  umf_message_len,
@@ -246,7 +246,7 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
     method Action deqHeader() if(recv.notEmpty());
         recv.deq;
         mar.enq(unpack(zeroExtend(tpl_1(data_split))));
-        sent.incr();
+        statIncrSent();
         startRequestFired.send();
         if(`MARSHALLING_DEBUG == 1)
         begin
@@ -280,7 +280,7 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
  
     method Action deqBody();
         mar.deq();
-        sent.incr();
+        statIncrSent();
         if(`MARSHALLING_DEBUG == 1)
         begin
             $display("Connection %s TX sends: %h", name, mar.first);
@@ -301,8 +301,8 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
                                                  Connection_Receive#(t_DATA) recv, 
                                                  Integer id, 
                                                  NumTypeParam#(bitwidth) width,  
-                                                 STAT blocked, 
-                                                 STAT sent) 
+                                                 function Action statIncrBlocked(), 
+                                                 function Action statIncrSent()) 
 
     (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                     umf_channel_id, umf_service_id,
@@ -328,7 +328,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
         PulseWire startRequestFired <- mkPulseWire();  
  
         rule checkBlocked(recv.notEmpty() && !(startRequestFired));
-            blocked.incr();
+            statIncrBlocked();
         endrule
 
         function GENERIC_UMF_PACKET_HEADER#(
@@ -353,7 +353,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
         function Action deqHeader();
         action
             recv.deq;
-            sent.incr();
+            statIncrSent();
             startRequestFired.send();
 
             if(`MARSHALLING_DEBUG == 1)
@@ -384,7 +384,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
         PulseWire startRequestFired <- mkPulseWire(); 
 
         rule checkBlocked(recv.notEmpty() && !(continueRequestFired || startRequestFired));
-            blocked.incr();
+            statIncrBlocked();
         endrule
 
         unmarshalled = interface EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
@@ -395,7 +395,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
 
                            method notEmptyHeader = recv.notEmpty && waitHeader;
                            method Action deqHeader() if(recv.notEmpty && waitHeader);
-                               sent.incr();
+                               statIncrSent();
                                startRequestFired.send();
                                if(`MARSHALLING_DEBUG == 1)
                                begin
@@ -432,7 +432,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
                                end
 
                                waitHeader <= True;
-			       sent.incr();
+			       statIncrSent();
                                continueRequestFired.send();
                            endmethod
 
@@ -465,7 +465,7 @@ module mkPacketizeOutgoingChainMarshalled#(String name,
                                                                           umf_phy_pvt,    filler_bits), umf_chunk)) port, 
                                  Integer id, 
                                  NumTypeParam#(bitwidth) width, 
-                                 STAT received) 
+                                 function Action statIncrReceived()) 
     (PHYSICAL_CHAIN_OUT) // module interface 
 
     provisos (Bits#(umf_chunk, umf_chunk_SZ),
@@ -490,7 +490,7 @@ module mkPacketizeOutgoingChainMarshalled#(String name,
 
                endinterface;
 
-    let unmarshaller <- mkPacketizeConnectionSendMarshalled(name, send, port, id, width, received);
+    let unmarshaller <- mkPacketizeConnectionSendMarshalled(name, send, port, id, width, statIncrReceived);
 
     interface clock = myClock;
     interface reset = myReset;
@@ -508,7 +508,7 @@ module mkPacketizeOutgoingChainUnmarshalled#(String name,
                                                                           umf_phy_pvt,    filler_bits), umf_chunk)) port, 
                                  Integer id, 
                                  NumTypeParam#(bitwidth) width, 
-                                 STAT received) 
+                                 function Action statIncrReceived()) 
     (PHYSICAL_CHAIN_OUT) // module interface 
 
     provisos (Bits#(umf_chunk, umf_chunk_SZ));
@@ -533,7 +533,7 @@ module mkPacketizeOutgoingChainUnmarshalled#(String name,
 
                endinterface;
 
-    let unmarshaller <- mkPacketizeConnectionSendUnmarshalled(name, send, port, id, width, received);
+    let unmarshaller <- mkPacketizeConnectionSendUnmarshalled(name, send, port, id, width, statIncrReceived);
 
     interface clock = myClock;
     interface reset = myReset;
@@ -549,8 +549,8 @@ endmodule
 module mkPacketizeIncomingChainMarshalled#(String name,
                                  Integer id,  
                                  NumTypeParam#(bitwidth) width,
-                                 STAT blocked, 
-                                 STAT sent) 
+                                 function Action statIncrBlocked(), 
+                                 function Action statIncrSent()) 
     (Tuple2#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                           umf_channel_id, umf_service_id,
                                           umf_method_id,  umf_message_len,
@@ -597,8 +597,8 @@ module mkPacketizeIncomingChainMarshalled#(String name,
                                                                          recv,            
                                                                          id,
                                                                          width,
-                                                                         blocked,
-                                                                         sent);
+                                                                         statIncrBlocked,
+                                                                         statIncrSent);
 
 
     let physical_chain_in = interface PHYSICAL_CHAIN_IN;
@@ -619,8 +619,8 @@ endmodule
 module mkPacketizeIncomingChainUnmarshalled#(String name,
                                  Integer id,  
                                  NumTypeParam#(bitwidth) width,
-                                 STAT blocked, 
-                                 STAT sent) 
+                                 function Action statIncrBlocked(), 
+                                 function Action statIncrSent()) 
     (Tuple2#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                           umf_channel_id, umf_service_id,
                                           umf_method_id,  umf_message_len,
@@ -664,8 +664,8 @@ module mkPacketizeIncomingChainUnmarshalled#(String name,
                                                                          recv,            
                                                                          id,
                                                                          width,
-                                                                         blocked,
-                                                                         sent);
+                                                                         statIncrBlocked,
+                                                                         statIncrSent);
 
 
     let physical_chain_in = interface PHYSICAL_CHAIN_IN;
