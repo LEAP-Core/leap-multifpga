@@ -1965,3 +1965,14 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 - Pass statistics increment methods as functions to the router code
   (needed for grouping multiple counters into a single node).
+
+----------
+mcadler     Date: Tue Mar 27 20:47:45 EDT 2012  CSN: CSN-multifpga-116
+                  Wed Mar 28 00:47:45 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          115 
+
+Move the code generation for statistics increments to the statistics class,
+leaving only one line to change in order to use a different method.

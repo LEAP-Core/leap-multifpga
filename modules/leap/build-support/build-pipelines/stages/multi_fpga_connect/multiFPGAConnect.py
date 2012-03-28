@@ -71,6 +71,10 @@ class RouterStats:
 
         return s
 
+    def incrCounter(self, name):
+        """Emit a string with the Bluespec code that increments a counter."""
+        return 'stats.incr(' + name + ')'
+
 
 class MultiFPGAConnect():
 
@@ -219,7 +223,7 @@ class MultiFPGAConnect():
       for via in egressVias:
         multiplexor_definition += '  let ' + via.via_method + '_wire <- mkDWire(tagged Invalid);\n' 
         multiplexor_definition += '  let ' + via.via_method + '_pulse <- mkPulseWire();\n' 
-        
+
         if(GENERATE_ROUTER_STATS):
           multiplexor_stats.addCounter('enqueued_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED',
@@ -246,7 +250,7 @@ class MultiFPGAConnect():
       #multiplexor_definition += '    $display("mergeData ' + moduleName  +'  fires");\n'
 
       if(GENERATE_ROUTER_STATS):
-        multiplexor_definition += '\t\tstats.incr(merged_' + moduleName + ');\n'
+        multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('merged_' + moduleName) + ';\n'
 
       multiplexor_definition += '\t\twrite(zeroExtendNP(pack(' + moduleAggregateTypeName + '{\n'
       first = 1
@@ -265,7 +269,7 @@ class MultiFPGAConnect():
         multiplexor_definition += '\t\t' + via.via_method + '_wire <= tagged Valid data;\n'
         multiplexor_definition += '\t\t' + via.via_method + '_pulse.send;\n'
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\t\tstats.incr(enqueued_' + via.via_method + ');\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
         multiplexor_definition += '\tendmethod\n\n'
 
       multiplexor_definition += 'endmodule\n\n'
@@ -342,7 +346,7 @@ class MultiFPGAConnect():
 
 
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\t\tstats.incr(enqueued_' + via.via_method + ');\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
@@ -407,7 +411,7 @@ class MultiFPGAConnect():
         multiplexor_definition += '    write(zeroExtendNP({tag,data}));\n'
         viaCount = viaCount + 1
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\t\tstats.incr(enqueued_' + via.via_method + ');\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
@@ -490,7 +494,7 @@ class MultiFPGAConnect():
 
         multiplexor_definition += '\tmethod Action ' + via.via_method + '_deq() if (' + via.via_method + '_fifo.first() matches tagged Valid .data );\n\n'
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\t\tstats.incr(dequeued_' + via.via_method + ');\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('dequeued_' + via.via_method) + ';\n'
         multiplexor_definition += '\t\t' + via.via_method + '_fifo.deq();\n'
         multiplexor_definition += '\tendmethod\n\n'
 
@@ -555,7 +559,7 @@ class MultiFPGAConnect():
       for via in ingressVias:
         multiplexor_definition += '  method ActionValue#(Bit#(' + str(via.via_width) + ')) ' + via.via_method + '();\n'
         if(GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\t\tstats.incr(dequeued_' + via.via_method + ');\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('dequeued_' + via.via_method) + ';\n'
         multiplexor_definition += '    ' + via.via_method + '_fifo.deq();\n'
         multiplexor_definition += '    return ' + via.via_method + '_fifo.first();\n'
         multiplexor_definition += '  endmethod\n'
@@ -1206,8 +1210,8 @@ class MultiFPGAConnect():
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_recv_' + dangling.inverse_name + ',\n')
                 if(GENERATE_ROUTER_STATS):
-                  header.write('\tstats.incr(blocked_' + dangling.inverse_name + '),\n')
-                  header.write('\tstats.incr(sent_' + dangling.inverse_name + '));\n\n')
+                  header.write('\t' + stats.incrCounter('blocked_' + dangling.inverse_name) + ',\n')
+                  header.write('\t' + stats.incrCounter('sent_' + dangling.inverse_name) + ');\n\n')
                 else:
                   header.write('\t?, ?);\n\n')
 
@@ -1224,8 +1228,8 @@ class MultiFPGAConnect():
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_chain_' + dangling.inverse_name + ',\n')
                 if(GENERATE_ROUTER_STATS):
-                  header.write('\tstats.incr(blocked_chain_' + dangling.inverse_name + '),\n')
-                  header.write('\tstats.incr(sent_chain_' + dangling.inverse_name + '));\n\n')
+                  header.write('\t' + stats.incrCounter('blocked_chain_' + dangling.inverse_name) + ',\n')
+                  header.write('\t' + stats.incrCounter('sent_chain_' + dangling.inverse_name) + ');\n\n')
                 else:
                   header.write('\t?, ?);\n\n')
           
@@ -1293,7 +1297,7 @@ class MultiFPGAConnect():
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_send_' + dangling.inverse_name + ',\n')
                 if(GENERATE_ROUTER_STATS):
-                  header.write('\tstats.incr(received_' + dangling.inverse_name + '));\n\n')
+                  header.write('\t' + stats.incrCounter('received_' + dangling.inverse_name) + ');\n\n')
                 else:
                   header.write('\t?);\n\n')
 
@@ -1310,7 +1314,7 @@ class MultiFPGAConnect():
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_sink_' + dangling.inverse_name + ',\n')
                 if(GENERATE_ROUTER_STATS):
-                  header.write('\tstats.incr(received_' + dangling.inverse_name + '));\n\n')
+                  header.write('\t' + stats.incrCounter('received_' + dangling.inverse_name) + ');\n\n')
                 else:
                   header.write('\t?);\n\n')
 
