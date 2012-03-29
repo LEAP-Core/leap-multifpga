@@ -73,7 +73,7 @@ class RouterStats:
 
     def incrCounter(self, name):
         """Emit a string with the Bluespec code that increments a counter."""
-        return 'stats.incr(' + name + ')'
+        return 'stats.incr_NB(' + name + ')'
 
 
 class MultiFPGAConnect():

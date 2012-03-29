@@ -1976,3 +1976,13 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 Move the code generation for statistics increments to the statistics class,
 leaving only one line to change in order to use a different method.
+
+----------
+mcadler     Date: Thu Mar 29 08:02:58 EDT 2012  CSN: CSN-multifpga-117
+                  Thu Mar 29 12:02:58 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          116 
+
+Use non-blocking statistics counters to avoid deadlock.
