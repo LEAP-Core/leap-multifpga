@@ -2,6 +2,8 @@
 `include "awb/provides/soft_services.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 
+import "BDPI" function ActionValue#(Bit#(32))  delay(Bit#(32) input);
+
 module [CONNECTED_MODULE] mkForward#(String sendName, String recvName) (Empty);
     Connection_Send#(Bit#(`WIDTH)) sendX <- mkConnection_Send(sendName);
     Connection_Receive#(Bit#(`WIDTH)) recvX <- mkConnection_Receive(recvName);
@@ -18,3 +20,4 @@ module [CONNECTED_MODULE] mkForward#(String sendName, String recvName) (Empty);
         end
     endrule
 endmodule
+

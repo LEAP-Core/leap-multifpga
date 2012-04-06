@@ -1986,3 +1986,34 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
  multiFPGAConnect.py       Locally Modified          116 
 
 Use non-blocking statistics counters to avoid deadlock.
+
+----------
+kfleming    Date: Fri Apr  6 18:00:15 EDT 2012  CSN: CSN-multifpga-118
+                  Fri Apr  6 22:00:15 UTC 2012
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          117 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-ingress.bsv   Locally Modified          117 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ via.py                    Locally Modified          117 
+ multiFPGAConnect.py       Locally Modified          117 
+
+Directory modules/multifpga/spiral
+ test_common.bsv           Locally Modified          117 
+ test-common.bsv           Locally Modified          117 
+ test_common.awb           Locally Modified          117 
+
+
+Added support for back-to-back reads from the same channel in the
+ingress switch.  This required adding more precise buffer control
+mechanims to the packetizers and soft-connections.
+
+Also, I made the type generation for the lanes a little more precise.
+Now we use the maximum width link actually allocated to the lane,
+rather than the PHYSICAL_CONNECTION_SIZE.  This makes packets more
+efficient. It also allows us to eliminate marshalling logic in some of
+the packetizers.

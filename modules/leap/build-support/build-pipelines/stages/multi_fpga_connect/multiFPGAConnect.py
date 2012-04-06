@@ -1,6 +1,7 @@
 import re
 import sys
 import SCons.Script
+import math
 from model import  *
 from config import *
 from fpga_environment_parser import *
@@ -74,7 +75,6 @@ class RouterStats:
     def incrCounter(self, name):
         """Emit a string with the Bluespec code that increments a counter."""
         return 'stats.incr_NB(' + name + ')'
-
 
 class MultiFPGAConnect():
 
@@ -223,6 +223,7 @@ class MultiFPGAConnect():
       for via in egressVias:
         multiplexor_definition += '  let ' + via.via_method + '_wire <- mkDWire(tagged Invalid);\n' 
         multiplexor_definition += '  let ' + via.via_method + '_pulse <- mkPulseWire();\n' 
+        
 
         if(GENERATE_ROUTER_STATS):
           multiplexor_stats.addCounter('enqueued_' + via.via_method,
@@ -325,6 +326,7 @@ class MultiFPGAConnect():
 
       multiplexor_definition += multiplexor_stats.genStats()
 
+
       for via in egressVias:
         multiplexor_definition += '  method Action ' + via.via_method + '(Bit#(' + str(via.via_width)  + ') data) if(write_ready);\n'
         #multiplexor_definition += '    $display("' + via.via_method + '_wire fires");\n'
@@ -344,9 +346,9 @@ class MultiFPGAConnect():
         multiplexor_definition += '    })));\n'
 
 
-
         if(GENERATE_ROUTER_STATS):
           multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
+
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
@@ -573,7 +575,7 @@ class MultiFPGAConnect():
     self.analyzeNetwork()
     self.generateCode()
 
-  #First we parse the files, and then attempt to make all the connections.
+  #First we parse the files, and then attempt to make all the connections.  Lots of dictionaries.
   def processDanglingConnections(self):
       APM_FILE = self.moduleList.env['DEFS']['APM_FILE']
       APM_NAME = self.moduleList.env['DEFS']['APM_NAME']
@@ -659,26 +661,30 @@ class MultiFPGAConnect():
               print 'Unmatched connection ' + dangling.name
               sys.exit(0)
 
-  def generateRouterTypes(self, viaWidth, viaLinks):
+  def generateRouterTypes(self, viaWidth, viaLinks, maxWidth):
 
     # At some point, we can reduce the number of header bits based on 
     # what we actually assign.  This would permit us to allocate smalled link
-      
+    links = math.ceil(math.log(viaLinks+1))  
+    chunks = max([1,math.ceil(math.log(1+math.floor(maxWidth/viaWidth)))])
+    fillerWidth = viaWidth - links - chunks
+    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) 
+
     headerType = "GENERIC_UMF_PACKET_HEADER#(\n" + \
                  "             0, TLog#(TAdd#(1," + str(viaLinks) + ")) ,\n" + \
-                 "             0, TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," + str(viaWidth) + ")))),\n" + \
+                 "             0, TLog#(TAdd#(1,TMax#(1,TDiv#(" + str(maxWidth) + "," + str(viaWidth) + ")))),\n" + \
                  "             0, TSub#(" + str(viaWidth)  + ", TAdd#(TLog#(TAdd#(1," + str(viaLinks) + "))," + \
-                 "TLog#(TAdd#(1,TMax#(1,TDiv#(PHYSICAL_CONNECTION_SIZE," +  str(viaWidth) + ")))))))"
+                 "TLog#(TAdd#(1,TMax#(1,TDiv#(" + str(maxWidth) + "," +  str(viaWidth) + ")))))))"
 
     bodyType = "Bit#(" +  str(viaWidth) + ")"
       
     type = "GENERIC_UMF_PACKET#(" + headerType + ", " + bodyType + ")"
 
-    return [headerType, bodyType, type]
+    return [headerType, bodyType, type, fillerWidth]
 
 
   def analyzeNetwork(self):
-    self.analyzeNetworkRandom()
+    self.analyzeNetworkLJF()
 
   # This via allocation algorithm selects the "longest" job for allocation and 
   # sticks it on the least loaded processor.  There are assymmetries in this problem
@@ -885,11 +891,16 @@ class MultiFPGAConnect():
         # But we will fill in the data structure temporarily.  
         # Once all data via assignments have been handeled, we will do flowcontrol.
         for via in range(len(viaWidthsFinal)):
-          [headerType, bodyType, type] = self.generateRouterTypes(viaWidthsFinal[via], viaLinksFinal[via])
 
-          egress = Via("egress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viaLoadsFinal[via])
+          # let's find the maximum width guy so that we calculate the types correctly. 
+          viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
+          maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections))
 
-          ingress = Via("ingress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viaLoadsFinal[via])
+          [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(viaWidthsFinal[via], viaLinksFinal[via], maxWidth)
+
+          egress = Via("egress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viaLoadsFinal[via], fillerWidth)
+
+          ingress = Via("ingress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viaLoadsFinal[via], fillerWidth)
 
           egressViasInitial[platform][targetPlatform].append(egress)
           ingressViasInitial[targetPlatform][platform].append(ingress) 
@@ -934,8 +945,9 @@ class MultiFPGAConnect():
 
             load = viaLoadsOld[via]/128 * ((bitwidth + headerSize )/localEgress[via].via_width + extraChunk) + viaLoads[platform][targetPlatform][via]
                 
-            # We don't do a great job here of evaluating opportunity cost.  Picking the longest running on the fastest processor 
-            # might be a bad choice.
+            # We don't do a great job here of evaluating opportunity
+            # cost.  Picking the longest running on the fastest
+            # processor might be a bad choice.
             if(load < minLoad or minIdx == -1):
               minIdx = via
               minLoad = load
@@ -954,12 +966,17 @@ class MultiFPGAConnect():
           egress_first_pass = egressViasInitial[platform][targetPlatform][via]
           ingress_first_pass = ingressViasInitial[targetPlatform][platform][via]
 
+          # let's find the maximum width guy so that we calculate the types correctly. 
+          viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
+          maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections)) # notice that we are not taking in to account the flow control bits here. We might well want to do that at some point. 
+
+
           print "Idx " + str(via) + " links " + str(len(egressLinks[platform][targetPlatform])) + " loads " + str(len(viaLoads[platform][targetPlatform]))
-          [headerType, bodyType, type] = self.generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via])
+          [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth) 
 
-          egress = Via("egress", headerType, bodyType, type, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via])
+          egress = Via("egress", headerType, bodyType, type, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via],fillerWidth)
 
-          ingress = Via("ingress", headerType, bodyType, type, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via])
+          ingress = Via("ingress", headerType, bodyType, type, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via],fillerWidth)
 
           self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(egress)
           self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(ingress) 
@@ -1015,29 +1032,11 @@ class MultiFPGAConnect():
         hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
         ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
-        # We're dropping some bits here
-        # this loop should be refactored to split ingress and egress
-        # we need to reserve space for valid bits
-        for via in range(numberOfVias):
-          viaWidth = (self.platformData[platform]['WIDTHS'][egressVia] - numberOfVias) / numberOfVias
-          # need to set the via widths here...
-          spareLink = 0
-          if(via < (recvs + chains)%numberOfVias):
-            spareLink = 1
-          viaLinks = ((recvs + chains)/numberOfVias) + spareLink
-          viaLinks +=1 # allocate flowcontrol link
-          [headerType, bodyType, type] = self.generateRouterTypes(viaWidth, viaLinks)
-          
-          print "Creating Via " + 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  +str(via) + " : links " + str(viaLinks)
-          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), 0, via, 0))
-          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), 0, via, 0)) 
-
-
         # now that we have decided on the vias, we must assign links to vias
         # this nice deterministic algorithm will work - but we should be careful - the opposite side must also agree with us. 
 
-        linkVias  = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
-        linkCount = len(linkVias) # need single flow control lane
+        linkVias  = numberOfVias
+        linkCount = numberOfVias # need single flow control lane
 
         # send/recv pairs had better be matched.
         # We want the slower chains to be evenly dispersed across the randomly assigned links
@@ -1055,10 +1054,10 @@ class MultiFPGAConnect():
               sys.exit(-1)
 
         
-            platformConnections[danglingIdx].via_idx = linkCount % len(linkVias)
-            platformConnections[danglingIdx].via_link = linkCount / len(linkVias) # Accounting for feedback
-            targetPlatformConnections[danglingIdx].via_idx = linkCount % len(linkVias)
-            targetPlatformConnections[danglingIdx].via_link = linkCount / len(linkVias) # Accounting for feedback
+            platformConnections[danglingIdx].via_idx = linkCount % linkVias
+            platformConnections[danglingIdx].via_link = linkCount / linkVias # Accounting for feedback
+            targetPlatformConnections[danglingIdx].via_idx = linkCount % linkVias
+            targetPlatformConnections[danglingIdx].via_link = linkCount / linkVias # Accounting for feedback
 
             linkCount += 1
             print "Assigning  " + platform + "->" + targetPlatform + " " + platformConnections[danglingIdx].name + "Type: " + platformConnections[danglingIdx].sc_type  + " Idx " + str(platformConnections[danglingIdx].via_idx) + " Link " + str(platformConnections[danglingIdx].via_link) + "\n"
@@ -1074,14 +1073,38 @@ class MultiFPGAConnect():
               sys.exit(-1)
 
         
-            platformConnections[danglingIdx].via_idx = linkCount % len(linkVias)
-            platformConnections[danglingIdx].via_link = linkCount / len(linkVias) # Accounting for feedback
-            targetPlatformConnections[danglingIdx].via_idx = linkCount % len(linkVias)
-            targetPlatformConnections[danglingIdx].via_link = linkCount / len(linkVias) # Accounting for feedback
+            platformConnections[danglingIdx].via_idx = linkCount % linkVias
+            platformConnections[danglingIdx].via_link = linkCount / linkVias # Accounting for feedback
+            targetPlatformConnections[danglingIdx].via_idx = linkCount % linkVias
+            targetPlatformConnections[danglingIdx].via_link = linkCount / linkVias # Accounting for feedback
 
             linkCount += 1
+
             print "Assigning  " + platform + "->" + targetPlatform + " " + platformConnections[danglingIdx].name + "Type: " + platformConnections[danglingIdx].sc_type  + " Idx " + str(platformConnections[danglingIdx].via_idx) + " Link " + str(platformConnections[danglingIdx].via_link) + "\n"
 
+
+        # Now that we have an assignment of links, we can calculate the via types. 
+        # We're dropping some bits here
+        # this loop should be refactored to split ingress and egress
+        # we need to reserve space for valid bits
+        for via in range(numberOfVias):
+          viaWidth = (self.platformData[platform]['WIDTHS'][egressVia] - numberOfVias) / numberOfVias
+          # need to set the via widths here...
+          spareLink = 0
+          if(via < (recvs + chains)%numberOfVias):
+            spareLink = 1
+          viaLinks = ((recvs + chains)/numberOfVias) + spareLink
+          viaLinks +=1 # allocate flowcontrol link
+
+          # let's find the maximum width guy so that we calculate the types correctly. 
+          viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
+          maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections)) # notice that we are not taking in to account the flow control bits here. We might well want to do that at some point. 
+
+          [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(viaWidth, viaLinks, maxWidth)
+          
+          print "Creating Via " + 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  +str(via) + " : links " + str(viaLinks)
+          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), 0, via, 0, fillerWidth))
+          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), 0, via, 0, fillerWidth)) 
 
         
 
@@ -1139,8 +1162,8 @@ class MultiFPGAConnect():
 
                     stats.addCounter('sent_' + dangling.inverse_name,
                                      'ROUTER_' + dangling.inverse_name + '_SENT',
-                                     dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent')
-
+                                     dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent') 
+             
                   recvs += 1 
 
 
@@ -1150,7 +1173,8 @@ class MultiFPGAConnect():
                                      'ROUTER_' + dangling.inverse_name + '_RECEIVED',
                                      dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' received cycles')
 
-                  header.write('CONNECTION_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.inverse_name + ' <- mkPhysicalConnectionSend("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
+
+                  header.write('PHYSICAL_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.inverse_name + ' <- mkPhysicalConnectionSend("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
                   sends += 1
 
               # only create a chain when we see the source
@@ -1170,6 +1194,7 @@ class MultiFPGAConnect():
                 chainsStr += 'registerChain(chain_' + dangling.inverse_name + ');\n'
 
               if(dangling.inverse_sc_type == 'ChainSrc'):
+
                 if(GENERATE_ROUTER_STATS):
                   stats.addCounter('blocked_chain_' + dangling.inverse_name,
                                    'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_BLOCKED',
@@ -1200,7 +1225,7 @@ class MultiFPGAConnect():
                 packetizerType = 'Marshalled'
 	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.inverse_name +' = ?;\n')
                 egressVectors[dangling.via_idx][dangling.via_link] = 'pack_recv_' + dangling.inverse_name
-                if(dangling.bitwidth < egressVias[dangling.via_idx].via_width):
+                if(dangling.bitwidth <= egressVias[dangling.via_idx].via_filler_width):            
                   packetizerType = 'Unmarshalled'
 
                 header.write('// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
@@ -1215,14 +1240,19 @@ class MultiFPGAConnect():
                 else:
                   header.write('\t?, ?);\n\n')
 
+
               if(dangling.inverse_sc_type == 'ChainSrc' ):
-	        header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_chain_' + dangling.inverse_name +' = ?;\n')
-	        #header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_chain_' + dangling.inverse_name +' = ?;\n')
+                header.write('// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+	        #header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_chain_' + dangling.inverse_name +' = ?;\n')
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_chain_' + dangling.inverse_name +' = ?;\n')
                 print "Chain Sink " + dangling.inverse_name + ": Idx " + str(dangling.via_idx) + " Link: " + str(dangling.via_link) + " Length: " + str(len(egressVectors[dangling.via_idx]))  
                 egressVectors[dangling.via_idx][dangling.via_link] = 'tpl_1(pack_chain_' + dangling.inverse_name + ')'
                 packetizerType = 'Marshalled'
-                if(dangling.bitwidth < ingressVias[dangling.via_idx].via_width):
+                if(dangling.bitwidth <= egressVias[dangling.via_idx].via_filler_width):
                   packetizerType = 'Unmarshalled'
+
+                print "Choosing Incoming Marshalling with " + str(egressVias[dangling.via_idx].via_filler_width) +   " + " + str(egressVias[dangling.via_idx].via_width) + "(" +  str(egressVias[dangling.via_idx].via_width + egressVias[dangling.via_idx].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
+
                 header.write('let pack_chain_' + dangling.inverse_name + ' <- mkPacketizeIncomingChain' + packetizerType + '(\n')
                 header.write('\t"' + dangling.inverse_name + '",\n')
                 header.write('\t' + str(dangling.via_link) + ',\n')
@@ -1232,6 +1262,7 @@ class MultiFPGAConnect():
                   header.write('\t' + stats.incrCounter('sent_chain_' + dangling.inverse_name) + ');\n\n')
                 else:
                   header.write('\t?, ?);\n\n')
+
           
             # we now need switches for each via.  Need modular arithmetic here to make sure that everyone has a link.  
             # for now we will assume that flow control is twinned - that is the egress 2 uses ingress 2 for its flow control
@@ -1287,8 +1318,11 @@ class MultiFPGAConnect():
               if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
 	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.inverse_name +' = ?;\n\n')
                 packetizerType = 'Marshalled'
-                if(dangling.bitwidth < ingressVias[dangling.via_idx].via_width):
+                if(dangling.bitwidth <= ingressVias[dangling.via_idx].via_width + ingressVias[dangling.via_idx].via_filler_width):            
+                  packetizerType = 'PartialMarshalled'
+                if(dangling.bitwidth <= ingressVias[dangling.via_idx].via_filler_width):
                   packetizerType = 'Unmarshalled'
+
                 header.write('// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
                 header.write('Empty unpack_send_' + dangling.inverse_name + ' <- mkPacketizeConnectionSend' + packetizerType  + '(\n')
                 header.write('\t"' + dangling.inverse_name + '",\n')
@@ -1303,11 +1337,17 @@ class MultiFPGAConnect():
 
 
               if(dangling.inverse_sc_type == 'ChainSink' ):
-	        header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_sink_' + dangling.inverse_name +' = ?;\n')
-	        #header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_sink_' + dangling.inverse_name +' = ?;\n')
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_sink_' + dangling.inverse_name +' = ?;\n')
                 packetizerType = 'Marshalled'
-                if(dangling.bitwidth < ingressVias[dangling.via_idx].via_width):
+                header.write('// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                if(dangling.bitwidth <= (ingressVias[dangling.via_idx].via_width + ingressVias[dangling.via_idx].via_filler_width)): 
+                  print "Chain check PartialMarshalled passed"
+                  packetizerType = 'PartialMarshalled'
+                if(dangling.bitwidth <= ingressVias[dangling.via_idx].via_filler_width):            
                   packetizerType = 'Unmarshalled'
+
+                print "Choosing Marshalling with " + str(ingressVias[dangling.via_idx].via_filler_width) +   " + " + str(ingressVias[dangling.via_idx].via_width) + "(" +  str(ingressVias[dangling.via_idx].via_width + ingressVias[dangling.via_idx].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
+
                 header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.inverse_name + ' <- mkPacketizeOutgoingChain' + packetizerType + '(\n')
                 header.write('\t"' + dangling.inverse_name + '",\n')
                 header.write('\t' + ingressVias[dangling.via_idx].via_switch + '.ingressPorts[' + str(dangling.via_link) + '],\n')

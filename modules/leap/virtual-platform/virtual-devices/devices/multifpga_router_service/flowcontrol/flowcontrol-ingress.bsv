@@ -32,13 +32,17 @@ import FIFOF::*;import DReg::*;
 `include "awb/provides/channelio.bsh"
 `include "awb/provides/rrr.bsh"
 `include "awb/provides/umf.bsh"
-
+`include "awb/provides/stats_service.bsh"
+`include "awb/provides/soft_connections.bsh"
 `include "awb/rrr/service_ids.bsh"
+
+
 
 // request/response port interfaces
 interface SWITCH_INGRESS_PORT#(type umf_packet);
     method ActionValue#(umf_packet) read();
-    method Action read_ready();
+    method Action                   read_ready();
+    method Bool                     read_allocated();
 endinterface
 
 interface INGRESS_SWITCH#(numeric type n, type umf_packet, type umf_packet_header_w, type umf_body_w);
@@ -49,7 +53,7 @@ endinterface
 // The ingress switch takes two arguments - a read and a write.   The read function is a stream 
 // of serialized incoming packets.  The write function is used to send flow control tokens back to 
 // the corresponding egress switch on another FPGA.
-module mkIngressSwitch#(Integer flowcontrolID, function umf_chunk first(), function Action deq())
+module [CONNECTED_MODULE] mkIngressSwitch#(Integer flowcontrolID, /*STAT_VECTOR#(n) latencyStats,*/ function umf_chunk first(), function Action deq())
 
     (INGRESS_SWITCH#(n, 
                      GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -88,7 +92,7 @@ module mkIngressSwitch#(Integer flowcontrolID, function umf_chunk first(), funct
                   umf_chunk_w) m = ?;
   if(valueof(n) > 0)
     begin
-      m <- mkFlowControlSwitchIngressNonZero(flowcontrolID, first, deq);
+      m <- mkFlowControlSwitchIngressNonZero(flowcontrolID, /*latencyStats,*/ first, deq);
     end
   return m;
 endmodule
@@ -96,7 +100,7 @@ endmodule
 
 // Here we are reading and sticking things into the BRAM buffer. 
 // We write back the credits periodically
-module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_chunk first(), function Action deq())
+module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID,/* STAT_VECTOR#(n) latencyStats,*/ function umf_chunk first(), function Action deq())
 
     (INGRESS_SWITCH#(n,
                      GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -122,7 +126,15 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
              Add#(chunk_extra, TAdd#(umf_service_id,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))), SizeOf#(umf_chunk_w)),
 
              Add#(service_id_extra, TLog#(n), umf_service_id),
+             Max#(n, 2, n_FIFOS_SAFE),
+             Log#(n_FIFOS_SAFE, n_FIFOS_SAFE_SZ),
              Add#(1, nExcess, n));
+
+    // =====
+    //   Dynamic Parameters
+    // =====
+
+    Reg#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) returnThreshold <- mkReg(`MULTIFPGA_FIFO_SIZES/2);
 
     // ==============================================================
     //                        Ports and Queues
@@ -150,6 +162,20 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
     FIFOF#(umf_chunk_w) bodyFIFO <- mkFIFOF();
 
     Reg#(Bit#(10)) count <- mkReg(0);
+
+
+    // ==============================================================
+    //                        Latency Stats Measurement
+    // ==============================================================
+       
+    rule countLatency;
+        for(Integer i = 0; i < valueof(n); i = i + 1 )    
+        begin
+
+            //latencyStats.incrBy(fromInteger(i),zeroExtend(requestQueues.used()[i]));
+        end
+    endrule
+
 
     rule debug (`SWITCH_DEBUG == 1);
         count <= count + 1;
@@ -190,7 +216,7 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
             end
 
             // If we get too free, we need to send come cedits down the pipe.
-            if((requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2))
+            if((requestQueues.free[use_idx] > returnThreshold))
             begin 
 
                 if(`SWITCH_DEBUG == 1)
@@ -241,12 +267,12 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
             end
 
             // If we get too free, we need to send come cedits down the pipe.
-            if((requestQueues.free[use_idx] > `MULTIFPGA_FIFO_SIZES/2))
+            if((requestQueues.free[use_idx] > returnThreshold))
             begin 
-                //if(`SWITCH_DEBUG == 1)
-                //begin
+                if(`SWITCH_DEBUG == 1)
+                begin
                     $display("Sending %d tokens to %d my idx %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
-                //end
+                end
 
                 // This is the flow control packet header. 
                 GENERIC_UMF_PACKET_HEADER#(
@@ -344,27 +370,45 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
     //
 
     Reg#(Maybe#(Bit#(TLog#(n))))  reqIdx <- mkDReg(tagged Invalid); // We use DReg because we may fail to deq.
+    Wire#(Maybe#(Bit#(TLog#(n))))  schedIdx <- mkDWire(tagged Invalid); // We use DWire because we may fail to deq.
 
-    Scheduler#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),Bit#(1)) scheduler <- mkZeroCycleScheduler;
-
+    ARBITER#(n) arbiterNormal <- mkRoundRobinArbiter();  // We should test different arbiter schemes here. 
+    Wire#(Maybe#(UInt#(TLog#(n)))) newMsgQIdx <- mkDWire(tagged Invalid);
     PulseWire deqFired <- mkPulseWire;
+    Vector#(n,Reg#(Bool)) idxLast <- replicateM(mkReg(True));    
 
     //
     // First half -- pick an incoming responseQueue
     //
+
     rule write_response_newmsg1;
-        scheduler.putInfo(map(pack,readVReg(readReady)), requestQueues.used());
+        Bit#(n) request = '0;
+        for (Integer s = 0; s < valueof(n); s = s + 1)
+        begin
+            request[s] = pack(readReady[s] && requestQueues.used()[s] > 0 && idxLast[s]); // Non-FC queues need buffer
+        end
+        
+        let arbitedRequestNormal = arbiterNormal.arbitrate(request);
+        
+        newMsgQIdx <= arbitedRequestNormal;	
+
     endrule
 
+
+
     // Now that we have a scheduling decsion, we can setup the switch dequeue
-    rule makeReq(scheduler.getNext() matches tagged Valid .idx);
-        requestQueues.firstReq(idx);
+    rule makeReq(newMsgQIdx matches tagged Valid .idx);
+        requestQueues.firstReq(pack(idx));
+        requestQueues.deq(pack(idx)); // This deq happens because the read will happen...
+        deqFired.send;
+
         if(`SWITCH_DEBUG == 1)
         begin
             $display("%t read request for %d", $time, idx);
         end
 
-        reqIdx <= tagged Valid idx;
+        reqIdx <= tagged Valid pack(idx);
+        schedIdx <= tagged Valid pack(idx);
     endrule
 
 
@@ -399,14 +443,22 @@ module mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID, function umf_ch
                                    $display("%t read dequeue for %d: %h", $time, idx, val); 
                                  end
 
-                               requestQueues.deq(idx); // Will this deq be one cycle behind?  Probably....
-                               deqFired.send;
                                return val;
 
                            endmethod
 
                            method Action read_ready();
                                readReady[s] <= True;
+                           endmethod
+
+                           method Bool read_allocated();
+                               let result = False;
+ 			       if(schedIdx matches tagged Valid .idx)
+                               begin
+                                   result = (idx == fromInteger(s));
+                               end
+
+                              return result;
                            endmethod
                        endinterface;
 
