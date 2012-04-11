@@ -2017,3 +2017,16 @@ Now we use the maximum width link actually allocated to the lane,
 rather than the PHYSICAL_CONNECTION_SIZE.  This makes packets more
 efficient. It also allows us to eliminate marshalling logic in some of
 the packetizers.
+
+----------
+mcadler     Date: Wed Apr 11 17:45:14 EDT 2012  CSN: CSN-multifpga-119
+                  Wed Apr 11 21:45:14 UTC 2012
+
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_acp_128_connected_application.apm Locally Added               0 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_acp_128_multifpga_dual_sram.apm Locally Added               0 
+
+Add configuration for 128-core mesh model.
