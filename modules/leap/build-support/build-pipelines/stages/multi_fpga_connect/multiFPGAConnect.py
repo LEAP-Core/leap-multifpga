@@ -665,10 +665,10 @@ class MultiFPGAConnect():
 
     # At some point, we can reduce the number of header bits based on 
     # what we actually assign.  This would permit us to allocate smalled link
-    links = math.ceil(math.log(viaLinks+1))  
-    chunks = max([1,math.ceil(math.log(1+math.floor(maxWidth/viaWidth)))])
+    links = math.ceil(math.log(viaLinks+1,2))  
+    chunks = max([1,math.ceil(math.log(1+math.floor(maxWidth/viaWidth),2))])
     fillerWidth = viaWidth - links - chunks
-    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) 
+    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " max link " + str(maxWidth) + " via links " + str(viaLinks) 
 
     headerType = "GENERIC_UMF_PACKET_HEADER#(\n" + \
                  "             0, TLog#(TAdd#(1," + str(viaLinks) + ")) ,\n" + \
@@ -684,7 +684,7 @@ class MultiFPGAConnect():
 
 
   def analyzeNetwork(self):
-    self.analyzeNetworkLJF()
+    self.analyzeNetworkRandom()
 
   # This via allocation algorithm selects the "longest" job for allocation and 
   # sticks it on the least loaded processor.  There are assymmetries in this problem
@@ -1245,12 +1245,12 @@ class MultiFPGAConnect():
                 header.write('// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
 	        #header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_chain_' + dangling.inverse_name +' = ?;\n')
 	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_chain_' + dangling.inverse_name +' = ?;\n')
-                print "Chain Sink " + dangling.inverse_name + ": Idx " + str(dangling.via_idx) + " Link: " + str(dangling.via_link) + " Length: " + str(len(egressVectors[dangling.via_idx]))  
                 egressVectors[dangling.via_idx][dangling.via_link] = 'tpl_1(pack_chain_' + dangling.inverse_name + ')'
                 packetizerType = 'Marshalled'
                 if(dangling.bitwidth <= egressVias[dangling.via_idx].via_filler_width):
                   packetizerType = 'Unmarshalled'
 
+                print "Chain Sink " + dangling.inverse_name + ": Idx " + str(dangling.via_idx) + " Link: " + str(dangling.via_link) + " Length: " + str(len(egressVectors[dangling.via_idx]))  
                 print "Choosing Incoming Marshalling with " + str(egressVias[dangling.via_idx].via_filler_width) +   " + " + str(egressVias[dangling.via_idx].via_width) + "(" +  str(egressVias[dangling.via_idx].via_width + egressVias[dangling.via_idx].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
 
                 header.write('let pack_chain_' + dangling.inverse_name + ' <- mkPacketizeIncomingChain' + packetizerType + '(\n')
