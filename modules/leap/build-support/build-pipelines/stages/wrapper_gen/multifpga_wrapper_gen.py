@@ -6,8 +6,7 @@ from model import  *
 from fpga_environment_parser import *
 from fpgamap_parser import *
 from config import *
-
-
+ 
 
 #this might be better implemented as a 'Node' in scons, but 
 #I want to get something working before exploring that path
@@ -51,6 +50,11 @@ class WrapperGen():
       # change only when some other file changes.
       ignore_bsv.write(conSizePath);
 
+      # Generate a dummy connection size file to avoid errors during dependence
+      # analysis.
+      if not os.path.exists(conSizePath):
+        os.system('leap-connect --dummy --dynsize ' + module.name + ' ' + conSizePath)
+
       ignore_bsv.close();
 
       wrapper_bsv.write('import HList::*;\n')
@@ -63,23 +67,22 @@ class WrapperGen():
         for wrapper in [wrapper_bsv, log_bsv]:      
           wrapper.write('// These are well-known/required leap modules\n')
           wrapper.write('// import non-synthesis public files\n')
-          wrapper.write('`include "project-hybrid-main.bsv"\n')
+          wrapper.write('`include "' + module.name + '.bsv"\n')
           
           wrapper.write('// import non-synthesis private files\n')
-
 
           wrapper.write('// Get defintion of TOP_LEVEL_WIRES\n')
           wrapper.write('import physical_platform::*;\n')
 
           wrapper.write('(* synthesize *)\n')
           wrapper.write('(* no_default_clock, no_default_reset *)\n')
+
         wrapper_bsv.write('module mk_model_Wrapper (TOP_LEVEL_WIRES);\n')
         log_bsv.write('module mk_model_Log (TOP_LEVEL_WIRES);\n')
 
         for wrapper in [wrapper_bsv, log_bsv]:      
           wrapper.write('    // instantiate own module\n')
           wrapper.write('     let m <- mkModel();\n')
-
           wrapper.write('    return m;\n')
 
           wrapper.write('endmodule\n')
@@ -127,6 +130,5 @@ class WrapperGen():
           wrapper.write('    interface device = m_final;\n')
           wrapper.write('endmodule\n')
     
-
       wrapper_bsv.close()
       log_bsv.close()

@@ -2041,3 +2041,17 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 
 Fixed bug in router type generation.  Python defaults to log base 2 as opposed to log base e.
+
+----------
+mcadler     Date: Sun Apr 22 09:24:02 EDT 2012  CSN: CSN-multifpga-121
+                  Sun Apr 22 13:24:02 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ BSV-multi.py              Locally Removed           120 
+ BSVmulti.py               Locally Modified          120 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ multifpga_wrapper_gen.py  Locally Modified          120 
+
+Port recent changes from LEAP.
