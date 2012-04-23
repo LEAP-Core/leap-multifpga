@@ -4,7 +4,7 @@ import SCons.Script
 from fpga_environment_parser import *
 from fpgamap_parser import *
 from model import  *
-from config import *
+
 
 def makePlatformBitfileName(name, apm):
   return name +'_'+ apm + '_multifpga_bitfile'

@@ -3,7 +3,6 @@ import sys
 import SCons.Script
 import math
 from model import  *
-from config import *
 from fpga_environment_parser import *
 from fpgamap_parser import *
 # we write to bitfile 
@@ -80,6 +79,9 @@ class MultiFPGAConnect():
 
   def __init__(self, moduleList):
       self.moduleList = moduleList
+      self.MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
+      self.GENERATE_ROUTER_DEBUG = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_DEBUG')
+      self.GENERATE_ROUTER_STATS = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_STATS')
       APM_FILE = moduleList.env['DEFS']['APM_FILE']
       APM_NAME = moduleList.env['DEFS']['APM_NAME']
       # Need the FPGA configuration 
@@ -225,13 +227,13 @@ class MultiFPGAConnect():
         multiplexor_definition += '  let ' + via.via_method + '_pulse <- mkPulseWire();\n' 
         
 
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_stats.addCounter('enqueued_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED',
                                        via.via_method +' cycles enqueued')
      
       #stats for the merger
-      if(GENERATE_ROUTER_STATS):
+      if(self.GENERATE_ROUTER_STATS):
         multiplexor_stats.addCounter('merged_' + moduleName,
                                      'ROUTER_' + moduleName + '_MERGED',
                                      moduleName + ' cycles enqueued')
@@ -250,7 +252,7 @@ class MultiFPGAConnect():
       multiplexor_definition += ');//Only if there\'s data...\n'
       #multiplexor_definition += '    $display("mergeData ' + moduleName  +'  fires");\n'
 
-      if(GENERATE_ROUTER_STATS):
+      if(self.GENERATE_ROUTER_STATS):
         multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('merged_' + moduleName) + ';\n'
 
       multiplexor_definition += '\t\twrite(zeroExtendNP(pack(' + moduleAggregateTypeName + '{\n'
@@ -269,7 +271,7 @@ class MultiFPGAConnect():
         #multiplexor_definition += '    $display("' + via.via_method + '_wire fires");\n'
         multiplexor_definition += '\t\t' + via.via_method + '_wire <= tagged Valid data;\n'
         multiplexor_definition += '\t\t' + via.via_method + '_pulse.send;\n'
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
         multiplexor_definition += '\tendmethod\n\n'
 
@@ -314,12 +316,12 @@ class MultiFPGAConnect():
       multiplexor_definition += '                           function Bool write_ready() ) (' + interfaceName + ');\n'
       # mkDwire with empty string signifier...
       for via in egressVias:
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_stats.addCounter('enqueued_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED',
                                        via.via_method + ' cycles enqueued')
 
-      if(GENERATE_ROUTER_STATS):
+      if(self.GENERATE_ROUTER_STATS):
         multiplexor_stats.addCounter('merged_' + moduleName,
                                      'ROUTER_' + moduleName + '_MERGED',
                                      moduleName + ' cycles enqueued')
@@ -346,7 +348,7 @@ class MultiFPGAConnect():
         multiplexor_definition += '    })));\n'
 
 
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
 
         multiplexor_definition += '  endmethod\n'
@@ -392,12 +394,12 @@ class MultiFPGAConnect():
       multiplexor_definition += '                           function Bool write_ready() ) (' + interfaceName + ');\n'
       # mkDwire with empty string signifier...
       for via in egressVias:
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_stats.addCounter('enqueued_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED',
                                        via.via_method + ' cycles enqueued')
 
-      if(GENERATE_ROUTER_STATS):
+      if(self.GENERATE_ROUTER_STATS):
         multiplexor_stats.addCounter('merged_' + moduleName,
                                      'ROUTER_' + moduleName + '_MERGED',
                                      moduleName + ' cycles enqueued')
@@ -412,7 +414,7 @@ class MultiFPGAConnect():
         multiplexor_definition += '    Bit#(TLog#(TAdd#(1,' + str(len(egressVias)) + '))) tag = ' + str(viaCount) + ';\n'
         multiplexor_definition += '    write(zeroExtendNP({tag,data}));\n'
         viaCount = viaCount + 1
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
         multiplexor_definition += '  endmethod\n'
 
@@ -459,12 +461,12 @@ class MultiFPGAConnect():
       for via in ingressVias:
         multiplexor_definition += '\tlet ' + via.via_method + '_fifo <- mkBypassFIFOF();\n' 
 
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_stats.addCounter('dequeued_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_DEQUEUED',
                                        via.via_method + ' cycles dequeued')
 
-      if(GENERATE_ROUTER_DEBUG):   
+      if(self.GENERATE_ROUTER_DEBUG):   
         multiplexor_definition += '\n\tDEBUG_SCAN_FIELD_LIST via_dbg_list = List::nil;\n'
         for via in ingressVias:
           multiplexor_definition += '\tvia_dbg_list <- addDebugScanField(via_dbg_list, "' + via.via_method + ' notFull", ' + via.via_method + '_fifo.notFull);\n'
@@ -495,7 +497,7 @@ class MultiFPGAConnect():
         multiplexor_definition += '\tendmethod\n\n'
 
         multiplexor_definition += '\tmethod Action ' + via.via_method + '_deq() if (' + via.via_method + '_fifo.first() matches tagged Valid .data );\n\n'
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('dequeued_' + via.via_method) + ';\n'
         multiplexor_definition += '\t\t' + via.via_method + '_fifo.deq();\n'
         multiplexor_definition += '\tendmethod\n\n'
@@ -542,7 +544,7 @@ class MultiFPGAConnect():
 
       for via in ingressVias:
         multiplexor_definition += '  let ' + via.via_method + '_fifo <- mkBypassFIFOF();\n' # Bypass fifo saves latency.
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_stats.addCounter('dequeued_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_DEQUEUED',
                                        via.via_method + ' cycles dequeued')
@@ -560,7 +562,7 @@ class MultiFPGAConnect():
 
       for via in ingressVias:
         multiplexor_definition += '  method ActionValue#(Bit#(' + str(via.via_width) + ')) ' + via.via_method + '();\n'
-        if(GENERATE_ROUTER_STATS):
+        if(self.GENERATE_ROUTER_STATS):
           multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('dequeued_' + via.via_method) + ';\n'
         multiplexor_definition += '    ' + via.via_method + '_fifo.deq();\n'
         multiplexor_definition += '    return ' + via.via_method + '_fifo.first();\n'
@@ -990,7 +992,8 @@ class MultiFPGAConnect():
 
   def analyzeNetworkRandom(self):
 
-    numberOfVias = MAX_NUMBER_OF_VIAS # let's do a simple scheme with an equal number of vias.
+    # let's do a simple scheme with an equal number of vias.
+    numberOfVias = self.MAX_NUMBER_OF_VIAS
 
     for platform in self.environment.getPlatformNames():
       for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
@@ -1155,7 +1158,7 @@ class MultiFPGAConnect():
               print "Laying down " + dangling.inverse_name + " of type " + dangling.sc_type + " on " + dangling.platform
               if(dangling.inverse_sc_type == 'Send' or dangling.inverse_sc_type == 'ChainRoutingSend'):
                   header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.inverse_name + ' <- mkPhysicalConnectionRecv("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
-                  if(GENERATE_ROUTER_STATS):
+                  if(self.GENERATE_ROUTER_STATS):
                     stats.addCounter('blocked_' + dangling.inverse_name,
                                      'ROUTER_' + dangling.inverse_name + '_BLOCKED',
                                      dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + 'cycles blocked')
@@ -1168,7 +1171,7 @@ class MultiFPGAConnect():
 
 
               if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
-                  if(GENERATE_ROUTER_STATS):
+                  if(self.GENERATE_ROUTER_STATS):
                     stats.addCounter('received_' + dangling.inverse_name,
                                      'ROUTER_' + dangling.inverse_name + '_RECEIVED',
                                      dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' received cycles')
@@ -1181,7 +1184,7 @@ class MultiFPGAConnect():
               if(dangling.inverse_sc_type == 'ChainSink'):
                 chains += 1 
 
-                if(GENERATE_ROUTER_STATS):
+                if(self.GENERATE_ROUTER_STATS):
                   stats.addCounter('received_' + dangling.inverse_name,
                                    'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_RECEIVED',
                                    dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +' received cycles')
@@ -1195,7 +1198,7 @@ class MultiFPGAConnect():
 
               if(dangling.inverse_sc_type == 'ChainSrc'):
 
-                if(GENERATE_ROUTER_STATS):
+                if(self.GENERATE_ROUTER_STATS):
                   stats.addCounter('blocked_chain_' + dangling.inverse_name,
                                    'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_BLOCKED',
                                    dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles blocked')
@@ -1234,7 +1237,7 @@ class MultiFPGAConnect():
                 header.write('\trecv_' + dangling.inverse_name + ',\n')
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_recv_' + dangling.inverse_name + ',\n')
-                if(GENERATE_ROUTER_STATS):
+                if(self.GENERATE_ROUTER_STATS):
                   header.write('\t' + stats.incrCounter('blocked_' + dangling.inverse_name) + ',\n')
                   header.write('\t' + stats.incrCounter('sent_' + dangling.inverse_name) + ');\n\n')
                 else:
@@ -1257,7 +1260,7 @@ class MultiFPGAConnect():
                 header.write('\t"' + dangling.inverse_name + '",\n')
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_chain_' + dangling.inverse_name + ',\n')
-                if(GENERATE_ROUTER_STATS):
+                if(self.GENERATE_ROUTER_STATS):
                   header.write('\t' + stats.incrCounter('blocked_chain_' + dangling.inverse_name) + ',\n')
                   header.write('\t' + stats.incrCounter('sent_chain_' + dangling.inverse_name) + ');\n\n')
                 else:
@@ -1268,7 +1271,7 @@ class MultiFPGAConnect():
             # for now we will assume that flow control is twinned - that is the egress 2 uses ingress 2 for its flow control
             # this might well need to change as we introduce assymetry x_X
             # we actually should be allocating the feedback channel as part of the analysis phase, but that can happen later.             
-            if (GENERATE_ROUTER_DEBUG):
+            if (self.GENERATE_ROUTER_DEBUG):
               header.write('\nDEBUG_SCAN_FIELD_LIST egress_via_dbg_list = List::nil;\n')
 
             for via_idx in range(len(egressVias)):
@@ -1295,11 +1298,11 @@ class MultiFPGAConnect():
                 header.write('EGRESS_PACKET_GENERATOR#(' + egressVias[via_idx].via_header_type + ', ' +  egressVias[via_idx].via_body_type + ')links_' + egressVias[via_idx].via_switch + '[' + str(egressVias[via_idx].via_links) + '] = ' + linkArray + ';\n') 
                 header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ', ' + ingressVias[egressVias[via_idx].via_outgoing_flowcontrol_via].via_switch + '.ingressPorts[' + str(egressVias[via_idx].via_outgoing_flowcontrol_link) +'], compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack), "' + egressVias[via_idx].via_switch + '");\n')
 
-                if(GENERATE_ROUTER_DEBUG):   
+                if(self.GENERATE_ROUTER_DEBUG):   
                   header.write('egress_via_dbg_list <- addDebugScanField(egress_via_dbg_list, "' + egressVias[via_idx].via_switch + ' buffer status", ' + egressVias[via_idx].via_switch + '.bufferStatus);\n')
                   header.write('egress_via_dbg_list <- addDebugScanField(egress_via_dbg_list, "' + egressVias[via_idx].via_switch + ' fifo status", ' + egressVias[via_idx].via_switch + '.fifoStatus);\n')
 
-            if(GENERATE_ROUTER_DEBUG):   
+            if(self.GENERATE_ROUTER_DEBUG):   
               header.write('let egressViaDbg <- mkDebugScanNode("Multi-FPGA Router Egress VIAs", egress_via_dbg_list);\n')
 
             # Hook up the ingress links
@@ -1330,7 +1333,7 @@ class MultiFPGAConnect():
                 header.write('\t' + ingressVias[dangling.via_idx].via_switch + '.ingressPorts[' + str(dangling.via_link) + '],\n')
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_send_' + dangling.inverse_name + ',\n')
-                if(GENERATE_ROUTER_STATS):
+                if(self.GENERATE_ROUTER_STATS):
                   header.write('\t' + stats.incrCounter('received_' + dangling.inverse_name) + ');\n\n')
                 else:
                   header.write('\t?);\n\n')
@@ -1353,7 +1356,7 @@ class MultiFPGAConnect():
                 header.write('\t' + ingressVias[dangling.via_idx].via_switch + '.ingressPorts[' + str(dangling.via_link) + '],\n')
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_sink_' + dangling.inverse_name + ',\n')
-                if(GENERATE_ROUTER_STATS):
+                if(self.GENERATE_ROUTER_STATS):
                   header.write('\t' + stats.incrCounter('received_' + dangling.inverse_name) + ');\n\n')
                 else:
                   header.write('\t?);\n\n')

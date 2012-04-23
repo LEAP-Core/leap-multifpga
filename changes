@@ -2055,3 +2055,29 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
  multifpga_wrapper_gen.py  Locally Modified          120 
 
 Port recent changes from LEAP.
+
+----------
+mcadler     Date: Mon Apr 23 18:58:29 EDT 2012  CSN: CSN-multifpga-122
+                  Mon Apr 23 22:58:29 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          121 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          121 
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ BSVmulti.py               Locally Modified          121 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ tool.py                   Locally Modified          121 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ multifpga_wrapper_gen.py  Locally Modified          121 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform
+ FPGAPlatformPipeline.py   Locally Modified          121 
+
+New method of managing AWB parameters in the build flow that permits overriding
+AWB parameters at compile time.  (See check-in to leap package.)

@@ -5,7 +5,6 @@ import SCons.Script
 from model import  *
 from fpga_environment_parser import *
 from fpgamap_parser import *
-from config import *
  
 
 #this might be better implemented as a 'Node' in scons, but 

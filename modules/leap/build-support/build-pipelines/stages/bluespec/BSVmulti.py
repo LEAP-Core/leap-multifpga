@@ -4,7 +4,6 @@ import re
 import string
 import SCons.Script
 from model import  *
-from config import *
 from multifpga_router_service import *
 
 def get_wrapper(module):
@@ -30,12 +29,12 @@ class BSV():
     else:
        bsc_events_flag = ' -D HASIM_EVENTS_ENABLED=True '
 
-    if(USE_ROUTING_KNOWN == 1):
+    if (moduleList.getAWBParam('multifpga_router_service', 'USE_ROUTING_KNOWN') == 1):
        bsc_routing_known = ' -D ROUTING_KNOWN '
     else:
        bsc_routing_known = ' '
 
-    self.BSC_FLAGS = BSC_FLAGS + bsc_events_flag + bsc_routing_known
+    self.BSC_FLAGS = moduleList.getAWBParam('bsv_tool', 'BSC_FLAGS') + bsc_events_flag + bsc_routing_known
 
     moduleList.env.BuildDir(TMP_BSC_DIR, '.', duplicate=0)
     moduleList.env['ENV']['BUILD_DIR'] = moduleList.env['DEFS']['BUILD_DIR']  # need to set the builddir for synplify
@@ -354,11 +353,11 @@ class BSV():
                           '')
       env.Precious(bld_v)
 
-      if(USE_ROUTING_KNOWN == 1):
+      if (moduleList.getAWBParam('multifpga_router_service', 'USE_ROUTING_KNOWN') == 1):
         if(module.name == moduleList.topModule.name):
           moduleList.env.Depends(bld_v,moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath+ '/' + 'multifpga_routing.bsh')
 
-      if(BUILD_VERILOG == 1):
+      if (moduleList.getAWBParam('bsv_tool', 'BUILD_VERILOG') == 1):
         module.moduleDependency['VERILOG'] += [bld_v] + [ext_gen_v]
 
       if(getBuildPipelineDebug(moduleList) != 0):
@@ -407,7 +406,7 @@ class BSV():
                        bld_v + bld_ba,
                        'leap-gen-black-box -nohash $SOURCE > $TARGET')
 
-      if (BUILD_LOGS_ONLY):
+      if (moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
         moduleList.topDependency += [bb]
 
       # because I'm not sure that we guarantee the wrappers can only be imported
