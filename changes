@@ -2081,3 +2081,14 @@ Directory modules/leap/build-support/pipelines/multifpga_platform
 
 New method of managing AWB parameters in the build flow that permits overriding
 AWB parameters at compile time.  (See check-in to leap package.)
+
+----------
+mcadler     Date: Tue Apr 24 17:48:26 EDT 2012  CSN: CSN-multifpga-123
+                  Tue Apr 24 21:48:26 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ BSVmulti.py               Locally Modified          122 
+
+Support for the latest Bluespec compiler that doesn't generate .bi files.
+Still works with old compilers.
