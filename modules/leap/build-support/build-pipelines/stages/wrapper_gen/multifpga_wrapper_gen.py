@@ -76,8 +76,8 @@ class WrapperGen():
           wrapper.write('(* synthesize *)\n')
           wrapper.write('(* no_default_clock, no_default_reset *)\n')
 
-        wrapper_bsv.write('module mk_model_Wrapper (TOP_LEVEL_WIRES);\n')
-        log_bsv.write('module mk_model_Log (TOP_LEVEL_WIRES);\n')
+        wrapper_bsv.write('module [Module] mk_model_Wrapper (TOP_LEVEL_WIRES);\n')
+        log_bsv.write('module [Module] mk_model_Log (TOP_LEVEL_WIRES);\n')
 
         for wrapper in [wrapper_bsv, log_bsv]:      
           wrapper.write('    // instantiate own module\n')
@@ -110,7 +110,7 @@ class WrapperGen():
 
         for wrapper in [wrapper_bsv, log_bsv]:      
           wrapper.write('(* synthesize *)\n')
-          wrapper.write('module mk_' + module.name + '_Wrapper (SOFT_SERVICES_SYNTHESIS_BOUNDARY#(`CON_RECV_' + module.name + ', `CON_SEND_' + module.name + ', `CON_RECV_MULTI_' + module.name + ', `CON_SEND_MULTI_' + module.name +', `CHAINS_' + module.name +'));\n')
+          wrapper.write('module [Module] mk_' + module.name + '_Wrapper (SOFT_SERVICES_SYNTHESIS_BOUNDARY#(`CON_RECV_' + module.name + ', `CON_SEND_' + module.name + ', `CON_RECV_MULTI_' + module.name + ', `CON_SEND_MULTI_' + module.name +', `CHAINS_' + module.name +'));\n')
           wrapper.write('  \n')
           # we need to insert the fpga platform here
           # get my parameters 
