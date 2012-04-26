@@ -77,6 +77,25 @@ class MultiFPGAGenerateBitfile():
            return sts
          return compile_platform_log
 
+    def strcat_closure(strlistIn,masterstr):
+         strlist = strlistIn[:] # make a copy of strlist
+         def cat_string_files(target, source, env):
+           strings = ""
+           for file in strlist:
+             print "Catting " + file
+             fileHandle = open(file,"r")
+             strings += fileHandle.read()
+             fileHandle.close()
+
+           # only the master needs the whole list of strings.
+           print "appending " + masterstr
+           fileHandle = open(masterstr,"a")
+           fileHandle.write(strings)
+           fileHandle.close()
+           
+         return cat_string_files
+
+
     moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] = []
 
     # the stuff below here should likely go in a different file, and there will be many hard-coded paths
@@ -152,14 +171,34 @@ class MultiFPGAGenerateBitfile():
             print ('Link dir is ' + linkDir)
             os.symlink(relpath(rrrPath, linkDir), linkPath)
 
-
+      strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMName + '.str'
       # this dependency on platform logs is coarse.  we could do better, but it may not be necessary
       subbuild = moduleList.env.Command( 
-          [bitfile],
+          [bitfile,strfile],
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
           compile_closure(platform)
           )                   
       moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] += [bitfile] 
 
-      #force build remove me later....          
-      moduleList.topDependency += [subbuild]
+    # each platform can have a different strings file.  Let's cat all the strings files together...
+    # because the hash signatures are unique we can be quite sloppy in this.
+    strlist = []
+    master = ""
+    for platformName in self.environment.getPlatformNames():
+      platform = self.environment.getPlatform(platformName)
+      platformAPMName = makePlatformBitfileName(platform.name,APM_NAME)
+      platformBuildDir = makePlatformBuildDir(platform.name)
+      strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMName + '.str'
+      print "string file is??? " +  strfile
+      if(platform.master):
+        master = strfile
+      else:
+        strlist.append(strfile)
+
+    strcat = moduleList.env.Command(
+          [moduleList.apmName + ".str"],
+          moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'],
+          strcat_closure(strlist,master)
+          )
+
+    moduleList.topDependency += [strcat]

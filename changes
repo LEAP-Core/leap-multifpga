@@ -2104,3 +2104,15 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
 Add [Module] types to synthesis-boundary top-level modules in order to compile
 correctly when no compiler back end is enabled.  (Per recommendation from
 Bluespec.)
+
+----------
+kfleming    Date: Wed Apr 25 23:38:46 EDT 2012  CSN: CSN-multifpga-125
+                  Thu Apr 26 03:38:46 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          124 
+
+
+Concatenating strings files together as a part of the build process
+saves me time.  Rent or buy?  Buy....
