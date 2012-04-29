@@ -1,10 +1,5 @@
 import os
-import sys
-import re
-import SCons.Script
 from model import  *
-from fpga_environment_parser import *
-from fpgamap_parser import *
  
 
 #this might be better implemented as a 'Node' in scons, but 
@@ -14,31 +9,22 @@ class WrapperGen():
 
   def __init__(self, moduleList):
 
-    envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
-    if(len(envFile) != 1):
-      print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
-    self.mapping = parseFPGAMap(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
-    print "mapping keys: " + str(self.mapping.getPlatformNames)
+    ## Here we use a module list sorted alphabetically in order to guarantee
+    ## the generated wrapper files are consistent.  The topological sort
+    ## guarantees only a depth first traversal -- not the same traversal
+    ## each time.
+    synth_modules = [moduleList.topModule] + moduleList.synthBoundaries()
 
-    envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENVS')
-    if(len(envFile) != 1):
-      print "Found more than one environment file: " + str(envFile) + ", exiting\n"
-    self.environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
-    print "environment keys: " + str(self.environment.getPlatformNames)
-
-    topo = moduleList.topologicalOrderSynth()
-    # we probably want reverse topological ordering... ???? Really?
-
-    for module in topo:
-      wrapperPath = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/' + module.name + "_Wrapper.bsv"
-      logPath = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/' + module.name + "_Log.bsv"
-      conSizePath =  moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/' + module.name + "_Wrapper_con_size.bsh"
+    for module in synth_modules:
+      modPath = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/' + module.name
+      wrapperPath =  modPath + "_Wrapper.bsv"
+      logPath = modPath + "_Log.bsv"
+      conSizePath =  modPath + "_Wrapper_con_size.bsh"
       ignorePath = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + module.buildPath + '/.ignore'
 
       if(getBuildPipelineDebug(moduleList) != 0):
         print "Wrapper path is " + wrapperPath
       wrapper_bsv = open(wrapperPath, 'w')
-      log_bsv = open(logPath, 'w')
 
       ignore_bsv = open(ignorePath, 'w')
       ignore_bsv.write("// Generatef by multifpga_wrapper_gen.py\n")
@@ -48,45 +34,73 @@ class WrapperGen():
       # build dependence changes and rebuilding.  Ignore it, since the file will
       # change only when some other file changes.
       ignore_bsv.write(conSizePath);
+      ignore_bsv.close();
 
       # Generate a dummy connection size file to avoid errors during dependence
       # analysis.
       if not os.path.exists(conSizePath):
         os.system('leap-connect --dummy --dynsize ' + module.name + ' ' + conSizePath)
 
-      ignore_bsv.close();
-
       wrapper_bsv.write('import HList::*;\n')
       wrapper_bsv.write('import ModuleContext::*;\n')
-      log_bsv.write('import HList::*;\n')
-      log_bsv.write('import ModuleContext::*;\n')
       # the top module is handled specially
       if(module.name == moduleList.topModule.name):
 
-        for wrapper in [wrapper_bsv, log_bsv]:      
-          wrapper.write('// These are well-known/required leap modules\n')
-          wrapper.write('// import non-synthesis public files\n')
-          wrapper.write('`include "' + module.name + '.bsv"\n')
-          
-          wrapper.write('// import non-synthesis private files\n')
+        wrapper_bsv.write('// These are well-known/required leap modules\n')
+        wrapper_bsv.write('// import non-synthesis public files\n')
+        wrapper_bsv.write('`include "' + module.name + '.bsv"\n')
 
-          wrapper.write('// Get defintion of TOP_LEVEL_WIRES\n')
-          wrapper.write('import physical_platform::*;\n')
+        # Include all subordinate synthesis boundaries for use by
+        # instantiateAllSynthBoundaries() below.
+        for synth in synth_modules:
+          if synth != module:
+            wrapper_bsv.write('`include "' + synth.name + '_synth.bsv"\n')
 
-          wrapper.write('(* synthesize *)\n')
-          wrapper.write('(* no_default_clock, no_default_reset *)\n')
-
+        wrapper_bsv.write('\n// import non-synthesis private files\n')
+        wrapper_bsv.write('// Get defintion of TOP_LEVEL_WIRES\n')
+        wrapper_bsv.write('import physical_platform::*;\n')
+        wrapper_bsv.write('(* synthesize *)\n')
+        wrapper_bsv.write('(* no_default_clock, no_default_reset *)\n')
         wrapper_bsv.write('module [Module] mk_model_Wrapper (TOP_LEVEL_WIRES);\n')
-        log_bsv.write('module [Module] mk_model_Log (TOP_LEVEL_WIRES);\n')
+        wrapper_bsv.write('    // instantiate own module\n')
+        wrapper_bsv.write('     let m <- mkModel();\n')
+        wrapper_bsv.write('    return m;\n')
+        wrapper_bsv.write('endmodule\n')
 
-        for wrapper in [wrapper_bsv, log_bsv]:      
-          wrapper.write('    // instantiate own module\n')
-          wrapper.write('     let m <- mkModel();\n')
-          wrapper.write('    return m;\n')
+        # Provide a method that imports all subordinate synthesis boundaries.
+        # It will be invoked inside the top level model in order to build
+        # all soft connections.
+        wrapper_bsv.write('\n\nmodule ')
+        if len(synth_modules) != 1:
+          wrapper_bsv.write('[Connected_Module]')
+        wrapper_bsv.write(' instantiateAllSynthBoundaries ();\n')
 
-          wrapper.write('endmodule\n')
+        for synth in synth_modules:
+          if synth != module:
+            wrapper_bsv.write('    ' + synth.synthBoundaryModule + '();\n')
 
+        wrapper_bsv.write('endmodule')
       else:
+        log_bsv = open(logPath, 'w')
+        log_bsv.write('import HList::*;\n')
+        log_bsv.write('import ModuleContext::*;\n')
+
+        # Parents of a synthesis boundary likely import the top level module of
+        # the boundary.  This way, the synthesis boundary could be removed and
+        # the code within the boundary would be imported correctly by the parent.
+        # The code within the synthesis boundary will actually be imported at the
+        # top level instead, so we need a dummy module for use by the parent of
+        # a boundary that looks like it imports the code but actually does nothing.
+        # Importing at the top level allows us to build all synthesis regions
+        # in parallel.
+        dummy_import_bsv = open(modPath + '.bsv', 'w')
+        dummy_import_bsv.write('// Generated by wrapper_gen.py\n\n')
+        dummy_import_bsv.write('module ' + module.synthBoundaryModule + ' ();\n');
+        dummy_import_bsv.write('endmodule\n');
+        dummy_import_bsv.close()
+
+        if not os.path.exists(modPath + '_synth.bsv'):
+          os.system('leap-connect --dummy --softservice ' + moduleList.apmFile + ' ' + modPath + '_synth.bsv')
 
         for wrapper in [wrapper_bsv, log_bsv]:      
           wrapper.write('// These are well-known/required leap modules\n')
@@ -118,16 +132,17 @@ class WrapperGen():
           wrapper.write('    // instantiate own module\n')
           wrapper.write('    let int_ctx0 <- initializeServiceContext();\n')
           wrapper.write('    match {.int_ctx1, .int_name1} <- runWithContext(int_ctx0, putSynthesisBoundaryID(' + str(module.synthBoundaryUID)  + '));\n');
-          wrapper.write('    match {.int_ctx2, .int_name2} <- runWithContext(int_ctx1, putSynthesisBoundaryPlatform("' + self.mapping.getSynthesisBoundaryPlatform(module.name) + '"));\n')
-          wrapper.write('    match {.int_ctx3, .int_name3} <- runWithContext(int_ctx2, putSynthesisBoundaryPlatformID(' + str(self.environment.getSynthesisBoundaryPlatformID(self.mapping.getSynthesisBoundaryPlatform(module.name))) + '));\n')
+          wrapper.write('    match {.int_ctx2, .int_name2} <- runWithContext(int_ctx1, putSynthesisBoundaryPlatform("' + module.synthBoundaryPlatformName + '"));\n')
+          wrapper.write('    match {.int_ctx3, .int_name3} <- runWithContext(int_ctx2, putSynthesisBoundaryPlatformID(' + str(module.synthBoundaryPlatformUID) + '));\n')
           wrapper.write('    // By convention, global string ID 0 (the first string) is the module name\n');
-          wrapper.write('    match {.int_ctx4, .int_name4} <- runWithContext(int_ctx3, getGlobalStringUID("' + self.mapping.getSynthesisBoundaryPlatform(module.name) + ':' + module.name + '"));\n');
+          wrapper.write('    match {.int_ctx4, .int_name4} <- runWithContext(int_ctx3, getGlobalStringUID("' + module.synthBoundaryPlatformName + ':' + module.name + '"));\n');
           wrapper.write('    match {.int_ctx5, .int_name5} <- runWithContext(int_ctx4, ' + module.synthBoundaryModule + ');\n')
           wrapper.write('    match {.final_ctx, .m_final}  <- runWithContext(int_ctx5, mkSoftConnectionDebugInfo);\n')
           wrapper.write('    let service_ifc <- exposeServiceContext(final_ctx);\n')
           wrapper.write('    interface services = service_ifc;\n')
           wrapper.write('    interface device = m_final;\n')
           wrapper.write('endmodule\n')
-    
+
+        log_bsv.close()
+
       wrapper_bsv.close()
-      log_bsv.close()

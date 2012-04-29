@@ -2116,3 +2116,17 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_b
 
 Concatenating strings files together as a part of the build process
 saves me time.  Rent or buy?  Buy....
+
+----------
+mcadler     Date: Sat Apr 28 20:18:01 EDT 2012  CSN: CSN-multifpga-126
+                  Sun Apr 29 00:18:01 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ BSVmulti.py               Locally Modified          125 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ multifpga_wrapper_gen.py  Locally Modified          125 
+
+All synthesis boundaries are now built in parallel and instantiated in the
+top-level model build.  See the corresponding comment for leap.
