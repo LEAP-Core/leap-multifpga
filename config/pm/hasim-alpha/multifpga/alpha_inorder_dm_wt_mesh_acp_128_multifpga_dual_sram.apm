@@ -73,11 +73,8 @@ File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
 Packagehint=multifpga
 
 [Alpha Inorder DM, WT, Mesh 128 cores/Params]
-CONTEXT_ID_BITS=7
 FUNCP_TLB_PVT_ENTRIES=4096
-FUNCP_PHYSICAL_REG_INDEX_BITS=14
 TOKEN_ID_BITS=6
-MAX_NUM_CONTEXTS=128
 FUNCP_PVT_CACHE_ENTRIES=16384
 
 [Alpha Inorder DM, WT, Mesh 128 cores]

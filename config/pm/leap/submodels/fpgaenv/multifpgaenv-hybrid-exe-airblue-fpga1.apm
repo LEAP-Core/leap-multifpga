@@ -117,16 +117,14 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
 
-[BSV Build Tool MultiFPGA]
-File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv-multi.awb
-Packagehint=multifpga
-
 [MultiFPGA BlueSim Platform Build Pipeline/Requires]
 software_tool=Software build tool
 iface_tool=Interface builder
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
-bsv_tool=BSV Build Tool MultiFPGA
+bsv_tool=BSV Build Tool (First Phase)
+fpga_environment_parser=FPGA Environment Datatype
+fpgamap_parser=FPGAMap
 
 [MultiFPGA BlueSim Platform Build Pipeline]
 File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
@@ -172,3 +170,18 @@ physical_channel=Simulation Physical Channel
 [RL Bluespec Library Submodel]
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
+
+[BSV Build Tool (First Phase)/Params]
+BSC_FLAGS="-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -show-range-conflict -remove-dollar"
+
+[BSV Build Tool (First Phase)]
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
+Packagehint=leap
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga

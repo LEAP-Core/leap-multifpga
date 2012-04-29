@@ -64,12 +64,6 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
-[alpha_inorder_dm_wt_ring_acp_16/Params]
-CONTEXT_ID_BITS=4
-FUNCP_PHYSICAL_REG_INDEX_BITS=11
-TOKEN_ID_BITS=6
-MAX_NUM_CONTEXTS=16
-
 [alpha_inorder_dm_wt_ring_acp_16]
 File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_ring_acp_16_connected_application.apm
 Packagehint=multifpga

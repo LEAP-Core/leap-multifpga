@@ -2130,3 +2130,78 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
 
 All synthesis boundaries are now built in parallel and instantiated in the
 top-level model build.  See the corresponding comment for leap.
+
+----------
+mcadler     Date: Sun Apr 29 19:31:34 EDT 2012  CSN: CSN-multifpga-127
+                  Sun Apr 29 23:31:34 UTC 2012
+
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN.apm Locally Modified          126 
+ multifpgaenv-hybrid-exe-fpga0.apm Locally Modified          126 
+ multifpgaenv-hybrid-exe-airblue-fpga0.apm Locally Modified          126 
+ multifpgaenv-hybrid-exe-fpga1.apm Locally Modified          126 
+ multifpgaenv-hybrid-exe-airblue-fpga1.apm Locally Modified          126 
+ multifpgaenv-hybrid-exe-fpga0-dist-cache.apm Locally Modified          126 
+ multifpgaenv-hybrid-exe-fpga1-dist-cache.apm Locally Modified          126 
+ multifpgaenv-hybrid-exe-fpga0-quad.apm Locally Modified          126 
+
+Directory config/pm/leap/submodels/pipelines
+ build-pipeline-xilinx-multifpga.apm Locally Modified          126 
+
+Directory config/pm/airblue/library_tests
+ softphy_SOVA_acp.apm      Locally Modified          126 
+
+Directory config/pm/h264
+ softphy_SOVA_acp.apm      Locally Modified          126 
+ h264_multifpga_decoder_split_synth.apm Locally Modified          126 
+ h264_multifpga_decoder_split_synth_exe.apm Locally Modified          126 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_ring_acp_16_multifpga_sram.apm Locally Modified          126 
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga_dual_sram.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_acp_64_multifpga_sram.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_acp_16_multifpga_sram_big_cache.apm Locally Modified          126 
+ alpha_inorder_dm_wt_mesh_acp_64_multifpga_dual_sram.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_acp_16_dual_multifpga_sram.apm Locally Modified          126 
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga_dual_sram_4_lanes.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_acp_32_multifpga.apm Locally Modified          126 
+ alpha_inorder_multifpga_time_func_xupv5.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_acp_16_multifpga.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_acp_64_multifpga.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_acp_16_multifpga_sram_2.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_acp_16_multifpga_sram_3.apm Locally Modified          126 
+ alpha_inorder_multifpga_time_func_16_acp_dual_sram.apm Locally Modified          126 
+ alpha_inorder_dm_wt_mesh_acp_128_multifpga_dual_sram.apm Locally Modified          126 
+ alpha_inorder_dm_wt_ring_exe_16_multifpga.apm Locally Modified          126 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-xupv5-fpga0-sata.apm Locally Modified          126 
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified          126 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified          126 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified          126 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multi-fpga-connect.awb    Locally Modified          126 
+
+Directory modules/leap/build-support/build-pipelines/stages
+ bluespec/                 Locally Removed           126 
+
+Directory modules/leap/build-support/build-pipelines/stages/bluespec
+ bsv-multi.awb             Locally Removed           126 
+ BSVmulti.py               Locally Removed           126 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ multi-fpga-wrapper-gen.awb Locally Removed           126 
+ multifpga_wrapper_gen.py  Locally Removed           126 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform_sim
+ sim-build-pipeline-multifpga.awb Locally Modified          126 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform
+ fpga-platform-build-pipeline.awb Locally Modified          126 
+
+Tired of maintaining multi-FPGA-specific versions of build_bsv and
+wrapper_gen_tool build pipeline stages.  The leap versions now support
+multi-FPGA.
+

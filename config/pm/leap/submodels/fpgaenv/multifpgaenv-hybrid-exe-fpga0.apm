@@ -142,49 +142,42 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
 
-[BSV Build Tool MultiFPGA]
-File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv-multi.awb
-Packagehint=multifpga
-
-[FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
-Packagehint=multifpga
-
 [MultiFPGA BlueSim Platform Build Pipeline/Requires]
 software_tool=Software build tool
 iface_tool=Interface builder
-wrapper_gen_tool=MultiFPGA Synthesis Boundary Wrapper generation tool
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
-bsv_tool=BSV Build Tool MultiFPGA
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
 
 [MultiFPGA BlueSim Platform Build Pipeline]
 File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
 Packagehint=multifpga
 
-[MultiFPGA Synthesis Boundary Wrapper generation tool]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/multi-fpga-wrapper-gen.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis Boundary Wrapper generation tool/Requires]
-fpgamap_parser=FPGAMap
-fpga_environment_parser=FPGA Environment Datatype
-
-[FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
-Packagehint=multifpga
-
-
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=multifpga
 
-
-[Soft Services for MultiFPGA Submodel/Params]
-CON_CWIDTH=128
-
-[MultiFPGA Master Platform Services/Params]
-SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
-
 [MultiFPGA Master Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master.apm
+Packagehint=multifpga
+
+[BSV Build Tool (First Phase)/Params]
+BSC_FLAGS="-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -show-range-conflict -remove-dollar"
+
+[BSV Build Tool (First Phase)]
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
+Packagehint=leap
+
+[Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
+Packagehint=leap
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
 Packagehint=multifpga

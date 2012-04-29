@@ -73,10 +73,6 @@ File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_16_c
 Packagehint=multifpga
 
 [New Asim Model/Params]
-CONTEXT_ID_BITS=4
-FUNCP_PHYSICAL_REG_INDEX_BITS=11
-TOKEN_ID_BITS=6
-MAX_NUM_CONTEXTS=16
 FUNCP_TLB_PVT_ENTRIES=4096
 FUNCP_PVT_CACHE_ENTRIES=16384
 

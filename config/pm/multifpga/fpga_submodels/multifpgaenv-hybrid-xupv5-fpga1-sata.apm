@@ -89,22 +89,11 @@ File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-
 Packagehint=leap
 
 [NULL Local Memory Interface/Params]
-LOCAL_MEM_WORDS_PER_LINE=4
-LOCAL_MEM_WORD_BITS=64
 LOCAL_MEM_ADDR_BITS=26
 
 [RL Bluespec Library Submodel]
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
-
-
-
-
-
-
-
-
-
 
 [Xilinx BITGEN]
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
@@ -122,25 +111,9 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-ngd.awb
 Packagehint=leap
 
-[MultiFPGA Synthesis Boundary Wrapper generation tool]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/multi-fpga-wrapper-gen.awb
-Packagehint=multifpga
-
 [FPGA Programming Tool]
 File=modules/leap/build-support/build-pipelines/stages/fpgaprog/fpgaprog.awb
 Packagehint=leap
-
-[BSV Build Tool MultiFPGA]
-File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv-multi.awb
-Packagehint=multifpga
-
-[FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis Boundary Wrapper generation tool/Requires]
-fpga_environment_parser=FPGA Environment Datatype
-fpgamap_parser=FPGAMap
 
 [Xilinx Post-synthesis Toolchain]
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-post-synth.awb
@@ -161,10 +134,6 @@ xilinx_loader=Xilinx LOADER
 File=modules/leap/build-support/build-pipelines/stages/null_software/null_software.awb
 Packagehint=multifpga
 
-[FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
-Packagehint=multifpga
-
 [MCD Tool for Xilinx]
 File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
 Packagehint=leap
@@ -172,9 +141,6 @@ Packagehint=leap
 [Xilinx MAP]
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
-
-[BSV Build Tool MultiFPGA/Params]
-BUILD_LOGS_ONLY=1
 
 [FPGA Platform Build Pipeline]
 File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
@@ -186,9 +152,11 @@ post_synthesis_tool=Xilinx Post-synthesis Toolchain
 software_tool=Null software build tool
 mcd_tool=MCD Tool for Xilinx
 iface_tool=Interface builder
-wrapper_gen_tool=MultiFPGA Synthesis Boundary Wrapper generation tool
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 synthesis_tool=Synplify/XST Synthesis Tool
-bsv_tool=BSV Build Tool MultiFPGA
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
 
 [Null Physical Channel]
 File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
@@ -208,7 +176,6 @@ MODEL_CLOCK_FREQ=25
 [Synplify/XST Synthesis Tool]
 File=modules/leap/build-support/build-pipelines/stages/synplify/synplify-sub.awb
 Packagehint=leap
-
 
 [XUP Virtex 5 PCIE AURORA]
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora/xilinx-xup-pcie-sata.awb
@@ -232,17 +199,30 @@ aurora_device=Aurora SATA Device, Single Lane, 3gbps
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=multifpga
 
-[Soft Services for MultiFPGA Submodel/Params]
-CON_CWIDTH=128
-
-
 [MultiFPGA Slave Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave.apm
 Packagehint=multifpga
 
-[MultiFPGA Slave Platform Services/Params]
-SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
-
 [Standard Virtual Devices Submodel]
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
+
+[BSV Build Tool (First Phase)/Params]
+BUILD_LOGS_ONLY=1
+BSC_FLAGS="-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -show-range-conflict -remove-dollar"
+
+[BSV Build Tool (First Phase)]
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
+Packagehint=leap
+
+[Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
+Packagehint=leap
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
