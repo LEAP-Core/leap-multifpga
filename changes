@@ -2205,3 +2205,13 @@ Tired of maintaining multi-FPGA-specific versions of build_bsv and
 wrapper_gen_tool build pipeline stages.  The leap versions now support
 multi-FPGA.
 
+
+----------
+mcadler     Date: Sun Apr 29 19:36:03 EDT 2012  CSN: CSN-multifpga-128
+                  Sun Apr 29 23:36:03 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multi-fpga-connect.awb    Locally Modified          127 
+
+Accidentally changed the max. number of vias 3 to in the last commit.
