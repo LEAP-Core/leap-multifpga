@@ -2215,3 +2215,23 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
  multi-fpga-connect.awb    Locally Modified          127 
 
 Accidentally changed the max. number of vias 3 to in the last commit.
+
+----------
+mcadler     Date: Mon Apr 30 17:02:23 EDT 2012  CSN: CSN-multifpga-129
+                  Mon Apr 30 21:02:23 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/pipelines/multifpga
+ multifpga-build-pipeline.awb Locally Modified          128 
+
+Directory modules/leap/build-support/project
+ platform-multifpga.awb    Locally Modified          128 
+ project-multifpga.awb     Locally Modified          128 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform_sim
+ sim-build-pipeline-multifpga.awb Locally Modified          128 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform
+ fpga-platform-build-pipeline.awb Locally Modified          128 
+
+BUILD_PIPELINE_DEBUG flag shouldn't cause recompilation.

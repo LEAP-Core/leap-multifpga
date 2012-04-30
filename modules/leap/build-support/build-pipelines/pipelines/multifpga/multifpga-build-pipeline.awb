@@ -13,3 +13,4 @@
 
 %scons %library multiFPGAPipeline.py
 
+%param BUILD_PIPELINE_DEBUG 0 "Enable build pipeline debug"

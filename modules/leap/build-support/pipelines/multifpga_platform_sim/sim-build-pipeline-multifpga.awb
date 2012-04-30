@@ -16,3 +16,5 @@
 %requires bluesim_tool
 
 %scons %library SimulationPipelineMultiFPGA.py
+
+%param BUILD_PIPELINE_DEBUG 0 "Enable build pipeline debug"

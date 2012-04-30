@@ -26,7 +26,6 @@
 %scons %library ProjectDependency.py
 
 
-%param BUILD_PIPELINE_DEBUG 0 "Enable top level build pipeline debug"
 %param SMART_SYNTH_BOUNDARY 0        "use smart synthesis boundaries"
 %param SYNTH_BOUNDARY       mkError  "name of synthesis boundary"
 
