@@ -2235,3 +2235,13 @@ Directory modules/leap/build-support/pipelines/multifpga_platform
  fpga-platform-build-pipeline.awb Locally Modified          128 
 
 BUILD_PIPELINE_DEBUG flag shouldn't cause recompilation.
+
+----------
+mcadler     Date: Wed May  9 22:50:19 EDT 2012  CSN: CSN-multifpga-130
+                  Thu May 10 02:50:19 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multi-fpga-connect.awb    Locally Modified          129 
+
+Change the default number of vias to 4.

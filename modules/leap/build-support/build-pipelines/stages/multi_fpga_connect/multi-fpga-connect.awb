@@ -10,4 +10,4 @@
 %scons %library danglingConnection.py
 %scons %library via.py
 
-%param --global MAX_NUMBER_OF_VIAS 1 "True if we can expect that the router has been generated"
+%param --global MAX_NUMBER_OF_VIAS 4 "True if we can expect that the router has been generated"
