@@ -2245,3 +2245,27 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
  multi-fpga-connect.awb    Locally Modified          129 
 
 Change the default number of vias to 4.
+
+----------
+kfleming    Date: Wed May 16 21:57:40 EDT 2012  CSN: CSN-multifpga-131
+                  Thu May 17 01:57:40 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ viaAssignment.py          Locally Added               0 
+ multi-fpga-connect.awb    Locally Modified          130 
+ via.py                    Locally Modified          130 
+ multiFPGAConnect.py       Locally Modified          130 
+ linkAssignment.py         Locally Added               0 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform_sim
+ SimulationPipelineMultiFPGA.py Locally Modified          130 
+
+
+Refactored random and ljf channel allocation schemes to share many
+pieces of code.  In particular the random scheme is reduced to around
+20 lines of code.  
+
+Random allocation now attempts to do load balancing, although for the
+case I tested (2 lanes, 16 cores) no performance gain was achieved. 
+

@@ -11,20 +11,9 @@ from multi_fpga_generate_bitfile import *
 from multi_fpga_log_generator import *
 from danglingConnection import *
 from via import *
+from viaAssignment import *
+from linkAssignment import *
 
-# Notice that chains will have their platform direction labelled
-def parseStats(filename):
-  logfile = open(filename,'r')
-  stats = {}
-  print "Processing Stats:  " + filename
-  for line in logfile:
-    if(re.match('.*ROUTER_.*_SENT.*',line)):           
-      match = re.search(r'.*ROUTER_(\w+)_SENT,.*,(\d+)',line)
-      if(match):
-        print "Stat " + match.group(1) + " got " + match.group(2)
-        stats[match.group(1)] = int(match.group(2))
-    
-  return stats
 
 ##
 ## Manage generation of statistics within a module by collecting counter names
@@ -129,39 +118,39 @@ class MultiFPGAConnect():
       moduleList.topDependency += [subbuild]
 
   def assignIndices(self,sourceConn,sinkConn):
-    print "Now processing connection %s between %s (%s) -> %s (%s)" % (sourceConn.name, sourceConn.platform, sourceConn.sc_type, sinkConn.platform, sinkConn.sc_type)
+      print "Now processing connection %s between %s (%s) -> %s (%s)" % (sourceConn.name, sourceConn.platform, sourceConn.sc_type, sinkConn.platform, sinkConn.sc_type)
 
-    sourceConn.inverse_sc_type = sinkConn.sc_type
-    sinkConn.inverse_sc_type   = sourceConn.sc_type
+      sourceConn.inverse_sc_type = sinkConn.sc_type
+      sinkConn.inverse_sc_type   = sourceConn.sc_type
 
-    sourceConn.inverse_name = sinkConn.name
-    sinkConn.inverse_name   = sourceConn.name
+      sourceConn.inverse_name = sinkConn.name
+      sinkConn.inverse_name   = sourceConn.name
 
-    if(sinkConn.platform in self.platformData[sourceConn.platform]['INDEX']):
-      # only increment the sourceConn. 
-      self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] += 1
-      index = self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform]
-      sourceConn.idx = index 
-      sinkConn.idx = index 
-      print "Setting index :" + str(index)
-    else:
-      self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] = 0
-      sourceConn.idx = 0
-      sinkConn.idx = 0 
-      print "Setting index :" + str(0)
+      if(sinkConn.platform in self.platformData[sourceConn.platform]['INDEX']):
+          # only increment the sourceConn. 
+          self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] += 1
+          index = self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform]
+          sourceConn.idx = index 
+          sinkConn.idx = index 
+          print "Setting index :" + str(index)
+      else:
+          self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] = 0
+          sourceConn.idx = 0
+          sinkConn.idx = 0 
+          print "Setting index :" + str(0)
     
-    # Tell the sink about the source.  The sink may have been processed already
-    if(sinkConn.platform in self.platformData[sourceConn.platform]['CONNECTED']):
-      self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] += [sinkConn]
-      print "Sink platform length: " + str(len(self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform]))
-    else:   
-      self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] = [sinkConn]
+      # Tell the sink about the source.  The sink may have been processed already
+      if(sinkConn.platform in self.platformData[sourceConn.platform]['CONNECTED']):
+          self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] += [sinkConn]
+          print "Sink platform length: " + str(len(self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform]))
+      else:   
+          self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] = [sinkConn]
 
-    if(sourceConn.platform in self.platformData[sinkConn.platform]['CONNECTED']):
-      self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] += [sourceConn]
-      print "Source platform length: " + str(len(self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform]))
-    else:   
-      self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] = [sourceConn]
+      if(sourceConn.platform in self.platformData[sinkConn.platform]['CONNECTED']):
+          self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] += [sourceConn]
+          print "Source platform length: " + str(len(self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform]))
+      else:   
+          self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] = [sourceConn]
 
   def connectPath(self, src, sink):
 
@@ -663,6 +652,26 @@ class MultiFPGAConnect():
               print 'Unmatched connection ' + dangling.name
               sys.exit(0)
 
+  # Notice that chains will have their platform direction labelled
+  def parseStats(self):
+    # let's read in a stats file
+    statsFile = self.moduleList.getAllDependenciesWithPaths('GIVEN_STATS')    
+    stats = {}
+    print "StatsFile " + str(statsFile)
+    if(len(statsFile) > 0):
+      filename = self.moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + statsFile[0]
+      logfile = open(filename,'r')  
+      print "Processing Stats:  " + filename
+      for line in logfile:
+        if(re.match('.*ROUTER_.*_SENT.*',line)):           
+          match = re.search(r'.*ROUTER_(\w+)_SENT,.*,(\d+)',line)
+          if(match):
+            print "Stat " + match.group(1) + " got " + match.group(2)
+            stats[match.group(1)] = int(match.group(2))
+    
+    return stats
+
+
   def generateRouterTypes(self, viaWidth, viaLinks, maxWidth):
 
     # At some point, we can reduce the number of header bits based on 
@@ -685,6 +694,115 @@ class MultiFPGAConnect():
     return [headerType, bodyType, type, fillerWidth]
 
 
+  def allocateRandom(self, links):
+     return 0;
+
+  # This needs to be side-effect free. 
+  def allocateLJF(self, platformLinks, targetLinks, vias):
+    #first sort the links on both sides
+    links = sorted(platformLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending    
+    platformConnectionsProvisional = []
+    targetPlatformConnectionsProvisional = []
+    # do I need to rename all the links to be sorted?  Probably...
+    for danglingIdx in range(len(links)):           
+      if((links[danglingIdx].sc_type == 'Recv') or (links[danglingIdx].sc_type == 'ChainSink') or (links[danglingIdx].sc_type == 'ChainRoutingRecv')):
+        # depending on the width of the vias, and the width of our type we get different loads on different processors
+        # need to choose the minimum
+        headerSize = 12 # reserve some space for the header
+        print "\n\n Analyzing " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + "\n"
+
+        minIdx = -1 
+        minLoad = 0        
+        for via in range(len(vias)):
+          extraChunk = 0
+          viaWidth = vias[via].width
+          viaLoad = vias[via].load
+          if(((links[danglingIdx].bitwidth + headerSize )%viaWidth) > 0):
+            extraChunk = 1
+                
+          load = (links[danglingIdx].activity * ( (links[danglingIdx].bitwidth + headerSize )/viaWidth + extraChunk)) + viaLoad
+          
+          # We don't do a great job here of evaluating opportunity cost.  Picking the longest running on the fastest processor 
+          # might be a bad choice.
+          if((load < minLoad) or (minIdx == -1)):
+            print "Setting min load as " +str(minLoad)  + " idx: " + str(via)
+            minIdx = via
+            minLoad = load
+              
+        vias[minIdx].load = minLoad
+        # XXX what are these doing?  
+        platformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].sc_type, minIdx, vias[minIdx].links))
+        targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].inverse_sc_type, minIdx, vias[minIdx].links))  
+        print "Assigning Recv " + links[danglingIdx].name   + " Idx " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
+        vias[minIdx].links += 1
+    return [vias, platformConnectionsProvisional, targetPlatformConnectionsProvisional]
+
+
+  def assignLinks(self, provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections):
+    for provisional in provisionalAssignments:
+      for idx in range(len(platformConnections)): # we can probably do better than this n^2 loop. 
+        # Watch out for chain Sinks and sources
+        if((platformConnections[idx].name == provisional.name) and (platformConnections[idx].sc_type == provisional.sc_type)): 
+          platformConnections[idx].via_idx  = provisional.via_idx
+          platformConnections[idx].via_link = provisional.via_link
+          print "Assigning egress " + platformConnections[idx].name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+    for provisional in provisionalTargetAssignments:
+      for idx in range(len(targetPlatformConnections)): # we can probably do better than this n^2 loop. 
+        # Watch out for chain Sinks and sources
+        if((targetPlatformConnections[idx].name == provisional.name) and (targetPlatformConnections[idx].sc_type == provisional.sc_type)):    
+          targetPlatformConnections[idx].via_idx  = provisional.via_idx
+          targetPlatformConnections[idx].via_link = provisional.via_link
+
+          print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+
+
+  # Given a stats asssignment, this function will give all dangling
+  # connections in the design a weight.  If no stat exists, then the
+  # weight will be the average of the weights that do exist.  If no
+  # stats file exists, then the weight will be set to a constant and
+  # preference give to non-chains
+  def assignActivity(self, stats):
+    # handle the connections themselves
+    recvs = 0
+    chains = 0           
+
+    for platform in self.environment.getPlatformNames():
+      for targetPlatform in self.platformData[platform]['CONNECTED'].keys():
+        totalTraffic = 0;
+        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
+          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
+            recvs += 1
+            if(dangling.name in stats):
+              dangling.activity = stats[dangling.name]
+              totalTraffic += stats[dangling.name]
+              print "Assigning " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])
+
+          # only create a chain when we see the source                                                                                                                                                                                       
+          if(dangling.sc_type == 'ChainSrc'):
+            chains += 1
+            chainName = platform + "_" + targetPlatform + "_" + dangling.name
+            if(chainName in stats):
+              dangling.activity = stats[chainName]
+              totalTraffic += stats[chainName]
+
+        if(totalTraffic == 0):
+          totalTraffic = 2*(chains+recvs)
+
+        # assign some value to 
+        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
+          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
+            if(not(dangling.name in stats)):
+              dangling.activity = totalTraffic/(chains+recvs)
+
+          # only create a chain when we see the source                                                                                                                                                                                       
+          if(dangling.sc_type == 'ChainSrc'):
+            chains += 1
+            chainName = platform + "_" + targetPlatform + "_" + dangling.name
+            if(not (chainName in stats)):
+              dangling.activity = totalTraffic/(2*(chains+recvs)) * 0.1  # no stat?  Make connections better than chains
+
+
+
   def analyzeNetwork(self):
     self.analyzeNetworkRandom()
 
@@ -703,14 +821,9 @@ class MultiFPGAConnect():
         egressViasInitial[platform][targetPlatform] = []
         ingressViasInitial[platform][targetPlatform] = []
 
-
     # let's read in a stats file
-    statsFile = self.moduleList.getAllDependenciesWithPaths('GIVEN_STATS')    
-    stats = {}
-    print "StatsFile " + str(statsFile)
-    if(len(statsFile) > 0):
-      stats = parseStats(self.moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + statsFile[0])
-
+    stats = self.parseStats()
+    self.assignActivity(stats)
 
     for platform in self.environment.getPlatformNames():
       for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
@@ -721,47 +834,7 @@ class MultiFPGAConnect():
 
         headerSize = 12 # simplifying assumption: headers have uniform size.  This isn't actually the case.
 
-        # handle the connections themselves
-        recvs = 0
-        chains = 0           
-
-        # let's first build up a data structure representing job
-        # lengths, initializing everything to equal weight.
-        # Since chains have relatively little cost, we give them much less weight than 
-        # normal links
-        # We need two passes to fill in potentially missing links
-        totalTraffic = 0;
-        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
-            recvs += 1 
-            if(dangling.name in stats):
-              dangling.activity = stats[dangling.name]
-              totalTraffic += stats[dangling.name]
-              print "Assigning " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])
-
-          # only create a chain when we see the source                    
-          if(dangling.sc_type == 'ChainSrc'):
-            chains += 1 
-            chainName = platform + "_" + targetPlatform + "_" + dangling.name
-            if(chainName in stats):
-              dangling.activity = stats[chainName]
-              totalTraffic += stats[chainName]
-
-        if(totalTraffic == 0):
-          totalTraffic = 2*(chains+recvs)
-
-        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
-            if(not(dangling.name in stats)):
-              dangling.activity = totalTraffic/(chains+recvs)
-            
-          # only create a chain when we see the source          
-          if(dangling.sc_type == 'ChainSrc'):
-            chains += 1 
-            chainName = platform + "_" + targetPlatform + "_" + dangling.name
-            if(not (chainName in stats)):
-              dangling.activity = totalTraffic/(2*(chains+recvs))
-
+        
         hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
         egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
         hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
@@ -769,31 +842,23 @@ class MultiFPGAConnect():
 
         firstAllocationPass = True; # We can't terminate in the first pass 
         viaWidthsFinal = [] # at some point, we'll want to derive this.  
-        viaLinksFinal = [] 
-        viaLoadsFinal = [] 
+        #viaLinksFinal = [] 
+        #viaLoadsFinal = [] 
         maxLoad = 0;
 
         sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
-
-        for link in sortedLinks:
-          print "Link" + dangling.name + "activiy: " + str(dangling.activity)
-
+        
         # The general strategy here is 
         # 1) hueristically pick lane widths
         # 2) Assign links to lanes using Longest Job First hueristic
         # Repeat until maximum link occupancy increases (although we might just try repeatedly and keep all the results) 
 
         for numberOfVias in range(1,10):
-          viaLoads = []
-          viaSizingIdx = 0
-          viaLinks = []
-          viaWidths = []
+          viaSizingIdx = 0          
           noViasRemaining = 0
           # pick our via links deterministically
-          
+          viaWidths = []
           for via in range(numberOfVias):
-            viaLinks.append(0)
-            viaLoads.append(0)
             if(via == 0):
               viaWidths.append(self.platformData[platform]['WIDTHS'][egressVia] - 1)
             else: # carve off a lane for the longest running job
@@ -820,67 +885,26 @@ class MultiFPGAConnect():
           # send/recv pairs had better be matched.
           # so let's match them up
           # need to maintain the sorted order
+          platformConnections = sorted(self.platformData[platform]['CONNECTED'][targetPlatform],key = lambda connection: connection.name)
+          targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)
 
-          platformConnectionsProvisional = []
-          targetPlatformConnectionsProvisional = []
-          for danglingIdx in range(len(sortedLinks)):           
-            if((sortedLinks[danglingIdx].sc_type == 'Recv') or (sortedLinks[danglingIdx].sc_type == 'ChainSink') or (sortedLinks[danglingIdx].sc_type == 'ChainRoutingRecv')):
-              # depending on the width of the vias, and the width of our type we get different loads on different processors
-              # need to choose the minimum
-              print "\n\n Analyzing " + sortedLinks[danglingIdx].name + " of width " + str(sortedLinks[danglingIdx].bitwidth)  + "\n"
-
-              minIdx = -1 
-              minLoad = 0
-              for via in range(numberOfVias):
-                extraChunk = 0
-                if(((sortedLinks[danglingIdx].bitwidth + headerSize )%viaWidths[via]) > 0):
-                  extraChunk = 1
-                
-                load = (sortedLinks[danglingIdx].activity * ( (sortedLinks[danglingIdx].bitwidth + headerSize )/viaWidths[via] + extraChunk)) + viaLoads[via]
-
-                print "link " + str(via) + " of width " + str(viaWidths[via]) + " header " + str(headerSize) + " extra " + str(extraChunk) +   " starts at " + str(viaLoads[via]) + ", new load is " + str(load) + " activity: " + str(sortedLinks[danglingIdx].activity)
-                # We don't do a great job here of evaluating opportunity cost.  Picking the longest running on the fastest processor 
-                # might be a bad choice.
-                if((load < minLoad) or (minIdx == -1)):
-                  print "Setting min load as " +str(minLoad)  + " idx: " + str(via)
-                  minIdx = via
-                  minLoad = load
-              
-              viaLoads[minIdx] = minLoad
-              platformConnectionsProvisional.append([sortedLinks[danglingIdx].name, sortedLinks[danglingIdx].sc_type, minIdx, viaLinks[minIdx]])
-              targetPlatformConnectionsProvisional.append([sortedLinks[danglingIdx].name, sortedLinks[danglingIdx].inverse_sc_type, minIdx, viaLinks[minIdx]])  
-              print "Assigning Recv " + sortedLinks[danglingIdx].name   + " Idx " + str(minIdx) + " Link " + str(viaLinks[minIdx]) + "\n"
-              viaLinks[minIdx] += 1
+          vias = [ViaAssignment(width, 0, 0) for width in viaWidths]
+          [viasProvisional, platformConnectionsProvisional, targetPlatformConnectionsProvisional] = self.allocateLJF(platformConnections, targetPlatformConnections , vias)
 
 
           platformConnections = sorted(self.platformData[platform]['CONNECTED'][targetPlatform],key = lambda connection: connection.name)
-          targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)
+          targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)          
           print "Lengths: "  + str(len(platformConnections)) + " " + str(len(targetPlatformConnections))  
           #Did we do better than last time?
-          for idx in range(len(viaLoads)):
-            print "Load " + str(idx) + ": " + str(viaLoads[idx]) 
-          print "For " + str(len(viaLoads)) + " vias maximum load is: " + str(max(viaLoads))
-          if(max(viaLoads) < maxLoad or firstAllocationPass):
-            print "Better allocation with  " + str(len(viaLoads)) + " vias found."
-            maxLoad = max(viaLoads)
-            viaWidthsFinal = viaWidths
-            viaLinksFinal = viaLinks
-            viaLoadsFinal = viaLoads
-            for provisional in platformConnectionsProvisional:
-              for idx in range(len(platformConnections)): # we can probably do better than this n^2 loop. 
-                # Watch out for chain Sinks and sources
-                if((platformConnections[idx].name == provisional[0]) and (platformConnections[idx].sc_type == provisional[1])): 
-                  platformConnections[idx].via_idx  = provisional[2]
-                  platformConnections[idx].via_link = provisional[3]
-                  print "Assigning egress " + platformConnections[idx].name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional[2]) + ' ' + str(provisional[3])
-            for provisional in targetPlatformConnectionsProvisional:
-              for idx in range(len(targetPlatformConnections)): # we can probably do better than this n^2 loop. 
-                # Watch out for chain Sinks and sources
-                if((targetPlatformConnections[idx].name == provisional[0]) and (targetPlatformConnections[idx].sc_type == provisional[1])):    
-                  targetPlatformConnections[idx].via_idx  = provisional[2]
-                  targetPlatformConnections[idx].via_link = provisional[3]
-
-                  print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional[2]) + ' ' + str(provisional[3])
+          for idx in range(len(viasProvisional)):
+            print "Loads " + str(idx) + ": " + str(viasProvisional[idx].load) + ' (links: ' + str(viasProvisional[idx].links) + ')'
+             
+          print "For " + str(len(viasProvisional)) + " vias maximum load is: " + str(max([via.load for via in viasProvisional]))
+          if(max([via.load for via in viasProvisional]) < maxLoad or firstAllocationPass):
+            print "Better allocation with  " + str(len(viasProvisional)) + " vias found."
+            maxLoad = max([via.load for via in viasProvisional])
+            viasFinal = viasProvisional
+            self.assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections)
 #          else:
             #Quit while we're ahead
 #            break
@@ -892,21 +916,21 @@ class MultiFPGAConnect():
         # We don't yet have information about how to handle flowcontrol
         # But we will fill in the data structure temporarily.  
         # Once all data via assignments have been handeled, we will do flowcontrol.
-        for via in range(len(viaWidthsFinal)):
+        for via in range(len(viasFinal)):
 
           # let's find the maximum width guy so that we calculate the types correctly. 
           viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
           maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections))
 
-          [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(viaWidthsFinal[via], viaLinksFinal[via], maxWidth)
+          [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(viasFinal[via].width, viasFinal[via].links, maxWidth)
 
-          egress = Via("egress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viaLoadsFinal[via], fillerWidth)
+          egress = Via("egress", headerType, bodyType, type, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viasFinal[via].load, fillerWidth)
 
-          ingress = Via("ingress", headerType, bodyType, type, viaWidthsFinal[via], viaLinksFinal[via], viaLinksFinal[via], 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viaLoadsFinal[via], fillerWidth)
+          ingress = Via("ingress", headerType, bodyType, type, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viasFinal[via].load, fillerWidth)
 
           egressViasInitial[platform][targetPlatform].append(egress)
           ingressViasInitial[targetPlatform][platform].append(ingress) 
-          print "Via pair " + egress.via_switch + ": " + str(via) + ' width: '  + str(viaWidthsFinal[via]) + ' links" ' + str(viaLinksFinal[via])
+          print "Via pair " + egress.via_switch + ": " + str(via) + ' width: '  + str(viasFinal[via].width) + ' links" ' + str(viasFinal[via].links)
 
 
 
@@ -994,6 +1018,8 @@ class MultiFPGAConnect():
 
     # let's do a simple scheme with an equal number of vias.
     numberOfVias = self.MAX_NUMBER_OF_VIAS
+    stats = self.parseStats()
+    self.assignActivity(stats)
 
     for platform in self.environment.getPlatformNames():
       for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
@@ -1010,24 +1036,9 @@ class MultiFPGAConnect():
         # and use it later
 
         # handle the connections themselves
-        recvs = 0
-        chains = 0           
-
-        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
-            recvs += 1 
-
-          # only create a chain when we see the source
-          if(dangling.sc_type == 'ChainSink'):
-            print "Got chain src named: " + dangling.name
-            chains += 1 
-
-          if(dangling.sc_type == 'ChainSrc'):
-            print "Got chain sink named: " + dangling.name        
-
-          # the egress via determines the ingress via
-          self.platformData[platform]['EGRESS_VIAS'][targetPlatform] = []
-          self.platformData[targetPlatform]['INGRESS_VIAS'][platform] = []
+        
+        self.platformData[platform]['EGRESS_VIAS'][targetPlatform] = []
+        self.platformData[targetPlatform]['INGRESS_VIAS'][platform] = []
             
                                          
         hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
@@ -1035,70 +1046,25 @@ class MultiFPGAConnect():
         hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
         ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
-        # now that we have decided on the vias, we must assign links to vias
-        # this nice deterministic algorithm will work - but we should be careful - the opposite side must also agree with us. 
-
-        linkVias  = numberOfVias
-        linkCount = numberOfVias # need single flow control lane
-
         # send/recv pairs had better be matched.
         # We want the slower chains to be evenly dispersed across the randomly assigned links
         platformConnections = self.platformData[platform]['CONNECTED'][targetPlatform]
         targetPlatformConnections = self.platformData[targetPlatform]['CONNECTED'][platform]
+        viaWidth = (self.platformData[platform]['WIDTHS'][egressVia] - numberOfVias) / numberOfVias
 
-        # Now we assign lanes/links to ingress/egress pairs
-        for danglingIdx in range(len(self.platformData[platform]['CONNECTED'][targetPlatform])):           
-          # sanity check the world
-          if(platformConnections[danglingIdx].sc_type == 'Recv' or platformConnections[danglingIdx].sc_type == 'ChainRoutingRecv'):              
-            if((platformConnections[danglingIdx].idx != targetPlatformConnections[danglingIdx].idx) or (platformConnections[danglingIdx].sc_type != targetPlatformConnections[danglingIdx].inverse_sc_type)):
-              print "Platform " + platform + " -> " + targetPlatform 
-              print "Mis-matched connections: " + platformConnections[danglingIdx].name + " vs. " + targetPlatformConnections[danglingIdx].name
-              print "Non-inverse connection types: " + platformConnections[danglingIdx].sc_type + " vs. " + targetPlatformConnections[danglingIdx].sc_type
-              sys.exit(-1)
-
-        
-            platformConnections[danglingIdx].via_idx = linkCount % linkVias
-            platformConnections[danglingIdx].via_link = linkCount / linkVias # Accounting for feedback
-            targetPlatformConnections[danglingIdx].via_idx = linkCount % linkVias
-            targetPlatformConnections[danglingIdx].via_link = linkCount / linkVias # Accounting for feedback
-
-            linkCount += 1
-            print "Assigning  " + platform + "->" + targetPlatform + " " + platformConnections[danglingIdx].name + "Type: " + platformConnections[danglingIdx].sc_type  + " Idx " + str(platformConnections[danglingIdx].via_idx) + " Link " + str(platformConnections[danglingIdx].via_link) + "\n"
-
-        # This second pass is a hueristic that forces the lightly used chains to be evenly distributed 
-        for danglingIdx in range(len(self.platformData[platform]['CONNECTED'][targetPlatform])):           
-          # sanity check the world
-          if(platformConnections[danglingIdx].sc_type == 'ChainSink'):              
-            if((platformConnections[danglingIdx].idx != targetPlatformConnections[danglingIdx].idx) or (platformConnections[danglingIdx].sc_type != targetPlatformConnections[danglingIdx].inverse_sc_type)):
-              print "Platform " + platform + " -> " + targetPlatform 
-              print "Mis-matched connections: " + platformConnections[danglingIdx].name + " vs. " + targetPlatformConnections[danglingIdx].name
-              print "Non-inverse connection types: " + platformConnections[danglingIdx].sc_type + " vs. " + targetPlatformConnections[danglingIdx].sc_type
-              sys.exit(-1)
-
-        
-            platformConnections[danglingIdx].via_idx = linkCount % linkVias
-            platformConnections[danglingIdx].via_link = linkCount / linkVias # Accounting for feedback
-            targetPlatformConnections[danglingIdx].via_idx = linkCount % linkVias
-            targetPlatformConnections[danglingIdx].via_link = linkCount / linkVias # Accounting for feedback
-
-            linkCount += 1
-
-            print "Assigning  " + platform + "->" + targetPlatform + " " + platformConnections[danglingIdx].name + "Type: " + platformConnections[danglingIdx].sc_type  + " Idx " + str(platformConnections[danglingIdx].via_idx) + " Link " + str(platformConnections[danglingIdx].via_link) + "\n"
-
-
+        #We already assign the flow control link to zero, so we must initialize the 
+        #via assignment to have one link already gone
+        vias = [ViaAssignment(viaWidth, 0, 1) for via in range(numberOfVias)]
+        [viasProvisional, platformConnectionsProvisional, targetPlatformConnectionsProvisional] = self.allocateLJF(platformConnections, targetPlatformConnections , vias)
+        self.assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections)
         # Now that we have an assignment of links, we can calculate the via types. 
         # We're dropping some bits here
         # this loop should be refactored to split ingress and egress
         # we need to reserve space for valid bits
         for via in range(numberOfVias):
-          viaWidth = (self.platformData[platform]['WIDTHS'][egressVia] - numberOfVias) / numberOfVias
           # need to set the via widths here...
-          spareLink = 0
-          if(via < (recvs + chains)%numberOfVias):
-            spareLink = 1
-          viaLinks = ((recvs + chains)/numberOfVias) + spareLink
-          viaLinks +=1 # allocate flowcontrol link
-
+          viaLinks = viasProvisional[via].links
+          print "Via " + str(via) + " links " + str(viasProvisional[via].links)
           # let's find the maximum width guy so that we calculate the types correctly. 
           viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
           maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections)) # notice that we are not taking in to account the flow control bits here. We might well want to do that at some point. 

@@ -15,7 +15,7 @@ class Build(ProjectDependency):
     WrapperGen(moduleList)
     Iface(moduleList)
     BSV(moduleList)
-    if(not BUILD_LOGS_ONLY):
+    if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
       Bluesim(moduleList)
       Software(moduleList)
 

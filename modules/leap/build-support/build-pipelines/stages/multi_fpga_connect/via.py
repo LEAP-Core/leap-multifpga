@@ -17,3 +17,5 @@ class Via():
       self.via_switch = via_switch
       self.via_load = via_load
       self.via_filler_width = via_filler_width
+
+
