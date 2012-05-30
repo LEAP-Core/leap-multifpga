@@ -2269,3 +2269,18 @@ pieces of code.  In particular the random scheme is reduced to around
 Random allocation now attempts to do load balancing, although for the
 case I tested (2 lanes, 16 cores) no performance gain was achieved. 
 
+
+----------
+kfleming    Date: Wed May 30 10:34:23 EDT 2012  CSN: CSN-multifpga-132
+                  Wed May 30 14:34:23 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          131 
+
+
+Two bug fixes:
+
+Fixed int/float cast bug that was causing some builds to fail, since chains not in the stats report were were weighted 0
+
+If no link is assigned to the via, we use the via width at the maximum length.  This seems reasonable. 

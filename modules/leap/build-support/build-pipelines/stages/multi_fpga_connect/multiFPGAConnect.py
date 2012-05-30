@@ -792,14 +792,14 @@ class MultiFPGAConnect():
         for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
           if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
             if(not(dangling.name in stats)):
-              dangling.activity = totalTraffic/(chains+recvs)
+              dangling.activity = float(totalTraffic)/(chains+recvs)
 
           # only create a chain when we see the source                                                                                                                                                                                       
           if(dangling.sc_type == 'ChainSrc'):
             chains += 1
             chainName = platform + "_" + targetPlatform + "_" + dangling.name
             if(not (chainName in stats)):
-              dangling.activity = totalTraffic/(2*(chains+recvs)) * 0.1  # no stat?  Make connections better than chains
+              dangling.activity = (float(totalTraffic)/(2*(chains+recvs))) * 0.1  # no stat?  Make connections better than chains
 
 
 
@@ -1067,7 +1067,9 @@ class MultiFPGAConnect():
           print "Via " + str(via) + " links " + str(viasProvisional[via].links)
           # let's find the maximum width guy so that we calculate the types correctly. 
           viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
-          maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections)) # notice that we are not taking in to account the flow control bits here. We might well want to do that at some point. 
+          maxWidth = viaWidth
+          if(len(viaConnections) > 0):
+            maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections)) # notice that we are not taking in to account the flow control bits here. We might well want to do that at some point. 
 
           [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(viaWidth, viaLinks, maxWidth)
           
