@@ -1,0 +1,8 @@
+model -> ACP0;
+common_services -> ACP0;
+connected_application -> ACP0;
+hardware_system -> ACP0;
+mem_perf_tester -> ACP0;
+mem_perf_tester_alt -> ACP1;
+
+

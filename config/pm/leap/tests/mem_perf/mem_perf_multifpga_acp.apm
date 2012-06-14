@@ -1,0 +1,93 @@
+
+[Global]
+SaveParameters=0
+Description=has strange module alingments
+File=mem_perf_multifpga_acp
+Version=2.2
+Name=Multifpga synthesis test 
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[Default Software Connected Application]
+File=modules/leap/build-support/project/application-env/soft-services/default-sw/connected-application-default-sw.awb
+Packagehint=leap
+
+[Default Software Connected Application/Requires]
+hardware_system=Scratchpad Memory Performance Test System (MultiFPGA)
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=Default Software Connected Application
+environment_description=ACP Dual FPGA Environment
+build_pipeline=multiFPGA Build Pipeline
+fpga_mapping=Mem Perf ACP Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline]
+File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline/Requires]
+multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_generate_bitfile=multiFPGA Generate bitfle
+multi_fpga_log_generator=multiFPGA Log Generation
+
+[MultiFPGA Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Requires]
+fpgamap_parser=FPGAMap
+
+[multiFPGA Generate bitfle]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
+Packagehint=multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+
+[Scratchpad Memory Performance Test System (MultiFPGA)]
+File=modules/apps/tests/mem_perf/mem-perf-wrapper-multi.awb
+Packagehint=leap-debug
+
+[Scratchpad Memory Performance Test System (MultiFPGA)/Requires]
+mem_perf_tester=Scratchpad Memory Performance Test System
+mem_perf_tester_alt=Scratchpad Memory Performance Test System (FPGA1)
+
+[Scratchpad Memory Performance Test System (FPGA1)]
+File=modules/apps/tests/mem_perf/mem-perf-alt.awb
+Packagehint=leap-debug
+
+[Scratchpad Memory Performance Test System]
+File=modules/apps/tests/mem_perf/mem-perf.awb
+Packagehint=leap-debug
+
+[ACP Dual FPGA Environment]
+File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env.awb
+Packagehint=multifpga
+
+[Mem Perf ACP Mapping]
+File=modules/multifpga/mem_perf/acp_mapping.awb
+Packagehint=multifpga

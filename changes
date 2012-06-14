@@ -2284,3 +2284,30 @@ Two bug fixes:
 Fixed int/float cast bug that was causing some builds to fail, since chains not in the stats report were were weighted 0
 
 If no link is assigned to the via, we use the via width at the maximum length.  This seems reasonable. 
+
+----------
+keflemin    Date: Thu Jun 14 09:51:32 EDT 2012  CSN: CSN-multifpga-133
+                  Thu Jun 14 13:51:32 UTC 2012
+
+
+Directory config/pm/leap
+ tests/                    Locally Added               0 
+
+Directory config/pm/leap/tests
+ mem_perf/                 Locally Added               0 
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_acp.apm Locally Added               0 
+
+Directory config/pm/leap/submodels/common
+ multifpga-soft-services.apm Locally Modified          132 
+
+Directory modules/multifpga
+ mem_perf/                 Locally Added               0 
+
+Directory modules/multifpga/mem_perf
+ acp_mapping.awb           Locally Added               0 
+ acp-mapping.map           Locally Added               0 
+
+
+Added support for memory performance test on multiple FPGAs. 
