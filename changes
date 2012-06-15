@@ -2311,3 +2311,15 @@ Directory modules/multifpga/mem_perf
 
 
 Added support for memory performance test on multiple FPGAs. 
+
+----------
+keflemin    Date: Fri Jun 15 16:45:49 EDT 2012  CSN: CSN-multifpga-134
+                  Fri Jun 15 20:45:49 UTC 2012
+
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_single_mem_acp.apm Locally Added               0 
+ mem_perf_multifpga_acp.apm Locally Modified          133 
+
+
+Fixed memory test for the ACP.
