@@ -2323,3 +2323,19 @@ Directory config/pm/leap/tests/mem_perf
 
 
 Fixed memory test for the ACP.
+
+----------
+kfleming    Date: Wed Jun 20 19:21:42 EDT 2012  CSN: CSN-multifpga-135
+                  Wed Jun 20 23:21:42 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          134 
+
+
+
+Added brute-force channel allocation algorithm.  This runs over all
+possible program-driven channel allocations and picks the best lane
+allocation.  This can take a very long time to run (exponential), and
+it doesn't do any better than LJF and only a little better than
+random. Ball in bins to the max!

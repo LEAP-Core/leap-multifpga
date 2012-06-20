@@ -2,6 +2,7 @@ import re
 import sys
 import SCons.Script
 import math
+import itertools
 from model import  *
 from fpga_environment_parser import *
 from fpgamap_parser import *
@@ -694,9 +695,6 @@ class MultiFPGAConnect():
     return [headerType, bodyType, type, fillerWidth]
 
 
-  def allocateRandom(self, links):
-     return 0;
-
   # This needs to be side-effect free. 
   def allocateLJF(self, platformLinks, targetLinks, vias):
     #first sort the links on both sides
@@ -709,7 +707,7 @@ class MultiFPGAConnect():
         # depending on the width of the vias, and the width of our type we get different loads on different processors
         # need to choose the minimum
         headerSize = 12 # reserve some space for the header
-        print "\n\n Analyzing " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + "\n"
+        #print "\n\n Analyzing " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + "\n"
 
         minIdx = -1 
         minLoad = 0        
@@ -725,7 +723,7 @@ class MultiFPGAConnect():
           # We don't do a great job here of evaluating opportunity cost.  Picking the longest running on the fastest processor 
           # might be a bad choice.
           if((load < minLoad) or (minIdx == -1)):
-            print "Setting min load as " +str(minLoad)  + " idx: " + str(via)
+            #print "Setting min load as " +str(minLoad)  + " idx: " + str(via)
             minIdx = via
             minLoad = load
               
@@ -733,7 +731,7 @@ class MultiFPGAConnect():
         # XXX what are these doing?  
         platformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].sc_type, minIdx, vias[minIdx].links))
         targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].inverse_sc_type, minIdx, vias[minIdx].links))  
-        print "Assigning Recv " + links[danglingIdx].name   + " Idx " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
+        #print "Assigning Recv " + links[danglingIdx].name   + " Idx " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
         vias[minIdx].links += 1
     return [vias, platformConnectionsProvisional, targetPlatformConnectionsProvisional]
 
@@ -804,56 +802,23 @@ class MultiFPGAConnect():
 
 
   def analyzeNetwork(self):
-    self.analyzeNetworkRandom()
+      self.analyzeNetworkRandom()
 
-  # This via allocation algorithm selects the "longest" job for allocation and 
-  # sticks it on the least loaded processor.  There are assymmetries in this problem
-  # which do not exist in the processor scheduling problem and that must be dealt with.    
-  def analyzeNetworkLJF(self):
+  def generateViaLJF(self, platform, targetPlatform):
+      firstAllocationPass = True; # We can't terminate in the first pass 
+      viaWidthsFinal = [] # at some point, we'll want to derive this. 
+      viasFinal = []   
+      maxLoad = 0;
+      headerSize = 12 # simplifying assumption: headers have uniform size.  This isn't actually the case.
 
-    # set up intermediate data structures.  We need a couple of passes to resolve link allocation. 
-    egressViasInitial = {}
-    ingressViasInitial = {}
-    for platform in self.environment.getPlatformNames():      
-      egressViasInitial[platform] = {}
-      ingressViasInitial[platform] = {}
-      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
-        egressViasInitial[platform][targetPlatform] = []
-        ingressViasInitial[platform][targetPlatform] = []
+      hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
+      egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
+      hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
+      ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
-    # let's read in a stats file
-    stats = self.parseStats()
-    self.assignActivity(stats)
+      sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
 
-    for platform in self.environment.getPlatformNames():
-      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
-
-        # for this target, we assume that we have a monolithic fifo via.  
-        # first, we must decide how to break up the via.  We will store that information
-        # and use it later
-
-        headerSize = 12 # simplifying assumption: headers have uniform size.  This isn't actually the case.
-
-        
-        hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-        egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
-        hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
-        ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
-
-        firstAllocationPass = True; # We can't terminate in the first pass 
-        viaWidthsFinal = [] # at some point, we'll want to derive this.  
-        #viaLinksFinal = [] 
-        #viaLoadsFinal = [] 
-        maxLoad = 0;
-
-        sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
-        
-        # The general strategy here is 
-        # 1) hueristically pick lane widths
-        # 2) Assign links to lanes using Longest Job First hueristic
-        # Repeat until maximum link occupancy increases (although we might just try repeatedly and keep all the results) 
-
-        for numberOfVias in range(1,10):
+      for numberOfVias in range(1,10):
           viaSizingIdx = 0          
           noViasRemaining = 0
           # pick our via links deterministically
@@ -894,12 +859,7 @@ class MultiFPGAConnect():
 
           platformConnections = sorted(self.platformData[platform]['CONNECTED'][targetPlatform],key = lambda connection: connection.name)
           targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)          
-          print "Lengths: "  + str(len(platformConnections)) + " " + str(len(targetPlatformConnections))  
-          #Did we do better than last time?
-          for idx in range(len(viasProvisional)):
-            print "Loads " + str(idx) + ": " + str(viasProvisional[idx].load) + ' (links: ' + str(viasProvisional[idx].links) + ')'
-             
-          print "For " + str(len(viasProvisional)) + " vias maximum load is: " + str(max([via.load for via in viasProvisional]))
+     
           if(max([via.load for via in viasProvisional]) < maxLoad or firstAllocationPass):
             print "Better allocation with  " + str(len(viasProvisional)) + " vias found."
             maxLoad = max([via.load for via in viasProvisional])
@@ -909,6 +869,100 @@ class MultiFPGAConnect():
             #Quit while we're ahead
 #            break
           firstAllocationPass = False
+
+      return viasFinal
+
+
+
+  # The general strategy here is 
+  # 1) hueristically pick lane widths
+  # 2) Assign links to lanes using Longest Job First hueristic
+  # Repeat until maximum link occupancy increases (although we might just try repeatedly and keep all the results) 
+
+  def generateViaCombinational(self, platform, targetPlatform):
+      firstAllocationPass = True; # We can't terminate in the first pass 
+      viaWidthsFinal = [] # at some point, we'll want to derive this. 
+      viasFinal = []   
+      maxLoad = 0;
+      headerSize = 12 # simplifying assumption: headers have uniform size.  This isn't actually the case.
+
+      hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
+      egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
+      hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
+      ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
+
+      sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
+        
+
+      for numberOfVias in range(0,3):
+          viaSizingIdx = 0          
+          noViasRemaining = 0
+          # pick our via links deterministically
+          viaWidths = []
+          viaOptions = itertools.combinations(sortedLinks,numberOfVias)
+          for allocation in viaOptions:
+            #is it legal?
+            baseViaWidth = self.platformData[platform]['WIDTHS'][egressVia] - (sum(map(lambda x: x.bitwidth, allocation)) + (1+numberOfVias)*(headerSize + 1)) 
+            if(baseViaWidth > 0):
+              viaWidths = map(lambda x: x.bitwidth + headerSize, allocation) + [baseViaWidth+headerSize]
+            else:
+              continue
+
+
+            # send/recv pairs had better be matched.
+            # so let's match them up
+            # need to maintain the sorted order
+            platformConnections = sorted(self.platformData[platform]['CONNECTED'][targetPlatform],key = lambda connection: connection.name)
+            targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)
+
+            vias = [ViaAssignment(width, 0, 0) for width in viaWidths]
+            [viasProvisional, platformConnectionsProvisional, targetPlatformConnectionsProvisional] = self.allocateLJF(platformConnections, targetPlatformConnections , vias)
+
+
+            platformConnections = sorted(self.platformData[platform]['CONNECTED'][targetPlatform],key = lambda connection: connection.name)
+            targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)          
+            
+            if(max([via.load for via in viasProvisional]) < maxLoad or firstAllocationPass):
+              print "Better allocation with  " + str(len(viasProvisional)) + " vias found."
+              maxLoad = max([via.load for via in viasProvisional])
+              viasFinal = viasProvisional
+              self.assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections)
+
+            firstAllocationPass = False
+
+      return viasFinal
+
+
+  def analyzeNetworkNonuniform(self, allocateFunction):
+
+    # set up intermediate data structures.  We need a couple of passes to resolve link allocation. 
+    egressViasInitial = {}
+    ingressViasInitial = {}
+    for platform in self.environment.getPlatformNames():      
+      egressViasInitial[platform] = {}
+      ingressViasInitial[platform] = {}
+      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+        egressViasInitial[platform][targetPlatform] = []
+        ingressViasInitial[platform][targetPlatform] = []
+
+    # let's read in a stats file
+    stats = self.parseStats()
+    self.assignActivity(stats)
+
+    for platform in self.environment.getPlatformNames():
+      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+
+        # for this target, we assume that we have a monolithic fifo via.  
+        # first, we must decide how to break up the via.  We will store that information
+        # and use it later
+
+        viasFinal = allocateFunction(platform, targetPlatform)
+        #end here 
+        headerSize = 12 # simplifying assumption: headers have uniform size.  This isn't actually the case.
+        hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
+        egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
+        hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
+        ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
         self.platformData[platform]['EGRESS_VIAS'][targetPlatform] = []
         self.platformData[targetPlatform]['INGRESS_VIAS'][platform] = []
@@ -1001,7 +1055,7 @@ class MultiFPGAConnect():
           [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth) 
 
           egress = Via("egress", headerType, bodyType, type, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via],fillerWidth)
-
+ 
           ingress = Via("ingress", headerType, bodyType, type, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via],fillerWidth)
 
           self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(egress)
@@ -1009,9 +1063,11 @@ class MultiFPGAConnect():
           print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
 
 
+  def analyzeNetworkComb(self):
+      self.analyzeNetworkNonuniform(self.generateViaCombinational)
 
-         
-
+  def analyzeNetworkLJF(self):
+      self.analyzeNetworkNonuniform(self.generateViaLJF)
 
 
   def analyzeNetworkRandom(self):
