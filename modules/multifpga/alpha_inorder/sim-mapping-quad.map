@@ -4,6 +4,7 @@ hasim_funcp -> FPGA1;
 hasim_isa_datapath -> FPGA1;
 funcp_memstate -> FPGA0;
 funcp_memstate_tlb -> FPGA0;
+commands_service -> FPGA2;
 hasim_timep -> FPGA2;
 inorder_pipeline_front_end -> FPGA3;
 decode_stage -> FPGA3;

@@ -5,6 +5,7 @@ hasim_funcp -> ACP0;
 hasim_isa_datapath -> ACP0;
 funcp_memstate -> ACP0;
 funcp_memstate_tlb -> ACP0;
+commands_service -> ACP0;
 hasim_timep -> ACP0;
 inorder_pipeline_front_end -> ACP1;
 decode_stage -> ACP0;

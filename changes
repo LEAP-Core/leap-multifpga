@@ -2339,3 +2339,20 @@ possible program-driven channel allocations and picks the best lane
 allocation.  This can take a very long time to run (exponential), and
 it doesn't do any better than LJF and only a little better than
 random. Ball in bins to the max!
+
+----------
+mcadler     Date: Mon Jun 25 16:29:35 EDT 2012  CSN: CSN-multifpga-136
+                  Mon Jun 25 20:29:35 UTC 2012
+
+
+Directory modules/multifpga/alpha_inorder
+ sim-mapping-time-func.map Locally Modified          135 
+ sim-mapping-time-func-cache.map Locally Modified          135 
+ sim-mapping-quad.map      Locally Modified          135 
+ acp-mapping-time-func-cache-2.map Locally Modified          135 
+ sim-mapping.map           Locally Modified          135 
+ acp-mapping-time-func.map Locally Modified          135 
+ acp-mapping-time-func-cache-3.map Locally Modified          135 
+ acp-mapping-time-func-cache.map Locally Modified          135 
+
+Place HAsim commands_service (usually with the timing model).
