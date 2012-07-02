@@ -2356,3 +2356,19 @@ Directory modules/multifpga/alpha_inorder
  acp-mapping-time-func-cache.map Locally Modified          135 
 
 Place HAsim commands_service (usually with the timing model).
+
+----------
+kfleming    Date: Mon Jul  2 16:11:13 EDT 2012  CSN: CSN-multifpga-137
+                  Mon Jul  2 20:11:13 UTC 2012
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga_dual_sram.apm Locally Modified          136 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          136 
+ danglingConnection.py     Locally Modified          136 
+
+
+Added support for module decorations on soft connections in the
+multifpga compiler.

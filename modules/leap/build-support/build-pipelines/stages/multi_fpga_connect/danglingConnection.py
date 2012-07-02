@@ -2,7 +2,7 @@ import sys
 
 class DanglingConnection():
   
-  def __init__(self, sc_type, raw_type, idx, name, platform, optional, bitwidth):
+  def __init__(self, sc_type, raw_type, idx, name, platform, optional, bitwidth, modulename, chainroot):
       self.sc_type = sc_type
       self.raw_type = raw_type
       self.name = name
@@ -12,6 +12,8 @@ class DanglingConnection():
       self.optional = optional
       self.bitwidth = int(bitwidth)
       self.matched = False
+      self.modulename = modulename
+      self.chainroot = chainroot
       self.inverse_sc_type = "ERROR"
       self.chainPartner = -1
       self.via_idx = -1

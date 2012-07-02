@@ -79,3 +79,6 @@ FUNCP_PVT_CACHE_ENTRIES=16384
 [ACP Dual FPGA Env with Dual SRAM]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
 Packagehint=multifpga
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=1

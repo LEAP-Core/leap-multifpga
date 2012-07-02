@@ -1214,9 +1214,13 @@ class MultiFPGAConnect():
                                    dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +' received cycles')
 
                 # we must create a logical chain information
-                chainsStr += 'let chain_' + dangling.inverse_name + ' = LOGICAL_CHAIN_INFO{logicalName: "' + dangling.inverse_name + '", logicalType: "' + \
-                             dangling.raw_type + '", computePlatform: "' + platform + '", incoming: tpl_2(pack_chain_' + dangling.inverse_name + ')' +\
-                             ', outgoing: unpack_chain_' + dangling.inverse_name + '};\n'
+                chainsStr += 'let chain_' + dangling.inverse_name + ' = ' + \
+                             'LOGICAL_CHAIN_INFO{logicalName: "' + dangling.inverse_name + '", ' + \
+                             'logicalType: "' + dangling.raw_type + '", computePlatform: "' + platform + '", ' + \
+                             'incoming: tpl_2(pack_chain_' + dangling.inverse_name + '), ' + \
+                             'outgoing: unpack_chain_' + dangling.inverse_name + ', ' + \
+                             'moduleNameIncoming: "router", moduleNameOutgoing: "router"' + \
+                             '};\n'
                       
                 chainsStr += 'registerChain(chain_' + dangling.inverse_name + ');\n'
 
@@ -1402,7 +1406,7 @@ class MultiFPGAConnect():
             if(match):
               self.platformData[platformName]['WIDTHS'][match.group(1)] = int(match.group(2))
           if(re.match("Compilation message: .*: Dangling",line)):
-              match = re.search(r'.*Dangling (\w+) {(.*)} \[(\d+)\]:(\w+):(\w+):(\w+):(\d+)', line)
+              match = re.search(r'.*Dangling (\w+) {(.*)} \[(\d+)\]:(\w+):(\w+):(\w+):(\d+):(\w+):(\w+)', line)
               if(match):
             #python groups begin at index 1  
                   print 'found connection: ' + line
@@ -1418,7 +1422,9 @@ class MultiFPGAConnect():
                                                                                 match.group(4),      
                                                                                 match.group(5),
                                                                                 match.group(6),
-                                                                                match.group(7))]
+                                                                                match.group(7),
+                                                                                match.group(8),
+                                                                                match.group(9))]
                   if(match.group(1) == "Chain"):
                     self.platformData[platformName]['DANGLING'] += [DanglingConnection("ChainSink", 
                                                                                 match.group(2),
@@ -1426,7 +1432,9 @@ class MultiFPGAConnect():
                                                                                 match.group(4),
                                                                                 match.group(5),
                                                                                 match.group(6),
-                                                                                match.group(7))]
+                                                                                match.group(7),
+                                                                                match.group(8),
+                                                                                match.group(9))]
 
               else:
                   print "Malformed connection message: " + line
