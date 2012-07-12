@@ -16,15 +16,8 @@ RootProvides=model
 DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
 model=HW/SW Hybrid Multifpga Project Foundation
 
-[Default Software Connected Application]
-File=modules/leap/build-support/project/application-env/soft-services/default-sw/connected-application-default-sw.awb
-Packagehint=leap
-
-[Default Software Connected Application/Requires]
-hardware_system=Scratchpad Memory Performance Test System (MultiFPGA)
-
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
-connected_application=Default Software Connected Application
+connected_application=Scratchpad Perf Test Connected Application
 environment_description=ACP Dual FPGA Env with Dual SRAM
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Mem Perf ACP Mapping
@@ -68,18 +61,6 @@ Packagehint=multifpga
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype
 
-[Scratchpad Memory Performance Test System (MultiFPGA)]
-File=modules/apps/tests/mem_perf/mem-perf-wrapper-multi.awb
-Packagehint=leap-debug
-
-[Scratchpad Memory Performance Test System (MultiFPGA)/Requires]
-mem_perf_tester=Scratchpad Memory Performance Test System
-mem_perf_tester_alt=Scratchpad Memory Performance Test System (FPGA1)
-
-[Scratchpad Memory Performance Test System (FPGA1)]
-File=modules/apps/tests/mem_perf/mem-perf-alt.awb
-Packagehint=leap-debug
-
 [Scratchpad Memory Performance Test System]
 File=modules/apps/tests/mem_perf/mem-perf.awb
 Packagehint=leap-debug
@@ -94,3 +75,17 @@ Packagehint=multifpga
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
+
+[Scratchpad Perf Test Connected Application]
+File=modules/apps/tests/mem_perf/connected_application/connected-application-test.awb
+Packagehint=leap-debug
+
+[Scratchpad Perf Test Connected Application/Requires]
+mem_perf_wrapper=Scratchpad Memory Performance Test System Wrapper
+
+[Scratchpad Memory Performance Test System Wrapper]
+File=modules/apps/tests/mem_perf/mem-perf-wrapper.awb
+Packagehint=leap-debug
+
+[Scratchpad Memory Performance Test System Wrapper/Requires]
+mem_perf_tester=Scratchpad Memory Performance Test System

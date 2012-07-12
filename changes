@@ -2372,3 +2372,34 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 Added support for module decorations on soft connections in the
 multifpga compiler.
+
+----------
+kfleming    Date: Thu Jul 12 18:10:06 EDT 2012  CSN: CSN-multifpga-138
+                  Thu Jul 12 22:10:06 UTC 2012
+
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_acp.apm Locally Modified          137 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga_dual_sram.apm Locally Modified          137 
+ alpha_inorder_dm_wt_ring_acp_16_dual_multifpga_sram.apm Locally Modified          137 
+ alpha_inorder_multifpga_time_func_exe.apm Locally Modified          137 
+ alpha_inorder_dm_wt_mesh_acp_128_multifpga_dual_sram.apm Locally Modified          137 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ typelex.py                Locally Added               0 
+ type_parser.py            Locally Added               0 
+ multiFPGAConnect.py       Locally Modified          137 
+ dumpStructures.tcl        Locally Added               0 
+ danglingConnection.py     Locally Modified          137 
+ taggedUnion.py            Locally Added               0 
+ member.py                 Locally Added               0 
+ parse_type.py             Locally Added               0 
+ multi-fpga-connect.awb    Locally Modified          137 
+ typeparser.awb            Locally Added               0 
+ type.py                   Locally Added               0 
+ struct.py                 Locally Added               0 
+
+
+Added a parser for bluespec types. We can now build a type representation in python.

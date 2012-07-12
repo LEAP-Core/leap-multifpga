@@ -18,6 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
+type_parser=Bluespec Type parser
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -82,3 +83,7 @@ Packagehint=multifpga
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
+
+[Bluespec Type parser]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+Packagehint=multifpga

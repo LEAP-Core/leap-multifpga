@@ -1,0 +1,20 @@
+#/********************************************************************
+#* Generic FPGA build pipeline
+#********************************************************************/
+
+%name Bluespec Type parser
+%desc Datatype for describing FPGA environmen
+
+%provides type_parser
+
+%scons %library member.py
+%scons %library taggedUnion.py
+%scons %library struct.py
+%scons %library type.py
+%scons %library parse_type.py
+%scons %private typelex.py
+%scons %private typeparse.py
+
+%sources -t TCL -v PRIVATE dumpStructures.tcl
+
+

@@ -2,8 +2,9 @@ import sys
 
 class DanglingConnection():
   
-  def __init__(self, sc_type, raw_type, idx, name, platform, optional, bitwidth, modulename, chainroot):
+  def __init__(self, sc_type, raw_type, idx, name, platform, optional, bitwidth, modulename, chainroot, type_structure):
       self.sc_type = sc_type
+
       self.raw_type = raw_type
       self.name = name
       self.inverse_name = "ERROR"
@@ -18,6 +19,7 @@ class DanglingConnection():
       self.chainPartner = -1
       self.via_idx = -1
       self.via_link = -1
+      self.type_structure = type_structure
       self.activity = 0 # this is used in lane allocation
 
   # can probably extend matches to support chains

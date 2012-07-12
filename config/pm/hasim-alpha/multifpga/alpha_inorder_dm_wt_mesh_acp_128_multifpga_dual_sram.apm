@@ -18,6 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
+type_parser=Bluespec Type parser
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -79,4 +80,8 @@ FUNCP_PVT_CACHE_ENTRIES=16384
 
 [Alpha Inorder DM, WT, Mesh 128 cores]
 File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_128_connected_application.apm
+Packagehint=multifpga
+
+[Bluespec Type parser]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga

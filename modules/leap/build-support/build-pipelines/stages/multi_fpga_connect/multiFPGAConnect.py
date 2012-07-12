@@ -5,6 +5,7 @@ import math
 import itertools
 from model import  *
 from fpga_environment_parser import *
+from type_parser import *
 from fpgamap_parser import *
 # we write to bitfile 
 # we read from logfile
@@ -103,7 +104,20 @@ class MultiFPGAConnect():
           wrapperLog =  platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
           parameterFile =  platformBitfileBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
                
-          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'INGRESS_VIAS': {}, 'EGRESS_VIAS': {}, 'INGRESS_VIAS_PASS_ONE': {}, 'EGRESS_VIAS_PASS_ONE': {}}
+
+          # We need to build up some context to give bluetcl the right search paths for when
+          # we go to inspect the types.  Each platform can have a different hierarchy.
+          allModules = [moduleList.topModule] + moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].synthBoundaries() + moduleList.synthBoundaries()
+          bluetclPaths = ''
+
+          for boundary in allModules:
+              bluetclPaths += platformLogBuildDir + '/hw/' + boundary.buildPath + '/.bsc/:'
+
+          # need ifc as well
+          bluetclPaths += platformLogBuildDir + '/iface/build/hw/.bsc/'
+          
+
+          self.platformData[platform.name] = {'LOG': wrapperLog, 'BSH': parameterFile, 'BLUETCL': bluetclPaths, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'INGRESS_VIAS': {}, 'EGRESS_VIAS': {}, 'INGRESS_VIAS_PASS_ONE': {}, 'EGRESS_VIAS_PASS_ONE': {}, 'TYPES':{}}
 
 
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
@@ -1398,6 +1412,7 @@ class MultiFPGAConnect():
 
   def parseDangling(self, platformName):
       logfile = open(self.platformData[platformName]['LOG'],'r')
+      parser = TypeParser()
       print "Processing: " + self.platformData[platformName]['LOG']
       for line in logfile:
           # also pull out link widths
@@ -1416,6 +1431,30 @@ class MultiFPGAConnect():
                   else:
                     sc_type = match.group(1)
 
+                  # construct a tagged union structure for this type!                  
+                  type =  parser.parseType(match.group(2))
+                  typeRefs = flatten(type.getTypeRefs())
+                  #Let's resolve all the type references for fun and profit
+                  for ref in typeRefs:
+                      if(ref in self.platformData[platformName]['TYPES']):
+                          continue
+                      # Anonymous structs may have dollar signs in them.  
+                      ref.replace('$','\$')
+                      typeDeconstruction = ref.split("::")                      
+                      command = 'bluetcl ./hw/model/dumpStructures.tcl ' + typeDeconstruction[0] + ' ' + typeDeconstruction[1]  +  ' -p ' + self.platformData[platformName]['BLUETCL']
+                      print command + "\n"
+                      
+                      tclIn = os.popen(command)
+                      raw = tclIn.read()
+                      self.platformData[platformName]['TYPES'][ref] = parser.parseType(raw)
+                      print "Raw:   " + raw + "\n"
+                      print "parse: " + str(self.platformData[platformName]['TYPES'][ref])
+
+                  #Was the original type a reference? If it was, then our loop recovered its type.
+                  if(isinstance(type,TypeRef)):
+                      type = self.platformData[platformName]['TYPES'][type.ref()] 
+                      
+
                   self.platformData[platformName]['DANGLING'] += [DanglingConnection(sc_type, 
                                                                                 match.group(2),
                                                                                 match.group(3),
@@ -1424,7 +1463,8 @@ class MultiFPGAConnect():
                                                                                 match.group(6),
                                                                                 match.group(7),
                                                                                 match.group(8),
-                                                                                match.group(9))]
+                                                                                match.group(9),
+                                                                                type)]
                   if(match.group(1) == "Chain"):
                     self.platformData[platformName]['DANGLING'] += [DanglingConnection("ChainSink", 
                                                                                 match.group(2),
@@ -1434,7 +1474,8 @@ class MultiFPGAConnect():
                                                                                 match.group(6),
                                                                                 match.group(7),
                                                                                 match.group(8),
-                                                                                match.group(9))]
+                                                                                match.group(9),
+                                                                                type)]
 
               else:
                   print "Malformed connection message: " + line

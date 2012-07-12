@@ -5,11 +5,14 @@
 
 %provides multi_fpga_connect
 %requires fpgamap_parser
+%requires type_parser
 
 %scons %library multiFPGAConnect.py
 %scons %library viaAssignment.py
 %scons %library linkAssignment.py
 %scons %library danglingConnection.py
 %scons %library via.py
+
+
 
 %param --global MAX_NUMBER_OF_VIAS 4 "True if we can expect that the router has been generated"
