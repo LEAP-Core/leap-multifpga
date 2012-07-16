@@ -2403,3 +2403,18 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 
 Added a parser for bluespec types. We can now build a type representation in python.
+
+----------
+kfleming    Date: Mon Jul 16 17:34:29 EDT 2012  CSN: CSN-multifpga-139
+                  Mon Jul 16 21:34:29 UTC 2012
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_loop_acp.apm Locally Modified          138 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          138 
+
+
+Added support for counting the number of lanes enqueued per
+cycle. This helps evaluate the quality of channel allocations.
