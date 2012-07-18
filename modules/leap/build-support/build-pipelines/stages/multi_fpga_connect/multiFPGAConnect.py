@@ -70,7 +70,9 @@ class MultiFPGAConnect():
 
   def __init__(self, moduleList):
       self.moduleList = moduleList
+      self.ANALYZE_NETWORK = moduleList.getAWBParam('multi_fpga_connect', 'ANALYZE_NETWORK')
       self.MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
+      self.MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MIN_NUMBER_OF_VIAS')
       self.GENERATE_ROUTER_DEBUG = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_DEBUG')
       self.GENERATE_ROUTER_STATS = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_STATS')
       APM_FILE = moduleList.env['DEFS']['APM_FILE']
@@ -835,7 +837,7 @@ class MultiFPGAConnect():
 
 
   def analyzeNetwork(self):
-      self.analyzeNetworkRandom()
+      eval('self.' + self.ANALYZE_NETWORK + '()')
 
   def generateViaLJF(self, platform, targetPlatform):
       firstAllocationPass = True; # We can't terminate in the first pass 
@@ -851,7 +853,7 @@ class MultiFPGAConnect():
 
       sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
 
-      for numberOfVias in range(1,10):
+      for numberOfVias in range(self.MIN_NUMBER_OF_VIAS,self.MAX_NUMBER_OF_VIAS+1):
           viaSizingIdx = 0          
           noViasRemaining = 0
           # pick our via links deterministically
@@ -927,7 +929,7 @@ class MultiFPGAConnect():
       sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
         
 
-      for numberOfVias in range(0,3):
+      for numberOfVias in range(self.MIN_NUMBER_OF_VIAS,self.MAX_NUMBER_OF_VIAS + 1):
           viaSizingIdx = 0          
           noViasRemaining = 0
           # pick our via links deterministically
@@ -1102,13 +1104,19 @@ class MultiFPGAConnect():
   def analyzeNetworkLJF(self):
       self.analyzeNetworkNonuniform(self.generateViaLJF)
 
+  def analyzeNetworkCompletelyRandom(self):
+      self.analyzeNetworkUniform(False)
 
   def analyzeNetworkRandom(self):
+      self.analyzeNetworkUniform(True)
+
+  def analyzeNetworkUniform(self, useActivity):
 
     # let's do a simple scheme with an equal number of vias.
     numberOfVias = self.MAX_NUMBER_OF_VIAS
     stats = self.parseStats()
-    self.assignActivity(stats)
+    if(useActivity):
+      self.assignActivity(stats)
 
     for platform in self.environment.getPlatformNames():
       for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():

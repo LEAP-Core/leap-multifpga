@@ -2418,3 +2418,17 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 Added support for counting the number of lanes enqueued per
 cycle. This helps evaluate the quality of channel allocations.
+
+----------
+keflemin    Date: Wed Jul 18 10:57:04 EDT 2012  CSN: CSN-multifpga-140
+                  Wed Jul 18 14:57:04 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          139 
+ multi-fpga-connect.awb    Locally Modified          139 
+
+
+Added awb parameters to control the lane allocation scheme used by the 
+multifpga compiler. This is useful in scripting experiments. 
+

@@ -16,3 +16,5 @@
 
 
 %param --global MAX_NUMBER_OF_VIAS 4 "True if we can expect that the router has been generated"
+%param --global MIN_NUMBER_OF_VIAS 1 "True if we can expect that the router has been generated"
+%param --global ANALYZE_NETWORK "analyzeNetworkRandom" "Which analysis function should we be calling."
