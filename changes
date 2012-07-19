@@ -2432,3 +2432,25 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 Added awb parameters to control the lane allocation scheme used by the 
 multifpga compiler. This is useful in scripting experiments. 
 
+
+----------
+kfleming    Date: Thu Jul 19 00:01:28 EDT 2012  CSN: CSN-multifpga-141
+                  Thu Jul 19 04:01:28 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          140 
+ viaAssignment.py          Locally Modified          140 
+
+
+Fixed bug in load balancer code.  We made the assumption that header
+were 12 bits wide, but this was causing load balancing mistakes for
+narrow lanes. Now the load balancing is recursive. We set provisional
+header widths, do a lane allocation, and check if the provisional
+header sizes were feasible.  If they weren't, we store the correct
+header sizes and iterate until a fixed point is reached.  Usually this
+happens after a couple of iterations.  
+
+Balancing errors in HAsim were as high as 40%, but now seem to be
+under 10%.
+

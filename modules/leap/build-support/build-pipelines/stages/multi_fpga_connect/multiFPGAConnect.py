@@ -730,30 +730,42 @@ class MultiFPGAConnect():
     return [headerType, bodyType, type, fillerWidth]
 
 
-  # This needs to be side-effect free. 
+  # Having a large, conservative header size can cause us to weight 
+  # lanes incorrectly during LJF operation.  As a result, we will now 
+  # maintain provisional header widths and do a hill climb until we get 
+  # feasible header sizes.  This will put much tighter bounds on our header 
+  # sizings
   def allocateLJF(self, platformLinks, targetLinks, vias):
+      return self.allocateLJFWithHeaders(platformLinks, targetLinks, vias, [1 for via in vias]);
+
+  def allocateLJFWithHeaders(self, platformLinks, targetLinks, vias, headers):
     #first sort the links on both sides
     links = sorted(platformLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending    
     platformConnectionsProvisional = []
     targetPlatformConnectionsProvisional = []
+    #since we can recurse, we should copy our inputs
+    viasRollback = copy.deepcopy(vias)
     # do I need to rename all the links to be sorted?  Probably...
+    maxLinkWidth = [-1 for via in vias]
     for danglingIdx in range(len(links)):           
       if((links[danglingIdx].sc_type == 'Recv') or (links[danglingIdx].sc_type == 'ChainSink') or (links[danglingIdx].sc_type == 'ChainRoutingRecv')):
         # depending on the width of the vias, and the width of our type we get different loads on different processors
         # need to choose the minimum
-        headerSize = 12 # reserve some space for the header
-        #print "\n\n Analyzing " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + "\n"
 
+        print "\n\n Analyzing " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + " raw load: " + str(links[danglingIdx].activity) + "\n"
+        
         minIdx = -1 
         minLoad = 0        
+        
         for via in range(len(vias)):
           extraChunk = 0
           viaWidth = vias[via].width
           viaLoad = vias[via].load
+          headerSize = headers[via] # reserve some space for the header.  we may actually find that this sizing is wrong.
           if(((links[danglingIdx].bitwidth + headerSize )%viaWidth) > 0):
             extraChunk = 1
-                
-          load = (links[danglingIdx].activity * ( (links[danglingIdx].bitwidth + headerSize )/viaWidth + extraChunk)) + viaLoad
+          chunks = (links[danglingIdx].bitwidth + headerSize )/viaWidth + extraChunk       
+          load = links[danglingIdx].activity * chunks + viaLoad
           
           # We don't do a great job here of evaluating opportunity cost.  Picking the longest running on the fastest processor 
           # might be a bad choice.
@@ -761,15 +773,34 @@ class MultiFPGAConnect():
             #print "Setting min load as " +str(minLoad)  + " idx: " + str(via)
             minIdx = via
             minLoad = load
-              
+           
         vias[minIdx].load = minLoad
+        if(links[danglingIdx].bitwidth > maxLinkWidth[minIdx]):
+          maxLinkWidth[minIdx] = links[danglingIdx].bitwidth
         # XXX what are these doing?  
         platformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].sc_type, minIdx, vias[minIdx].links))
         targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].inverse_sc_type, minIdx, vias[minIdx].links))  
-        #print "Assigning Recv " + links[danglingIdx].name   + " Idx " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
+        print "Assigning Recv " + links[danglingIdx].name   + " Via " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
+        print "Vias are " +  str(vias) + "\n"
         vias[minIdx].links += 1
-    return [vias, platformConnectionsProvisional, targetPlatformConnectionsProvisional]
 
+    #do we have a legal assingment (i.e., were our header sizes okay?)
+    needRecurse = False
+    headersNext = []
+    for via in range(len(vias)):
+        [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(vias[via].width, vias[via].links, maxLinkWidth[via])
+        headerActual = vias[via].width - fillerWidth
+        #To ensure termination, we require monotonically increasing
+        #header sizes 
+        headersNext.append(max([headerActual,headers[via]]))
+        if(headers[via] < headerActual):
+            needRecurse = True
+              
+    if(not needRecurse):
+        return [vias, platformConnectionsProvisional, targetPlatformConnectionsProvisional]
+    else:
+        print "Recursing with header: " + str(headersNext) + "\n"
+        return self.allocateLJFWithHeaders(platformLinks, targetLinks, viasRollback, headersNext)
 
   def assignLinks(self, provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections):
     for provisional in provisionalAssignments:
@@ -919,7 +950,7 @@ class MultiFPGAConnect():
       viaWidthsFinal = [] # at some point, we'll want to derive this. 
       viasFinal = []   
       maxLoad = 0;
-      headerSize = 12 # simplifying assumption: headers have uniform size.  This isn't actually the case.
+      headerSize = 7 # simplifying assumption: headers have uniform size.  This isn't actually the case.
 
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
       egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
@@ -993,7 +1024,7 @@ class MultiFPGAConnect():
 
         viasFinal = allocateFunction(platform, targetPlatform)
         #end here 
-        headerSize = 12 # simplifying assumption: headers have uniform size.  This isn't actually the case.
+        headerSize = 7 # simplifying assumption: headers have uniform size.  This isn't actually the case.
         hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
         egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
         hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]

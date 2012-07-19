@@ -5,3 +5,5 @@ class ViaAssignment():
       self.load = load
       self.links = links
       
+  def __repr__(self):
+    return "Via width: " + str(self.width) + " load: " + str(self.load) + " links: " + str(self.links) + " "
