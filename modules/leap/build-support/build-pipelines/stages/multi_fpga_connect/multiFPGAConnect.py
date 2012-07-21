@@ -88,7 +88,6 @@ class MultiFPGAConnect():
           print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
       self.mapping = parseFPGAMap(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0])
 
-
       # we produce some bsh in each platform
       self.platformData = {}
       moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] = []
@@ -1471,6 +1470,9 @@ class MultiFPGAConnect():
   def parseDangling(self, platformName):
       logfile = open(self.platformData[platformName]['LOG'],'r')
       parser = TypeParser()
+      type = 'Typeclass {librl_bsv_base::Compress#(type t_DATA, type t_ENC_DATA, type t_DECODER, type t_MAPPING)} {dependencies {{t_DATA determines (t_ENC_DATA, t_DECODER, t_MAPPING)}}} {members {{{a#(librl_bsv_base::COMPRESSION_ENCODER#(t_DATA, t_ENC_DATA))   provisos (IsModule#(a, b))} mkCompressor} {{a#(librl_bsv_base::COMPRESSION_DECODER#(t_DATA, t_ENC_DATA, t_DECODER))   provisos (IsModule#(a, b))} mkDecompressor}}} {instances {{librl_bsv_base::Compress#(Maybe#(t_DATA), Bit#(t_CONTAINER_SZ), Bit#(1), HList::HList2#(Bit#(t_DATA_SZ), Bit#(1)))   provisos (Add#(1, t_DATA_SZ, t_CONTAINER_SZ), Bits#(t_DATA, t_DATA_SZ))}}} {position {hw/model/compress.bsv 47 11}}'
+      parser.parseType(type)
+
       print "Processing: " + self.platformData[platformName]['LOG']
       for line in logfile:
           # also pull out link widths

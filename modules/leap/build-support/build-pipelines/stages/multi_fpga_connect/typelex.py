@@ -7,12 +7,18 @@
 reserved = {
     'TaggedUnion': 'TAGGEDUNION',
     'Struct': 'STRUCT',
+    'Typeclass': 'TYPECLASS',
     'members': 'MEMBERS',
+    'dependencies': 'DEPENDENCIES',
+    'determines': 'DETERMINES',
+    'instances': 'INSTANCES',
+    'function': 'FUNCTION',
     'position': 'POSITION',
     'polymorphic': 'POLYMORPHIC',
     'type': 'TYPE',
     'numeric': 'NUMERIC',
     'width': 'WIDTH',
+    'provisos': 'PROVISOS',
     }
 
 tokens = [ 'RCURLY', 'LCURLY', 'RPAREN', 'LPAREN', 'DOUBLECOLON',
@@ -31,10 +37,15 @@ t_COMMA = r','
 t_DOUBLECOLON = r'::'
 t_POUND = r'\#'
 t_TAGGEDUNION = r'TaggedUnion'
+t_DEPENDENCIES = r'dependencies'
+t_INSTANCES = r'instances'
+t_TYPECLASS = r'Typeclass'
 t_STRUCT = r'Struct'
 t_MEMBERS = r'members'
 t_POSITION = r'position'
+t_FUNCTION = r'function'
 t_POLYMORPHIC = r'polymorphic'
+t_PROVISOS = r'provisos'
 t_NUMERIC = r'numeric'
 t_TYPE = r'type'
 t_WIDTH = r'width'

@@ -16,6 +16,24 @@ class Type():
             representation += "#(" + ",".join(map(lambda a: str(a) , self.params)) + ")"
         return representation
 
+class Function(Type):
+  
+    def __init__(self, name, returnType, params):
+        self.name = name
+        self.returnType = returnType
+        self.params = params
+
+    def getTypeRefs(self):
+        return  [returnType.getTypeRefs()] + map(lambda m: m.getTypeRefs(),self.params)
+
+    def __repr__(self):
+        representation = 'function ' + str(self.returnType) + ' ' + self.name
+        if(len(self.params) > 0):
+            representation += "(" + ",".join(map(lambda a: str(a) , self.params)) + ")"
+        else:
+            representation += "()"
+        return representation
+
 class NumericType(Type):
   
     def __init__(self, name):

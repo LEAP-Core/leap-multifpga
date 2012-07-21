@@ -11,6 +11,7 @@
 %scons %library taggedUnion.py
 %scons %library struct.py
 %scons %library type.py
+%scons %library typeclass.py
 %scons %library parse_type.py
 %scons %private typelex.py
 %scons %private typeparse.py

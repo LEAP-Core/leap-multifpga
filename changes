@@ -2454,3 +2454,23 @@ happens after a couple of iterations.
 Balancing errors in HAsim were as high as 40%, but now seem to be
 under 10%.
 
+
+----------
+kfleming    Date: Sat Jul 21 18:50:15 EDT 2012  CSN: CSN-multifpga-142
+                  Sat Jul 21 22:50:15 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ typelex.py                Locally Modified          141 
+ multiFPGAConnect.py       Locally Modified          141 
+ typeclass.py              Locally Added               0 
+ typeparser.awb            Locally Modified          141 
+ type.py                   Locally Modified          141 
+
+
+Added parser support for examining typeclasses and instances in
+advance of the Compress typeclass.  Parser now handles functions and
+provisos.
+
+I also added better support for recognizing polymorphic types, which
+will be needed for type unification of polymorphic Compress instances.
