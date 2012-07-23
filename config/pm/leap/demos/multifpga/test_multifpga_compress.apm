@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_loop
+File=test_multifpga_compress
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -70,21 +70,13 @@ Packagehint=multifpga
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype
 
-[Configurable Crossing test module d]
-File=modules/multifpga/longChain/test_d.awb
-Packagehint=multifpga
-
-[Configurable Crossing test module c]
-File=modules/multifpga/longChain/test_c.awb
-Packagehint=multifpga
-
 [MultiFPGA Loop Synthesis test module top]
 File=modules/multifpga/longChain/top.awb
 Packagehint=multifpga
 
 [MultiFPGA Loop Synthesis test module top/Requires]
-test_c=Configurable Crossing test module c
-test_d=Configurable Crossing test module d
+test_c=Compression test module c
+test_d=Compression test module d
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
@@ -98,4 +90,12 @@ Packagehint=multifpga
 
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+Packagehint=multifpga
+
+[Compression test module d]
+File=modules/multifpga/compressionTest/test_d.awb
+Packagehint=multifpga
+
+[Compression test module c]
+File=modules/multifpga/compressionTest/test_c.awb
 Packagehint=multifpga

@@ -2,7 +2,8 @@ import sys
 import re
 from type import *
 
-class Struct(Type):
+
+class Struct(CompoundType):
   
     def __init__(self, type, members, width):
         self.members = members
@@ -18,8 +19,21 @@ class Struct(Type):
         representation += "}} {width " + str(self.width) + "}"
         return representation
 
+    def __eq__(self,other):
+        # We can strip out the reference, but if it exists we should check it
+        equal = False
+        if(isinstance(other,PolyType)):
+            #poly types subsume everything
+            return True
+        elif(isinstance(other, PolyStruct) or isinstance(other, Struct)):
+            equal = (self.type == other.type) and (len(self.members) == len(other.members))
+            if(equal):
+                for idx in range(len(self.members)):
+                    equal = equal and (self.members[idx] == other.members[idx])
 
-class PolyStruct(Type):
+        return equal       
+
+class PolyStruct(CompoundType):
   
     def __init__(self, type, members):
         self.members = members
@@ -34,7 +48,19 @@ class PolyStruct(Type):
         representation += "}} "
         return representation
 
+    def __eq__(self,other):
+        # We can strip out the reference, but if it exists we should check it
+        equal = False
+        if(isinstance(other,PolyType)):
+            #poly types subsume everything
+            return True
+        elif(isinstance(other, PolyStruct) or isinstance(other, Struct)):
+            equal = (self.type == other.type) and (len(self.members) == len(other.members))
+            if(equal):
+                for idx in range(len(self.members)):
+                    equal = equal and (self.members[idx] == other.members[idx])
 
+        return equal       
 
 
 

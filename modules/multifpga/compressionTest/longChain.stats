@@ -1,0 +1,350 @@
+CENTRAL_CACHE_CACHE_DIRTY_LINE_FLUSH,"Central Cache: Dirty lines flushed to memory",0
+CENTRAL_CACHE_CACHE_FORCE_INVAL_LINE,"Central Cache: Lines forcibly invalidated (not due to capacity)",0
+CENTRAL_CACHE_CACHE_INVAL_LINE,"Central Cache: Lines invalidated due to capacity",0
+CENTRAL_CACHE_CACHE_LOAD_HIT,"Central Cache: Load hits",0
+CENTRAL_CACHE_CACHE_LOAD_MISS,"Central Cache: Load misses",0
+CENTRAL_CACHE_CACHE_LOAD_RECENT_LINE_HIT,"Central Cache: Load recent line cache hits",0
+CENTRAL_CACHE_CACHE_STORE_HIT,"Central Cache: Store hits",0
+CENTRAL_CACHE_CACHE_STORE_MISS,"Central Cache: Store misses",0
+Module_application_env,"provides application_env (Soft Services Hybrid Application Environment)",1
+Module_assertions_device,"provides assertions_device (Report when a dictionary-defined important event occurs in HW.)",1
+Module_assertions_service,"provides assertions_service (Wrap assertions device in Soft Connections)",1
+Module_bluesim_tool,"provides bluesim_tool (Builds a bluesim executable)",1
+Module_bsv_tool,"provides bsv_tool (This tool builds Bluespec modules in sub directories)",1
+Module_build_pipeline,"provides build_pipeline (MultiFPGA BlueSim Platform Build Pipeline)",1
+Module_central_cache,"provides central_cache (Local Memory Central Cache)",1
+Module_central_cache_common,"provides central_cache_common (Central Cache Common Definitions)",1
+Module_central_cache_service,"provides central_cache_service (Central Cache Service)",1
+Module_channelio,"provides channelio (Basic Virtual Channel Multiplexer)",1
+Module_clocks_device,"provides clocks_device (Simulation Clocks Device)",1
+Module_command_switches,"provides command_switches (Standard Command Switches)",1
+Module_common_services,"provides common_services (Wrap Base Devices in Soft Connections)",1
+Module_common_utility_devices,"provides common_utility_devices (A collection of useful utilities, mostly dealing with I/O)",1
+Module_connected_application,"provides connected_application (MultiFPGA Loop Test Connected Application)",1
+Module_debug_scan_device,"provides debug_scan_device (Scans dictionary-defined state values out from HW.)",1
+Module_debug_scan_service,"provides debug_scan_service (Wrap debug scan device in Soft Connections)",1
+Module_dynamic_parameters_device,"provides dynamic_parameters_device (Sends values set on the command line to HW.)",1
+Module_dynamic_parameters_service,"provides dynamic_parameters_service (Wrap dynamic parameter device in Soft Connections)",1
+Module_environment_description,"provides environment_description (Simulation Dual FPGA Environment)",1
+Module_fpga_components,"provides fpga_components (Software FPGA Components)",1
+Module_fpga_environment_parser,"provides fpga_environment_parser (Datatype for describing FPGA environment)",1
+Module_fpga_mapping,"provides fpga_mapping (This file describes the mapping of the test to the ACP)",1
+Module_fpgaenv,"provides fpgaenv (FPGA Environment)",1
+Module_fpgamap_parser,"provides fpgamap_parser (A data type for describing FPGA environments)",1
+Module_front_panel,"provides front_panel (Hybrid Front Panel)",1
+Module_front_panel_service,"provides front_panel_service (Wrapt the Front Panel Device in Soft Connections)",1
+Module_hardware_system,"provides hardware_system (MultiFPGA	Loop Synthesis test module top)",1
+Module_iface_tool,"provides iface_tool (Build tool for LEAP interfaces)",1
+Module_librl_bsv,"provides librl_bsv (Reconfigurable Logic Bluespec Library)",1
+Module_librl_bsv_base,"provides librl_bsv_base (Reconfigurable Logic Bluespec Base Library)",1
+Module_librl_bsv_cache,"provides librl_bsv_cache (Manage an RL-side cache of arbitrary objects)",1
+Module_librl_bsv_storage,"provides librl_bsv_storage (Reconfigurable logic Bluespec modules that manage storage)",1
+Module_local_mem,"provides local_mem (Local Memory Interface using BRAM)",1
+Module_local_memory_device,"provides local_memory_device (Soft Connection Local Memory Device)",1
+Module_low_level_platform_interface,"provides low_level_platform_interface (Low Level Platform Interface for Hybrid Models)",1
+Module_mem_services,"provides mem_services (A Set of Standard Mem Services)",1
+Module_model,"provides model (MultiFPGA Platform)",1
+Module_multifpga_router_service,"provides multifpga_router_service (A stub file for the build-time generated router)",1
+Module_multifpga_switch,"provides multifpga_switch (MultiFPGA Switch with Flowcontrol)",1
+Module_physical_channel,"provides physical_channel (Simulation Physical Channel)",1
+Module_physical_interconnect,"provides physical_interconnect (Shared Tree Physical Interconnect)",1
+Module_physical_platform,"provides physical_platform (FPGA0 Simulation Physical Platform)",1
+Module_physical_platform_debugger,"provides physical_platform_debugger (Null Physical Platform Debugger)",1
+Module_physical_platform_utils,"provides physical_platform_utils (Common Utilities shared by multiple Platforms)",1
+Module_platform_services,"provides platform_services (Translates Virtual Devices into Soft Connections)",1
+Module_project_common,"provides project_common (A set of utilities useful for all hybrid projects.)",1
+Module_remote_memory,"provides remote_memory (Null Remote Memory)",1
+Module_rrr,"provides rrr (RRR Clients and Servers)",1
+Module_rrr_common,"provides rrr_common (RRR Common Module)",1
+Module_scratchpad_memory,"provides scratchpad_memory (Hybrid Scratchpad Memory Device)",1
+Module_scratchpad_memory_common,"provides scratchpad_memory_common (Scratchpad Memory Common Definitions)",1
+Module_scratchpad_memory_service,"provides scratchpad_memory_service (Wrap the Scratchpad Memory in Soft Connections)",1
+Module_shared_memory_service,"provides shared_memory_service (Null Shared Memory Services)",1
+Module_smart_synth_boundaries,"provides smart_synth_boundaries (Some BSH magic to maintain backwards compatibility.  There are massive hacks here.)",1
+Module_soft_clocks,"provides soft_clocks (Simply stamps out a new clock for each requested clock)",1
+Module_soft_clocks_lib,"provides soft_clocks_lib (Simply stamps out a new clock for each requested clock)",1
+Module_soft_connections,"provides soft_connections (SoftService Soft Connections for MultiFPGA)",1
+Module_soft_connections_alg,"provides soft_connections_alg (SoftService Soft Connections Algorithm MultiFPGA)",1
+Module_soft_connections_common,"provides soft_connections_common (Soft Service Soft Connections Common)",1
+Module_soft_connections_debug,"provides soft_connections_debug (Soft Connections Debugging)",1
+Module_soft_services,"provides soft_services (Everything needed for the various soft services)",1
+Module_soft_services_deps,"provides soft_services_deps (A means for dependent modules to include all soft service implementation files)",1
+Module_soft_services_lib,"provides soft_services_lib (Toplevel for connected module alone)",1
+Module_soft_strings,"provides soft_strings (Integer UID-based global string database)",1
+Module_software_tool,"provides software_tool (Build for software side of hybrid system)",1
+Module_starter_device,"provides starter_device (Starter Virtual Device)",1
+Module_starter_service,"provides starter_service (Wrarp Starter Device in Soft Connections)",1
+Module_stats_device,"provides stats_device (Periodically reports dictionary-defined statistics from HW.)",1
+Module_stats_service,"provides stats_service (Wrap Stats Device cin Soft Connections)",1
+Module_streams_device,"provides streams_device (Prints Dictionary-defined messages when instructed by HW.)",1
+Module_streams_service,"provides streams_service (Wrap streams device in Soft Connections)",1
+Module_test_c,"provides test_c (Configurable Crossing test module c)",1
+Module_test_d,"provides test_d (Configurable Crossing test module d)",1
+Module_umf,"provides umf (Little-Endian Unified Message Format)",1
+Module_unix_comm_device,"provides unix_comm_device (UNIX Communication Physical Device)",1
+Module_unix_pipe_device,"provides unix_pipe_device (UNIX Pipe Physical Device)",1
+Module_virtual_devices,"provides virtual_devices (Standard Virtual Devices)",1
+Module_virtual_platform,"provides virtual_platform (Standard Virtual Platform)",1
+Module_wrapper_gen_tool,"provides wrapper_gen_tool (Build wrappper files for multifpga synthesis)",1
+Param_ASSERTIONS_PER_NODE,"Max number of assertions connected to an assertion node (ring stop).",16
+Param_BSC_FLAGS,"Bluespec compiler options",-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -show-range-conflict -remove-dollar
+Param_BSV_DEBUG,"BSV build debug",1
+Param_BUILD_LOGS_ONLY,"True if we should build only logfiles",0
+Param_BUILD_PIPELINE_DEBUG,"Enable top level build pipeline debug",0
+Param_BUILD_VERILOG,"Direct BSC to build verilog",1
+Param_CENTRAL_CACHE_DEBUG_ENABLE,"Enables the central cache debug",1
+Param_CENTRAL_CACHE_LINE_ADDR_BITS,"Address size of entries in the central cache.  Must be at least as large as the largest client.",64
+Param_CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS,"Index bits for a BRAM-based cache of recently accessed lines",10
+Param_CENTRAL_CACHE_MODE,"Bits 0-1: 0 write-back, 1 write-through, 3 disabled / Bit 2 disables recent line cache (dynamic)",0
+Param_CENTRAL_CACHE_REFINFO_BITS,"Reference metadata size.  Must be large enough for the largest client's metadata.",64
+Param_CENTRAL_CACHE_STATS,"Do we enable central cache stats collection",1
+Param_CIO_NUM_CHANNELS,"Number of virtual duplex channels",2
+Param_CLEAN_BSV,"Clean BSV intermediate files on rebuild",1
+Param_CLOSE_CHAINS,"should we close chains at the top level",1
+Param_CONNECTION_IDX_SIZE,"Number of bits to index multicast connections (8=256 connections).",8
+Param_CON_BUFFERING,"Amount of Buffering Slots per Connection.",2
+Param_CON_CHAIN_CWIDTH,"Phyisical Chain Connection Bit Width, which is not split.",128
+Param_CON_CWIDTH,"Phyisical Connection Bit Width after splitting.",128
+Param_CON_DEBUG_ENABLE,"Add soft-connection state to the debug scan chain (0/1)",1
+Param_CON_NUMCHAINS,"Number of Connection Chains.",9
+Param_CRYSTAL_CLOCK_FREQ,"Input (Crystal) Clock Frequency",50
+Param_DEBUG_LOG_DIR,"Debug log directory",leap_debug
+Param_DEBUG_REVBUF,"Turn on debugging for reversal buffer",0
+Param_DEBUG_STREAM_CAPTURE_FIFO,"Turn on debugging for stream capture fifos",0
+Param_EXTRA_DICTS,"A set of extra dictionary files",multifpga_routing.dic
+Param_EXTRA_RRRS,"A set of extra rrr files",
+Param_FPGA_DEV_PATH,"FPGA device(s) allocated (comma separated) (dynamic)",
+Param_FPGA_NUM_PLATFORMS,"Number of FPGA targets",2
+Param_FPGA_PLATFORM_ID,"ID of multi-FPGA target",0
+Param_FPGA_PLATFORM_NAME,"Name of multi-FPGA target",FPGA0
+Param_GENERATE_VICO,"True if we are building a vico target",0
+Param_GLOBAL_STRING_LOCAL_UID_SZ,"Number of bits for storing the local UID",14
+Param_GLOBAL_STRING_PLATFORM_UID_SZ,"Number of bits for storing the platform UID",6
+Param_GLOBAL_STRING_SYNTH_UID_SZ,"Number of bits for storing the synthesis boundary UID",10
+Param_IGNORE_PLATFORM_MISMATCH,"Specifies name of multi-fpga target",0
+Param_LOCAL_MEM_ADDR_BITS,"Local memory address size (address indexes words)",10
+Param_LOCAL_MEM_READ_LATENCY,"Additional latency to add to reads (for debugging)",8
+Param_LOCAL_MEM_WORDS_PER_LINE,"Local memory words per line (must be power of 2)",4
+Param_LOCAL_MEM_WORD_BITS,"Local memory word size",64
+Param_LOCAL_MEM_WRITE_LATENCY,"Additional latency to add to writes (for debugging)",4
+Param_MAGIC_SIMULATION_CLOCK_FACTOR,"Used to determine periods for ratioed clocks - making it larger may increase clock resolution",10000
+Param_MARSHALLING_DEBUG,"Should we enable router debug?",0
+Param_MODEL_CLOCK_FREQ,"Desired model clock frequency (integer).",50
+Param_MULTIFPGA_FIFO_SIZES,"True if we can expect that the router has been generated",128
+Param_NUM_CONNS,"Number of loopbacks",16
+Param_PLATFORM_SCRATCHPAD_DEBUG_ENABLE,"Enable Platform Scratchpad Debug Log",1
+Param_PLATFORM_SERVICES_AVAILABLE,"1 = Platform services are available.",1
+Param_SCRATCHPAD_CLIENT_REF_INFO_BITS,"Bits available to clients to tag a reference.",11
+Param_SCRATCHPAD_MEMORY_ADDR_BITS,"Word-level address bits per private scratchpad region",32
+Param_SCRATCHPAD_MEMORY_DEBUG_ENABLE,"Enables the scratchpad memory debug",1
+Param_SCRATCHPAD_PLATFORM,"Where should my scratchpad requests go?",Unknown
+Param_SCRATCHPAD_PVT_CACHE_MODE,"0: write-back, 1: write-through, 2: write-no-allocate, 3: disabled (dynamic)",0
+Param_SCRATCHPAD_STD_PVT_CACHE_ENTRIES,"Scratchpad private cache entries (must be a power of 2)",4096
+Param_SCRATCHPAD_STD_PVT_SKEW,"Skew cache indices",0
+Param_SIMULATOR_ARGS,"Simulator Args",-w
+Param_SIM_READ_PORT,"Simulator Read Port",/tmp/FPGA1ToFPGA0
+Param_SIM_WRITE_PORT,"Simulator Write Port",/tmp/FPGA0ToFPGA1
+Param_SMART_SYNTH_BOUNDARY,"use smart synthesis boundaries",0
+Param_STATS_SIZE,"Number of bits per Stat counter.",28
+Param_STREAMS_ENABLE_DEBUG,"Enable debugging streams",0
+Param_SWITCH_DEBUG,"Enables copious switch debug printing",0
+Param_TREE_PAYLOAD_SIZE,"Size of tree message payload.",400
+Param_TREE_STATION_IDX_SIZE,"Size of tree station index.",8
+Param_UMF_CHANNEL_ID_BITS,"Bits in UMF ChannelID",4
+Param_UMF_CHUNK_BYTES,"Bytes in UMF Chunk",4
+Param_UMF_MAX_MSG_BYTES,"Maximum message length",1024
+Param_UMF_METHOD_ID_BITS,"Bits in UMF MethodID",4
+Param_UMF_MSG_LENGTH_BITS,"Bits in UMF MsgLength",15
+Param_UMF_PHY_CHANNEL_RESERVED_BITS,"Bits reserved for use by the physical channel",1
+Param_UMF_SERVICE_ID_BITS,"Bits in UMF ServiceID",8
+Param_UNIX_COMM_DEBUG,"Unix communication device",0
+Param_UNIX_COMM_WIDTH,"Width of unix comm device in 64-bit words.  Device will scale its clock to provide upgraded bandwidth",4
+Param_USE_ROUTING_KNOWN,"True if we can expect that the router has been generated",1
+ROUTER_FPGA0_FPGA1_OldSchoolChain0_BLOCKED,"OldSchoolChain0 on egress4 link 3 cycles blocked",0
+ROUTER_FPGA0_FPGA1_OldSchoolChain0_RECEIVED,"OldSchoolChain0 on ingress4 link 3 received cycles",0
+ROUTER_FPGA0_FPGA1_OldSchoolChain0_SENT,"OldSchoolChain0 on egress4 link 3 cycles sent",0
+ROUTER_FPGA0_FPGA1_OldSchoolChain1_BLOCKED,"OldSchoolChain1 on egress4 link 2 cycles blocked",0
+ROUTER_FPGA0_FPGA1_OldSchoolChain1_RECEIVED,"OldSchoolChain1 on ingress4 link 2 received cycles",0
+ROUTER_FPGA0_FPGA1_OldSchoolChain1_SENT,"OldSchoolChain1 on egress4 link 2 cycles sent",0
+ROUTER_FPGA0_FPGA1_OldSchoolChain5_BLOCKED,"OldSchoolChain5 on egress4 link 4 cycles blocked",9
+ROUTER_FPGA0_FPGA1_OldSchoolChain5_RECEIVED,"OldSchoolChain5 on ingress4 link 4 received cycles",844
+ROUTER_FPGA0_FPGA1_OldSchoolChain5_SENT,"OldSchoolChain5 on egress4 link 4 cycles sent",108
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_0_BLOCKED,"ScratchpadGlobalReq_chunk_0 on egress4 link 5 cycles blocked",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_0_RECEIVED,"ScratchpadGlobalReq_chunk_0 on ingress4 link 5 received cycles",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_0_SENT,"ScratchpadGlobalReq_chunk_0 on egress4 link 5 cycles sent",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_1_BLOCKED,"ScratchpadGlobalReq_chunk_1 on egress4 link 6 cycles blocked",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_1_RECEIVED,"ScratchpadGlobalReq_chunk_1 on ingress4 link 6 received cycles",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_1_SENT,"ScratchpadGlobalReq_chunk_1 on egress4 link 6 cycles sent",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_2_BLOCKED,"ScratchpadGlobalReq_chunk_2 on egress4 link 7 cycles blocked",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_2_RECEIVED,"ScratchpadGlobalReq_chunk_2 on ingress4 link 7 received cycles",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_2_SENT,"ScratchpadGlobalReq_chunk_2 on egress4 link 7 cycles sent",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_3_BLOCKED,"ScratchpadGlobalReq_chunk_3 on egress4 link 8 cycles blocked",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_3_RECEIVED,"ScratchpadGlobalReq_chunk_3 on ingress4 link 8 received cycles",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalReq_chunk_3_SENT,"ScratchpadGlobalReq_chunk_3 on egress4 link 8 cycles sent",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_0_BLOCKED,"ScratchpadGlobalResp_chunk_0 on egress4 link 10 cycles blocked",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_0_RECEIVED,"ScratchpadGlobalResp_chunk_0 on ingress4 link 10 received cycles",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_0_SENT,"ScratchpadGlobalResp_chunk_0 on egress4 link 10 cycles sent",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_1_BLOCKED,"ScratchpadGlobalResp_chunk_1 on egress4 link 9 cycles blocked",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_1_RECEIVED,"ScratchpadGlobalResp_chunk_1 on ingress4 link 9 received cycles",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_1_SENT,"ScratchpadGlobalResp_chunk_1 on egress4 link 9 cycles sent",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_2_BLOCKED,"ScratchpadGlobalResp_chunk_2 on egress4 link 11 cycles blocked",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_2_RECEIVED,"ScratchpadGlobalResp_chunk_2 on ingress4 link 11 received cycles",0
+ROUTER_FPGA0_FPGA1_ScratchpadGlobalResp_chunk_2_SENT,"ScratchpadGlobalResp_chunk_2 on egress4 link 11 cycles sent",0
+ROUTER_FPGA1_FPGA0_OldSchoolChain0_BLOCKED,"OldSchoolChain0 on egress4 link 3 cycles blocked",0
+ROUTER_FPGA1_FPGA0_OldSchoolChain0_RECEIVED,"OldSchoolChain0 on ingress4 link 3 received cycles",0
+ROUTER_FPGA1_FPGA0_OldSchoolChain0_SENT,"OldSchoolChain0 on egress4 link 3 cycles sent",0
+ROUTER_FPGA1_FPGA0_OldSchoolChain1_BLOCKED,"OldSchoolChain1 on egress4 link 2 cycles blocked",0
+ROUTER_FPGA1_FPGA0_OldSchoolChain1_RECEIVED,"OldSchoolChain1 on ingress4 link 2 received cycles",0
+ROUTER_FPGA1_FPGA0_OldSchoolChain1_SENT,"OldSchoolChain1 on egress4 link 2 cycles sent",0
+ROUTER_FPGA1_FPGA0_OldSchoolChain5_BLOCKED,"OldSchoolChain5 on egress4 link 4 cycles blocked",476
+ROUTER_FPGA1_FPGA0_OldSchoolChain5_RECEIVED,"OldSchoolChain5 on ingress4 link 4 received cycles",108
+ROUTER_FPGA1_FPGA0_OldSchoolChain5_SENT,"OldSchoolChain5 on egress4 link 4 cycles sent",470
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_0_BLOCKED,"ScratchpadGlobalReq_chunk_0 on egress4 link 5 cycles blocked",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_0_RECEIVED,"ScratchpadGlobalReq_chunk_0 on ingress4 link 5 received cycles",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_0_SENT,"ScratchpadGlobalReq_chunk_0 on egress4 link 5 cycles sent",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_1_BLOCKED,"ScratchpadGlobalReq_chunk_1 on egress4 link 6 cycles blocked",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_1_RECEIVED,"ScratchpadGlobalReq_chunk_1 on ingress4 link 6 received cycles",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_1_SENT,"ScratchpadGlobalReq_chunk_1 on egress4 link 6 cycles sent",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_2_BLOCKED,"ScratchpadGlobalReq_chunk_2 on egress4 link 7 cycles blocked",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_2_RECEIVED,"ScratchpadGlobalReq_chunk_2 on ingress4 link 7 received cycles",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_2_SENT,"ScratchpadGlobalReq_chunk_2 on egress4 link 7 cycles sent",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_3_BLOCKED,"ScratchpadGlobalReq_chunk_3 on egress4 link 8 cycles blocked",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_3_RECEIVED,"ScratchpadGlobalReq_chunk_3 on ingress4 link 8 received cycles",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalReq_chunk_3_SENT,"ScratchpadGlobalReq_chunk_3 on egress4 link 8 cycles sent",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_0_BLOCKED,"ScratchpadGlobalResp_chunk_0 on egress4 link 10 cycles blocked",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_0_RECEIVED,"ScratchpadGlobalResp_chunk_0 on ingress4 link 10 received cycles",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_0_SENT,"ScratchpadGlobalResp_chunk_0 on egress4 link 10 cycles sent",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_1_BLOCKED,"ScratchpadGlobalResp_chunk_1 on egress4 link 9 cycles blocked",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_1_RECEIVED,"ScratchpadGlobalResp_chunk_1 on ingress4 link 9 received cycles",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_1_SENT,"ScratchpadGlobalResp_chunk_1 on egress4 link 9 cycles sent",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_2_BLOCKED,"ScratchpadGlobalResp_chunk_2 on egress4 link 11 cycles blocked",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_2_RECEIVED,"ScratchpadGlobalResp_chunk_2 on ingress4 link 11 received cycles",0
+ROUTER_FPGA1_FPGA0_ScratchpadGlobalResp_chunk_2_SENT,"ScratchpadGlobalResp_chunk_2 on egress4 link 11 cycles sent",0
+ROUTER_egressMultiplexor_FPGA0_to_FPGA1_MERGED,"egressMultiplexor_FPGA0_to_FPGA1 cycles enqueued",458027
+ROUTER_egressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver0_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver0_write cycles enqueued",390000
+ROUTER_egressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver1_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver1_write cycles enqueued",195000
+ROUTER_egressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver2_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver2_write cycles enqueued",195000
+ROUTER_egressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver3_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver3_write cycles enqueued",130002
+ROUTER_egressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver4_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver4_write cycles enqueued",146257
+ROUTER_egressMultiplexor_FPGA1_to_FPGA0_MERGED,"egressMultiplexor_FPGA1_to_FPGA0 cycles enqueued",471603
+ROUTER_egressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver0_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver0_write cycles enqueued",390000
+ROUTER_egressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver1_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver1_write cycles enqueued",195000
+ROUTER_egressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver2_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver2_write cycles enqueued",195000
+ROUTER_egressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver3_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver3_write cycles enqueued",130003
+ROUTER_egressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver4_write_ENQUEUED," vplat_llpint_physicalDrivers_unixCommDriver4_write cycles enqueued",146926
+ROUTER_fromB10_BLOCKED,"fromB10 on egress2 link 1cycles blocked",268682
+ROUTER_fromB10_RECEIVED,"fromB10 on ingress2 link 1 received cycles",65000
+ROUTER_fromB10_SENT,"fromB10 on egress2 link 1 cycles sent",65000
+ROUTER_fromB11_BLOCKED,"fromB11 on egress3 link 1cycles blocked",304531
+ROUTER_fromB11_RECEIVED,"fromB11 on ingress3 link 1 received cycles",65000
+ROUTER_fromB11_SENT,"fromB11 on egress3 link 1 cycles sent",65000
+ROUTER_fromB12_BLOCKED,"fromB12 on egress4 link 1cycles blocked",294520
+ROUTER_fromB12_RECEIVED,"fromB12 on ingress4 link 1 received cycles",65000
+ROUTER_fromB12_SENT,"fromB12 on egress4 link 1 cycles sent",65000
+ROUTER_fromB13_BLOCKED,"fromB13 on egress0 link 4cycles blocked",332410
+ROUTER_fromB13_RECEIVED,"fromB13 on ingress0 link 4 received cycles",65000
+ROUTER_fromB13_SENT,"fromB13 on egress0 link 4 cycles sent",65000
+ROUTER_fromB14_BLOCKED,"fromB14 on egress0 link 5cycles blocked",167931
+ROUTER_fromB14_RECEIVED,"fromB14 on ingress0 link 5 received cycles",65000
+ROUTER_fromB14_SENT,"fromB14 on egress0 link 5 cycles sent",65000
+ROUTER_fromB15_BLOCKED,"fromB15 on egress1 link 2cycles blocked",39499
+ROUTER_fromB15_RECEIVED,"fromB15 on ingress1 link 2 received cycles",65000
+ROUTER_fromB15_SENT,"fromB15 on egress1 link 2 cycles sent",65000
+ROUTER_fromB16_BLOCKED,"fromB16 on egress2 link 2cycles blocked",42105
+ROUTER_fromB16_RECEIVED,"fromB16 on ingress2 link 2 received cycles",65000
+ROUTER_fromB16_SENT,"fromB16 on egress2 link 2 cycles sent",65000
+ROUTER_fromB1_BLOCKED,"fromB1 on egress0 link 0cycles blocked",296865
+ROUTER_fromB1_RECEIVED,"fromB1 on ingress0 link 0 received cycles",65000
+ROUTER_fromB1_SENT,"fromB1 on egress0 link 0 cycles sent",65000
+ROUTER_fromB2_BLOCKED,"fromB2 on egress0 link 1cycles blocked",258904
+ROUTER_fromB2_RECEIVED,"fromB2 on ingress0 link 1 received cycles",65000
+ROUTER_fromB2_SENT,"fromB2 on egress0 link 1 cycles sent",65000
+ROUTER_fromB3_BLOCKED,"fromB3 on egress1 link 0cycles blocked",227140
+ROUTER_fromB3_RECEIVED,"fromB3 on ingress1 link 0 received cycles",65000
+ROUTER_fromB3_SENT,"fromB3 on egress1 link 0 cycles sent",65000
+ROUTER_fromB4_BLOCKED,"fromB4 on egress2 link 0cycles blocked",237000
+ROUTER_fromB4_RECEIVED,"fromB4 on ingress2 link 0 received cycles",65000
+ROUTER_fromB4_SENT,"fromB4 on egress2 link 0 cycles sent",65000
+ROUTER_fromB5_BLOCKED,"fromB5 on egress3 link 0cycles blocked",267944
+ROUTER_fromB5_RECEIVED,"fromB5 on ingress3 link 0 received cycles",65000
+ROUTER_fromB5_SENT,"fromB5 on egress3 link 0 cycles sent",65000
+ROUTER_fromB6_BLOCKED,"fromB6 on egress4 link 0cycles blocked",308237
+ROUTER_fromB6_RECEIVED,"fromB6 on ingress4 link 0 received cycles",65000
+ROUTER_fromB6_SENT,"fromB6 on egress4 link 0 cycles sent",65000
+ROUTER_fromB7_BLOCKED,"fromB7 on egress0 link 2cycles blocked",309101
+ROUTER_fromB7_RECEIVED,"fromB7 on ingress0 link 2 received cycles",65000
+ROUTER_fromB7_SENT,"fromB7 on egress0 link 2 cycles sent",65000
+ROUTER_fromB8_BLOCKED,"fromB8 on egress0 link 3cycles blocked",288374
+ROUTER_fromB8_RECEIVED,"fromB8 on ingress0 link 3 received cycles",65000
+ROUTER_fromB8_SENT,"fromB8 on egress0 link 3 cycles sent",65000
+ROUTER_fromB9_BLOCKED,"fromB9 on egress1 link 1cycles blocked",262664
+ROUTER_fromB9_RECEIVED,"fromB9 on ingress1 link 1 received cycles",65000
+ROUTER_fromB9_SENT,"fromB9 on egress1 link 1 cycles sent",65000
+ROUTER_fromD0_BLOCKED,"fromD0 on egress0 link 0cycles blocked",413830
+ROUTER_fromD0_RECEIVED,"fromD0 on ingress0 link 0 received cycles",65000
+ROUTER_fromD0_SENT,"fromD0 on egress0 link 0 cycles sent",65000
+ROUTER_fromD10_BLOCKED,"fromD10 on egress3 link 1cycles blocked",278998
+ROUTER_fromD10_RECEIVED,"fromD10 on ingress3 link 1 received cycles",65000
+ROUTER_fromD10_SENT,"fromD10 on egress3 link 1 cycles sent",65000
+ROUTER_fromD11_BLOCKED,"fromD11 on egress4 link 1cycles blocked",300811
+ROUTER_fromD11_RECEIVED,"fromD11 on ingress4 link 1 received cycles",65000
+ROUTER_fromD11_SENT,"fromD11 on egress4 link 1 cycles sent",65000
+ROUTER_fromD12_BLOCKED,"fromD12 on egress0 link 4cycles blocked",364352
+ROUTER_fromD12_RECEIVED,"fromD12 on ingress0 link 4 received cycles",65000
+ROUTER_fromD12_SENT,"fromD12 on egress0 link 4 cycles sent",65000
+ROUTER_fromD13_BLOCKED,"fromD13 on egress0 link 5cycles blocked",260904
+ROUTER_fromD13_RECEIVED,"fromD13 on ingress0 link 5 received cycles",65000
+ROUTER_fromD13_SENT,"fromD13 on egress0 link 5 cycles sent",65000
+ROUTER_fromD14_BLOCKED,"fromD14 on egress1 link 2cycles blocked",67744
+ROUTER_fromD14_RECEIVED,"fromD14 on ingress1 link 2 received cycles",65000
+ROUTER_fromD14_SENT,"fromD14 on egress1 link 2 cycles sent",65000
+ROUTER_fromD15_BLOCKED,"fromD15 on egress2 link 2cycles blocked",60013
+ROUTER_fromD15_RECEIVED,"fromD15 on ingress2 link 2 received cycles",65000
+ROUTER_fromD15_SENT,"fromD15 on egress2 link 2 cycles sent",65000
+ROUTER_fromD1_BLOCKED,"fromD1 on egress0 link 1cycles blocked",291515
+ROUTER_fromD1_RECEIVED,"fromD1 on ingress0 link 1 received cycles",65000
+ROUTER_fromD1_SENT,"fromD1 on egress0 link 1 cycles sent",65000
+ROUTER_fromD2_BLOCKED,"fromD2 on egress1 link 0cycles blocked",226708
+ROUTER_fromD2_RECEIVED,"fromD2 on ingress1 link 0 received cycles",65000
+ROUTER_fromD2_SENT,"fromD2 on egress1 link 0 cycles sent",65000
+ROUTER_fromD3_BLOCKED,"fromD3 on egress2 link 0cycles blocked",231222
+ROUTER_fromD3_RECEIVED,"fromD3 on ingress2 link 0 received cycles",65000
+ROUTER_fromD3_SENT,"fromD3 on egress2 link 0 cycles sent",65000
+ROUTER_fromD4_BLOCKED,"fromD4 on egress3 link 0cycles blocked",247271
+ROUTER_fromD4_RECEIVED,"fromD4 on ingress3 link 0 received cycles",65000
+ROUTER_fromD4_SENT,"fromD4 on egress3 link 0 cycles sent",65000
+ROUTER_fromD5_BLOCKED,"fromD5 on egress4 link 0cycles blocked",275362
+ROUTER_fromD5_RECEIVED,"fromD5 on ingress4 link 0 received cycles",65000
+ROUTER_fromD5_SENT,"fromD5 on egress4 link 0 cycles sent",65000
+ROUTER_fromD6_BLOCKED,"fromD6 on egress0 link 2cycles blocked",352543
+ROUTER_fromD6_RECEIVED,"fromD6 on ingress0 link 2 received cycles",65000
+ROUTER_fromD6_SENT,"fromD6 on egress0 link 2 cycles sent",65000
+ROUTER_fromD7_BLOCKED,"fromD7 on egress0 link 3cycles blocked",314330
+ROUTER_fromD7_RECEIVED,"fromD7 on ingress0 link 3 received cycles",65000
+ROUTER_fromD7_SENT,"fromD7 on egress0 link 3 cycles sent",65000
+ROUTER_fromD8_BLOCKED,"fromD8 on egress1 link 1cycles blocked",229022
+ROUTER_fromD8_RECEIVED,"fromD8 on ingress1 link 1 received cycles",65000
+ROUTER_fromD8_SENT,"fromD8 on egress1 link 1 cycles sent",65000
+ROUTER_fromD9_BLOCKED,"fromD9 on egress2 link 1cycles blocked",277239
+ROUTER_fromD9_RECEIVED,"fromD9 on ingress2 link 1 received cycles",65000
+ROUTER_fromD9_SENT,"fromD9 on egress2 link 1 cycles sent",65000
+ROUTER_ingressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver0_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver0_read cycles dequeued",390000
+ROUTER_ingressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver1_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver1_read cycles dequeued",195000
+ROUTER_ingressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver2_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver2_read cycles dequeued",195000
+ROUTER_ingressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver3_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver3_read cycles dequeued",130003
+ROUTER_ingressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver4_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver4_read cycles dequeued",146984
+ROUTER_ingressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver0_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver0_read cycles dequeued",390000
+ROUTER_ingressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver1_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver1_read cycles dequeued",195000
+ROUTER_ingressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver2_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver2_read cycles dequeued",195000
+ROUTER_ingressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver3_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver3_read cycles dequeued",130002
+ROUTER_ingressMultiplexor_FPGA1_to_FPGA0_vplat_llpint_physicalDrivers_unixCommDriver4_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver4_read cycles dequeued",146254
+ROUTER_rrr_server_TESTDRRR_req_BLOCKED,"rrr_server_TESTDRRR_req on egress3 link 2cycles blocked",0
+ROUTER_rrr_server_TESTDRRR_req_RECEIVED,"rrr_server_TESTDRRR_req on ingress3 link 2 received cycles",2
+ROUTER_rrr_server_TESTDRRR_req_SENT,"rrr_server_TESTDRRR_req on egress3 link 2 cycles sent",2
+ROUTER_rrr_server_TESTDRRR_resp_BLOCKED,"rrr_server_TESTDRRR_resp on egress3 link 2cycles blocked",0
+ROUTER_rrr_server_TESTDRRR_resp_RECEIVED,"rrr_server_TESTDRRR_resp on ingress3 link 2 received cycles",3
+ROUTER_rrr_server_TESTDRRR_resp_SENT,"rrr_server_TESTDRRR_resp on egress3 link 2 cycles sent",3
+SCRATCHPAD_LOCAL_REQUESTS,"Requests from the local scratchpads",0
+SCRATCHPAD_LOCAL_RESPONSES,"Responses from the local scratchpads",0
+SCRATCHPAD_REMOTE_REQUESTS,"Requests from the remote scratchpads",0
+SCRATCHPAD_REMOTE_RESPONSES,"Responses from the remote scratchpads",0

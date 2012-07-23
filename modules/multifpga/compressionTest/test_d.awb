@@ -1,0 +1,15 @@
+%AWB_START
+
+%name Compression test module d
+%desc Compression test module d
+
+%provides test_d
+
+%sources -t RRR -v PUBLIC test-d.rrr
+%sources -t BSV -v PUBLIC test-d.bsv
+
+%param --dynamic INVALID_THRESHOLD  0   "Run length of back to back invalid messages"
+
+%param SYNTH_BOUNDARY mkD "name of synthesis boundary"
+
+%AWB_END

@@ -2,7 +2,7 @@ import sys
 import re
 from type import *
 
-class PolyTaggedUnion(Type):
+class PolyTaggedUnion(CompoundType):
   
     def __init__(self, type, members):
         self.members = members
@@ -17,8 +17,21 @@ class PolyTaggedUnion(Type):
         representation += "}} "
         return representation
 
+    def __eq__(self,other):
+        # We can strip out the reference, but if it exists we should check it
+        equal = False
+        if(isinstance(other,type.PolyType)):
+            #poly types subsume everything
+            return True
+        if(isinstance(other, PolyTaggedUnion) or isinstance(other, TaggedUnion)):
+            equal = (self.type == other.type) and (len(self.members) == len(other.members))
+            if(equal):
+                for idx in range(len(self.members)):
+                    equal = equal and (self.members[idx] == other.members[idx])
 
-class TaggedUnion(Type):
+        return equal       
+
+class TaggedUnion(CompoundType):
   
     def __init__(self, type, members, width):
         self.members = members
@@ -39,4 +52,16 @@ class TaggedUnion(Type):
         representation += "}} {width " + str(self.width) + "}"
         return representation
 
-      
+    def __eq__(self,other):
+        # We can strip out the reference, but if it exists we should check it
+        equal = False
+        if(isinstance(other,type.PolyType)):
+            #poly types subsume everything
+            return True
+        if(isinstance(other, PolyTaggedUnion) or isinstance(other, TaggedUnion)):
+            equal = (self.type == other.type) and (len(self.members) == len(other.members))
+            if(equal):
+                for idx in range(len(self.members)):
+                    equal = equal and (self.members[idx] == other.members[idx])
+
+        return equal       

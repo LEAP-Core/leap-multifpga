@@ -2486,3 +2486,45 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 Now that AWB parameters can be updated on the SCons command line it is necessary
 to pass all command line arguments down to the first pass (logfile) build instead
 of just DEBUG, OPT, TRACE and EVENTS.
+
+----------
+kfleming    Date: Mon Jul 23 19:45:24 EDT 2012  CSN: CSN-multifpga-144
+                  Mon Jul 23 23:45:24 UTC 2012
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_loop.apm   Locally Modified          143 
+ test_multifpga_compress.apm Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ linkType.py               Locally Added               0 
+ multiFPGAConnect.py       Locally Modified          143 
+ taggedUnion.py            Locally Modified          143 
+ member.py                 Locally Modified          143 
+ parse_type.py             Locally Modified          143 
+ typeparse.py              Locally Added               0 
+ multi-fpga-connect.awb    Locally Modified          143 
+ type.py                   Locally Modified          143 
+ struct.py                 Locally Modified          143 
+
+Directory modules/multifpga/compressionTest
+ connected_application/    Locally Removed           143 
+
+Directory modules/multifpga/compressionTest/connected_application
+ connected-application-throughput.h Locally Removed           143 
+ connected-application-throughput.awb Locally Removed           143 
+ connected-application-throughput.bsv Locally Removed           143 
+ connected-application-throughput.cpp Locally Removed           143 
+
+Directory modules/multifpga/compressionTest
+ test_b.awb                Locally Removed           143 
+ test_top.bsv              Locally Removed           143 
+ top.awb                   Locally Removed           143 
+
+
+Began adding support for type unification of Compression class. This
+may end up being more difficult than I initially imagined.  
+
+This checkin also disables type parsing by parameter, since it is an
+experimental feature.  I also *added* the type parser, an embarassing
+omission that was discovered by Michael Adler.

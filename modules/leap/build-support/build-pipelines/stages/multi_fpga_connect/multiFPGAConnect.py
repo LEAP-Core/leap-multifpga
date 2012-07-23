@@ -15,7 +15,7 @@ from danglingConnection import *
 from via import *
 from viaAssignment import *
 from linkAssignment import *
-
+from linkType import *
 
 ##
 ## Manage generation of statistics within a module by collecting counter names
@@ -72,6 +72,7 @@ class MultiFPGAConnect():
       self.moduleList = moduleList
       self.ANALYZE_NETWORK = moduleList.getAWBParam('multi_fpga_connect', 'ANALYZE_NETWORK')
       self.MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
+      self.ENABLE_TYPE_COMPRESSION = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_TYPE_COMPRESSION')
       self.MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MIN_NUMBER_OF_VIAS')
       self.GENERATE_ROUTER_DEBUG = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_DEBUG')
       self.GENERATE_ROUTER_STATS = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_STATS')
@@ -1470,8 +1471,7 @@ class MultiFPGAConnect():
   def parseDangling(self, platformName):
       logfile = open(self.platformData[platformName]['LOG'],'r')
       parser = TypeParser()
-      type = 'Typeclass {librl_bsv_base::Compress#(type t_DATA, type t_ENC_DATA, type t_DECODER, type t_MAPPING)} {dependencies {{t_DATA determines (t_ENC_DATA, t_DECODER, t_MAPPING)}}} {members {{{a#(librl_bsv_base::COMPRESSION_ENCODER#(t_DATA, t_ENC_DATA))   provisos (IsModule#(a, b))} mkCompressor} {{a#(librl_bsv_base::COMPRESSION_DECODER#(t_DATA, t_ENC_DATA, t_DECODER))   provisos (IsModule#(a, b))} mkDecompressor}}} {instances {{librl_bsv_base::Compress#(Maybe#(t_DATA), Bit#(t_CONTAINER_SZ), Bit#(1), HList::HList2#(Bit#(t_DATA_SZ), Bit#(1)))   provisos (Add#(1, t_DATA_SZ, t_CONTAINER_SZ), Bits#(t_DATA, t_DATA_SZ))}}} {position {hw/model/compress.bsv 47 11}}'
-      parser.parseType(type)
+
 
       print "Processing: " + self.platformData[platformName]['LOG']
       for line in logfile:
@@ -1491,28 +1491,60 @@ class MultiFPGAConnect():
                   else:
                     sc_type = match.group(1)
 
-                  # construct a tagged union structure for this type!                  
-                  type =  parser.parseType(match.group(2))
-                  typeRefs = flatten(type.getTypeRefs())
-                  #Let's resolve all the type references for fun and profit
-                  for ref in typeRefs:
-                      if(ref in self.platformData[platformName]['TYPES']):
-                          continue
-                      # Anonymous structs may have dollar signs in them.  
-                      ref.replace('$','\$')
-                      typeDeconstruction = ref.split("::")                      
-                      command = 'bluetcl ./hw/model/dumpStructures.tcl ' + typeDeconstruction[0] + ' ' + typeDeconstruction[1]  +  ' -p ' + self.platformData[platformName]['BLUETCL']
-                      print command + "\n"
-                      
-                      tclIn = os.popen(command)
-                      raw = tclIn.read()
-                      self.platformData[platformName]['TYPES'][ref] = parser.parseType(raw)
-                      print "Raw:   " + raw + "\n"
-                      print "parse: " + str(self.platformData[platformName]['TYPES'][ref])
+                  type = LinkType("None",False)
+                  if(self.ENABLE_TYPE_COMPRESSION):
+                      # construct a tagged union structure for this type!                  
+                      type =  parser.parseType(match.group(2))
+                      typeRefs = flatten(type.getTypeRefs())
 
-                  #Was the original type a reference? If it was, then our loop recovered its type.
-                  if(isinstance(type,TypeRef)):
-                      type = self.platformData[platformName]['TYPES'][type.ref()] 
+                      #If we got no type refs, then this is a base class in the Prelude. 
+
+                      #Let's resolve all the type references for fun and profit
+                      for ref in typeRefs:
+                          if(ref in self.platformData[platformName]['TYPES']):
+                              continue
+                          # Anonymous structs may have dollar signs in them.  
+                          ref.replace('$','\$')
+                          typeDeconstruction = ref.split("::")                      
+                          command = 'bluetcl ./hw/model/dumpStructures.tcl ' + typeDeconstruction[0] + ' ' + typeDeconstruction[1]  +  ' -p ' + self.platformData[platformName]['BLUETCL']
+                          print command + "\n"
+                      
+                          tclIn = os.popen(command)
+                          raw = tclIn.read()
+
+                          # Let's look for the Compress typeclass
+                          command = 'bluetcl ./hw/model/dumpStructures.tcl ' + typeDeconstruction[0] + ' Compress -p ' + self.platformData[platformName]['BLUETCL']
+                          print command + "\n"
+                          type = parser.parseType(raw)
+
+                          tclIn = os.popen(command)
+                          typeclassRaw = tclIn.read()
+                          compressable = False
+                          typeclass = "None"
+                          try:
+                              typeclass = parser.parseType(typeclassRaw) 
+
+                              # Are we compressable?
+
+                              for instance in typeclass.instances:
+                                  print "instance: " + str(instance)  
+                                  if(instance.params[0] == type):
+                                      compressable = True
+                                      break
+
+                          except TypeError:
+                              #We need something here even though we don't handle the exception
+                              print "No compress typeclass found for " + str(type)
+
+                          self.platformData[platformName]['TYPES'][ref] = LinkType(type,False)
+                          print "Raw:   " + raw + "\n"
+                          print "TypeclassRaw:   " + typeclassRaw + "\n"
+                          print "parse: " + str(self.platformData[platformName]['TYPES'][ref])
+  
+
+                      #Was the original type a reference? If it was, then our loop recovered its type.
+                      if(isinstance(type,TypeRef)):
+                          type = self.platformData[platformName]['TYPES'][type.ref()] 
                       
 
                   self.platformData[platformName]['DANGLING'] += [DanglingConnection(sc_type, 
