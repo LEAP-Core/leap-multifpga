@@ -68,10 +68,8 @@ class MultiFPGAGenerateLogfile():
            print "tool.py: alive in call platform log " + platform.name
 
            # Compute command line arguments in case they affect topology
-           compile_cmd = 'scons'
-           compile_cmd += ' DEBUG=1' if getDebug(moduleList) else ' OPT=1'
-           compile_cmd += ' TRACE=' + str(getTrace(moduleList))
-           compile_cmd += ' EVENTS=' + str(getEvents(moduleList))
+           compile_cmd = 'scons '
+           compile_cmd += ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
 
            compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
            print compile_cmd
