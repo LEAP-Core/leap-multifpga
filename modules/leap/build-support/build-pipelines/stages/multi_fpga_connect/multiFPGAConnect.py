@@ -69,6 +69,11 @@ class RouterStats:
 class MultiFPGAConnect():
 
   def __init__(self, moduleList):
+      def makePlatformConfigPath(name):
+          config_dir = 'multi_fpga/apm-local/'
+          if not os.path.exists(config_dir): os.makedirs(config_dir)
+          return config_dir + name
+
       self.moduleList = moduleList
       self.ANALYZE_NETWORK = moduleList.getAWBParam('multi_fpga_connect', 'ANALYZE_NETWORK')
       self.MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
@@ -96,11 +101,11 @@ class MultiFPGAConnect():
       # these defs are copied from a previous tool.  refactor
           platform = self.environment.getPlatform(platformName)
           platformLogAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
-          platformLogPath = 'config/pm/private/' + makePlatformLogName(platform.name,APM_NAME)
+          platformLogPath = makePlatformConfigPath(makePlatformLogName(platform.name,APM_NAME))
           platformLogBuildDir = 'multi_fpga/' + makePlatformLogName(platform.name,APM_NAME) + '/pm'
 
           platformBitfileAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
-          platformBitfilePath = 'config/pm/private/' + makePlatformBitfileName(platform.name,APM_NAME)
+          platformBitfilePath = makePlatformConfigPath(makePlatformBitfileName(platform.name,APM_NAME))
           platformBitfileBuildDir = 'multi_fpga/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
 
           wrapperLog =  platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'

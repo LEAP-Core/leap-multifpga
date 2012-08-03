@@ -15,17 +15,22 @@ def makePlatformLogName(name, apm):
 class MultiFPGAGenerateLogfile():
 
   def __init__(self, moduleList):
+    def makePlatformConfigPath(name):
+      config_dir = 'multi_fpga/apm-local/'
+      if not os.path.exists(config_dir): os.makedirs(config_dir)
+      return config_dir + name
+
     APM_FILE = moduleList.env['DEFS']['APM_FILE']
     APM_NAME = moduleList.env['DEFS']['APM_NAME']
     applicationRootName = APM_NAME  + '_mutlifpga_connected_application'
     applicationName = applicationRootName + '.apm'
-    applicationPath =  'config/pm/private/' + applicationName
+    applicationPath =  makePlatformConfigPath(applicationName)
     mappingRootName = APM_NAME  + '_mutlifpga_mapping'
     mappingName = mappingRootName + '.apm'
-    mappingPath =  'config/pm/private/' + mappingName
+    mappingPath =  makePlatformConfigPath(mappingName)
     environmentRootName = APM_NAME  + '_multifpga_environment'
     environmentName = environmentRootName + '.apm'
-    environmentPath =  'config/pm/private/' + environmentName
+    environmentPath =  makePlatformConfigPath(environmentName)
 
     def makePlatformBuildDir(name):
       return 'multi_fpga/' + makePlatformLogName(name,APM_NAME) + '/pm'
@@ -56,7 +61,7 @@ class MultiFPGAGenerateLogfile():
          def compile_platform_log(target, source, env):
           
            platformAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
-           platformPath = 'config/pm/private/' + platformAPMName
+           platformPath = makePlatformConfigPath(platformAPMName)
            platformBuildDir = makePlatformBuildDir(platform.name)
            # and now we can build them
            # what we want to gather here is dangling top level connections
@@ -122,14 +127,14 @@ class MultiFPGAGenerateLogfile():
     for platformName in environment.getPlatformNames():
       platform = environment.getPlatform(platformName)
       platformAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
-      platformPath = 'config/pm/private/' + platformAPMName
+      platformPath = makePlatformConfigPath(platformAPMName)
       platformBuildDir = makePlatformBuildDir(platformName)
       wrapperLogTgt =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log.multi_fpga'
       wrapperLogBld =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
       routerBSH =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
 
       print "wrapper: " + wrapperLogTgt
-      print "platformPath: " + moduleList.env['DEFS']['WORKSPACE_ROOT'] + '/src/private/' + platformPath
+      print "platformPath: " + platformPath
 
       execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
       execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)

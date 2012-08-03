@@ -18,6 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
+type_parser=Bluespec Type parser
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -78,4 +79,8 @@ FUNCP_PVT_CACHE_ENTRIES=16384
 
 [ACP Dual FPGA Env with Dual SRAM]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
+Packagehint=multifpga
+
+[Bluespec Type parser]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga

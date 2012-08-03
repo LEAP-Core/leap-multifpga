@@ -2528,3 +2528,24 @@ may end up being more difficult than I initially imagined.
 This checkin also disables type parsing by parameter, since it is an
 experimental feature.  I also *added* the type parser, an embarassing
 omission that was discovered by Michael Adler.
+
+----------
+mcadler     Date: Fri Aug  3 16:43:14 EDT 2012  CSN: CSN-multifpga-145
+                  Fri Aug  3 20:43:14 UTC 2012
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_acp_64_multifpga_dual_sram.apm Locally Modified          144 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          144 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          144 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ tool.py                   Locally Modified          144 
+
+Generate APM files in a sub-directory of the build instead of in the workspace's
+private config tree.  This allows for parallel building of the same model
+(in different pm directories) with no destructive interference in APM files.

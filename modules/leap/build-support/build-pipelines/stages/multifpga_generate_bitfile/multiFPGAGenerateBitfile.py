@@ -12,19 +12,24 @@ def makePlatformBitfileName(name, apm):
 class MultiFPGAGenerateBitfile():
 
   def __init__(self, moduleList):
+    def makePlatformConfigPath(name):
+      config_dir = 'multi_fpga/apm-local/'
+      if not os.path.exists(config_dir): os.makedirs(config_dir)
+      return config_dir + name
+
     # we should always be building these things
     # looks a lot like the log file generation, but with different params.  We should refactor
     APM_FILE = moduleList.env['DEFS']['APM_FILE']
     APM_NAME = moduleList.env['DEFS']['APM_NAME']
     applicationRootName = APM_NAME  + '_mutlifpga_connected_application'
     applicationName = applicationRootName + '.apm'
-    applicationPath =  'config/pm/private/' + applicationName
+    applicationPath =  makePlatformConfigPath(applicationName)
     mappingRootName = APM_NAME  + '_mutlifpga_mapping'
     mappingName = mappingRootName + '.apm'
-    mappingPath =  'config/pm/private/' + mappingName
+    mappingPath =  makePlatformConfigPath(mappingName)
     environmentRootName = APM_NAME  + '_multifpga_environment'
     environmentName = environmentRootName + '.apm'
-    environmentPath =  'config/pm/private/' + environmentName
+    environmentPath =  makePlatformConfigPath(environmentName)
 
     def makePlatformBuildDir(name):
       return 'multi_fpga/' + makePlatformBitfileName(name,APM_NAME) + '/pm'
@@ -52,7 +57,7 @@ class MultiFPGAGenerateBitfile():
          def compile_platform_log(target, source, env):
 
            platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
-           platformPath = 'config/pm/private/' + platformAPMName
+           platformPath = makePlatformConfigPath(platformAPMName)
            platformBuildDir = makePlatformBuildDir(platform.name)
 
            print "alive in call platform log " + platformPath
@@ -105,12 +110,12 @@ class MultiFPGAGenerateBitfile():
     for platformName in self.environment.getPlatformNames():
       platform = self.environment.getPlatform(platformName)
       platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
-      platformPath = 'config/pm/private/' + platformAPMName
+      platformPath = makePlatformConfigPath(platformAPMName)
       platformBuildDir = makePlatformBuildDir(platform.name)
       bitfile = platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.xilinx/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_'
 
       print "wrapper: " + bitfile
-      print "platformPath: " + moduleList.env['DEFS']['WORKSPACE_ROOT'] + '/src/private/' + platformPath
+      print "platformPath: " + platformPath
 
       execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
       execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
