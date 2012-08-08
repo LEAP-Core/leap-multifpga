@@ -141,6 +141,8 @@ class MultiFPGAGenerateLogfile():
       execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
       execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)
       execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_ID ' + str((environment.getSynthesisBoundaryPlatformID(platform.name))))
+      execute('asim-shell --batch set parameter ' + platformPath + ' CON_CWIDTH ' +  str(moduleList.getAWBParam('multi_fpga_log_generator', 'SOFT_CONN_CWIDTH')))
+      execute('asim-shell --batch set parameter ' + platformPath + ' CON_CHAIN_CWIDTH ' +  str(moduleList.getAWBParam('multi_fpga_log_generator', 'SOFT_CONN_CWIDTH')))
       execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_NAME \\"' + platform.name + '\\"')
       execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_NUM_PLATFORMS ' + str(len(environment.getPlatformNames())))
 

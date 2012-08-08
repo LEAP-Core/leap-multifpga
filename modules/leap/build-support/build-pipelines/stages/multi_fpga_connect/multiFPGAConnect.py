@@ -704,12 +704,20 @@ class MultiFPGAConnect():
       logfile = open(filename,'r')  
       print "Processing Stats:  " + filename
       for line in logfile:
-        if(re.match('.*ROUTER_.*_SENT.*',line)):           
+        if(re.match('.*ROUTER_.*_SENT.*',line)):
+          #We may have a chunked pattern.   
+          match = re.search(r'.*ROUTER_(\w+)(_chunk_\d+)_SENT,.*,(\d+)',line)
+          if(match):
+              #print "Stat Match Chunk" + match.group(1) + " got " + match.group(3) + " from " + line
+              stats[match.group(1)] = int(match.group(3))
+              stats[match.group(1)+match.group(2)] = int(match.group(3))
+              continue
+
           match = re.search(r'.*ROUTER_(\w+)_SENT,.*,(\d+)',line)
           if(match):
-            print "Stat " + match.group(1) + " got " + match.group(2)
-            stats[match.group(1)] = int(match.group(2))
-    
+              #print "Stat Match " + match.group(1) + " got " + match.group(2) + " from " + line
+              stats[match.group(1)] = int(match.group(2))
+
     return stats
 
 
@@ -717,16 +725,26 @@ class MultiFPGAConnect():
 
     # At some point, we can reduce the number of header bits based on 
     # what we actually assign.  This would permit us to allocate smalled link
-    links = math.ceil(math.log(viaLinks+1,2))  
-    chunks = max([1,math.ceil(math.log(1+math.floor(maxWidth/viaWidth),2))])
-    fillerWidth = viaWidth - links - chunks
-    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " max link " + str(maxWidth) + " via links " + str(viaLinks) 
+    links = max([1,int(math.ceil(math.log(viaLinks,2)))])  
+    # Max chunks depends on filler.  iterate till we get a fixed point.
+    # iteration should converge because chunks should monotonically decrease
+    # and fillerWidth should monotonically increase
+    fillerWidth = -1
+    fillerWidthNext = 0
+    chunks = -1
 
+    while(fillerWidth != fillerWidthNext):
+        fillerWidth = fillerWidthNext
+        chunks = int(max([1,math.ceil(math.log(1+math.floor(max([0, maxWidth - fillerWidth])/viaWidth),2))]))
+        fillerWidthNext = viaWidth - links - chunks
+
+    fillerWidth = fillerWidthNext
+    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " max link " + str(maxWidth) + " via links " + str(viaLinks) 
+  
     headerType = "GENERIC_UMF_PACKET_HEADER#(\n" + \
-                 "             0, TLog#(TAdd#(1," + str(viaLinks) + ")) ,\n" + \
-                 "             0, TLog#(TAdd#(1,TMax#(1,TDiv#(" + str(maxWidth) + "," + str(viaWidth) + ")))),\n" + \
-                 "             0, TSub#(" + str(viaWidth)  + ", TAdd#(TLog#(TAdd#(1," + str(viaLinks) + "))," + \
-                 "TLog#(TAdd#(1,TMax#(1,TDiv#(" + str(maxWidth) + "," +  str(viaWidth) + ")))))))"
+                 "             0, " + str(links) + ",// Log links ( "+ str(viaLinks) +")\n" + \
+                 "             0, " + str(chunks) + ",//Log chunks\n" + \
+                 "             0, " + str(fillerWidth) +")//filler width\n"
 
     bodyType = "Bit#(" +  str(viaWidth) + ")"
       
@@ -757,7 +775,7 @@ class MultiFPGAConnect():
         # depending on the width of the vias, and the width of our type we get different loads on different processors
         # need to choose the minimum
 
-        print "\n\n Analyzing " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + " raw load: " + str(links[danglingIdx].activity) + "\n"
+        print "\n\n Analyzing  " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + " raw load: " + str(links[danglingIdx].activity) + "\n"
         
         minIdx = -1 
         minLoad = 0        
@@ -802,6 +820,7 @@ class MultiFPGAConnect():
             needRecurse = True
               
     if(not needRecurse):
+        print "NoRecurse Assigned " + str(vias) + "\n"
         return [vias, platformConnectionsProvisional, targetPlatformConnectionsProvisional]
     else:
         print "Recursing with header: " + str(headersNext) + "\n"
@@ -842,9 +861,17 @@ class MultiFPGAConnect():
           if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
             recvs += 1
             if(dangling.name in stats):
-              dangling.activity = stats[dangling.name]
-              totalTraffic += stats[dangling.name]
-              print "Assigning " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])
+                dangling.activity = stats[dangling.name]
+                totalTraffic += stats[dangling.name]
+                print "Assigning " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])
+            else:
+                #In some we may have the wrong number of chunks.  To make things more usable
+                #we will also match non-chunks 
+                match = re.search(r'(\w+)(_chunk_\d+)',dangling.name)
+                if(match and (match.group(1) in stats)):      
+                    dangling.activity = stats[match.group(1)]
+                    totalTraffic += stats[match.group(1)]
+                    print "Assigning (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
 
           # only create a chain when we see the source                                                                                                                                                                                       
           if(dangling.sc_type == 'ChainSrc'):
@@ -853,6 +880,13 @@ class MultiFPGAConnect():
             if(chainName in stats):
               dangling.activity = stats[chainName]
               totalTraffic += stats[chainName]
+              print "Assigning " + platform + "->" + targetPlatform + " " + chainName + " " + str(stats[chainName])
+            else:
+                match = re.search(r'(\w+)(_chunk_\d+)',chainName)
+                if(match and (match.group(1) in stats)):   
+                    dangling.activity = stats[match.group(1)]
+                    totalTraffic += stats[match.group(1)]
+                    print "Assigning (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
 
         if(totalTraffic == 0):
           totalTraffic = 2*(chains+recvs)
@@ -860,14 +894,13 @@ class MultiFPGAConnect():
         # assign some value to 
         for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
           if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
-            if(not(dangling.name in stats)):
+            if(dangling.activity < 0):
               dangling.activity = float(totalTraffic)/(chains+recvs)
 
           # only create a chain when we see the source                                                                                                                                                                                       
-          if(dangling.sc_type == 'ChainSrc'):
-            chains += 1
+          if(dangling.sc_type == 'ChainSrc'):         
             chainName = platform + "_" + targetPlatform + "_" + dangling.name
-            if(not (chainName in stats)):
+            if(dangling.activity < 0):
               dangling.activity = (float(totalTraffic)/(2*(chains+recvs))) * 0.1  # no stat?  Make connections better than chains
 
 
@@ -970,7 +1003,9 @@ class MultiFPGAConnect():
           noViasRemaining = 0
           # pick our via links deterministically
           viaWidths = []
-          viaOptions = itertools.combinations(sortedLinks,numberOfVias)
+          viaOptions = [] 
+          if(numberOfVias > 1):
+              viaOptions = itertools.combinations(sortedLinks,numberOfVias - 1) # we always have the base via..
           for allocation in viaOptions:
             #is it legal?
             baseViaWidth = self.platformData[platform]['WIDTHS'][egressVia] - (sum(map(lambda x: x.bitwidth, allocation)) + (1+numberOfVias)*(headerSize + 1)) 
@@ -1001,6 +1036,7 @@ class MultiFPGAConnect():
 
             firstAllocationPass = False
 
+      print "Combinational returns " + str(viasFinal) + "\n"
       return viasFinal
 
 

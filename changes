@@ -2549,3 +2549,30 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 Generate APM files in a sub-directory of the build instead of in the workspace's
 private config tree.  This allows for parallel building of the same model
 (in different pm directories) with no destructive interference in APM files.
+
+----------
+keflemin    Date: Wed Aug  8 11:16:02 EDT 2012  CSN: CSN-multifpga-146
+                  Wed Aug  8 15:16:02 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          145 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          145 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ tool.py                   Locally Modified          145 
+ multi_fpga_parse.awb      Locally Modified          145 
+
+
+Two refinements as a result of ongoing characterizations efforts
+
+1) Simplified the generation of packet types for the routers.  I was
+   trying to use bluespec type functions, but that was resulting in
+   errors in some cases. Instead, python just calculates the numbers. 
+
+2) When labelling channels with loading factors, we can now match
+   soft-connection chunks against the base name.  In the case of many
+   narrow lanes this is necessary to get a good placement. 
+
