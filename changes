@@ -2576,3 +2576,33 @@ Two refinements as a result of ongoing characterizations efforts
    soft-connection chunks against the base name.  In the case of many
    narrow lanes this is necessary to get a good placement. 
 
+
+----------
+keflemin    Date: Thu Aug  9 19:39:03 EDT 2012  CSN: CSN-multifpga-147
+                  Thu Aug  9 23:39:03 UTC 2012
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_acp_64_multifpga_dual_sram.apm Locally Modified          146 
+ alpha_inorder_dm_wt_mesh_exe_8_128_multifpga_dual_sram.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ fpga0_8.apm               Locally Added               0 
+ fpga1_8.apm               Locally Added               0 
+ fpga2_8.apm               Locally Added               0 
+ fpga3_8.apm               Locally Added               0 
+ fpga4_8.apm               Locally Added               0 
+ fpga5_8.apm               Locally Added               0 
+ fpga6_8.apm               Locally Added               0 
+ fpga7_8.apm               Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-octo.env              Locally Added               0 
+ sim_fpga_env_octo.awb     Locally Added               0 
+
+Directory modules/multifpga/alpha_inorder
+ sim-mapping-time-func-cache-8.map Locally Added               0 
+ sim_mapping_time_func_cache_8.awb Locally Added               0 
+
+
+Added 8-way software simulator for 128-core hasim. 

@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation Octo FPGA Environment
+%desc Simulation Octo FPGA Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-octo.env
+%AWB_END
