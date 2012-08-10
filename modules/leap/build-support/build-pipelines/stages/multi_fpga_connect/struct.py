@@ -11,7 +11,8 @@ class Struct(CompoundType):
         self.type = type 
 
     def getTypeRefs(self):
-        return type.getTypeRefs() + map(lambda m: m.getTypeRefs(),members)
+        print "ref struct " + str(self)
+        return type.getTypeRefs() + map(lambda m: m.getTypeRefs(), self.members)
         
     def __repr__(self):
         representation = "Struct " + str(self.type) + " {members {"
@@ -40,7 +41,8 @@ class PolyStruct(CompoundType):
         self.type = type 
 
     def getTypeRefs(self):
-        return map(lambda m: m.getTypeRefs(),members)
+        print "ref PolyStruct " + str(self)
+        return map(lambda m: m.getTypeRefs(),self.members)
         
     def __repr__(self):
         representation = "Struct {" + str(self.type) + "} polymorphic {members {"

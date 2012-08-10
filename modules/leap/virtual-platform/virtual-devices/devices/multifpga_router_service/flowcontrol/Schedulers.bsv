@@ -143,8 +143,8 @@ module mkZeroCycleScheduler (Scheduler#(k_next,Bit#(sz),Bit#(sz_next)))
         Vector#(k_next,Integer) intVec = genVector();
         let vec0   = zip(okVec0,intVec);
         let res0   = fold(chooseFirstIfPossible,vec0);
-        let dec    = tpl_1(res0) ? tagged Valid fromInteger(tpl_2(res0)) : 
-                                 tagged Invalid;  
+        Maybe#(Bit#(TLog#(k_next))) dec = tpl_1(res0) ? tagged Valid fromInteger(tpl_2(res0)) : 
+                                                        tagged Invalid;  
         last <= dec;
         getNextW <= dec;
 

@@ -87,3 +87,6 @@ GENERATE_ROUTER_STATS=1
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Params]
+ENABLE_TYPE_COMPRESSION=0

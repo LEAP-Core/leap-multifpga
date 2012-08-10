@@ -7,7 +7,12 @@
 reserved = {
     'TaggedUnion': 'TAGGEDUNION',
     'Struct': 'STRUCT',
+    'Alias': 'ALIAS',
     'Typeclass': 'TYPECLASS',
+    'TMax': 'TMAX',
+    'TSub': 'TSUB',
+    'TAdd': 'TADD',
+    'TLog': 'TLOG',
     'members': 'MEMBERS',
     'dependencies': 'DEPENDENCIES',
     'determines': 'DETERMINES',
@@ -37,10 +42,15 @@ t_COMMA = r','
 t_DOUBLECOLON = r'::'
 t_POUND = r'\#'
 t_TAGGEDUNION = r'TaggedUnion'
+t_ALIAS = r'Alias'
 t_DEPENDENCIES = r'dependencies'
 t_INSTANCES = r'instances'
 t_TYPECLASS = r'Typeclass'
 t_STRUCT = r'Struct'
+t_TMAX = r'TMax'
+t_TADD = r'TAdd'
+t_TSUB = r'TSub'
+t_TLOG = r'TLog'
 t_MEMBERS = r'members'
 t_POSITION = r'position'
 t_FUNCTION = r'function'

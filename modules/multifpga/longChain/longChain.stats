@@ -328,6 +328,102 @@ ROUTER_fromD8_SENT,"fromD8 on egress1 link 1 cycles sent",65000
 ROUTER_fromD9_BLOCKED,"fromD9 on egress2 link 1cycles blocked",277239
 ROUTER_fromD9_RECEIVED,"fromD9 on ingress2 link 1 received cycles",65000
 ROUTER_fromD9_SENT,"fromD9 on egress2 link 1 cycles sent",65000
+ROUTER_fromB17_BLOCKED,"fromB10 on egress2 link 1cycles blocked",268682
+ROUTER_fromB17_RECEIVED,"fromB10 on ingress2 link 1 received cycles",65000
+ROUTER_fromB17_SENT,"fromB10 on egress2 link 1 cycles sent",65000
+ROUTER_fromB18_BLOCKED,"fromB11 on egress3 link 1cycles blocked",304531
+ROUTER_fromB18_RECEIVED,"fromB11 on ingress3 link 1 received cycles",65000
+ROUTER_fromB18_SENT,"fromB11 on egress3 link 1 cycles sent",65000
+ROUTER_fromB19_BLOCKED,"fromB12 on egress4 link 1cycles blocked",294520
+ROUTER_fromB19_RECEIVED,"fromB12 on ingress4 link 1 received cycles",65000
+ROUTER_fromB19_SENT,"fromB12 on egress4 link 1 cycles sent",65000
+ROUTER_fromB20_BLOCKED,"fromB13 on egress0 link 4cycles blocked",332410
+ROUTER_fromB20_RECEIVED,"fromB13 on ingress0 link 4 received cycles",65000
+ROUTER_fromB20_SENT,"fromB13 on egress0 link 4 cycles sent",65000
+ROUTER_fromB21_BLOCKED,"fromB14 on egress0 link 5cycles blocked",167931
+ROUTER_fromB21_RECEIVED,"fromB14 on ingress0 link 5 received cycles",65000
+ROUTER_fromB21_SENT,"fromB14 on egress0 link 5 cycles sent",65000
+ROUTER_fromB22_BLOCKED,"fromB15 on egress1 link 2cycles blocked",39499
+ROUTER_fromB22_RECEIVED,"fromB15 on ingress1 link 2 received cycles",65000
+ROUTER_fromB22_SENT,"fromB15 on egress1 link 2 cycles sent",65000
+ROUTER_fromB23_BLOCKED,"fromB16 on egress2 link 2cycles blocked",42105
+ROUTER_fromB23_RECEIVED,"fromB16 on ingress2 link 2 received cycles",65000
+ROUTER_fromB23_SENT,"fromB16 on egress2 link 2 cycles sent",65000
+ROUTER_fromB24_BLOCKED,"fromB1 on egress0 link 0cycles blocked",296865
+ROUTER_fromB24_RECEIVED,"fromB1 on ingress0 link 0 received cycles",65000
+ROUTER_fromB24_SENT,"fromB1 on egress0 link 0 cycles sent",65000
+ROUTER_fromB25_BLOCKED,"fromB2 on egress0 link 1cycles blocked",258904
+ROUTER_fromB25_RECEIVED,"fromB2 on ingress0 link 1 received cycles",65000
+ROUTER_fromB25_SENT,"fromB2 on egress0 link 1 cycles sent",65000
+ROUTER_fromB26_BLOCKED,"fromB3 on egress1 link 0cycles blocked",227140
+ROUTER_fromB26_RECEIVED,"fromB3 on ingress1 link 0 received cycles",65000
+ROUTER_fromB26_SENT,"fromB3 on egress1 link 0 cycles sent",65000
+ROUTER_fromB27_BLOCKED,"fromB4 on egress2 link 0cycles blocked",237000
+ROUTER_fromB27_RECEIVED,"fromB4 on ingress2 link 0 received cycles",65000
+ROUTER_fromB27_SENT,"fromB4 on egress2 link 0 cycles sent",65000
+ROUTER_fromB28_BLOCKED,"fromB5 on egress3 link 0cycles blocked",267944
+ROUTER_fromB28_RECEIVED,"fromB5 on ingress3 link 0 received cycles",65000
+ROUTER_fromB28_SENT,"fromB5 on egress3 link 0 cycles sent",65000
+ROUTER_fromB29_BLOCKED,"fromB6 on egress4 link 0cycles blocked",308237
+ROUTER_fromB29_RECEIVED,"fromB6 on ingress4 link 0 received cycles",65000
+ROUTER_fromB29_SENT,"fromB6 on egress4 link 0 cycles sent",65000
+ROUTER_fromB30_BLOCKED,"fromB7 on egress0 link 2cycles blocked",309101
+ROUTER_fromB30_RECEIVED,"fromB7 on ingress0 link 2 received cycles",65000
+ROUTER_fromB30_SENT,"fromB7 on egress0 link 2 cycles sent",65000
+ROUTER_fromB31_BLOCKED,"fromB8 on egress0 link 3cycles blocked",288374
+ROUTER_fromB31_RECEIVED,"fromB8 on ingress0 link 3 received cycles",65000
+ROUTER_fromB31_SENT,"fromB8 on egress0 link 3 cycles sent",65000
+ROUTER_fromB32_BLOCKED,"fromB9 on egress1 link 1cycles blocked",262664
+ROUTER_fromB32_RECEIVED,"fromB9 on ingress1 link 1 received cycles",65000
+ROUTER_fromB32_SENT,"fromB9 on egress1 link 1 cycles sent",65000
+ROUTER_fromD16_BLOCKED,"fromD0 on egress0 link 0cycles blocked",413830
+ROUTER_fromD16_RECEIVED,"fromD0 on ingress0 link 0 received cycles",65000
+ROUTER_fromD16_SENT,"fromD0 on egress0 link 0 cycles sent",65000
+ROUTER_fromD17_BLOCKED,"fromD10 on egress3 link 1cycles blocked",278998
+ROUTER_fromD17_RECEIVED,"fromD10 on ingress3 link 1 received cycles",65000
+ROUTER_fromD17_SENT,"fromD10 on egress3 link 1 cycles sent",65000
+ROUTER_fromD18_BLOCKED,"fromD11 on egress4 link 1cycles blocked",300811
+ROUTER_fromD18_RECEIVED,"fromD11 on ingress4 link 1 received cycles",65000
+ROUTER_fromD18_SENT,"fromD11 on egress4 link 1 cycles sent",65000
+ROUTER_fromD19_BLOCKED,"fromD12 on egress0 link 4cycles blocked",364352
+ROUTER_fromD19_RECEIVED,"fromD12 on ingress0 link 4 received cycles",65000
+ROUTER_fromD19_SENT,"fromD12 on egress0 link 4 cycles sent",65000
+ROUTER_fromD20_BLOCKED,"fromD13 on egress0 link 5cycles blocked",260904
+ROUTER_fromD20_RECEIVED,"fromD13 on ingress0 link 5 received cycles",65000
+ROUTER_fromD20_SENT,"fromD13 on egress0 link 5 cycles sent",65000
+ROUTER_fromD21_BLOCKED,"fromD14 on egress1 link 2cycles blocked",67744
+ROUTER_fromD21_RECEIVED,"fromD14 on ingress1 link 2 received cycles",65000
+ROUTER_fromD21_SENT,"fromD14 on egress1 link 2 cycles sent",65000
+ROUTER_fromD22_BLOCKED,"fromD15 on egress2 link 2cycles blocked",60013
+ROUTER_fromD22_RECEIVED,"fromD15 on ingress2 link 2 received cycles",65000
+ROUTER_fromD22_SENT,"fromD15 on egress2 link 2 cycles sent",65000
+ROUTER_fromD23_BLOCKED,"fromD1 on egress0 link 1cycles blocked",291515
+ROUTER_fromD23_RECEIVED,"fromD1 on ingress0 link 1 received cycles",65000
+ROUTER_fromD23_SENT,"fromD1 on egress0 link 1 cycles sent",65000
+ROUTER_fromD24_BLOCKED,"fromD2 on egress1 link 0cycles blocked",226708
+ROUTER_fromD24_RECEIVED,"fromD2 on ingress1 link 0 received cycles",65000
+ROUTER_fromD24_SENT,"fromD2 on egress1 link 0 cycles sent",65000
+ROUTER_fromD25_BLOCKED,"fromD3 on egress2 link 0cycles blocked",231222
+ROUTER_fromD25_RECEIVED,"fromD3 on ingress2 link 0 received cycles",65000
+ROUTER_fromD25_SENT,"fromD3 on egress2 link 0 cycles sent",65000
+ROUTER_fromD26_BLOCKED,"fromD4 on egress3 link 0cycles blocked",247271
+ROUTER_fromD26_RECEIVED,"fromD4 on ingress3 link 0 received cycles",65000
+ROUTER_fromD26_SENT,"fromD4 on egress3 link 0 cycles sent",65000
+ROUTER_fromD27_BLOCKED,"fromD5 on egress4 link 0cycles blocked",275362
+ROUTER_fromD27_RECEIVED,"fromD5 on ingress4 link 0 received cycles",65000
+ROUTER_fromD27_SENT,"fromD5 on egress4 link 0 cycles sent",65000
+ROUTER_fromD28_BLOCKED,"fromD6 on egress0 link 2cycles blocked",352543
+ROUTER_fromD28_RECEIVED,"fromD6 on ingress0 link 2 received cycles",65000
+ROUTER_fromD28_SENT,"fromD6 on egress0 link 2 cycles sent",65000
+ROUTER_fromD29_BLOCKED,"fromD7 on egress0 link 3cycles blocked",314330
+ROUTER_fromD29_RECEIVED,"fromD7 on ingress0 link 3 received cycles",65000
+ROUTER_fromD29_SENT,"fromD7 on egress0 link 3 cycles sent",65000
+ROUTER_fromD30_BLOCKED,"fromD8 on egress1 link 1cycles blocked",229022
+ROUTER_fromD30_RECEIVED,"fromD8 on ingress1 link 1 received cycles",65000
+ROUTER_fromD30_SENT,"fromD8 on egress1 link 1 cycles sent",65000
+ROUTER_fromD31_BLOCKED,"fromD9 on egress2 link 1cycles blocked",277239
+ROUTER_fromD31_RECEIVED,"fromD9 on ingress2 link 1 received cycles",65000
+ROUTER_fromD31_SENT,"fromD9 on egress2 link 1 cycles sent",65000
 ROUTER_ingressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver0_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver0_read cycles dequeued",390000
 ROUTER_ingressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver1_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver1_read cycles dequeued",195000
 ROUTER_ingressMultiplexor_FPGA0_to_FPGA1_vplat_llpint_physicalDrivers_unixCommDriver2_read_DEQUEUED,"vplat_llpint_physicalDrivers_unixCommDriver2_read cycles dequeued",195000

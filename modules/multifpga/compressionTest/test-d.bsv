@@ -6,7 +6,9 @@
 `include "awb/dict/PARAMS_TEST_D.bsh"
 `include "awb/provides/common_services.bsh"
 
-`define NUM_CONNS 16
+import LFSR::*;
+
+`define NUM_CONNS 2
 `define WIDTH 32
 
 module [CONNECTED_MODULE] mkD (Empty);
@@ -16,21 +18,23 @@ module [CONNECTED_MODULE] mkD (Empty);
     PARAMETER_NODE paramNode <- mkDynamicParameterNode();
     Param#(5) threshold <- mkDynamicParameter(`PARAMS_TEST_D_INVALID_THRESHOLD, paramNode);
 
-    function Maybe#(Bit#(`WIDTH)) expected(Bit#(32) counter);
-	let expectedResult = tagged Valid (truncate(counter));
+    function UnbalancedMaybe#(Bit#(`WIDTH)) expected(Bit#(32) counter);
+	UnbalancedMaybe#(Bit#(`WIDTH)) expectedResult = tagged UnbalancedValid (truncate(counter));
 	if(counter[4:0] < threshold)
 	begin
-	    expectedResult = tagged Invalid;
+	    expectedResult = tagged UnbalancedInvalid;
         end
 	return expectedResult;
     endfunction
 
-    Connection_Send#(Maybe#(Bit#(`WIDTH))) send0 <- mkConnection_Send("fromD0");
-    Connection_Receive#(Maybe#(Bit#(`WIDTH))) recvLast <- mkConnection_Receive("fromB" + integerToString(`NUM_CONNS));
+    Connection_Send#(UnbalancedMaybe#(Bit#(`WIDTH))) send0 <- mkConnection_Send("fromD0");
+    Connection_Receive#(UnbalancedMaybe#(Bit#(`WIDTH))) recvLast <- mkConnection_Receive("fromB" + integerToString(`NUM_CONNS));
 
     Reg#(Bit#(32)) testLength <- mkReg(0);
     Reg#(Bit#(32)) counter    <- mkReg(0);
     Reg#(Bit#(32)) rxCounter  <- mkReg(0);
+    LFSR#(Bit#(32)) srcLFSR   <- mkLFSR_32();
+    LFSR#(Bit#(32)) sinkLFSR  <- mkLFSR_32();
     Reg#(Bit#(32)) errors     <- mkReg(0);
     COUNTER#(32) cycles <- mkLCounter(0);
 
@@ -50,28 +54,22 @@ module [CONNECTED_MODULE] mkD (Empty);
 
     rule tokenSts(counter < testLength);
         counter <= counter + 1;
-	if(counter[4:0] < threshold)
-	begin
-	    send0.send(tagged Invalid);       
-        end
-	else
-	begin
-	    send0.send(tagged Valid truncate(counter));       
-        end
-        $display("TESTD: sends %d", counter);
+	srcLFSR.next();
+	send0.send(expected(srcLFSR.value()));       
+        $display("TESTD: sends %h", expected(srcLFSR.value()));
     endrule
 
     rule sinkLast;
         rxCounter <= rxCounter + 1;
         recvLast.deq;
-
-        if(recvLast.receive != expected(rxCounter))
+	sinkLFSR.next();
+        if(recvLast.receive != expected(sinkLFSR.value()))
         begin
-            $display("Error last: got %d expected %d", recvLast.receive, rxCounter);
+            $display("Error last: got %h expected %h", recvLast.receive, expected(sinkLFSR.value()));
             errors <= errors + 1;
         end
 
-        $display("TESTD: got %d expected %d", recvLast.receive, rxCounter);
+        $display("TESTD: got %h expected %h", recvLast.receive, rxCounter);
 
         if(rxCounter + 1 == testLength)
         begin
@@ -83,17 +81,17 @@ module [CONNECTED_MODULE] mkD (Empty);
 
   for(Integer i=1; i < `NUM_CONNS; i = i + 1) 
     begin   
-      Connection_Send#(Maybe#(Bit#(`WIDTH))) sendX <- mkConnection_Send("fromD" + integerToString(i));
-      Connection_Receive#(Maybe#(Bit#(`WIDTH))) recvX <- mkConnection_Receive("fromB" + integerToString(i));
-      Reg#(Bit#(32)) reflectCounter <- mkReg(0);
+      Connection_Send#(UnbalancedMaybe#(Bit#(`WIDTH))) sendX <- mkConnection_Send("fromD" + integerToString(i));
+      Connection_Receive#(UnbalancedMaybe#(Bit#(`WIDTH))) recvX <- mkConnection_Receive("fromB" + integerToString(i));
+      LFSR#(Bit#(32)) reflectCounter <- mkLFSR_32();
       rule reflect;
          sendX.send(recvX.receive);
-         reflectCounter <= reflectCounter + 1;
+         reflectCounter.next();
          recvX.deq;
          $display("TESTD:  %d fired got %d", i, recvX.receive);
-         if(recvX.receive != expected(reflectCounter))
+         if(recvX.receive != expected(reflectCounter.value()))
            begin
-             $display("Error (Module D) %d: got %d expected %d", i,  recvX.receive, reflectCounter);
+             $display("Error (Module D) %d: got %d expected %d", i,  recvX.receive, expected(reflectCounter.value()));
              $finish;
            end
       endrule

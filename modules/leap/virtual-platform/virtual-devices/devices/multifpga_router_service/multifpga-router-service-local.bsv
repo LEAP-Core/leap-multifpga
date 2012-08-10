@@ -331,8 +331,7 @@ module mkPacketizeConnectionSendUnmarshalled#(String name,
                                 umf_method_id,  umf_message_len,
                                 umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read(); 
 
-        Bit#(bitwidth) value = truncateNP(packet.UMF_PACKET_header.filler);
-        t_DATA data = (unpack(resize(value)));
+        t_DATA data = unpack(resize(packet.UMF_PACKET_header.filler));
         send.send(data);
         statIncrReceived();
 
@@ -479,12 +478,11 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
                            umf_method_id,  umf_message_len,
                            umf_phy_pvt,    filler_bits) firstHeader;
 
-         Bit#(bitwidth) value = resize(pack(recv.receive));
 	    
          // The following blob instantiates a packet header. 
          return GENERIC_UMF_PACKET_HEADER
                 {
-                    filler: zeroExtendNP(value),  // Woot
+                    filler: resize(pack(recv.receive)),  // Woot
                     phyChannelPvt: ?,
                     channelID: ?, // we use this elsewhere to refer to flow control messages
                     serviceID: fromInteger(id),
@@ -837,3 +835,8 @@ module mkPacketizeIncomingChainUnmarshalled#(String name,
 
    return tuple2(egress_packet_generator, physical_chain_in);
 endmodule
+
+
+
+
+

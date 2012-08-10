@@ -9,7 +9,8 @@ class PolyTaggedUnion(CompoundType):
         self.type = type 
 
     def getTypeRefs(self):
-        return map(lambda m: m.getTypeRefs(),members)
+        print "ref PolyTaggedUnion " + str(self)
+        return map(lambda m: m.getTypeRefs(), self.members)
 
     def __repr__(self):
         representation = "TaggedUnion {" + str(self.type) + "} polymorphic {members {"
@@ -20,7 +21,7 @@ class PolyTaggedUnion(CompoundType):
     def __eq__(self,other):
         # We can strip out the reference, but if it exists we should check it
         equal = False
-        if(isinstance(other,type.PolyType)):
+        if(isinstance(other,PolyType)):
             #poly types subsume everything
             return True
         if(isinstance(other, PolyTaggedUnion) or isinstance(other, TaggedUnion)):
@@ -44,7 +45,8 @@ class TaggedUnion(CompoundType):
         self.tagwidth = self.width - self.payloadwidth
 
     def getTypeRefs(self):
-        return type.getTypeRefs() + map(lambda m: m.getTypeRefs(),members)
+        print "ref TaggedUnion " + str(self)
+        return type.getTypeRefs() + map(lambda m: m.getTypeRefs(), self.members)
 
     def __repr__(self):
         representation = "TaggedUnion " + str(self.type) + " {members {"
@@ -55,7 +57,7 @@ class TaggedUnion(CompoundType):
     def __eq__(self,other):
         # We can strip out the reference, but if it exists we should check it
         equal = False
-        if(isinstance(other,type.PolyType)):
+        if(isinstance(other,PolyType)):
             #poly types subsume everything
             return True
         if(isinstance(other, PolyTaggedUnion) or isinstance(other, TaggedUnion)):

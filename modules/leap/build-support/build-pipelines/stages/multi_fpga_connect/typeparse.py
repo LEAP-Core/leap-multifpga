@@ -10,7 +10,7 @@ from typeclass import *
 
 #TaggedUnion union::UnionTest1 {members {{void YesEmpty {width 0}} {Bool NotEmpty {width 1}} {Bit#(32) Value {width 32}}}} {width 34} {position {union.bsv 7 3}}
 
-debugParser = False
+debugParser = True
 
 def dumpToks(p):
     toks = ""
@@ -21,6 +21,7 @@ def dumpToks(p):
 def p_type_decl(p):
     """
     type_decl : tagged_union 
+    type_decl : alias 
     type_decl : struct 
     type_decl : typeclass
     type_decl : poly_tagged_union 
@@ -47,6 +48,14 @@ def p_tagged_union(p):
     if(debugParser):
         print "parse tagged_union " + str(p) + "\n"
     p[0] = TaggedUnion(p[2],p[3],p[4])
+
+def p_alias(p):
+    """
+    alias : ALIAS type type position
+    """
+    if(debugParser):
+        print "parse alias " + str(p) + "\n"
+    p[0] = TypeAlias(p[2],p[3])
 
 def p_struct(p):
     """
@@ -97,13 +106,16 @@ def p_param_list(p):
     """
     param_list : LPAREN INT comma_list RPAREN
     param_list : LPAREN type comma_list RPAREN
+    param_list : LPAREN type_function comma_list RPAREN
     """
     if(debugParser):
         print "parse param_list: " + dumpToks(p)  + "\n"
-    if(isinstance(p[2],Type)):
-        p[0] =  [p[2]] + p[3]
-    else:
+    if(isinstance(p[2],str)):
         p[0] = [NumericType(int(p[2]))] + p[3]
+    else:
+        p[0] =  [p[2]] + p[3]
+
+
 
 def p_comma_list(p):
     """
@@ -121,13 +133,14 @@ def p_param(p):
     """
     param : COMMA INT
     param : COMMA type
+    param : COMMA type_function
     """
     if(debugParser):
         print "parse param: " + dumpToks(p)  + "\n"
-    if(isinstance(p[2],Type)):
-        p[0] = p[2]
-    else:
+    if(isinstance(p[2],str)):
         p[0] = NumericType(int(p[2]))
+    else:
+        p[0] = p[2]
 
 
 
@@ -303,7 +316,7 @@ def p_file(p):
         p[0] = p[1] + '/' + p[3]
 
 def p_error(p):
-    if(isinstance(p,None)):
+    if(p is None):
         raise TypeError("Error: No Tokens")
     else:
         raise TypeError("Error at token: " + p.value)
@@ -370,8 +383,10 @@ def p_proviso_list(p):
     """
     if(debugParser):
         print "parse proviso_list: " + dumpToks(p)  + "\n"
-    p[0] = []
-
+    if(len(p) == 2):
+        p[0] = [p[1]]
+    else:
+        p[0] = [p[1]] + p[3]
 
 def p_proviso(p):
     """
@@ -379,17 +394,32 @@ def p_proviso(p):
     """
     if(debugParser):
         print "parse proviso: " + dumpToks(p)  + "\n"
-    p[0] = []
+    p[0] = Proviso(p[1],p[4])
 
 
 def p_term_list(p):
     """
     term_list : INT COMMA term_list
     term_list : NAME COMMA term_list
+    term_list : type_function COMMA term_list
     term_list : INT
     term_list : NAME    
+    term_list : type_function
     """
     if(debugParser):
         print "parse term_list: " + dumpToks(p)  + "\n"
-    p[0] = []
+    if(len(p) == 4):
+        p[0] = [p[1]] + p[3]
+    else:
+        p[0] = [p[1]]
 
+def p_type_function(p):
+    """
+    type_function : TADD POUND LPAREN term_list RPAREN
+    type_function : TSUB POUND LPAREN term_list RPAREN
+    type_function : TMAX POUND LPAREN term_list RPAREN
+    type_function : TLOG POUND LPAREN term_list RPAREN
+    """
+    if(debugParser):
+        print "parse type_function: " + dumpToks(p)  + "\n"
+    p[0] = TypeFunction(p[1],p[4])

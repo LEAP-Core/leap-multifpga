@@ -9,7 +9,8 @@ class Member():
         self.index = index
 
     def getTypeRefs(self):
-        return [self.getTypeRefs()] 
+        print "ref Member " + str(self)
+        return [self.type.getTypeRefs()] 
 
     def __repr__(self):
         return "{" + str(self.type) + " " + self.name +" {width "+str(self.width)+"} "+str(self.index)+" }"
@@ -28,6 +29,7 @@ class PolyMember():
         self.index = index
 
     def getTypeRefs(self):
+        print "ref PolyMember " + str(self)
         return []
 
     def __repr__(self):
