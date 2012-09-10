@@ -52,6 +52,7 @@ class MultiFPGAGenerateBitfile():
     self.environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
     print "environment keys: " + str(self.environment.getPlatformNames)
 
+
     def compile_closure(platform):
 
          def compile_platform_log(target, source, env):
@@ -103,10 +104,15 @@ class MultiFPGAGenerateBitfile():
 
     moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] = []
 
+    # now that we know what the structure of the design, we can write to the config file
+    configFile = open("config/platform_env.sh","w");
+
+
     # the stuff below here should likely go in a different file, and there will be many hard-coded paths
     # copy the environment descriptions to private 
     #APM_FILE
     #WORKSPACE_ROOT
+    slaves = []
     for platformName in self.environment.getPlatformNames():
       platform = self.environment.getPlatform(platformName)
       platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
@@ -117,6 +123,15 @@ class MultiFPGAGenerateBitfile():
       print "wrapper: " + bitfile
       print "platformPath: " + platformPath
 
+      #sprinkle breadcrumbs in config file
+      if(platform.master):
+        configFile.write('master="'+ platformBuildDir +'"\n')
+        #override the existing models. They are surely wrong.
+        configFile.write('# overrides model defined by run script\n')
+        configFile.write('model="'+ makePlatformBitfileName(platform.name,APM_NAME) +'"\n')
+      else:
+        #we are a slave 
+        slaves.append('"' + makePlatformBitfileName(platform.name,APM_NAME) + '" => "' + platformBuildDir + '"')
       execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
       execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
       execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
@@ -186,6 +201,9 @@ class MultiFPGAGenerateBitfile():
           )                   
       moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] += [bitfile] 
 
+    # END for platform
+    configFile.write('slaves={'+ ",".join(slaves) +'}\n')
+    configFile.close()
     # each platform can have a different strings file.  Let's cat all the strings files together...
     # because the hash signatures are unique we can be quite sloppy in this.
     strlist = []

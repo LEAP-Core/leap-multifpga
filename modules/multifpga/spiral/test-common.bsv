@@ -12,7 +12,7 @@ module [CONNECTED_MODULE] mkForward#(String sendName, String recvName) (Empty);
         sendX.send(recvX.receive);
         recvX.deq;
         reflectCounter <= reflectCounter + 1;
-        $display("%s -> %s:  %d fired",sendName, recvName);
+        //$display("%s -> %s:  %d fired",sendName, recvName, i);
 	let val <- delay(recvX.receive);
         if(truncate(recvX.receive) != reflectCounter)
         begin

@@ -2641,3 +2641,74 @@ Directory modules/multifpga/longChain
 
 Support for automatic instantiation of compressor typeclass from
 source.
+
+----------
+kfleming    Date: Mon Sep 10 16:52:03 EDT 2012  CSN: CSN-multifpga-149
+                  Mon Sep 10 20:52:03 UTC 2012
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_chains_exe.apm Locally Modified          148 
+ test_multifpga_throughput_exe.apm Locally Modified          148 
+ test_multifpga_spiral_exe.apm Locally Modified          148 
+
+Directory config/pm/h264
+ h264_multifpga_decoder_split_synth.apm Locally Modified          148 
+ h264_multifpga_decoder_split_synth_exe.apm Locally Modified          148 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_exe.apm Locally Modified          148 
+ alpha_inorder_dm_wt_mesh_exe_16_multifpga_dual_sram.apm Locally Added               0 
+ alpha_inorder_dm_wt_mesh_exe_16_multifpga_quad_sram.apm Locally Added               0 
+ alpha_inorder_dm_wt_mesh_exe_64_multifpga_octo_sram.apm Locally Added               0 
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga_dual_sram_4_lanes.apm Locally Modified          148 
+ alpha_inorder_dm_wt_mesh_exe_64_multifpga_dual_sram.apm Locally Added               0 
+ alpha_inorder_dm_wt_mesh_exe_64_multifpga_quad_sram.apm Locally Added               0 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          148 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          148 
+ danglingConnection.py     Locally Modified          148 
+ via.py                    Locally Modified          148 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          148 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device.bsv Locally Modified          148 
+
+Directory modules/multifpga/longChain
+ test-c.bsv                Locally Modified          148 
+ test-d.bsv                Locally Modified          148 
+
+Directory modules/multifpga/h264
+ sim-mapping-4.map         Locally Added               0 
+ sim_mapping_4.awb         Locally Added               0 
+
+Directory modules/multifpga/alpha_inorder
+ sim-mapping-time-func-cache-4.map Locally Added               0 
+ sim-mapping-quad.map      Locally Modified          148 
+ sim_mapping_time_func_cache_4.awb Locally Added               0 
+ sim_mapping_time_func_cache_8.awb Locally Modified          148 
+
+Directory modules/multifpga/spiral
+ test-d.bsv                Locally Modified          148 
+ test-common.bsv           Locally Modified          148 
+ test-common-bdpi.c        Locally Added               0 
+ test-common-bdpi.h        Locally Added               0 
+
+
+Huge commit, and long over due. 
+
+1) Resurrected support for FPGA routing phase of the compiler.  This
+had been allowed to bit rot.
+
+2) Added better support for running mutliple FPGA simulations.  This
+will serve as a template when we get more complex multifpga systems.
+
+3) With this new capability, I spent a lot of time benchmarking and
+playing with the simulator. Results are good: some HAsim simulators
+are faster in two processes than in one!  Added testbench code.
+

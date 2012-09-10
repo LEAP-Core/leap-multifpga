@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Inorder Alpha Direct Writethrough Caches Mesh ACP
-File=alpha_inorder_dm_wt_mesh_acp_16_multifpga_dual_sram_4_lanes
+File=alpha_inorder_dm_wt_mesh_exe_64_multifpga_octo_sram
 Version=2.2
 Name=Inorder Alpha Writethrough Caches Mesh ACP 16
 Type=HAsim
@@ -45,9 +45,9 @@ Packagehint=multifpga
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 build_pipeline=multiFPGA Build Pipeline
-connected_application=New Asim Model
-environment_description=ACP Dual FPGA Env with Dual SRAM
-fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition with Cache
+connected_application=Alpha Inorder DM, WT, Mesh 64 cores
+environment_description=Simulation Octo FPGA Environment
+fpga_mapping=Alpha Inorder Sim Mapping Timing/Functional partition with Cache (Sim 8)
 
 [HW/SW Hybrid Multifpga Project Foundation/Params]
 SYNTH_BOUNDARY=mkModel
@@ -65,21 +65,13 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
-[Alpha Inorder ACP Mapping Timing/Functional partition with Cache]
-File=modules/multifpga/alpha_inorder/acp_mapping_time_func_cache.awb
+[Alpha Inorder DM, WT, Mesh 64 cores]
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_64_connected_application.apm
 Packagehint=multifpga
 
-[New Asim Model]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_16_connected_application.apm
-Packagehint=multifpga
-
-[New Asim Model/Params]
+[Alpha Inorder DM, WT, Mesh 64 cores/Params]
 FUNCP_TLB_PVT_ENTRIES=4096
 FUNCP_PVT_CACHE_ENTRIES=16384
-
-[ACP Dual FPGA Env with Dual SRAM]
-File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
-Packagehint=multifpga
 
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
@@ -87,3 +79,11 @@ Packagehint=multifpga
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
+
+[Alpha Inorder Sim Mapping Timing/Functional partition with Cache (Sim 8)]
+File=modules/multifpga/alpha_inorder/sim_mapping_time_func_cache_8.awb
+Packagehint=multifpga
+
+[Simulation Octo FPGA Environment]
+File=modules/leap-platforms/fpga-environments/sim/sim_fpga_env_octo.awb
+Packagehint=multifpga

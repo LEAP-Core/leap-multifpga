@@ -8,7 +8,7 @@ class DanglingConnection():
       self.raw_type = raw_type
       self.name = name
       self.inverse_name = "ERROR"
-      self.idx = -1 # we don't care about the physical indexes yet. They get assigned during the match operation
+      self.idx ="unassigned" # we don't care about the physical indexes yet. They get assigned during the match operation
       self.platform = platform
       self.optional = optional
       self.bitwidth = int(bitwidth)
@@ -17,8 +17,8 @@ class DanglingConnection():
       self.chainroot = chainroot
       self.inverse_sc_type = "ERROR"
       self.chainPartner = -1
-      self.via_idx = -1
-      self.via_link = -1
+      self.via_idx = "unassigned"
+      self.via_link = "unassigned"
       self.type_structure = type_structure
       self.activity = 0 # this is used in lane allocation
 

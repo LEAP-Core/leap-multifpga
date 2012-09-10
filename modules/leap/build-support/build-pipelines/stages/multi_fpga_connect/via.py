@@ -2,7 +2,9 @@ import sys
 
 class Via():
   
-  def __init__(self, via_direction, via_header_type, via_body_type, via_type, via_width, via_links, via_io_links, via_flowcontrol_links, via_method, via_switch, via_outgoing_flowcontrol_link, via_outgoing_flowcontrol_via, via_load, via_filler_width):
+  def __init__(self, via_source, via_sink, via_direction, via_header_type, via_body_type, via_type, via_width, via_links, via_io_links, via_flowcontrol_links, via_method, via_switch, via_outgoing_flowcontrol_link, via_outgoing_flowcontrol_via, via_load, via_filler_width):
+      self.via_source = via_source
+      self.via_sink = via_sink
       self.via_direction = via_direction       
       self.via_type = via_type
       self.via_header_type = via_header_type

@@ -34,13 +34,13 @@ module [CONNECTED_MODULE] mkD (Empty);
         errors <= 0;
         cycles.setC(0);
         rxCounter <= 0;
-        $display("TESTD: Got length %d", length);
+        //$display("TESTD: Got length %d", length);
     endrule
 
     rule tokenSts(counter < testLength);
         counter <= counter + 1;
         send0.send(truncate(counter));       
-        $display("TESTD: sends %d", counter);
+        //$display("TESTD: sends %d", counter);
     endrule
 
     rule sinkLast;
@@ -52,8 +52,7 @@ module [CONNECTED_MODULE] mkD (Empty);
             errors <= errors + 1;
         end
 
-        $display("TESTD: got %d expected %d", recvLast.receive, rxCounter);
-
+        
         if(rxCounter + 1 == testLength)
         begin
             $display("TESTD: PASSED");

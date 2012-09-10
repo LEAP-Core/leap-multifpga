@@ -11,7 +11,7 @@
 module [CONNECTED_MODULE] mkD (Empty);
 
     ServerStub_TESTDRRR serverStub <- mkServerStub_TESTDRRR();
-
+   Connection_Receive#(Bit#(250)) sendX <- mkConnection_Receive("Test");
     Connection_Send#(Bit#(`WIDTH)) send0 <- mkConnection_Send("fromD0");
     Connection_Receive#(Bit#(`WIDTH)) recvLast <- mkConnection_Receive("fromB" + integerToString(`NUM_CONNS));
 

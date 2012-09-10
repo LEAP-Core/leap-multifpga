@@ -24,7 +24,8 @@ from linkType import *
 class RouterStats:
     """Manage router statistics within a generated Bluespec module."""
 
-    def __init__(self):
+    def __init__(self,name):
+        self.name = name
         self.counters = list()
 
     def addCounter(self, name, tag, descr):
@@ -40,7 +41,7 @@ class RouterStats:
             return ''
 
         # First generate the set of IDs
-        s = '\n\tSTAT_ID statIDs[' + str(len(self.counters)) + '] = {\n'
+        s = '\n\tSTAT_ID ' + self.name + 'statIDs[' + str(len(self.counters)) + '] = {\n'
         idx = 0
         for cnt in self.counters:
             s += '\t\tstatName("' + cnt[1] + '", "' + cnt[2] + '")'
@@ -58,13 +59,13 @@ class RouterStats:
             idx += 1
 
         # Generate the statistics node
-        s += '\n\tSTAT_VECTOR#(' + str(len(self.counters)) + ') stats <- mkStatCounter_Vector(statIDs);\n\n'
+        s += '\n\tSTAT_VECTOR#(' + str(len(self.counters)) + ') ' + self.name + 'stats <- mkStatCounter_Vector(' + self.name + 'statIDs);\n\n'
 
         return s
 
     def incrCounter(self, name):
         """Emit a string with the Bluespec code that increments a counter."""
-        return 'stats.incr_NB(' + name + ')'
+        return  self.name + 'stats.incr_NB(' + name + ')'
 
 class MultiFPGAConnect():
 
@@ -139,6 +140,7 @@ class MultiFPGAConnect():
 
       moduleList.topDependency += [subbuild]
 
+  
   def assignIndices(self,sourceConn,sinkConn):
       print "Now processing connection %s between %s (%s) -> %s (%s)" % (sourceConn.name, sourceConn.platform, sourceConn.sc_type, sinkConn.platform, sinkConn.sc_type)
 
@@ -185,9 +187,10 @@ class MultiFPGAConnect():
           print "Adding hop: " + src.name + "Hop" + hop        
             
           sinks.append(DanglingConnection("ChainRoutingRecv", src.raw_type, -1, src.name + "Routethrough" + hop, 
-                                          hop, "False", src.bitwidth))
+                                          hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure))
           srcs.append(DanglingConnection("ChainRoutingSend", src.raw_type, -1, src.name + "Routethrough" + hop, 
-                                         hop, "False", src.bitwidth))
+                                         hop, "False", src.bitwidth, "RouteThrough", "RouteThroug\
+h", src.type_structure))
 
 
       sinks.append(sink)
@@ -201,9 +204,9 @@ class MultiFPGAConnect():
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_stats = RouterStats()
 
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+      multiplexor_stats = RouterStats("egressMultiplexor")
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
       egressMethod = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
@@ -242,7 +245,7 @@ class MultiFPGAConnect():
         sum_string.append('zeroExtend(pack(' + via.via_method + '_pulse))')
 
         if(self.GENERATE_ROUTER_STATS):
-          multiplexor_stats.addCounter('enqueued_' + via.via_method,
+          multiplexor_stats.addCounter('enqueued_' + moduleName + '_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED',
                                        via.via_method +' cycles enqueued')
 
@@ -250,7 +253,7 @@ class MultiFPGAConnect():
           
       for enqs in range(1 + len(egressVias)):
         if(self.GENERATE_ROUTER_STATS):
-          multiplexor_stats.addCounter('enqueued_' + str(enqs),
+          multiplexor_stats.addCounter('enqueued_' + moduleName + '_' + str(enqs),
                                        'ROUTER_' + moduleName + '_' + str(enqs) + '_ENQUEUED',
                                        via.via_method +' cycles that lanes enqueued')
 
@@ -293,7 +296,7 @@ class MultiFPGAConnect():
         if(self.GENERATE_ROUTER_STATS):
 
           multiplexor_definition += '\n\trule countMerges' + str(enqs) + '(totalEnqs == ' + str(enqs) + ');\n'
-          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + str(enqs)) + ';\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + moduleName + '_' + str(enqs)) + ';\n'
           multiplexor_definition += '\tendrule\n\n'
 
       for via in egressVias:
@@ -302,7 +305,7 @@ class MultiFPGAConnect():
         multiplexor_definition += '\t\t' + via.via_method + '_wire <= tagged Valid data;\n'
         multiplexor_definition += '\t\t' + via.via_method + '_pulse.send;\n'
         if(self.GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + moduleName + '_' + via.via_method) + ';\n'
         multiplexor_definition += '\tendmethod\n\n'
 
       multiplexor_definition += 'endmodule\n\n'
@@ -313,9 +316,10 @@ class MultiFPGAConnect():
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_stats = RouterStats()
 
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+      multiplexor_stats = RouterStats("egressMultiplexor")
+
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
       egressMethod = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
@@ -347,7 +351,7 @@ class MultiFPGAConnect():
       # mkDwire with empty string signifier...
       for via in egressVias:
         if(self.GENERATE_ROUTER_STATS):
-          multiplexor_stats.addCounter('enqueued_' + via.via_method,
+          multiplexor_stats.addCounter('enqueued_' + moduleName + '_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED',
                                        via.via_method + ' cycles enqueued')
 
@@ -379,7 +383,7 @@ class MultiFPGAConnect():
 
 
         if(self.GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_'+ moduleName + '_' + via.via_method) + ';\n'
 
         multiplexor_definition += '  endmethod\n'
 
@@ -391,9 +395,9 @@ class MultiFPGAConnect():
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_stats = RouterStats()
 
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+      multiplexor_stats = RouterStats("egressMultiplexor")
       egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
       hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
       egressMethod = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
@@ -425,7 +429,7 @@ class MultiFPGAConnect():
       # mkDwire with empty string signifier...
       for via in egressVias:
         if(self.GENERATE_ROUTER_STATS):
-          multiplexor_stats.addCounter('enqueued_' + via.via_method,
+          multiplexor_stats.addCounter('enqueued_' + moduleName + '_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED',
                                        via.via_method + ' cycles enqueued')
 
@@ -445,7 +449,7 @@ class MultiFPGAConnect():
         multiplexor_definition += '    write(zeroExtendNP({tag,data}));\n'
         viaCount = viaCount + 1
         if(self.GENERATE_ROUTER_STATS):
-          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + via.via_method) + ';\n'
+          multiplexor_definition += '\t\t' + multiplexor_stats.incrCounter('enqueued_' + moduleName + '_' + via.via_method) + ';\n'
         multiplexor_definition += '  endmethod\n'
 
       multiplexor_definition += 'endmodule\n\n'
@@ -456,9 +460,10 @@ class MultiFPGAConnect():
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_stats = RouterStats()
 
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+      multiplexor_stats = RouterStats("ingressMultiplexor")
+
       ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
       hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
       ingressMethod = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
@@ -539,9 +544,10 @@ class MultiFPGAConnect():
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
-    multiplexor_stats = RouterStats()
 
     for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+      multiplexor_stats = RouterStats("ingressMultiplexor")
+
       ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
       hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
       ingressMethod = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
@@ -735,11 +741,11 @@ class MultiFPGAConnect():
 
     while(fillerWidth != fillerWidthNext):
         fillerWidth = fillerWidthNext
-        chunks = int(max([1,math.ceil(math.log(1+math.floor(max([0, maxWidth - fillerWidth])/viaWidth),2))]))
+        chunks = int(max([1,math.ceil(math.log(1.0+math.ceil(float(max([0.0, maxWidth - fillerWidth]))/viaWidth),2))]))
         fillerWidthNext = viaWidth - links - chunks
 
     fillerWidth = fillerWidthNext
-    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " max link " + str(maxWidth) + " via links " + str(viaLinks) 
+    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " calc" + str(1.0+math.ceil(float(max([0.0, maxWidth - fillerWidth]))/viaWidth)) +") max link " + str(maxWidth) + " via links " + str(viaLinks) 
   
     headerType = "GENERIC_UMF_PACKET_HEADER#(\n" + \
                  "             0, " + str(links) + ",// Log links ( "+ str(viaLinks) +")\n" + \
@@ -802,7 +808,7 @@ class MultiFPGAConnect():
           maxLinkWidth[minIdx] = links[danglingIdx].bitwidth
         # XXX what are these doing?  
         platformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].sc_type, minIdx, vias[minIdx].links))
-        targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].inverse_sc_type, minIdx, vias[minIdx].links))  
+        targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].inverse_name, links[danglingIdx].inverse_sc_type, minIdx, vias[minIdx].links))  
         print "Assigning Recv " + links[danglingIdx].name   + " Via " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
         print "Vias are " +  str(vias) + "\n"
         vias[minIdx].links += 1
@@ -828,21 +834,30 @@ class MultiFPGAConnect():
 
   def assignLinks(self, provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections):
     for provisional in provisionalAssignments:
+      assigned = False
       for idx in range(len(platformConnections)): # we can probably do better than this n^2 loop. 
         # Watch out for chain Sinks and sources
-        if((platformConnections[idx].name == provisional.name) and (platformConnections[idx].sc_type == provisional.sc_type)): 
-          platformConnections[idx].via_idx  = provisional.via_idx
-          platformConnections[idx].via_link = provisional.via_link
-          print "Assigning egress " + platformConnections[idx].name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+          print "Examining: " + platformConnections[idx].name + " " + provisional.name
+          if((platformConnections[idx].name == provisional.name) and (platformConnections[idx].sc_type == provisional.sc_type)): 
+              assigned = True
+              platformConnections[idx].via_idx  = provisional.via_idx
+              platformConnections[idx].via_link = provisional.via_link
+              print "Assigning egress " + platformConnections[idx].name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+      if(not assigned):
+          exit(0)
     for provisional in provisionalTargetAssignments:
+      assigned = False
       for idx in range(len(targetPlatformConnections)): # we can probably do better than this n^2 loop. 
         # Watch out for chain Sinks and sources
+        print "Examining: " + targetPlatformConnections[idx].name + " " + provisional.name
         if((targetPlatformConnections[idx].name == provisional.name) and (targetPlatformConnections[idx].sc_type == provisional.sc_type)):    
-          targetPlatformConnections[idx].via_idx  = provisional.via_idx
-          targetPlatformConnections[idx].via_link = provisional.via_link
+            assigned = True
+            targetPlatformConnections[idx].via_idx  = provisional.via_idx
+            targetPlatformConnections[idx].via_link = provisional.via_link
 
-          print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
-
+            print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+      if(not assigned):
+          exit(0)
 
   # Given a stats asssignment, this function will give all dangling
   # connections in the design a weight.  If no stat exists, then the
@@ -1085,9 +1100,9 @@ class MultiFPGAConnect():
 
           [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(viasFinal[via].width, viasFinal[via].links, maxWidth)
 
-          egress = Via("egress", headerType, bodyType, type, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viasFinal[via].load, fillerWidth)
+          egress = Via(platform,targetPlatform,"egress", headerType, bodyType, type, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viasFinal[via].load, fillerWidth)
 
-          ingress = Via("ingress", headerType, bodyType, type, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viasFinal[via].load, fillerWidth)
+          ingress = Via(targetPlatform,platform,"ingress", headerType, bodyType, type, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viasFinal[via].load, fillerWidth)
 
           egressViasInitial[platform][targetPlatform].append(egress)
           ingressViasInitial[targetPlatform][platform].append(ingress) 
@@ -1161,9 +1176,9 @@ class MultiFPGAConnect():
           print "Idx " + str(via) + " links " + str(len(egressLinks[platform][targetPlatform])) + " loads " + str(len(viaLoads[platform][targetPlatform]))
           [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth) 
 
-          egress = Via("egress", headerType, bodyType, type, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via],fillerWidth)
+          egress = Via(platform,targetPlatform,"egress", headerType, bodyType, type, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via],fillerWidth)
  
-          ingress = Via("ingress", headerType, bodyType, type, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via],fillerWidth)
+          ingress = Via(targetPlatform,platform,"ingress", headerType, bodyType, type, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via],fillerWidth)
 
           self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(egress)
           self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(ingress) 
@@ -1233,7 +1248,7 @@ class MultiFPGAConnect():
         for via in range(numberOfVias):
           # need to set the via widths here...
           viaLinks = viasProvisional[via].links
-          print "Via " + str(via) + " links " + str(viasProvisional[via].links)
+          print "Uniform Via " + str(via) + " links " + str(viasProvisional[via].links)
           # let's find the maximum width guy so that we calculate the types correctly. 
           viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
           maxWidth = viaWidth
@@ -1243,8 +1258,8 @@ class MultiFPGAConnect():
           [headerType, bodyType, type, fillerWidth] = self.generateRouterTypes(viaWidth, viaLinks, maxWidth)
           
           print "Creating Via " + 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  +str(via) + " : links " + str(viaLinks)
-          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via("egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), 0, via, 0, fillerWidth))
-          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via("ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), 0, via, 0, fillerWidth)) 
+          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via(platform,targetPlatform,"egress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), 0, via, 0, fillerWidth))
+          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via(targetPlatform,platform,"ingress", headerType, bodyType, type, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), 0, via, 0, fillerWidth)) 
 
         
 
@@ -1289,8 +1304,6 @@ class MultiFPGAConnect():
           # the chain insertion code must lexically come after the arbiter instantiation
           chainsStr = ''
 
-          stats = RouterStats()
-
           # handle the connections themselves
           for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
             print  "\n\nGenerating routing code " + platform + " -> " + targetPlatform + " in " + self.platformData[platform]['BSH'] + "\n\n"
@@ -1300,7 +1313,8 @@ class MultiFPGAConnect():
             header.write('// Connection to ' + targetPlatform + ' \n')
             sends = 0
             recvs = 0
-            chains = 0           
+            chains = 0
+            stats = RouterStats( "router" + platform + "_" + targetPlatform)
 
             for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
               print "Laying down " + dangling.inverse_name + " of type " + dangling.sc_type + " on " + dangling.platform
@@ -1508,6 +1522,9 @@ class MultiFPGAConnect():
 
 
               if(dangling.inverse_sc_type == 'ChainSink' ):
+                print "My type: " + dangling.sc_type
+                print "My raw type: " + dangling.raw_type
+                print "My name: " + dangling.name
 	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_sink_' + dangling.inverse_name +' = ?;\n')
                 packetizerType = 'Marshalled'
                 header.write('// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')

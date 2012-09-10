@@ -663,9 +663,11 @@ module mkPacketizeOutgoingChainUnmarshalled#(String name,
 
     let send = interface PHYSICAL_SEND#(PHYSICAL_CHAIN_DATA);
                    method Action send(PHYSICAL_CHAIN_DATA data);
-	
-                       $display("Chain %s outgoing %h", name, data);
-   
+	               if(`MARSHALLING_DEBUG == 1)
+                       begin
+                           $display("Chain %s outgoing %h", name, data);
+                       end
+
                        outfifo.enq(data);
                    endmethod
 
@@ -807,10 +809,12 @@ module mkPacketizeIncomingChainUnmarshalled#(String name,
 
                endinterface;
 
-
-    rule debugR(tryData.wget matches tagged Valid .data &&& trySuccess);
-      $display("Chain %s incoming %h", name, data);
-    endrule
+    if(`MARSHALLING_DEBUG == 1)
+    begin
+        rule debugR(tryData.wget matches tagged Valid .data &&& trySuccess);
+            $display("Chain %s incoming %h", name, data);
+        endrule
+    end
 
     let egress_packet_generator <- mkPacketizeConnectionReceiveUnmarshalled(name,
                                                                          recv,            

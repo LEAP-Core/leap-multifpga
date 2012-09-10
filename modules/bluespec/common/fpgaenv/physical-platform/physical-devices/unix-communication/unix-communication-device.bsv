@@ -138,7 +138,10 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
 
     // initialize C code
     rule initialize(state == STATE_init0);
-        $display("init" + outgoing + incoming);
+        if(`UNIX_COMM_DEBUG > 0)
+        begin
+            $display("init" + outgoing + incoming);
+	end
         comm_init();
         state <= STATE_init1;
     endrule

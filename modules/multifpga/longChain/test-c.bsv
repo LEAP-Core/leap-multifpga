@@ -5,6 +5,8 @@
 `define WIDTH 32
 
 module [CONNECTED_MODULE] mkC (Empty);
+  Connection_Send#(Bit#(250)) sendX <- mkConnection_Send("Test");
+
   for(Integer i=0; i < `NUM_CONNS; i = i + 1) 
     begin   
       Connection_Send#(Bit#(`WIDTH)) sendX <- mkConnection_Send("fromB" + integerToString(i+1));

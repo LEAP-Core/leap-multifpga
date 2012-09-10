@@ -4,11 +4,13 @@ hasim_funcp -> FPGA1;
 hasim_isa_datapath -> FPGA1;
 funcp_memstate -> FPGA0;
 funcp_memstate_tlb -> FPGA0;
-commands_service -> FPGA2;
-hasim_timep -> FPGA2;
+commands_service -> FPGA3;
+hasim_timep -> FPGA3;
 common_services -> FPGA2;
 inorder_pipeline_front_end -> FPGA3;
 decode_stage -> FPGA3;
 inorder_pipeline_back_end -> FPGA3;
-hasim_l1_caches-> FPGA2;
+hasim_l1_caches-> FPGA3;
+hasim_last_level_cache -> FPGA2;
+
 
