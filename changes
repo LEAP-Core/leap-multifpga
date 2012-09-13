@@ -2712,3 +2712,15 @@ will serve as a template when we get more complex multifpga systems.
 playing with the simulator. Results are good: some HAsim simulators
 are faster in two processes than in one!  Added testbench code.
 
+
+----------
+kfleming    Date: Thu Sep 13 11:58:23 EDT 2012  CSN: CSN-multifpga-150
+                  Thu Sep 13 15:58:23 UTC 2012
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave.apm Locally Modified          149 
+ multifpga-platform-services-master.apm Locally Modified          149 
+
+
+Fixed compilation bug due to prefetcher requiring wider meta-data tags.  

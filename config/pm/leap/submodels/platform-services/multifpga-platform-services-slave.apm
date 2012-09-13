@@ -27,14 +27,9 @@ Packagehint=multifpga
 File=modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol/flowcontrol-switch.awb
 Packagehint=multifpga
 
-
-
 [Null Shared Memory Services]
 File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
 Packagehint=leap
-
-
-
 
 [Standard Mem Services]
 File=modules/leap/libraries/platform-services/mem-services/mem-services-standard.awb
@@ -93,8 +88,6 @@ common_services=Common Services
 mem_services=Standard Mem Services
 multifpga_router_service=MultiFPGA Router Service
 
-
-
 [Common Services/Requires]
 stats_service=Stats Service
 assertions_service=Assertions Service
@@ -125,3 +118,6 @@ Packagehint=leap
 [Standard I/O Services]
 File=modules/leap/libraries/platform-services/common-services/stdio-service/stdio-service.awb
 Packagehint=leap
+
+[Central Cache Common Definitions/Params]
+CENTRAL_CACHE_READ_META_BITS=15
