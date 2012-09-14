@@ -2724,3 +2724,14 @@ Directory config/pm/leap/submodels/platform-services
 
 
 Fixed compilation bug due to prefetcher requiring wider meta-data tags.  
+
+----------
+kfleming    Date: Fri Sep 14 12:24:39 EDT 2012  CSN: CSN-multifpga-151
+                  Fri Sep 14 16:24:39 UTC 2012
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_compress_acp.apm Locally Added               0 
+
+
+Added compression test for acp. 

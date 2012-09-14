@@ -1,0 +1,101 @@
+
+[Global]
+SaveParameters=0
+Description=has strange module alingments
+File=test_multifpga_compress_acp
+Version=2.2
+Name=Multifpga synthesis test 
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=MultiFPGA Loop Test Connected Application
+environment_description=ACP Dual FPGA Env with Dual SRAM
+build_pipeline=multiFPGA Build Pipeline
+fpga_mapping=Test ACP Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline]
+File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline/Requires]
+multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_generate_bitfile=multiFPGA Generate bitfle
+multi_fpga_log_generator=multiFPGA Log Generation
+
+[MultiFPGA Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Requires]
+fpgamap_parser=FPGAMap
+type_parser=Bluespec Type parser
+
+[multiFPGA Generate bitfle]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
+Packagehint=multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+
+[MultiFPGA Loop Synthesis test module top]
+File=modules/multifpga/longChain/top.awb
+Packagehint=multifpga
+
+[MultiFPGA Loop Synthesis test module top/Requires]
+test_c=Compression test module c
+test_d=Compression test module d
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=1
+
+[MultiFPGA Loop Test Connected Application/Requires]
+hardware_system=MultiFPGA Loop Synthesis test module top
+
+[MultiFPGA Loop Test Connected Application]
+File=modules/multifpga/longChain/connected_application/connected-application-throughput.awb
+Packagehint=multifpga
+
+[Bluespec Type parser]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+Packagehint=multifpga
+
+[Compression test module d]
+File=modules/multifpga/compressionTest/test_d.awb
+Packagehint=multifpga
+
+[Compression test module c]
+File=modules/multifpga/compressionTest/test_c.awb
+Packagehint=multifpga
+
+[Test ACP Mapping]
+File=modules/multifpga/synthTest/acp_mapping.awb
+Packagehint=multifpga
+
+[ACP Dual FPGA Env with Dual SRAM]
+File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
+Packagehint=multifpga
