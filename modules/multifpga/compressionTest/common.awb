@@ -1,0 +1,12 @@
+%AWB_START
+
+%name MultiFPGA compress test common
+%desc MultiFPGA compress test common
+
+%provides compress_common
+
+
+%public common.bsv 
+
+
+%AWB_END

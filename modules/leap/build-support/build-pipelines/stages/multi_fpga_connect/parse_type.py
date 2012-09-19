@@ -1,3 +1,4 @@
+
 import ply.yacc as yacc
 import ply.lex as lex
 from typelex import *
@@ -20,8 +21,4 @@ class TypeParser():
     def parseType(self, typeString):
         typeStruct = yacc.parse(typeString)
         return typeStruct        
-
-
-
-
 

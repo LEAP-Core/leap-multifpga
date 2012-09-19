@@ -70,19 +70,11 @@ Packagehint=multifpga
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype
 
-[MultiFPGA Loop Synthesis test module top]
-File=modules/multifpga/longChain/top.awb
-Packagehint=multifpga
-
-[MultiFPGA Loop Synthesis test module top/Requires]
-test_c=Compression test module c
-test_d=Compression test module d
-
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
 
 [MultiFPGA Loop Test Connected Application/Requires]
-hardware_system=MultiFPGA Loop Synthesis test module top
+hardware_system=MultiFPGA compress test module top
 
 [MultiFPGA Loop Test Connected Application]
 File=modules/multifpga/longChain/connected_application/connected-application-throughput.awb
@@ -98,4 +90,17 @@ Packagehint=multifpga
 
 [Compression test module c]
 File=modules/multifpga/compressionTest/test_c.awb
+Packagehint=multifpga
+
+[MultiFPGA compress test module top]
+File=modules/multifpga/compressionTest/top.awb
+Packagehint=multifpga
+
+[MultiFPGA compress test module top/Requires]
+compress_common=MultiFPGA compress test common
+test_c=Compression test module c
+test_d=Compression test module d
+
+[MultiFPGA compress test common]
+File=modules/multifpga/compressionTest/common.awb
 Packagehint=multifpga

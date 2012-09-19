@@ -1,10 +1,10 @@
 import sys
+from code import *
 
 class DanglingConnection():
   
   def __init__(self, sc_type, raw_type, idx, name, platform, optional, bitwidth, modulename, chainroot, type_structure):
       self.sc_type = sc_type
-
       self.raw_type = raw_type
       self.name = name
       self.inverse_name = "ERROR"
@@ -20,7 +20,12 @@ class DanglingConnection():
       self.via_idx = "unassigned"
       self.via_link = "unassigned"
       self.type_structure = type_structure
+      self.code = Code()
       self.activity = 0 # this is used in lane allocation
+
+
+  def __repr__(self):
+      return "{" + self.name + ":" + self.raw_type + ":" + self.sc_type+ ":" +str(self.optional)+ ":" + self.modulename + ":" + self.platform + " }"
 
   # can probably extend matches to support chains
   def matches(self, other):

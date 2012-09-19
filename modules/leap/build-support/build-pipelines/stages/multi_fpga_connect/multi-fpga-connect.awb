@@ -8,11 +8,13 @@
 %requires type_parser
 
 %scons %library multiFPGAConnect.py
+%scons %library taggedUnionCompress.py
 %scons %library viaAssignment.py
 %scons %library linkAssignment.py
 %scons %library linkType.py
 %scons %library danglingConnection.py
 %scons %library via.py
+%scons %library code.py
 
 
 

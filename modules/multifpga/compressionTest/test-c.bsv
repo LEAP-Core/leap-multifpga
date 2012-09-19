@@ -3,14 +3,47 @@
 `include "awb/provides/soft_services.bsh"
 `include "awb/dict/PARAMS_TEST_D.bsh"
 `include "awb/provides/common_services.bsh"
+
+`include "awb/provides/compress_common.bsh"
 import LFSR::*;
+import FIFO::*;
 
 `define NUM_CONNS 2
 `define WIDTH 32
 
+
+
 module [CONNECTED_MODULE] mkC (Empty);
     PARAMETER_NODE paramNode <- mkDynamicParameterNode();
     Param#(5) threshold <- mkDynamicParameter(`PARAMS_TEST_D_INVALID_THRESHOLD, paramNode);
+
+    Connection_Send#(UnionTest) testSend <- mkConnection_Send("fromB");
+    Connection_Receive#(UnionTest) testRecv <- mkConnection_Receive("fromD");
+    LFSR#(Bit#(32)) compressVal1 <- mkLFSR_32();					
+    LFSR#(Bit#(32)) compressVal2 <- mkLFSR_32();						
+    FIFO#(UnionTest) compressFIFO <- mkSizedFIFO(8);  
+
+    rule sendCompress;
+    	UnionTest value = unpack(truncate({compressVal1.value, compressVal2.value}));
+        testSend.send(value);
+	compressFIFO.enq(value);
+	compressVal1.next();
+	compressVal2.next();
+	$display("Compress Test Sending: %h", value);
+    endrule
+
+    rule recvCompress;
+       let incoming = testRecv.receive();
+       if(incoming != compressFIFO.first)
+       begin
+           $display("Compress Test: got %h expected %h", incoming, compressFIFO.first);
+	   $finish;
+       end
+       $display("Compress Test: got %h expected %h", incoming, compressFIFO.first);
+       testRecv.deq;
+       compressFIFO.deq;
+    endrule
+
 
     function UnbalancedMaybe#(Bit#(`WIDTH)) expected(Bit#(32) counter);
 	UnbalancedMaybe#(Bit#(`WIDTH)) expectedResult = tagged UnbalancedValid (truncate(counter));

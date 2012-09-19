@@ -1,0 +1,14 @@
+%AWB_START
+
+%name MultiFPGA compress test module top
+%desc MultiFPGA compress test test module top
+
+%provides hardware_system
+%requires test_c
+%requires compress_common
+%requires test_d
+
+%public test_top.bsv 
+
+
+%AWB_END

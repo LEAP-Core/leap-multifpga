@@ -2735,3 +2735,53 @@ Directory config/pm/leap/demos/multifpga
 
 
 Added compression test for acp. 
+
+----------
+kfleming    Date: Wed Sep 19 10:59:13 EDT 2012  CSN: CSN-multifpga-152
+                  Wed Sep 19 14:59:13 UTC 2012
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_compress_acp.apm Locally Modified          151 
+ test_multifpga_chains_acp.apm Locally Modified          151 
+ test_multifpga_compress.apm Locally Modified          151 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          151 
+ danglingConnection.py     Locally Modified          151 
+ code.py                   Locally Added               0 
+ parse_type.py             Locally Modified          151 
+ multi-fpga-connect.awb    Locally Modified          151 
+ taggedUnionCompress.py    Locally Added               0 
+
+Directory modules/multifpga/compressionTest
+ common.awb                Locally Added               0 
+ common.bsv                Locally Added               0 
+ test-c.bsv                Locally Modified          151 
+ test-d.bsv                Locally Modified          151 
+ test_top.bsv              Locally Added               0 
+ top.awb                   Locally Added               0 
+
+Directory modules/multifpga/alpha_inorder
+ sim-mapping-time-func-cache-8.map Locally Modified          151 
+
+
+Added support for automatic compression of tagged unions. General
+strategy is to 
+
+1) Find tagged union 
+
+2) Split tagged union into channels based on widths of member types.
+
+3) Synthesis compression module with code for disassembling and
+re-assembling split channels.
+
+4) Inject new channels into program graph, removing original uncompressed channel.
+
+5) Inject module code into synthesized router.
+
+
+Modifications to multi-fpga-connect were small, and I think the method
+of code generation employed here should generalize and simplify the
+code generation phase.
+

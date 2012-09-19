@@ -16,6 +16,7 @@ from via import *
 from viaAssignment import *
 from linkAssignment import *
 from linkType import *
+from taggedUnionCompress import *
 
 ##
 ## Manage generation of statistics within a module by collecting counter names
@@ -248,7 +249,7 @@ h", src.type_structure))
           multiplexor_stats.addCounter('enqueued_' + moduleName + '_' + via.via_method,
                                        'ROUTER_' + moduleName + '_' + via.via_method + '_ENQUEUED',
                                        via.via_method +' cycles enqueued')
-
+ 
       multiplexor_definition += '\tBit#(TLog#(' + str(1 + len(egressVias)) +')) totalEnqs = ' + " + ".join(sum_string) + ";\n"
           
       for enqs in range(1 + len(egressVias)):
@@ -781,7 +782,7 @@ h", src.type_structure))
         # depending on the width of the vias, and the width of our type we get different loads on different processors
         # need to choose the minimum
 
-        print "\n\n Analyzing  " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + " raw load: " + str(links[danglingIdx].activity) + "\n"
+        print "\n\n Analyzing   " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + " raw load: " + str(links[danglingIdx].activity) + "\n"
         
         minIdx = -1 
         minLoad = 0        
@@ -1283,6 +1284,11 @@ h", src.type_structure))
                                   self.platformData[platform]['CONNECTED'][targetPlatform])))):
                       header.write('`include "awb/provides/' + dep + '.bsh"\n')
 
+          # Dangling Connections for this platform may have some definitions.  We insert them here.
+          for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+              for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
+                  header.write(dangling.code.definition)
+
           # everything down here should be code generation.  Eventually it should be split out.  
           # probably also need to instantiate stats in a different modules
           [egress_multiplexor_definition, egress_multiplexor_instantiation, egress_multiplexor_names] = self.generateEgressMultiplexor(platform) 
@@ -1296,6 +1302,10 @@ h", src.type_structure))
           header.write('String platformName <- getSynthesisBoundaryPlatform();\n')
           header.write('messageM("Instantiating Custom Router on " + platformName); \n')
 
+          # Dangling Connections for this platform may have some declarations.  We insert them here.
+          for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+              for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
+                  header.write(dangling.code.declaration)
      
           header.write(egress_multiplexor_instantiation + ingress_multiplexor_instantiation)
 
@@ -1557,9 +1567,6 @@ h", src.type_structure))
       logfile = open(self.platformData[platformName]['LOG'],'r')
       parser = TypeParser()
 
-      #type = parser.parseType('Typeclass {librl_bsv_base::Compress#(type t_DATA, type t_ENC_DATA, type t_MODULE)} {dependencies {{t_DATA determines (t_ENC_DATA, t_MODULE)}}} {members {{{t_MODULE#(librl_bsv_base::COMPRESSION_ENCODER#(t_DATA, t_ENC_DATA))} mkCompressor} {{t_MODULE#(librl_bsv_base::COMPRESSION_DECODER#(t_DATA, t_ENC_DATA))} mkDecompressor}}} {instances {{librl_bsv_base::Compress#(Maybe#(t_DATA), Maybe#(t_DATA), t_MODULE)   provisos (IsModule#(t_MODULE, m__), Bits#(t_DATA, t_DATA_SZ))} {librl_bsv_base::Compress#(hasim_modellib::PORT_MULTIPLEXED_MSG#(t_NUM_INSTANCES, t_MSG), hasim_modellib::PORT_MULTIPLEXED_MSG_COMPRESSED#(t_NUM_INSTANCES, t_MSG), soft_connections::CONNECTED_MODULE)   provisos (Bits#(t_MSG, t_MSG_SZ), Add#(1, t_MSG_SZ, _v100), Add#(t_MSG_SZ, TMax#(TLog#(t_NUM_INSTANCES), 1), _v101), Max#(TAdd#(6, TMax#(TLog#(t_NUM_INSTANCES), 1)), _v101, _v102), Add#(1, _v102, t_ENC_DATA_SZ), Add#(TMax#(TLog#(t_NUM_INSTANCES), 1), _v100, t_DATA_SZ))} {librl_bsv_base::Compress#(librl_bsv_base::UnbalancedMaybe#(t_DATA), librl_bsv_base::CompressedUnbalancedMaybe#(t_DATA), t_MODULE)   provisos (IsModule#(t_MODULE, m__), Bits#(t_DATA, t_DATA_SZ))}}} {position {hw/model/compress.bsv 35 11}}')
-      #print "Type is: " + str(type)
-      #exit(0)
       compressInstanceTypes = {}
       #we will build up a list of compressors by examining all bo
       if(self.ENABLE_TYPE_COMPRESSION):
@@ -1657,8 +1664,7 @@ h", src.type_structure))
                                  
                                   if(str(instance.params[0]) in self.platformData[platformName]['TYPES']):
                                       instanceType = self.platformData[platformName]['TYPES'][str(instance.params[0])].type
-                                      instanceDeps = self.platformData[platformName]['TYPES'][str(\
-instance.params[0])].dependencies 
+                                      instanceDeps = self.platformData[platformName]['TYPES'][str(instance.params[0])].dependencies 
                                   else:
                                       instanceType = resolveType(instance.params[0])
                                       # We found a new type.  Memoize it!
@@ -1718,16 +1724,35 @@ instance.params[0])].dependencies
                               self.platformData[platformName]['TYPES'][str(baseType)] = type
 
 
-                  self.platformData[platformName]['DANGLING'] += [DanglingConnection(sc_type, 
-                                                                                match.group(2),
-                                                                                match.group(3),
-                                                                                match.group(4),      
-                                                                                match.group(5),
-                                                                                match.group(6),
-                                                                                match.group(7),
-                                                                                match.group(8),
-                                                                                match.group(9),
-                                                                                type)]
+
+                  parentConnection = DanglingConnection(sc_type, 
+                                                        match.group(2),
+                                                        match.group(3),
+                                                        match.group(4),      
+                                                        match.group(5),
+                                                        match.group(6),
+                                                        match.group(7),
+                                                        match.group(8),
+                                                        match.group(9),
+                                                        type)
+                           
+                  # can we automatically compress?
+                  if(isinstance(type.type,TaggedUnion) and self.ENABLE_TYPE_COMPRESSION and (sc_type == 'Recv' or sc_type == 'Send')):
+                      compressor = []
+                      if(sc_type == 'Recv'):
+                          compressor = TaggedUnionCompressor(parentConnection)
+                      else:
+                          compressor = TaggedUnionDecompressor(parentConnection)
+                      
+                      # The compressor generates a bunch of
+                      # connections.  Add them now. The parent
+                      # connection is effectively dead at this point,
+                      # as it will be subsumed in the compression code
+                      self.platformData[platformName]['DANGLING'] += compressor.channels
+
+                  else: # can't do anything with this link
+                      self.platformData[platformName]['DANGLING'] += [parentConnection]
+
                   if(match.group(1) == "Chain"):
                     self.platformData[platformName]['DANGLING'] += [DanglingConnection("ChainSink", 
                                                                                 match.group(2),

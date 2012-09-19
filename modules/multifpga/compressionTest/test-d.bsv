@@ -5,11 +5,15 @@
 `include "awb/rrr/remote_server_stub_TESTDRRR.bsh"
 `include "awb/dict/PARAMS_TEST_D.bsh"
 `include "awb/provides/common_services.bsh"
+`include "awb/provides/compress_common.bsh"
 
 import LFSR::*;
+import FIFO::*;
 
 `define NUM_CONNS 2
 `define WIDTH 32
+
+
 
 module [CONNECTED_MODULE] mkD (Empty);
 
@@ -17,6 +21,29 @@ module [CONNECTED_MODULE] mkD (Empty);
 
     PARAMETER_NODE paramNode <- mkDynamicParameterNode();
     Param#(5) threshold <- mkDynamicParameter(`PARAMS_TEST_D_INVALID_THRESHOLD, paramNode);
+
+    Connection_Receive#(UnionTest) testRecv <- mkConnection_Receive("fromB");
+    Connection_Send#(UnionTest) testSend <- mkConnection_Send("fromD");
+    LFSR#(Bit#(32)) compressVal1 <- mkLFSR_32();					
+    LFSR#(Bit#(32)) compressVal2 <- mkLFSR_32();					
+  
+
+    rule reflectCompress;
+       let incoming = testRecv.receive();
+       UnionTest value = unpack(truncate({compressVal1.value,compressVal2.value}));
+       if(incoming != value)
+       begin
+           $display("Compress Test Reflect: got %h expected %h", incoming, value);
+	   $finish;
+       end
+
+       $display("Compress Test Reflect: got %h expected %h", incoming, value);	
+       testRecv.deq;
+       compressVal1.next;
+       compressVal2.next;	
+       testSend.send(incoming);
+    endrule
+
 
     function UnbalancedMaybe#(Bit#(`WIDTH)) expected(Bit#(32) counter);
 	UnbalancedMaybe#(Bit#(`WIDTH)) expectedResult = tagged UnbalancedValid (truncate(counter));
