@@ -2785,3 +2785,20 @@ Modifications to multi-fpga-connect were small, and I think the method
 of code generation employed here should generalize and simplify the
 code generation phase.
 
+
+----------
+kfleming    Date: Thu Sep 20 12:27:35 EDT 2012  CSN: CSN-multifpga-153
+                  Thu Sep 20 16:27:35 UTC 2012
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ taggedUnionCompress.py    Locally Modified          152 
+
+Directory modules/multifpga/compressionTest
+ common.bsv                Locally Modified          152 
+
+
+The tagged union compressor now optimizes for same-length tagged union
+legs.  Instead of building a null channel, we instantiate only one for
+same-length legs.
+

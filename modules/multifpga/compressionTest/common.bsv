@@ -1,7 +1,7 @@
 
 typedef union tagged {
-  Bit#(1) LegA;
+  Bit#(10) LegA;
   Bit#(10) LegB;
   Bit#(40) LegC;	
-  Bit#(50) LegD;	
+  Bit#(40) LegD;	
 } UnionTest deriving (Bits,Eq);

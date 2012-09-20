@@ -53,17 +53,22 @@ class IndexFunction():
         
         sortedMembers = sorted(members, key = lambda x: x.width)
         
-
-        enables = [ 0 for member in members]
+        enables = [ 0 for member in sortedMembers]
         self.splits = []
         bitsThusFar = 0
-        
+        enableIdx = 0 # the enable index is different due to same-sized union members
+
         for idx in range(len(members)): 
-            enables[idx]=1
+            # remove size zero splits - they aren't needed, though we still need the index function.
+            if(sortedMembers[idx].width != bitsThusFar):
+                self.splits += [sortedMembers[idx].width-bitsThusFar]
+                enables[enableIdx]=1
+                enableIdx = enableIdx + 1
+
             enables.reverse()
             self.definition += "\t" + "\t" + "\t" + str(sortedMembers[idx].index) +":  result = {1'b" +  ",1'b".join(map(str,enables)) + '};\n'
             enables.reverse()
-            self.splits += [sortedMembers[idx].width-bitsThusFar]
+
             bitsThusFar = sortedMembers[idx].width 
             
         self.definition += "\t" + "\t" + "\t" + "default: result = ?;\n"
