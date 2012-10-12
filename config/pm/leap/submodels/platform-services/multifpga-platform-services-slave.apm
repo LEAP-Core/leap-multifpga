@@ -119,5 +119,3 @@ Packagehint=leap
 File=modules/leap/libraries/platform-services/common-services/stdio-service/stdio-service.awb
 Packagehint=leap
 
-[Central Cache Common Definitions/Params]
-CENTRAL_CACHE_READ_META_BITS=15

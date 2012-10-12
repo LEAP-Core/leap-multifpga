@@ -2802,3 +2802,15 @@ The tagged union compressor now optimizes for same-length tagged union
 legs.  Instead of building a null channel, we instantiate only one for
 same-length legs.
 
+
+----------
+mcadler     Date: Fri Oct 12 16:02:41 EDT 2012  CSN: CSN-multifpga-154
+                  Fri Oct 12 20:02:41 UTC 2012
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave.apm Locally Modified          153 
+ multifpga-platform-services-master.apm Locally Modified          153 
+
+Use default central cache metadata size, which is now larger than the
+setting was here.
