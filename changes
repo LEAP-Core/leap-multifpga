@@ -2814,3 +2814,29 @@ Directory config/pm/leap/submodels/platform-services
 
 Use default central cache metadata size, which is now larger than the
 setting was here.
+
+----------
+mcadler     Date: Wed Oct 17 07:43:54 EDT 2012  CSN: CSN-multifpga-155
+                  Wed Oct 17 11:43:54 UTC 2012
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_perf_acp.apm Locally Modified          154 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified          154 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          154 
+
+Timing closure was too difficult for egress arbiters that have a large number of input
+ports.  The arbiter is now configurable for either the previous single cycle mode
+or a new dual cycle mode in which an input channel is picked in one cycle and data
+movement begins in the next cycle.  The dual cycle mode is pipelined except that the
+same input channel may not be chosen in consecutive cycles.  Given that the arbiter
+is already managing lots of input channels and consecutive cycles matter only when
+the input channel's message size is only a single UMF chunk, this rarely affects
+performance.
+
+The current code in multiFPGAConnect.py choses multi cycle arbitration when more than
+10 input ports are competing for a physical channel.

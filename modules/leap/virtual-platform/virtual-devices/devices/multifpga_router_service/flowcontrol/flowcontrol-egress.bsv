@@ -27,6 +27,8 @@
 
 import Vector::*;
 import FIFOF::*;
+import DReg::*;
+
 
 `include "awb/provides/channelio.bsh"
 `include "awb/provides/rrr.bsh"
@@ -72,7 +74,8 @@ module mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                            umf_chunk_r)) flowcontrol,
 
                        function Action write(umf_chunk data),
-                       String name) 
+                       String name,
+                       Bool singleCycleArb)
 
     (EGRESS_SWITCH#(n)) // Module interface
 
@@ -94,7 +97,11 @@ module mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
   EGRESS_SWITCH#(n) m = ?;
   if(valueof(n) > 0)
     begin
-      m <- mkFlowControlSwitchEgressNonZero(requestQueues, flowcontrol, write, name);
+      m <- mkFlowControlSwitchEgressNonZero(requestQueues,
+                                            flowcontrol,
+                                            write,
+                                            name,
+                                            singleCycleArb);
     end
   return m;
 
@@ -118,7 +125,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                                                                    umf_chunk_r)) flowcontrol, 
 
                                          function Action write(umf_chunk data),
-                                         String name) 
+                                         String name,
+                                         Bool singleCycleArb)
 
     (EGRESS_SWITCH#(n)) // Module interface
 
@@ -163,12 +171,14 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
         end
     endrule
 
-    // create request/response buffers and link them to ports
+    // Use a random arbiter since the arbitration runs speculatively and
+    // doesn't know whether the winner gets to fire.  Given this, no arbiter
+    // will be fair since even with random the relative vector position of
+    // requestors may favor one over the other when only a few are firing.
+    // In the long run this probably doesn't matter as long as the link stays
+    // busy.
+    LOCAL_ARBITER#(n) arbiter <- mkLocalRandomArbiter();
 
-
-
-    ARBITER#(n_FIFOS_SAFE) arbiterNormal <- mkRoundRobinArbiter();
-    ARBITER#(n_FIFOS_SAFE) arbiterFC <- mkRoundRobinArbiter();
 
     // === other state ===
 
@@ -293,94 +303,134 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
     //
     // Start writing new message.  The write_request_newmsg rule is broken
-    // into two parts in order to help Bluespec generate a significantly simpler
-    // schedule than if the rules are combined.  Separating the rules breaks
-    // the connection between arbiter input vector state and the test for
-    // whether a requestQueue has data.
+    // into two parts for timing.  For large numbers of incoming ports, the
+    // cost of MUXing input values to the output port is too large for
+    // arbitration and MUXing in a single cycle.
     //
 
-    Wire#(Maybe#(UInt#(n_FIFOS_SAFE_SZ))) newMsgQIdx <- mkDWire(tagged Invalid);
+    FLOWCONTROL_ARBITER_IDX#(n) newMsgQIdx <-
+        singleCycleArb ? mkFlowControlArbIdxSingleCycle() :
+                         mkFlowControlArbIdxMultiCycle();
+
 
     //
-    // First half -- pick an incoming requestQueue
-    // we could make this 
+    // First half -- pick an incoming requestQueue.
     //
-    rule write_request_newmsg1 (requestChunksRemaining == 0);
+    rule writeRequestNewmsg1 (True);
 
-        // arbitrate
-        Bit#(n_FIFOS_SAFE) requestNormal = '0;
-        Bit#(n_FIFOS_SAFE) requestFC = '0;
-        for (Integer s = 0; s < valueof(n); s = s + 1)
+        // Incoming channel has a request and the channel isn't locked
+        function Bool hasRequest(Integer s) =
+            requestQueues[s].notEmptyHeader() &&
+            newMsgQIdx.notLocked(fromInteger(s));
+
+        Vector#(n, Bool) has_request = map(hasRequest, genVector());
+
+
+        // Buffers available for normal requests
+        function Bool bufAvailNormal(Integer s) =
+            bufferAvailable[s] && ! requestQueues[s].bypassFlowcontrol;
+
+        Vector#(n, Bool) buf_avail_normal = map(bufAvailNormal, genVector());
+
+
+        // Buffers available for flow control requests
+        function Bool bufAvailFC(Integer s) =
+            requestQueues[s].bypassFlowcontrol;
+
+        Vector#(n, Bool) buf_avail_fc = map(bufAvailFC, genVector());
+
+
+        // Generate the request vectors
+        let req_normal = zipWith(\&& , has_request, buf_avail_normal);
+        let req_fc = zipWith(\&& , has_request, buf_avail_fc);
+
+
+        // Flow control requests have priority
+        Vector#(n, Bool) reqs;
+        if (pack(req_fc) != 0)
         begin
-            requestNormal[s] = pack(requestQueues[s].notEmptyHeader() && (bufferAvailable[s] && !requestQueues[s].bypassFlowcontrol)); // Non-FC queues need buffer
-            requestFC[s] = pack(requestQueues[s].notEmptyHeader() && requestQueues[s].bypassFlowcontrol); // FC Queues are always ready
+            reqs = req_fc;
+
+            if (`SWITCH_DEBUG != 0)
+            begin
+                $display("FC wins right to arb");
+            end
+        end
+        else
+        begin
+            reqs = req_normal;
+
+            if (`SWITCH_DEBUG != 0 && (pack(req_normal) != 0))
+            begin
+                $display("Normal wins right to arb");
+            end
         end
 
-        let arbitedRequestNormal = arbiterNormal.arbitrate(requestNormal); 
-        let arbitedRequestFC = arbiterFC.arbitrate(requestFC); 
-        newMsgQIdx <= (isValid(arbitedRequestFC))?arbitedRequestFC:arbitedRequestNormal;
-        if(arbitedRequestNormal matches tagged Valid .idx &&&`SWITCH_DEBUG == 1)
-        begin
-	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), requestNormal, idx);
-        end
 
-        if(arbitedRequestFC matches tagged Valid .idx &&&`SWITCH_DEBUG == 1)
+        // Pick a winner.
+        let winner <- arbiter.arbitrate(reqs, False);
+        newMsgQIdx.setWinner(winner);
+
+        if (winner matches tagged Valid .idx &&& `SWITCH_DEBUG == 1)
         begin
-	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), requestFC, idx);
+	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), pack(reqs), idx);
         end
     endrule
+
 
     //
     // Second half -- consume a value from the chosen responseQueue.  If the
     // rule fails to fire because the channel write port is full it will fire
     // again later after being reselected by the first half.
     //
-    for (Integer s = 0; s < valueof(n); s = s + 1)
+    // This second half runs a cycle later for timing -- the MUX of input
+    // sources is too large to run in one cycle along with arbitration.
+    //
+    for (Integer s = 0; s < valueOf(n); s = s + 1)
     begin	
-        rule write_request_newmsg2 (newMsgQIdx matches tagged Valid .idx &&&
-                                    fromInteger(s) == idx &&&
-                                    requestChunksRemaining == 0 &&&
-                                    !creditDelay.notEmpty() &&&
-				    deqHeader);
+        rule writeRequestNewmsg2 (newMsgQIdx.getWinner() matches tagged Valid .idx &&&
+                                  idx == fromInteger(s) &&&
+                                  requestChunksRemaining == 0 &&&
+                                  !creditDelay.notEmpty() &&&
+                                  deqHeader);
+            let header = requestQueues[s].firstHeader;
+            Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) requestChunks = zeroExtend(header.numChunks) + 1; // also sending header
+            Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) oldCredits = portCredits.sub(fromInteger(s));
+
             if(`SWITCH_DEBUG == 1)
             begin
-                $display("scheduled %d", idx);
+                $display("scheduled %d", s);
             end
 
             requestQueues[s].deqHeader();
-            let header = requestQueues[s].firstHeader;
             // send the header packet to channelio
             write(unpack(pack(header))); // The guys above us know how to set VC, etc.
 
             // setup remaining chunks
             requestChunksRemaining <= header.numChunks;
-            Bit#(TAdd#(1,umf_message_len)) requestChunks = zeroExtend(header.numChunks) + 1; // also sending header
             requestActiveQueue <= fromInteger(s);
-           
-            Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) oldCredits = portCredits.sub(fromInteger(s)); 
 
-            Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  oldCredits - zeroExtendNP(requestChunks);
-            portCredits.upd(fromInteger(s),newCount);
+            Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  oldCredits - zeroExtendNP(requestChunks);
+            portCredits.upd(fromInteger(s), newCount);
             Bit#(umf_message_len) max = maxBound;
-            bufferAvailable[fromInteger(s)] <= newCount >= zeroExtend(max) + 1; 
- 
+            bufferAvailable[s] <= newCount >= zeroExtend(max) + 1; 
+
             if(`SWITCH_DEBUG == 1)
             begin
                 $display("Setting portCredits for %d to %d", s, newCount);
             end
 
-           if(oldCredits < zeroExtendNP(requestChunks) && (s != 0))
-           begin
-               $display("Bizzarre Credit Underflow oldCredit %d messageSize %d newCount %d max %d", oldCredits, requestChunks, newCount, max);
-               $finish;               
-           end
-
+            if (oldCredits < zeroExtendNP(requestChunks) && (s != 0))
+            begin
+                $display("Bizzarre Credit Underflow oldCredit %d messageSize %d newCount %d max %d", oldCredits, requestChunks, newCount, max);
+                $finish;               
+            end
         endrule
-    end  // Outgoing channel for loop
+    end
 
 
     // continue writing message
-    rule write_request_continue (requestChunksRemaining != 0);
+    rule writeRequestContinue (requestChunksRemaining != 0);
         if(`SWITCH_DEBUG == 1)
         begin
             $display("sending packet on  %d", requestActiveQueue);  
@@ -406,4 +456,66 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     method bufferStatus = readVReg(bufferAvailable);
 endmodule
 
+
+
+// ========================================================================
+//
+// Flow control arbiter presents an interface that can be used either for
+// same cycle or next cycle arbitration.
+//
+// ========================================================================
+
+interface FLOWCONTROL_ARBITER_IDX#(numeric type n);
+    method Action setWinner(Maybe#(LOCAL_ARBITER_CLIENT_IDX#(n)) winner);
+    method Maybe#(LOCAL_ARBITER_CLIENT_IDX#(n)) getWinner();
+
+    //
+    // notLocked() indicates whether a request may fire for a given
+    // port this cycle.
+    //
+    method Bool notLocked(LOCAL_ARBITER_CLIENT_IDX#(n) s);
+endinterface
+
+
+//
+// mkFlowControlArbIdxSingleCycle --
+//     Consumer of arbitration fires in the same cycle as the arbiter.
+//
+module mkFlowControlArbIdxSingleCycle
+    // Interface:
+    (FLOWCONTROL_ARBITER_IDX#(n));
+
+    Wire#(Maybe#(LOCAL_ARBITER_CLIENT_IDX#(n))) newMsgQIdx <- mkDWire(tagged Invalid);
+
+    method Action setWinner(Maybe#(LOCAL_ARBITER_CLIENT_IDX#(n)) winner);
+        newMsgQIdx <= winner;
+    endmethod
+
+    method Maybe#(LOCAL_ARBITER_CLIENT_IDX#(n)) getWinner() = newMsgQIdx;
+    method Bool notLocked(LOCAL_ARBITER_CLIENT_IDX#(n) s) = True;
+endmodule
+
+
+//
+// mkFlowControlArbIdxMultiCycle --
+//     Consumer of arbitration fires in the cycle after the arbiter.
+//     Arbitration is pipelined, though the same input may not win in
+//     consecutive cycles to simplify credit accounting.
+//
+module mkFlowControlArbIdxMultiCycle
+    // Interface:
+    (FLOWCONTROL_ARBITER_IDX#(n));
+
+    Reg#(Maybe#(LOCAL_ARBITER_CLIENT_IDX#(n))) newMsgQIdx <- mkDReg(tagged Invalid);
+
+    method Action setWinner(Maybe#(LOCAL_ARBITER_CLIENT_IDX#(n)) winner);
+        newMsgQIdx <= winner;
+    endmethod
+
+    method Maybe#(LOCAL_ARBITER_CLIENT_IDX#(n)) getWinner() = newMsgQIdx;
+
+    // Can't win in back-to-back cycles
+    method Bool notLocked(LOCAL_ARBITER_CLIENT_IDX#(n) s) =
+        ! (isValid(newMsgQIdx) && (validValue(newMsgQIdx) == s));
+endmodule
 

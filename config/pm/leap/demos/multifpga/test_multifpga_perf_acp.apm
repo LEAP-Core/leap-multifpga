@@ -84,6 +84,7 @@ Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
+type_parser=Bluespec Type parser
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -107,3 +108,7 @@ Packagehint=multifpga
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_DEBUG=1
 GENERATE_ROUTER_STATS=1
+
+[Bluespec Type parser]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+Packagehint=multifpga
