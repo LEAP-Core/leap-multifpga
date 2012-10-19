@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=mem_perf_multifpga_acp
+File=mem_perf_multifpga_alt_acp
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=Scratchpad Perf Test Connected Application
 environment_description=ACP Dual FPGA Env with Dual SRAM
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Mem Perf ACP Mapping
+fpga_mapping=Mem Perf ACP Mapping (Alt)
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -66,10 +66,6 @@ fpga_environment_parser=FPGA Environment Datatype
 File=modules/apps/tests/mem_perf/mem-perf.awb
 Packagehint=leap-debug
 
-[Mem Perf ACP Mapping]
-File=modules/multifpga/mem_perf/acp_mapping.awb
-Packagehint=multifpga
-
 [ACP Dual FPGA Env with Dual SRAM]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
 Packagehint=multifpga
@@ -104,3 +100,7 @@ Packagehint=leap-debug
 [Mem perf common types]
 File=modules/apps/tests/mem_perf/mem-perf-common.awb
 Packagehint=leap-debug
+
+[Mem Perf ACP Mapping (Alt)]
+File=modules/multifpga/mem_perf/acp_mapping_alt.awb
+Packagehint=multifpga

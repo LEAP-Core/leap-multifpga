@@ -2840,3 +2840,23 @@ performance.
 
 The current code in multiFPGAConnect.py choses multi cycle arbitration when more than
 10 input ports are competing for a physical channel.
+
+----------
+kfleming    Date: Thu Oct 18 20:10:05 EDT 2012  CSN: CSN-multifpga-156
+                  Fri Oct 19 00:10:05 UTC 2012
+
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_exe.apm Locally Added               0 
+ mem_perf_multifpga_acp.apm Locally Modified          155 
+ mem_perf_multifpga_alt_acp.apm Locally Added               0 
+
+Directory modules/multifpga/mem_perf
+ acp-mapping-alt.map       Locally Added               0 
+ acp_mapping_alt.awb       Locally Added               0 
+ acp-mapping.map           Locally Modified          155 
+ sim_mapping.awb           Locally Added               0 
+ sim-mapping.map           Locally Added               0 
+
+
+Multifpga testbench now does experiments approxiamately in parallel.
