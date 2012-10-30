@@ -103,15 +103,9 @@ File=modules/leap/virtual-platform/channelio/basic/basic-channelio.awb
 Packagehint=leap
 
 [Basic Virtual Channel Multiplexer/Requires]
-physical_channel=Bluespec PCIE Physical Channel
+physical_channel=Old-Style Bluespec PCIe Physical Channel
 
-[Bluespec PCIE Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec/pcie-bluespec.awb
-Packagehint=leap-platforms
 
-[Bluespec PCIE Physical Channel]
-File=modules/leap/virtual-platform/physical-channel/pcie/bluespec/pcie-bluespec-physical-channel.awb
-Packagehint=leap
 
 [RL Bluespec Library Submodel]
 File=config/pm/leap/submodels/common/librl-bsv.apm
@@ -181,7 +175,7 @@ File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
 
 [XUP Virtex 5 PCIE AURORA/Requires]
-pcie_device=Bluespec PCIE Device
+pcie_device=XUPv5 PCIE Device
 clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 aurora_device=Aurora SATA Device, Single Lane, 3gbps
@@ -224,3 +218,11 @@ Packagehint=multifpga
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
 Packagehint=multifpga
+
+[Old-Style Bluespec PCIe Physical Channel]
+File=modules/leap/virtual-platform/physical-channel/pcie/bluespec/pcie-bluespec-physical-channel.awb
+Packagehint=leap
+
+[XUPv5 PCIE Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-xupv5/pcie-bluespec.awb
+Packagehint=leap-platforms

@@ -188,12 +188,9 @@ Packagehint=leap-platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora/xilinx-xup-pcie-sata.awb
 Packagehint=leap-platforms
 
-[Bluespec PCIE Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec/pcie-bluespec.awb
-Packagehint=leap-platforms
 
 [XUP Virtex 5 PCIE AURORA/Requires]
-pcie_device=Bluespec PCIE Device
+pcie_device=XUPv5 PCIE Device
 clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 aurora_device=Aurora Device, Single Lane, 3.125gbps (SMA)
@@ -224,3 +221,7 @@ Packagehint=multifpga
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
 Packagehint=multifpga
+
+[XUPv5 PCIE Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-xupv5/pcie-bluespec.awb
+Packagehint=leap-platforms

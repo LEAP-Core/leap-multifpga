@@ -31,7 +31,7 @@ Packagehint=leap
 virtual_devices=Standard Virtual Devices Submodel
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
-platform_services=Standard Platform Services
+platform_services=Standard Platform Services Submodel
 
 [FPGA Environment]
 File=modules/leap/virtual-platform/fpga-environment.awb
@@ -92,8 +92,6 @@ Packagehint=leap
 CRYSTAL_CLOCK_FREQ=100
 
 [NULL Local Memory Interface/Params]
-LOCAL_MEM_WORDS_PER_LINE=4
-LOCAL_MEM_WORD_BITS=64
 LOCAL_MEM_ADDR_BITS=26
 
 [Standard Virtual Devices Submodel]
@@ -105,15 +103,9 @@ File=modules/leap/virtual-platform/channelio/basic/basic-channelio.awb
 Packagehint=leap
 
 [Basic Virtual Channel Multiplexer/Requires]
-physical_channel=Bluespec PCIE Physical Channel
+physical_channel=Old-Style Bluespec PCIe Physical Channel
 
-[Bluespec PCIE Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec/pcie-bluespec.awb
-Packagehint=leap-platforms
 
-[Bluespec PCIE Physical Channel]
-File=modules/leap/virtual-platform/physical-channel/pcie/bluespec/pcie-bluespec-physical-channel.awb
-Packagehint=leap
 
 [FPGA Build Pipeline Xilinx (Synplify)]
 File=config/pm/leap/submodels/pipelines/build-pipeline-xilinx-synplify.apm
@@ -124,7 +116,7 @@ File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
 [XUP Virtex 5 PCIE AURORA/Requires]
-pcie_device=Bluespec PCIE Device
+pcie_device=XUPv5 PCIE Device
 clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 aurora_device=Aurora SATA Device, Single Lane, 3gbps
@@ -141,6 +133,15 @@ Packagehint=leap-platforms
 File=config/pm/leap/submodels/common/soft-services.apm
 Packagehint=leap
 
-[Standard Platform Services]
+
+[Old-Style Bluespec PCIe Physical Channel]
+File=modules/leap/virtual-platform/physical-channel/pcie/bluespec/pcie-bluespec-physical-channel.awb
+Packagehint=leap
+
+[Standard Platform Services Submodel]
 File=config/pm/leap/submodels/platform-services/standard-platform-services.apm
 Packagehint=leap
+
+[XUPv5 PCIE Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-xupv5/pcie-bluespec.awb
+Packagehint=leap-platforms
