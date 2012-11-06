@@ -84,13 +84,6 @@ rrr_common=RRR Common Module
 File=modules/leap/virtual-platform/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
 Packagehint=leap
 
-[NULL Local Memory Interface]
-File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
-Packagehint=leap
-
-[NULL Local Memory Interface/Params]
-LOCAL_MEM_ADDR_BITS=26
-
 [RL Bluespec Library Submodel]
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
@@ -181,19 +174,15 @@ Packagehint=leap
 File=modules/bluespec/common/fpgaenv/physical-platform/xilinx_xupV5/pcie-aurora/xilinx-xup-pcie-sata.awb
 Packagehint=leap-platforms
 
-[Bluespec PCIE Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express-bluespec/pcie-bluespec.awb
-Packagehint=leap-platforms
-
 [Aurora SATA Device, Single Lane, 3gbps]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/sata-aurora-3gbps/sata-aurora.awb
 Packagehint=leap-platforms
 
 [XUP Virtex 5 PCIE AURORA/Requires]
-pcie_device=Bluespec PCIE Device
 clocks_device=Single-Ended Crystal Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 aurora_device=Aurora SATA Device, Single Lane, 3gbps
+pcie_device=XUPv5 PCIE Device
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
@@ -226,3 +215,12 @@ Packagehint=multifpga
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
 Packagehint=multifpga
+
+
+[XUPv5 PCIE Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-xupv5/pcie-bluespec.awb
+Packagehint=leap-platforms
+
+[NULL Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=leap

@@ -2876,3 +2876,13 @@ Directory config/pm/multifpga/inter_fpga_test/submodels
  fpgaenv-hybrid-xup-v5-pcie-sata.apm Locally Modified          156 
 
 Restore XUPv5 PCIe configuration.
+
+----------
+mcadler     Date: Mon Nov  5 20:06:00 EST 2012  CSN: CSN-multifpga-158
+                  Tue Nov  6 01:06:00 UTC 2012
+
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified          157 
+
+Missing PCIe configuration.
