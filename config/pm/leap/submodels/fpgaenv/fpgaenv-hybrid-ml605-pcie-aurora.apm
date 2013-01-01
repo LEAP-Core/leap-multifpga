@@ -103,14 +103,6 @@ Packagehint=leap
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex6-generic.awb
 Packagehint=leap-platforms
 
-[Differential Crystal Clocks Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-device.awb
-Packagehint=leap-platforms
-
-[Differential Crystal Clocks Device/Params]
-CRYSTAL_CLOCK_FREQ=200
-RESET_ACTIVE_HIGH=1
-
 [Virtex-6 PCIE Device (BlueNoC)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6/pcie-virtex6.awb
 Packagehint=leap-platforms
@@ -152,16 +144,31 @@ UMF_CHUNK_BYTES=16
 [ML605 Virtex-6 Platform with PCIe and Aurora/Requires]
 ml605_aurora_device=ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
 pcie_device=BlueNoC PCIe Bridge
-clocks_device=Differential Crystal Clocks Device
+clocks_device=Differential Crystal Clocks Device from Clocks
 physical_platform_utils=Common Physical Platform Utilities
 ddr_sdram_device=Xilinx DDR SDRAM Physical Device
+physical_platform_config=ML605 Virtex-6 Platform with PCIe
 
 [ML605 Virtex-6 Platform with PCIe and Aurora]
 File=modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma/aurora-ml605-v6-pcie-dma.awb
+Packagehint=leap-platforms
 
 [ML605 Aurora Device, Single Lane, 3.125gbps (SMA)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605/aurora-sma.awb
+Packagehint=leap-platforms
 
 [Aurora Platform Services Submodel]
 File=config/pm/leap/submodels/platform-services/aurora-platform-services.apm
 Packagehint=leap
+
+[ML605 Virtex-6 Platform with PCIe]
+File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/ml605/ml605-v6-pcie-dma.awb
+Packagehint=leap-platforms
+
+[Differential Crystal Clocks Device from Clocks]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-from-clocks.awb
+Packagehint=leap-platforms
+
+[Differential Crystal Clocks Device from Clocks/Params]
+CRYSTAL_CLOCK_FREQ=200
+RESET_ACTIVE_HIGH=1

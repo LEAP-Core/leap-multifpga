@@ -2886,3 +2886,14 @@ Directory config/pm/multifpga/fpga_submodels
  multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified          157 
 
 Missing PCIe configuration.
+
+----------
+kfleming    Date: Tue Jan  1 15:58:30 EST 2013  CSN: CSN-multifpga-160
+                  Tue Jan  1 20:58:30 UTC 2013
+
+
+Directory config/pm/leap/submodels/fpgaenv
+ fpgaenv-hybrid-ml605-pcie-aurora.apm Locally Modified          159 
+
+
+Updated aurora physical platform to use new-style clock imports.
