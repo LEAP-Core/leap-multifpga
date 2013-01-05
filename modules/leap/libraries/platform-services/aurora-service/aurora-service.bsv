@@ -31,6 +31,8 @@ import Complex::*;
 `include "asim/provides/soft_services.bsh"
 `include "asim/provides/soft_connections.bsh"
 `include "asim/provides/soft_clocks.bsh"
+`include "asim/provides/stdio_service.bsh"
+`include "asim/provides/soft_strings.bsh"
 `include "asim/provides/clocks_device.bsh"
 `include "asim/provides/fpga_components.bsh"
 `include "asim/provides/librl_bsv_storage.bsh"
@@ -39,7 +41,8 @@ import Complex::*;
 module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) (); 
 
    AURORA_DRIVER       auroraDriver = drivers.auroraDriver;
-   FIFOF#(Bit#(16)) serdes_infifo <- mkSizedBRAMFIFOF(64);
+   STDIO#(Bit#(64)) stdio <- mkStdIO();  
+   let serdes_infifo <- mkSizedBRAMFIFOF(64);
    // make soft connections to PHY
    Connection_Send#(Bit#(16)) analogRX <- mkConnection_Send("AuroraRX");
    Reg#(Bit#(40)) rxCount <- mkReg(0);
@@ -47,11 +50,11 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
    Reg#(Bit#(40)) sampleSent <- mkReg(0);
    
     rule sendToSW (serdes_infifo.notFull);
-      Bit#(16) dataIn <- auroraDriver.read();
+      auroraDriver.deq;
       rxCount <= rxCount + 1;
       // This may be a bug Alfred will know what to do. XXX
       sampleSent <= sampleSent + 1;
-      serdes_infifo.enq(dataIn);
+      serdes_infifo.enq(auroraDriver.first);
     endrule
 
 /* ///// ???????????
@@ -64,12 +67,12 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
 */
     rule toAnalog;
        serdes_infifo.deq;
-       analogRX.send(unpack(truncate(serdes_infifo.first())));       
+       analogRX.send(truncate(serdes_infifo.first()));       
     endrule
 
     Connection_Receive#(Bit#(16)) analogTX <- mkConnection_Receive("AuroraTX");
 
-    FIFOF#(Bit#(16)) serdes_send <- mkSizedFIFOF(32);  
+    let serdes_send <- mkSizedFIFOF(32);  
 
     Reg#(Bit#(40)) txCountIn <- mkReg(0);  
     Reg#(Bit#(40)) txCount <- mkReg(0);  
@@ -77,7 +80,7 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
     rule forwardToLL; 
       analogTX.deq();
       txCountIn <= txCountIn + 1;
-      serdes_send.enq(pack(analogTX.receive));
+      serdes_send.enq(zeroExtend(analogTX.receive));
     endrule
 
     rule sendToSERDESData;
@@ -85,4 +88,34 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
       txCount <= txCount + 1;
       serdes_send.deq();
     endrule
+
+    // periodic debug printout
+
+   
+    /*
+        method channel_up = ug_device.channel_up;
+        method lane_up = ug_device.lane_up;
+        method hard_err = ug_device.hard_err;
+        method soft_err = ug_device.soft_err;
+ 
+        method status = ug_device.status;
+        method rx_count = ug_device.rx_count;
+        method tx_count = ug_device.tx_count;
+        method error_count = ug_device.error_count;
+        method rx_fifo_count = serdes_rxfifo.dCount;
+        method tx_fifo_count = serdes_txfifo.sCount;
+*/ 
+        let aurSndMsg <- getGlobalStringUID("Aurora channel_up %x, lane_up %x, rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
+
+        Reg#(Bit#(24)) counter <- mkReg(0);
+
+        rule printf;
+           counter <= counter + 1;
+           if(counter + 1 == 0) 
+           begin
+               stdio.printf(aurSndMsg, list6(zeroExtend(pack(auroraDriver.channel_up)), zeroExtend(pack(auroraDriver.lane_up)), zeroExtend(rxCount), zeroExtend(txCount), zeroExtend(pack(auroraDriver.rx_fifo_count)), zeroExtend(pack(auroraDriver.tx_fifo_count))));
+           end
+       endrule
+        
+
 endmodule

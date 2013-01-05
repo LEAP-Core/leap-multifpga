@@ -2897,3 +2897,43 @@ Directory config/pm/leap/submodels/fpgaenv
 
 
 Updated aurora physical platform to use new-style clock imports.
+
+----------
+kfleming    Date: Sat Jan  5 16:14:42 EST 2013  CSN: CSN-multifpga-161
+                  Sat Jan  5 21:14:42 UTC 2013
+
+
+Directory config/pm/leap/tests
+ aurora_driver/            Locally Added               0 
+
+Directory config/pm/leap/tests/aurora_driver
+ aurora_driver_test.apm    Locally Added               0 
+ fpgaenv-aurora-debug.apm  Locally Added               0 
+
+Directory modules/leap
+ debug/                    Locally Added               0 
+
+Directory modules/leap/debug
+ aurora-flowcontrol-debug/ Locally Added               0 
+
+Directory modules/leap/debug/aurora-flowcontrol-debug
+ aurora_driver.bsh         Locally Added               0 
+ aurora_device.bsh         Locally Added               0 
+ aurora-flowcontrol-debug.cpp Locally Added               0 
+ sim-physical-platform.cpp Locally Added               0 
+ aurora-flowcontrol-debug.h Locally Added               0 
+ sim-physical-platform.h   Locally Added               0 
+ aurora-flowcontrol-debug.awb Locally Added               0 
+ sim-physical-platform.awb Locally Added               0 
+ aurora-flowcontrol-debug.bsv Locally Added               0 
+ README                    Locally Added               0 
+ sim-physical-platform.bsv Locally Added               0 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          160 
+
+Directory modules/leap/examples/hello-fellow
+ hello-world.bsv           Locally Modified          160 
+
+
+Added test code for aurora link flow control protocol.

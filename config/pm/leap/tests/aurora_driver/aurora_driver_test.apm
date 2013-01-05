@@ -1,0 +1,52 @@
+
+[Global]
+SaveParameters=0
+Description=Hello World Demo using hybrid streams for ML605 v6 PCIe
+File=aurora_driver_test
+Version=2.2
+Name=Hello Fellow for ML605 JTAG
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Pipeline Build
+RootProvides=model
+
+[Model]
+DefaultAttributes=hello unconnected hybrid project ml605 
+model=HW/SW Hybrid Pipeline Build
+
+[HW/SW Hybrid Pipeline Build/Requires]
+project_common=Default Hybrid Project Common Utilities
+fpgaenv=Aurora Debug Hybrid Simulation FPGA Environment
+application_env=Soft Services Hybrid Application Environment
+
+[HW/SW Hybrid Pipeline Build]
+File=modules/leap/build-support/project/project-pipeline.awb
+Packagehint=leap
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/leap/submodels/common/project-common-default.apm
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment/Requires]
+connected_application=AuroraDebug
+
+[AuroraDebug/Requires]
+inter_fpga_device=Xilinx Inter-FPGA Device
+
+[AuroraDebug]
+File=modules/leap/debug/aurora-flowcontrol-debug/aurora-flowcontrol-debug.awb
+Packagehint=multifpga
+
+[Xilinx Inter-FPGA Device]
+File=modules/leap/virtual-platform/virtual-devices/devices/inter-fpga/xilinx/inter-fpga-device-xilinx.awb
+Packagehint=leap
+
+[Aurora Debug Hybrid Simulation FPGA Environment]
+File=config/pm/leap/tests/aurora_driver/fpgaenv-aurora-debug.apm
+Packagehint=multifpga

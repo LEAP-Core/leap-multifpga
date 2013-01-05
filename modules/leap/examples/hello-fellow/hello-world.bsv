@@ -90,11 +90,15 @@ module [CONNECTED_MODULE] mkConnectedApplication ();
 		Connection_Receive#(Bit#(16)) auroraRecv <- mkConnectionRecv("AuroraRX");
     Connection_Send#(Bit#(16)) auroraSend <- mkConnectionSend("AuroraTX");
 		let aurMsg <- getGlobalStringUID("Aurora recv'd %x \n");
+		let aurSndMsg <- getGlobalStringUID("Aurora sent %x \n");
 		Reg#(Bit#(16)) auroraTestVal <- mkReg(0);
+
 		rule sendToAurora( auroraTestVal < 128 );
 			auroraTestVal <= auroraTestVal + 1;
 			auroraSend.send(auroraTestVal);
+                        stdio.printf(aurSndMsg, list1(zeroExtend(auroraTestVal)));
 		endrule
+
 		rule recvFromAurora;
 			auroraRecv.deq();
       stdio.printf(aurMsg, list1(zeroExtend(auroraRecv.receive)));

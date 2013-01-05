@@ -1,0 +1,15 @@
+ 
+%name Aurora Debug Simulation Physical Platform
+%desc Aurora Debug Simulation Physical Platform
+
+%provides physical_platform
+
+%requires clocks_device unix_pipe_device ddr_sdram_device physical_platform_utils 
+
+%sources -t BSV -v PUBLIC  sim-physical-platform.bsv
+%sources -t H   -v PUBLIC  sim-physical-platform.h
+%sources -t BSH -v PUBLIC  aurora_device.bsh
+%sources -t CPP -v PRIVATE sim-physical-platform.cpp
+
+%param --global MAKE_ALL_TARGET      exe       "Target of 'make all'.  Most likely bit, exe or vexe."
+

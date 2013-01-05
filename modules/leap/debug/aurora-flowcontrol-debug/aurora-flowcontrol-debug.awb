@@ -1,0 +1,21 @@
+********************************************************************
+* Awb module specification
+********************************************************************
+
+%AWB_START
+
+%name AuroraDebug
+%desc AuroraDebug
+
+%attributes hello fellow hybrid
+
+%provides connected_application
+%requires inter_fpga_device
+
+%notes README 
+
+%sources -t BSV  -v PUBLIC  aurora-flowcontrol-debug.bsv
+%sources -t H    -v PUBLIC  aurora-flowcontrol-debug.h
+%sources -t CPP  -v PRIVATE aurora-flowcontrol-debug.cpp
+
+%AWB_END
