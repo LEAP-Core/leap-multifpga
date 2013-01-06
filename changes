@@ -2937,3 +2937,17 @@ Directory modules/leap/examples/hello-fellow
 
 
 Added test code for aurora link flow control protocol.
+
+----------
+kfleming    Date: Sun Jan  6 15:22:30 EST 2013  CSN: CSN-multifpga-162
+                  Sun Jan  6 20:22:30 UTC 2013
+
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          161 
+
+Directory modules/leap/examples/hello-fellow
+ hello-world.bsv           Locally Modified          161 
+
+
+Added some debug registers to the ml60 aurora test code. 

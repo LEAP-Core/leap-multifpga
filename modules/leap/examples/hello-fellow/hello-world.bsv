@@ -93,7 +93,7 @@ module [CONNECTED_MODULE] mkConnectedApplication ();
 		let aurSndMsg <- getGlobalStringUID("Aurora sent %x \n");
 		Reg#(Bit#(16)) auroraTestVal <- mkReg(0);
 
-		rule sendToAurora( auroraTestVal < 128 );
+		rule sendToAurora;
 			auroraTestVal <= auroraTestVal + 1;
 			auroraSend.send(auroraTestVal);
                         stdio.printf(aurSndMsg, list1(zeroExtend(auroraTestVal)));
