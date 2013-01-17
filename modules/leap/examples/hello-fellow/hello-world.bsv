@@ -28,6 +28,8 @@ import List::*;
 `include "awb/provides/soft_services.bsh"
 `include "awb/provides/soft_services_lib.bsh"
 `include "awb/provides/soft_services_deps.bsh"
+`include "awb/provides/dynamic_parameters_service.bsh"
+`include "awb/dict/PARAMS_CONNECTED_APPLICATION.bsh"
 
 typedef enum 
 {
@@ -87,22 +89,64 @@ module [CONNECTED_MODULE] mkConnectedApplication ();
     endrule
 
     
+   PARAMETER_NODE paramNode  <- mkDynamicParameterNode();
+   Param#(8) sleepTime <- mkDynamicParameter(`PARAMS_CONNECTED_APPLICATION_SLEEP_TIME,paramNode);
+   Param#(1) verbose   <- mkDynamicParameter(`PARAMS_CONNECTED_APPLICATION_VERBOSE,paramNode);
+            
+
+
 		Connection_Receive#(Bit#(16)) auroraRecv <- mkConnectionRecv("AuroraRX");
     Connection_Send#(Bit#(16)) auroraSend <- mkConnectionSend("AuroraTX");
 		let aurMsg <- getGlobalStringUID("Aurora recv'd %x \n");
 		let aurSndMsg <- getGlobalStringUID("Aurora sent %x \n");
+		let aurErrorMsg <- getGlobalStringUID("Aurora recv'd %x expected %x total errors %x\n");
 		Reg#(Bit#(16)) auroraTestVal <- mkReg(0);
+		Reg#(Bit#(16)) recvExpected <- mkReg(0);
+		Reg#(Bit#(8)) sleep  <- mkReg(0);
+                Reg#(Bit#(32)) errors <- mkReg(0); 
 
-		rule sendToAurora;
-			auroraTestVal <= auroraTestVal + 1;
-			auroraSend.send(auroraTestVal);
-                        stdio.printf(aurSndMsg, list1(zeroExtend(auroraTestVal)));
+                rule sleepUp(sleep != 0);
+                   sleep <= sleep + 1;
+                endrule
+
+
+		rule sendToAurora(sleep == 0);
+                        if(sleep + 1 < sleepTime)
+                        begin
+                            sleep <= sleep + 1;
+                        end
+                        else 
+                        begin
+                            sleep <= 0;
+                        end 
+
+                        if(sleep == 0)
+                        begin
+  			    auroraTestVal <= auroraTestVal + 1;
+			    auroraSend.send(auroraTestVal);
+                            if(unpack(verbose))
+                            begin          
+                                stdio.printf(aurSndMsg, list1(zeroExtend(auroraTestVal)));
+                            end
+                        end
 		endrule
+
+               
 
 		rule recvFromAurora;
-			auroraRecv.deq();
-      stdio.printf(aurMsg, list1(zeroExtend(auroraRecv.receive)));
+                    auroraRecv.deq();
+                    recvExpected <= recvExpected + 1;
+
+                    if(auroraRecv.receive() != recvExpected)
+                    begin 
+                         errors <= errors + 1;
+                         stdio.printf(aurErrorMsg, list3(zeroExtend(auroraRecv.receive), zeroExtend(recvExpected), zeroExtend(errors)));
+                    end 
+                    else if(unpack(verbose))
+                    begin    
+                        stdio.printf(aurMsg, list1(zeroExtend(auroraRecv.receive)));
+                    end
+
+
 		endrule
-
-
 endmodule

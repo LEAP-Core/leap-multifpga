@@ -106,6 +106,7 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
         method tx_fifo_count = serdes_txfifo.sCount;
 */ 
         let aurSndMsg <- getGlobalStringUID("Aurora channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
+        let aurCreditMsg <- getGlobalStringUID("Aurora credit_underflow %x, rx_credit %x, tx_credit %x, data_drops %x\n");
 
         Reg#(Bit#(24)) counter <- mkReg(0);
 
@@ -114,6 +115,10 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
            if(counter + 1 == 0) 
            begin
                stdio.printf(aurSndMsg, list7(zeroExtend(pack(auroraDriver.channel_up)), zeroExtend(pack(auroraDriver.lane_up)), zeroExtend(auroraDriver.error_count), zeroExtend(auroraDriver.rx_count), zeroExtend(auroraDriver.tx_count), zeroExtend(pack(auroraDriver.rx_fifo_count)), zeroExtend(pack(auroraDriver.tx_fifo_count))));
+           end
+           else if (counter + 1 == 1)
+           begin
+               stdio.printf(aurCreditMsg, list4(zeroExtend(pack(auroraDriver.credit_underflow)), zeroExtend(pack(auroraDriver.rx_credit)), zeroExtend(auroraDriver.tx_credit), zeroExtend(pack(auroraDriver.data_drops))));
            end
        endrule
         

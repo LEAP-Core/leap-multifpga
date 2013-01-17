@@ -23,6 +23,7 @@
 // @author Angshuman Parashar
 //
 
+#include "asim/syntax.h"
 #include "awb/provides/connected_application.h"
 
 using namespace std;

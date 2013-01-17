@@ -1,0 +1,10 @@
+%AWB_START
+
+%name ML605 Dual FPGA Environment (SMA)
+%desc ML605 Dual FPGA Environment (SMA)
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC ml605-dual.env
+
+
+%AWB_END

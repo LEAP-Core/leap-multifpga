@@ -2951,3 +2951,30 @@ Directory modules/leap/examples/hello-fellow
 
 
 Added some debug registers to the ml60 aurora test code. 
+
+----------
+kfleming    Date: Wed Jan 16 19:42:38 EST 2013  CSN: CSN-multifpga-163
+                  Thu Jan 17 00:42:38 UTC 2013
+
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          162 
+
+Directory modules/leap/examples/hello-fellow
+ hello-fellow.awb          Locally Modified          162 
+ hello-world.bsv           Locally Modified          162 
+ hello-world.cpp           Locally Modified          162 
+
+Directory modules/leap-platforms/fpga-environments
+ ml605/                    Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments/ml605
+ ml605_fpga_env.awb        Locally Added               0 
+ ml605-dual.env            Locally Added               0 
+
+
+
+Two things, in light of the stability of the ml605
+
+1) Added some debug refinements for the inter-fpga tests.
+2) Began adding scaffold for ml605 multifpga implementations.
