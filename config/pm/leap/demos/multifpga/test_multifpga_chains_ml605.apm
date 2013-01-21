@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_chains_exe
+File=test_multifpga_chains_ml605
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -71,7 +71,6 @@ type_parser=Bluespec Type parser
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
-
 [multiFPGA Log Generation]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
 Packagehint=multifpga
@@ -98,8 +97,6 @@ Packagehint=multifpga
 File=modules/multifpga/synthTest/test_c_chains.awb
 Packagehint=multifpga
 
-[multiFPGA Log Generation/Params]
-GENERATE_ROUTER_STATS=1
 
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
@@ -112,3 +109,6 @@ Packagehint=multifpga
 [Test ACP Mapping]
 File=modules/multifpga/synthTest/acp_mapping.awb
 Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=1

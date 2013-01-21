@@ -172,3 +172,6 @@ Packagehint=leap-platforms
 [Differential Crystal Clocks Device from Clocks/Params]
 CRYSTAL_CLOCK_FREQ=200
 RESET_ACTIVE_HIGH=1
+
+[Aurora Platform Services Submodel/Params]
+DEBUG_ONLY=0

@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_chains_exe
+File=mem_perf_multifpga_ml605
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -17,10 +17,10 @@ DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid
 model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
-connected_application=MultiFPGA Test Connected Application
+connected_application=Scratchpad Perf Test Connected Application
 environment_description=ML605 Dual FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Test ACP Mapping
+fpga_mapping=Mem Perf ACP Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -34,26 +34,6 @@ Packagehint=multifpga
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_log_generator=multiFPGA Log Generation
-
-[MultiFPGA Synthesis test module a]
-File=modules/multifpga/synthTest/test_a.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module top/Requires]
-test_c=MultiFPGA Synthesis test module c (with chains)
-test_a=MultiFPGA Synthesis test module a
-test_b=MultiFPGA Synthesis test module b
-
-[MultiFPGA Synthesis test module a/Requires]
-test_d=MultiFPGA Synthesis test module d with rrr and chains
-
-[MultiFPGA Synthesis test module b]
-File=modules/multifpga/synthTest/test_b.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module top]
-File=modules/multifpga/synthTest/top.awb
-Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
@@ -71,7 +51,6 @@ type_parser=Bluespec Type parser
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
-
 [multiFPGA Log Generation]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
 Packagehint=multifpga
@@ -83,32 +62,45 @@ Packagehint=multifpga
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype
 
-[MultiFPGA Test Connected Application/Requires]
-hardware_system=MultiFPGA Synthesis test module top
+[Scratchpad Memory Performance Test System]
+File=modules/apps/tests/mem_perf/mem-perf.awb
+Packagehint=leap-debug
 
-[MultiFPGA Test Connected Application]
-File=modules/multifpga/synthTest/connected_application/connected-application-test.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module d with rrr and chains]
-File=modules/multifpga/synthTest/test_d_chains.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module c (with chains)]
-File=modules/multifpga/synthTest/test_c_chains.awb
+[Mem Perf ACP Mapping]
+File=modules/multifpga/mem_perf/acp_mapping.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
 
+[Scratchpad Perf Test Connected Application]
+File=modules/apps/tests/mem_perf/connected_application/connected-application-test.awb
+Packagehint=leap-debug
+
+[Scratchpad Perf Test Connected Application/Requires]
+mem_perf_wrapper=Scratchpad Memory Performance Test System Wrapper
+
+[Scratchpad Memory Performance Test System Wrapper]
+File=modules/apps/tests/mem_perf/mem-perf-wrapper.awb
+Packagehint=leap-debug
+
+[Scratchpad Memory Performance Test System Wrapper/Requires]
+mem_perf_tester=Scratchpad Memory Performance Test System
+mem_perf_tester_alt=Scratchpad Memory Performance Test System (FPGA1)
+mem_perf_common=Mem perf common types
+
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
 
+[Scratchpad Memory Performance Test System (FPGA1)]
+File=modules/apps/tests/mem_perf/mem-perf-alt.awb
+Packagehint=leap-debug
+
+[Mem perf common types]
+File=modules/apps/tests/mem_perf/mem-perf-common.awb
+Packagehint=leap-debug
+
 [ML605 Dual FPGA Environment (SMA)]
 File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_env.awb
-Packagehint=multifpga
-
-[Test ACP Mapping]
-File=modules/multifpga/synthTest/acp_mapping.awb
 Packagehint=multifpga

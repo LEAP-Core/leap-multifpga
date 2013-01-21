@@ -2978,3 +2978,37 @@ Two things, in light of the stability of the ml605
 
 1) Added some debug refinements for the inter-fpga tests.
 2) Began adding scaffold for ml605 multifpga implementations.
+
+----------
+kfleming    Date: Sun Jan 20 21:57:14 EST 2013  CSN: CSN-multifpga-164
+                  Mon Jan 21 02:57:14 UTC 2013
+
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_ml605.apm Locally Added               0 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_chains_exe.apm Locally Modified          163 
+ test_multifpga_chains_ml605.apm Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv
+ fpgaenv-hybrid-ml605-pcie-aurora.apm Locally Modified          163 
+
+Directory config/pm/multifpga/fpga_submodels
+ ml605_0.apm               Locally Added               0 
+ ml605_1.apm               Locally Added               0 
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Added               0 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Added               0 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.awb        Locally Modified          163 
+ aurora-service.bsv        Locally Modified          163 
+
+
+
+1) Added in remaining scaffold to support dual-ML605 designs
+
+2) Added a few such designs
+
+3) Added some switches to permit the aurora service to be used for
+debugging.

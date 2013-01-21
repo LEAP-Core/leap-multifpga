@@ -7,5 +7,5 @@
 
 %public aurora-service.bsv
 
-
+%param --global DEBUG_ONLY 1 "Limits aurora service to dumping debug about device"
 

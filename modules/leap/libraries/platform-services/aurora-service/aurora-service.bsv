@@ -44,83 +44,65 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
    STDIO#(Bit#(64)) stdio <- mkStdIO();  
    let serdes_infifo <- mkSizedBRAMFIFOF(64);
    // make soft connections to PHY
-   Connection_Send#(Bit#(16)) analogRX <- mkConnection_Send("AuroraRX");
+   Connection_Send#(Bit#(16)) analogRX <- mkConnectionSendOptional("AuroraRX");
    Reg#(Bit#(40)) rxCount <- mkReg(0);
    Reg#(Bit#(40)) sampleDropped <- mkReg(0);
    Reg#(Bit#(40)) sampleSent <- mkReg(0);
    
-    rule sendToSW (serdes_infifo.notFull);
-      auroraDriver.deq;
-      rxCount <= rxCount + 1;
-      // This may be a bug Alfred will know what to do. XXX
-      sampleSent <= sampleSent + 1;
-      serdes_infifo.enq(auroraDriver.first);
-    endrule
+    if(`DEBUG_ONLY == 0)
+    begin
+        rule sendToSW (serdes_infifo.notFull);
+            auroraDriver.deq;
+            rxCount <= rxCount + 1;           
+            sampleSent <= sampleSent + 1;
+            serdes_infifo.enq(auroraDriver.first);
+   
+        endrule
+    end
 
-/* ///// ???????????
-    rule dropdata (!serdes_infifo.notFull);
-       Bit#(16) dataIn <- auroraDriver.read();
-       rxCount <= rxCount + 1;
-       // This may be a bug Alfred will know what to do. XXX
-       sampleDropped <= sampleDropped + 1;
-    endrule
-*/
     rule toAnalog;
-       serdes_infifo.deq;
-       analogRX.send(truncate(serdes_infifo.first()));       
+        serdes_infifo.deq;
+        analogRX.send(truncate(serdes_infifo.first()));       
     endrule
 
-    Connection_Receive#(Bit#(16)) analogTX <- mkConnection_Receive("AuroraTX");
+    Connection_Receive#(Bit#(16)) analogTX  <- mkConnectionRecvOptional("AuroraTX");
 
-    let serdes_send <- mkSizedFIFOF(32);  
+    FIFOF#(Bit#(63)) serdes_send <- mkSizedFIFOF(32);  
 
     Reg#(Bit#(40)) txCountIn <- mkReg(0);  
     Reg#(Bit#(40)) txCount <- mkReg(0);  
 
     rule forwardToLL; 
-      analogTX.deq();
-      txCountIn <= txCountIn + 1;
-      serdes_send.enq(zeroExtend(analogTX.receive));
+        analogTX.deq();
+        txCountIn <= txCountIn + 1;
+        serdes_send.enq(zeroExtend(analogTX.receive));
     endrule
 
-    rule sendToSERDESData;
-      auroraDriver.write(serdes_send.first());  // Byte endian issue?
-      txCount <= txCount + 1;
-      serdes_send.deq();
-    endrule
+    if(`DEBUG_ONLY == 0)
+    begin
+        rule sendToSERDESData;
+            auroraDriver.write(serdes_send.first());  // Byte endian issue?
+            txCount <= txCount + 1;
+            serdes_send.deq();
+        endrule
+    end
 
     // periodic debug printout
+    let aurSndMsg <- getGlobalStringUID("Aurora channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
+    let aurCreditMsg <- getGlobalStringUID("Debug Mode: %x, Aurora credit_underflow %x, rx_credit %x, tx_credit %x, data_drops %x\n");
 
-   
-    /*
-        method channel_up = ug_device.channel_up;
-        method lane_up = ug_device.lane_up;
-        method hard_err = ug_device.hard_err;
-        method soft_err = ug_device.soft_err;
- 
-        method status = ug_device.status;
-        method rx_count = ug_device.rx_count;
-        method tx_count = ug_device.tx_count;
-        method error_count = ug_device.error_count;
-        method rx_fifo_count = serdes_rxfifo.dCount;
-        method tx_fifo_count = serdes_txfifo.sCount;
-*/ 
-        let aurSndMsg <- getGlobalStringUID("Aurora channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
-        let aurCreditMsg <- getGlobalStringUID("Aurora credit_underflow %x, rx_credit %x, tx_credit %x, data_drops %x\n");
+    Reg#(Bit#(24)) counter <- mkReg(0);
 
-        Reg#(Bit#(24)) counter <- mkReg(0);
-
-        rule printf;
-           counter <= counter + 1;
-           if(counter + 1 == 0) 
-           begin
-               stdio.printf(aurSndMsg, list7(zeroExtend(pack(auroraDriver.channel_up)), zeroExtend(pack(auroraDriver.lane_up)), zeroExtend(auroraDriver.error_count), zeroExtend(auroraDriver.rx_count), zeroExtend(auroraDriver.tx_count), zeroExtend(pack(auroraDriver.rx_fifo_count)), zeroExtend(pack(auroraDriver.tx_fifo_count))));
-           end
-           else if (counter + 1 == 1)
-           begin
-               stdio.printf(aurCreditMsg, list4(zeroExtend(pack(auroraDriver.credit_underflow)), zeroExtend(pack(auroraDriver.rx_credit)), zeroExtend(auroraDriver.tx_credit), zeroExtend(pack(auroraDriver.data_drops))));
-           end
-       endrule
-        
-
+    rule printf;
+        counter <= counter + 1;
+        if(counter + 1 == 0) 
+        begin
+            stdio.printf(aurSndMsg, list7(zeroExtend(pack(auroraDriver.channel_up)), zeroExtend(pack(auroraDriver.lane_up)), zeroExtend(auroraDriver.error_count), zeroExtend(auroraDriver.rx_count), zeroExtend(auroraDriver.tx_count), zeroExtend(pack(auroraDriver.rx_fifo_count)), zeroExtend(pack(auroraDriver.tx_fifo_count))));
+        end
+        else if (counter + 1 == 1)
+        begin
+            stdio.printf(aurCreditMsg, list5(`DEBUG_ONLY, zeroExtend(pack(auroraDriver.credit_underflow)), zeroExtend(pack(auroraDriver.rx_credit)), zeroExtend(auroraDriver.tx_credit), zeroExtend(pack(auroraDriver.data_drops))));
+        end
+    endrule
+       
 endmodule
