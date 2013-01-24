@@ -1,0 +1,10 @@
+
+%name Simlutation Communication Device with raw UNIX Communication
+%desc Simlutation Communication Device with raw UNIX Communication
+
+%provides simulation_communication_device
+%requires unix_comm_device
+
+%sources -t BSV    -v PUBLIC  simulation-communication-device.bsv
+%sources -t BSH    -v PUBLIC  simulation-communication-device.bsh
+

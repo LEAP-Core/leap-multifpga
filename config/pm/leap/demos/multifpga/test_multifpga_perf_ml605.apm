@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_throughput_acp
+File=test_multifpga_perf_ml605
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -17,17 +17,13 @@ DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid
 model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
-connected_application=MultiFPGA Throughput Test Connected Application
-environment_description=ACP Dual FPGA Environment
+connected_application=MultiFPGA Perf Test Connected Application
+environment_description=ML605 Dual FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Test ACP Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
-Packagehint=multifpga
-
-[ACP Dual FPGA Environment]
-File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env.awb
 Packagehint=multifpga
 
 [multiFPGA Build Pipeline]
@@ -44,12 +40,12 @@ File=modules/multifpga/synthTest/test_a.awb
 Packagehint=multifpga
 
 [MultiFPGA Synthesis test module top/Requires]
-test_c=MultiFPGA Throughput Test (C)
+test_c=MultiFPGA Synthesis test module c for benchmarking
 test_a=MultiFPGA Synthesis test module a
 test_b=MultiFPGA Synthesis test module b
 
 [MultiFPGA Synthesis test module a/Requires]
-test_d=MultiFPGA Throughput Test (D)
+test_d=MultiFPGA Synthesis test module d for benchmarking link
 
 [MultiFPGA Synthesis test module b]
 File=modules/multifpga/synthTest/test_b.awb
@@ -90,25 +86,29 @@ type_parser=Bluespec Type parser
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
 Packagehint=multifpga
 
+[MultiFPGA Synthesis test module c for benchmarking]
+File=modules/multifpga/synthTest/test_c_perf.awb
+Packagehint=multifpga
+
+[MultiFPGA Perf Test Connected Application]
+File=modules/multifpga/synthTest/connected_application/connected-application-perf.awb
+Packagehint=multifpga
+
+[MultiFPGA Perf Test Connected Application/Requires]
+hardware_system=MultiFPGA Synthesis test module top
+
+[MultiFPGA Synthesis test module d for benchmarking link]
+File=modules/multifpga/synthTest/test_d_perf.awb
+Packagehint=multifpga
+
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_DEBUG=1
 GENERATE_ROUTER_STATS=1
 
-[MultiFPGA Throughput Test (D)]
-File=modules/multifpga/throughputTest/test_d_throughput.awb
-Packagehint=multifpga
-
-[MultiFPGA Throughput Test (C)]
-File=modules/multifpga/throughputTest/test_c_throughput.awb
-Packagehint=multifpga
-
-[MultiFPGA Throughput Test Connected Application/Requires]
-hardware_system=MultiFPGA Synthesis test module top
-
-[MultiFPGA Throughput Test Connected Application]
-File=modules/multifpga/throughputTest/connected_application/connected-application-throughput.awb
-Packagehint=multifpga
-
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+Packagehint=multifpga
+
+[ML605 Dual FPGA Environment (SMA)]
+File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_env.awb
 Packagehint=multifpga

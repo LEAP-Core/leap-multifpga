@@ -22,7 +22,7 @@ import Clocks::*;
 import Vector::*;
 
 `include "clocks_device.bsh"
-`include "unix_comm_device.bsh"
+`include "simulation_communication_device.bsh"
 `include "physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
@@ -34,7 +34,7 @@ import Vector::*;
 interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER    clocksDriver;
-    interface Vector#(`NUM_FPGA,UNIX_COMM_DRIVER) unixCommDrivers;
+    interface Vector#(`NUM_FPGA, SIMULATION_COMMUNICATION_DRIVER) simCommDrivers;
 
 endinterface
 
@@ -48,7 +48,7 @@ endinterface
 interface TOP_LEVEL_WIRES;
     
     interface CLOCKS_WIRES    clocksWires;
-    interface Vector#(`NUM_FPGA, UNIX_COMM_WIRES) unixCommWires;
+    interface Vector#(`NUM_FPGA, SIMULATION_COMMUNICATION_WIRES) simCommWires;
     
 endinterface
 
@@ -81,18 +81,18 @@ module mkPhysicalPlatform
     Clock clk = clocks_device.driver.clock;
     Reset rst = clocks_device.driver.reset;
     
-    Vector#(`NUM_FPGA, UNIX_COMM_DRIVER) unixDrivers = newVector();
-    Vector#(`NUM_FPGA, UNIX_COMM_WIRES)  unixWires = newVector();
+    Vector#(`NUM_FPGA, SIMULATION_COMMUNICATION_DRIVER) simDrivers = newVector();
+    Vector#(`NUM_FPGA, SIMULATION_COMMUNICATION_WIRES)  simWires = newVector();
     for(Integer i = 0; i < `NUM_FPGA; i = i +1)
     begin 
         if(i != `MY_ID)
         begin
-	   let dev <- mkUNIXCommDevice("/tmp/FPGA" + integerToString(`MY_ID) +"ToFPGA" + integerToString(i),
-                                       "/tmp/FPGA" + integerToString(i) + "ToFPGA" + integerToString(`MY_ID),
-                                       clocked_by clk,
-                                       reset_by rst);
-           unixDrivers[i] = dev.driver;
-           unixWires[i]   = dev.wires;
+	    let dev <- mkSimulationCommunicationDevice("/tmp/FPGA" + integerToString(`MY_ID) +"ToFPGA" + integerToString(i),
+                                                      "/tmp/FPGA" + integerToString(i) + "ToFPGA" + integerToString(`MY_ID),
+                                                      clocked_by clk,
+                                                      reset_by rst);
+            simDrivers[i] = dev.driver;
+            simWires[i]   = dev.wires;
         end
     end 
 
@@ -103,7 +103,7 @@ module mkPhysicalPlatform
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface clocksDriver   = clocks_device.driver;
-        interface unixCommDrivers = unixDrivers;
+        interface simCommDrivers = simDrivers;
 
     endinterface
     
@@ -111,8 +111,8 @@ module mkPhysicalPlatform
     
     interface TOP_LEVEL_WIRES topLevelWires;
     
-        interface clocksWires    = clocks_device.wires;
-        interface unixCommWires  = unixWires;
+        interface clocksWires   = clocks_device.wires;
+        interface simCommWires  = simWires;
 
     endinterface
                

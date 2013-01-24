@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation Dual Aurora FPGA Environment 
+%desc Simulation Dual Aurora FPGA Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-dual-aurora.env
+%AWB_END

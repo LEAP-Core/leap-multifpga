@@ -4,7 +4,7 @@
 
 %provides physical_platform
 
-%requires clocks_device unix_pipe_device physical_platform_utils unix_comm_device
+%requires clocks_device unix_pipe_device physical_platform_utils simulation_communication_device
 
 %sources --t BSV --v PUBLIC  sim-physical-platform-fpga0.bsv
 %sources --t H   --v PUBLIC  sim-physical-platform-fpga0.h

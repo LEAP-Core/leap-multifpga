@@ -87,6 +87,7 @@ Packagehint=multifpga
 common_services=Common Services
 mem_services=Standard Mem Services
 multifpga_router_service=MultiFPGA Router Service
+aurora_service=Aurora Service
 
 [Common Services/Requires]
 stats_service=Stats Service
@@ -119,3 +120,6 @@ Packagehint=leap
 File=modules/leap/libraries/platform-services/common-services/stdio-service/stdio-service.awb
 Packagehint=leap
 
+[Aurora Service]
+File=modules/leap/libraries/platform-services/aurora-service/aurora-service.awb
+Packagehint=multifpga

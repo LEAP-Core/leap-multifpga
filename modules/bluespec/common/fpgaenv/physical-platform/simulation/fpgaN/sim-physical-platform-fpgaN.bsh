@@ -1,2 +1,2 @@
 `include "clocks_device.bsh"
-`include "unix_comm_device.bsh"
+`include "simulation_communication_device.bsh"

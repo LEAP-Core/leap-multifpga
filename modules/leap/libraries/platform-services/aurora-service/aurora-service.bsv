@@ -27,7 +27,7 @@ import Complex::*;
 
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/physical_platform.bsh"
-`include "asim/provides/ml605_aurora_device.bsh"
+`include "asim/provides/aurora_device.bsh"
 `include "asim/provides/soft_services.bsh"
 `include "asim/provides/soft_connections.bsh"
 `include "asim/provides/soft_clocks.bsh"
@@ -89,9 +89,12 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
 
     // periodic debug printout
     let aurSndMsg <- getGlobalStringUID("Aurora channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
+    let aurFCMsg <- getGlobalStringUID("Flowcontrol tokens RX'ed: %x, Flowcontrol tokens TX'ed %x\n");
     let aurCreditMsg <- getGlobalStringUID("Debug Mode: %x, Aurora credit_underflow %x, rx_credit %x, tx_credit %x, data_drops %x\n");
+    let txDebugMsg <- getGlobalStringUID("TXBuffer %x\n");
+    let rxDebugMsg <- getGlobalStringUID("RXBuffer %x\n");
 
-    Reg#(Bit#(24)) counter <- mkReg(0);
+    Reg#(Bit#(26)) counter <- mkReg(0);
 
     rule printf;
         counter <= counter + 1;
@@ -103,6 +106,20 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
         begin
             stdio.printf(aurCreditMsg, list5(`DEBUG_ONLY, zeroExtend(pack(auroraDriver.credit_underflow)), zeroExtend(pack(auroraDriver.rx_credit)), zeroExtend(auroraDriver.tx_credit), zeroExtend(pack(auroraDriver.data_drops))));
         end
+        else if (counter + 1 == 2)
+        begin
+            stdio.printf(aurFCMsg, list2(zeroExtend(pack(auroraDriver.rx_fc)), zeroExtend(pack(auroraDriver.tx_fc))));
+        end
     endrule
        
+    rule drainTX;
+       let data <- auroraDriver.txDebug.get();
+       stdio.printf(txDebugMsg, list1(zeroExtend(data)));
+    endrule
+
+    rule drainRX;
+       let data <- auroraDriver.rxDebug.get();
+       stdio.printf(rxDebugMsg, list1(zeroExtend(data)));
+    endrule
+
 endmodule

@@ -21,7 +21,7 @@
 import Clocks::*;
 
 `include "clocks_device.bsh"
-`include "unix_comm_device.bsh"
+`include "simulation_communication_device.bsh"
 `include "physical_platform_utils.bsh"
 
 // PHYSICAL_DRIVERS
@@ -33,7 +33,7 @@ import Clocks::*;
 interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER    clocksDriver;
-    interface UNIX_COMM_DRIVER unixCommDriver;
+    interface SIMULATION_COMMUNICATION_DRIVER simCommDriver;
 
 endinterface
 
@@ -47,7 +47,7 @@ endinterface
 interface TOP_LEVEL_WIRES;
     
     interface CLOCKS_WIRES    clocksWires;
-    interface UNIX_COMM_WIRES unixCommWires;
+    interface SIMULATION_COMMUNICATION_WIRES simCommWires;
     
 endinterface
 
@@ -80,11 +80,10 @@ module mkPhysicalPlatform
     Clock clk = clocks_device.driver.clock;
     Reset rst = clocks_device.driver.reset;
     
-
-    UNIX_COMM_DEVICE unix_comm_device  <- mkUNIXCommDevice("/tmp/FPGA1ToFPGA0",
-                                                           "/tmp/FPGA0ToFPGA1",
-                                                           clocked_by clk,
-                                                           reset_by rst);
+    SIMULATION_COMMUNICATION_DEVICE simulation_communication_device  <- mkUNIXCommDevice("/tmp/FPGA1ToFPGA0",
+                                                                                         "/tmp/FPGA0ToFPGA1",
+                                                                                         clocked_by clk,
+                                                                                         reset_by rst);
 
     // Finally, instantiate all other physical devices
 
@@ -93,7 +92,7 @@ module mkPhysicalPlatform
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface clocksDriver   = clocks_device.driver;
-        interface unixCommDriver = unix_comm_device.driver;
+        interface simCommDriver  = simulation_communication_device.driver;
 
     endinterface
     
@@ -102,7 +101,7 @@ module mkPhysicalPlatform
     interface TOP_LEVEL_WIRES topLevelWires;
     
         interface clocksWires    = clocks_device.wires;
-        interface unixCommWires  = unix_comm_device.wires;
+        interface simCommWires   = simulation_communication_device.wires;
 
     endinterface
                

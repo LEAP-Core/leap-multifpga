@@ -3012,3 +3012,94 @@ Directory modules/leap/libraries/platform-services/aurora-service
 
 3) Added some switches to permit the aurora service to be used for
 debugging.
+
+----------
+kfleming    Date: Wed Jan 23 21:05:15 EST 2013  CSN: CSN-multifpga-165
+                  Thu Jan 24 02:05:15 UTC 2013
+
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_ml605.apm Locally Modified          164 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_ml605.apm Locally Added               0 
+ test_multifpga_throughput_acp.apm Locally Modified          164 
+ test_multifpga_perf_ml605.apm Locally Added               0 
+ test_multifpga_throughput_aurora_exe.apm Locally Added               0 
+ test_multifpga_chains_ml605.apm Locally Modified          164 
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave.apm Locally Modified          164 
+ multifpga-platform-services-master.apm Locally Modified          164 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN.apm Locally Modified          164 
+ multifpgaenv-hybrid-exe-fpga0.apm Locally Modified          164 
+ fpgaenv-hybrid-ml605-pcie-aurora.apm Locally Modified          164 
+ multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm Locally Added               0 
+ multifpgaenv-hybrid-exe-fpga0-aurora.apm Locally Added               0 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_aurora_exe.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ ml605_0.apm               Locally Modified          164 
+ ml605_1.apm               Locally Modified          164 
+ fpga1-aurora.apm          Locally Added               0 
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          164 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          164 
+ fpga0-aurora.apm          Locally Added               0 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          164 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpgaN
+ sim-physical-platform-fpgaN.awb Locally Modified          164 
+ sim-physical-platform-fpgaN.bsv Locally Modified          164 
+ sim-physical-platform-fpgaN.bsh Locally Modified          164 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.awb Locally Modified          164 
+ sim-physical-platform-fpga0.bsv Locally Modified          164 
+ sim-physical-platform-fpga0.bsh Locally Modified          164 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga1
+ sim-physical-platform-fpga1.awb Locally Modified          164 
+ sim-physical-platform-fpga1.bsv Locally Modified          164 
+ sim-physical-platform-fpga1.bsh Locally Modified          164 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices
+ simulation-communication/ Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication
+ simulation-communication-device.bsh Locally Added               0 
+ simulation-communication.bsh Locally Added               0 
+ simulation-communication-device.awb Locally Added               0 
+ simulation-communication-device.bsv Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-octo.env              Locally Modified          164 
+ sim-dual.env              Locally Modified          164 
+ sim-cache-dual.env        Locally Modified          164 
+ sim-quad-ring.env         Locally Modified          164 
+ sim-airblue-env.env       Locally Modified          164 
+ sim_dual_aurora_env.awb   Locally Added               0 
+ sim-quad.env              Locally Modified          164 
+ sim-dual-aurora.env       Locally Added               0 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.cpp Locally Modified          164 
+
+
+1) Abstracted the simulation communication so that we can test both
+the aurora flowcontrol scheme and the router network using real
+workloads.  This will be helpful as the aurora flowcontrol grows more
+parametric.
+
+2) Added a simulator for the aurora flow control.
+
+3) Added several dual ml605 designs.  Some of the designs work, though
+longer runs are currently encumbered by glitches which I believe are
+related to soft reset (or the lack thereof).
+
+
