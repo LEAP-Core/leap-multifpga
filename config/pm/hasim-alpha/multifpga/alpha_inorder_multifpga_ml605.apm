@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=alpha_inorder_multifpga_acp
+File=alpha_inorder_multifpga_ml605
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -18,9 +18,9 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=HAsim Performance Model
-environment_description=ACP Dual FPGA Environment
+environment_description=ML605 Dual FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Alpha Inorder Sim Mapping
+fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -148,14 +148,6 @@ Packagehint=hasim
 File=modules/hasim/timing-models/memory/base-types/memory-base-types.awb
 Packagehint=hasim-models
 
-[Alpha Inorder Sim Mapping]
-File=modules/multifpga/alpha_inorder/sim_mapping.awb
-Packagehint=multifpga
-
-[ACP Dual FPGA Environment]
-File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env.awb
-Packagehint=multifpga
-
 [HAsim Common Default Configuration/Params]
 CONTEXT_ID_BITS=6
 
@@ -168,4 +160,12 @@ NUM_CPUS=64
 
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+Packagehint=multifpga
+
+[ML605 Dual FPGA Environment (SMA)]
+File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_env.awb
+Packagehint=multifpga
+
+[Alpha Inorder ACP Mapping Timing/Functional partition]
+File=modules/multifpga/alpha_inorder/acp_mapping_time_func.awb
 Packagehint=multifpga

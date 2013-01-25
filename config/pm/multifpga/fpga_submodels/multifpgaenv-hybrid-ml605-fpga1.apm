@@ -193,12 +193,12 @@ Packagehint=leap-platforms
 ddr_sdram_xilinx_driver=ML605 DDR3 SDRAM
 
 [ML605 Virtex-6 Platform with PCIe and Aurora/Requires]
-ml605_aurora_device=ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
 pcie_device=BlueNoC PCIe Bridge
 clocks_device=Differential Crystal Clocks Device from Clocks
 physical_platform_utils=Common Physical Platform Utilities
 ddr_sdram_device=Xilinx DDR SDRAM Physical Device
 physical_platform_config=ML605 Virtex-6 Platform with PCIe
+aurora_device=Aurora Device Wrapper
 
 [ML605 Virtex-6 Platform with PCIe and Aurora]
 File=modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma/aurora-ml605-v6-pcie-dma.awb
@@ -449,12 +449,12 @@ Packagehint=leap-platforms
 ddr_sdram_xilinx_driver=ML605 DDR3 SDRAM
 
 [ML605 Virtex-6 Platform with PCIe and Aurora/Requires]
-ml605_aurora_device=ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
 pcie_device=BlueNoC PCIe Bridge
 clocks_device=Differential Crystal Clocks Device from Clocks
 physical_platform_utils=Common Physical Platform Utilities
 ddr_sdram_device=Xilinx DDR SDRAM Physical Device
 physical_platform_config=ML605 Virtex-6 Platform with PCIe
+aurora_device=Aurora Device Wrapper
 
 [ML605 Virtex-6 Platform with PCIe and Aurora]
 File=modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma/aurora-ml605-v6-pcie-dma.awb
@@ -510,3 +510,15 @@ Packagehint=leap
 [Null Physical Channel]
 File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
 Packagehint=leap
+
+[Aurora Device Wrapper/Requires]
+aurora_flowcontrol=Aurora Device Flowcontrol
+aurora_driver=ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
+
+[Aurora Device Flowcontrol]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/aurora-device.awb
+Packagehint=leap-platforms
+
+[Aurora Device Wrapper]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device/aurora-device.awb
+Packagehint=leap-platforms

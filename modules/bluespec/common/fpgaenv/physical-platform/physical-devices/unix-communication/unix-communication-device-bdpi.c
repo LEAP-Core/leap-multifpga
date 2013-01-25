@@ -221,6 +221,14 @@ unsigned char comm_open(char* outgoing, char* incoming)
 {
     int i;
     Channel *channel;
+    const char *home = getenv("HOME");
+    const char *commDirectory = "/.multifpga/";
+
+    if(home == NULL) {
+        fprintf(stderr, "Environment variable HOME not defined.\n");
+        cleanup_comm();
+        exit(1);
+    }
 
     if(DEBUG_COMM) {
       printf("Calling comm open\n");
@@ -262,11 +270,34 @@ unsigned char comm_open(char* outgoing, char* incoming)
     channel->incomingQ = g_async_queue_new();
     channel->outgoingQ = g_async_queue_new();
 
-    channel->incomingFIFO = (char*) malloc(strlen(incoming)*sizeof(char));
-    strcpy(channel->incomingFIFO,incoming);
 
-    channel->outgoingFIFO = (char*) malloc(strlen(outgoing)*sizeof(char));
-    strcpy(channel->outgoingFIFO,outgoing);
+    channel->incomingFIFO = (char*) malloc( (strlen(incoming) + strlen(home) + strlen(commDirectory)) * sizeof(char));
+    strcpy(channel->incomingFIFO,home);
+    strcat(channel->incomingFIFO,commDirectory);
+    if(mkdir(channel->incomingFIFO, S_IRWXU) != 0) {
+        if(errno != EEXIST) {
+            fprintf(stderr, "Comm directory creation failed, bailing\n");
+            cleanup_comm();
+            exit(1);
+        }
+    }
+ 
+    strcat(channel->incomingFIFO,incoming);
+
+
+
+    channel->outgoingFIFO = (char*) malloc( (strlen(outgoing) + strlen(home) + strlen(commDirectory)) * sizeof(char));
+    strcpy(channel->outgoingFIFO,home);
+    strcat(channel->outgoingFIFO,commDirectory);
+    if(mkdir(channel->outgoingFIFO, S_IRWXU) != 0) {
+        if(errno != EEXIST) {
+            fprintf(stderr, "Comm directory creation failed, bailing\n");
+            cleanup_comm();
+            exit(1);
+        }
+    }
+ 
+    strcat(channel->outgoingFIFO,outgoing);
 
     pthread_create(&(channel->incomingThread), NULL, &process_incoming,channel);
     pthread_create(&(channel->outgoingThread), NULL, &process_outgoing,channel);

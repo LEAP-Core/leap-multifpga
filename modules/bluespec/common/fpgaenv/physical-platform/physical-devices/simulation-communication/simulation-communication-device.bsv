@@ -29,6 +29,6 @@ typedef UNIX_COMM_WIRES  SIMULATION_COMMUNICATION_WIRES;
 typedef UNIX_COMM_DEVICE SIMULATION_COMMUNICATION_DEVICE;
 
 module mkSimulationCommunicationDevice#(String outgoing, String incoming) (SIMULATION_COMMUNICATION_DEVICE);
-    let commDevice <- mkUNIXCommDevice#(outgoing, incoming);
-    return commDevice
+    let commDevice <- mkUNIXCommDevice(outgoing, incoming);
+    return commDevice;
 endmodule

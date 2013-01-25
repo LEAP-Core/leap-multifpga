@@ -3103,3 +3103,49 @@ longer runs are currently encumbered by glitches which I believe are
 related to soft reset (or the lack thereof).
 
 
+
+----------
+kfleming    Date: Thu Jan 24 20:35:51 EST 2013  CSN: CSN-multifpga-166
+                  Fri Jan 25 01:35:51 UTC 2013
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_chains_exe.apm Locally Modified          165 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_acp.apm Locally Modified          165 
+ alpha_inorder_multifpga_ml605.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          165 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          165 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          165 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpgaN
+ sim-physical-platform-fpgaN.bsv Locally Modified          165 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.bsv Locally Modified          165 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga1
+ sim-physical-platform-fpga1.bsv Locally Modified          165 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device-bdpi.c Locally Modified          165 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication
+ simulation-communication-device.bsv Locally Modified          165 
+
+
+1) Some bug fixes from yesterday's check-in 
+
+2) Changed how inter-fpga simulation fifos are created.  We were
+putting them in /tmp but that's an issue if there are multiple people
+using the simulator.  Instead, we now put them in $HOME/.multifpga
+which enables multiple users.  If we need simulataneous simulation,
+then some counter will be necessary.
+
+
+

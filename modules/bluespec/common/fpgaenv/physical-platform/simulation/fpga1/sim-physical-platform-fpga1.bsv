@@ -80,8 +80,8 @@ module mkPhysicalPlatform
     Clock clk = clocks_device.driver.clock;
     Reset rst = clocks_device.driver.reset;
     
-    SIMULATION_COMMUNICATION_DEVICE simulation_communication_device  <- mkUNIXCommDevice("/tmp/FPGA1ToFPGA0",
-                                                                                         "/tmp/FPGA0ToFPGA1",
+    SIMULATION_COMMUNICATION_DEVICE simulation_communication_device  <- mkUNIXCommDevice("FPGA1ToFPGA0",
+                                                                                         "FPGA0ToFPGA1",
                                                                                          clocked_by clk,
                                                                                          reset_by rst);
 

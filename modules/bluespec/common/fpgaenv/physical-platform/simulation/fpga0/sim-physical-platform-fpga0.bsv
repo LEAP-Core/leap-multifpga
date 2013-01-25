@@ -97,8 +97,8 @@ module mkPhysicalPlatform
     begin 
         if(i != `MY_ID)
         begin
-	   let dev <- mkSimulationCommunicationDevice("/tmp/FPGA" + integerToString(`MY_ID) +"ToFPGA" + integerToString(i),
-                                                      "/tmp/FPGA" + integerToString(i) + "ToFPGA" + integerToString(`MY_ID),
+	   let dev <- mkSimulationCommunicationDevice("FPGA" + integerToString(`MY_ID) +"ToFPGA" + integerToString(i),
+                                                      "FPGA" + integerToString(i) + "ToFPGA" + integerToString(`MY_ID),
                                                       clocked_by clk,
                                                       reset_by rst);
            simDrivers[i] = dev.driver;
