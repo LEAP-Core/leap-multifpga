@@ -148,16 +148,6 @@ Packagehint=hasim
 File=modules/hasim/timing-models/memory/base-types/memory-base-types.awb
 Packagehint=hasim-models
 
-[HAsim Common Default Configuration/Params]
-CONTEXT_ID_BITS=6
-
-[Alpha Functional Model/Params]
-FUNCP_PHYSICAL_REG_INDEX_BITS=12
-MAX_NUM_CONTEXTS=64
-
-[Chip Base Types/Params]
-NUM_CPUS=64
-
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
@@ -169,3 +159,6 @@ Packagehint=multifpga
 [Alpha Inorder ACP Mapping Timing/Functional partition]
 File=modules/multifpga/alpha_inorder/acp_mapping_time_func.awb
 Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=1

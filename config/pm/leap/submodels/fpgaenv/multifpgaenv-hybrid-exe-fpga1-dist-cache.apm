@@ -98,8 +98,8 @@ Packagehint=multifpga
 
 [FPGA1 Simulation Physical Platform/Requires]
 clocks_device=Simulation Clocks Device
-unix_comm_device=UNIX Communication Physical Device
 physical_platform_utils=Common Physical Platform Utilities
+simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
 
 [BSV Bluesim Build Tool]
 File=modules/leap/build-support/build-pipelines/stages/bluesim/bsv-exe.awb
@@ -176,3 +176,10 @@ Packagehint=multifpga
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
 Packagehint=multifpga
+
+[Simlutation Communication Device with raw UNIX Communication]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
+Packagehint=multifpga
+
+[Simlutation Communication Device with raw UNIX Communication/Requires]
+unix_comm_device=UNIX Communication Physical Device
