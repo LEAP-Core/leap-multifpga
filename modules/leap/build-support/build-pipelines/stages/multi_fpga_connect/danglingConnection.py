@@ -21,7 +21,7 @@ class DanglingConnection():
       self.via_link = "unassigned"
       self.type_structure = type_structure
       self.code = Code()
-      self.activity = 0 # this is used in lane allocation
+      self.activity = -1 # this is used in lane allocation
 
 
   def __repr__(self):

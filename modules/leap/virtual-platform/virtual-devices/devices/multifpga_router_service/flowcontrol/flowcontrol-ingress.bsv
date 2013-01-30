@@ -65,7 +65,7 @@ module [CONNECTED_MODULE] mkIngressSwitch#(Integer flowcontrolID, /*STAT_VECTOR#
                                                 umf_phy_pvt_w,    filler_bits_w), 
                      umf_chunk_w)) // Module interface
     
-    provisos(Add#(serviceExcess, TLog#(n), umf_service_id),
+    provisos(Add#(serviceExcess, TLog#(n), umf_service_id), // service id must fit all services.
                  Bits#(umf_chunk, TAdd#(filler_bits, TAdd#(umf_phy_pvt,
                                   TAdd#(umf_channel_id, TAdd#(umf_service_id,
                                                         TAdd#(umf_method_id,
@@ -76,8 +76,11 @@ module [CONNECTED_MODULE] mkIngressSwitch#(Integer flowcontrolID, /*STAT_VECTOR#
                                                         TAdd#(umf_method_id_w,
                                         umf_message_len_w)))))),
 
-                  Add#(chunk_extra, TAdd#(umf_service_id,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))), SizeOf#(umf_chunk_w)),
-                  Add#(1, nExcess, n)
+                  // must be able to fit flow control tokens 
+                  // For some narrow channels, this may not be possible, and this proviso will fail. 
+                  // It could be fixed by optionally marshalling the flow control tokens.
+                  Add#(chunk_extra, TAdd#(umf_service_id,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))), SizeOf#(umf_chunk_w)), 
+                  Add#(1, nExcess, n) // Must be at least one service
             );
  
   // If we have no incoming links, then we won't instantiate a switch

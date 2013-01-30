@@ -879,7 +879,7 @@ h", src.type_structure))
             if(dangling.name in stats):
                 dangling.activity = stats[dangling.name]
                 totalTraffic += stats[dangling.name]
-                print "Assigning " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])
+                print "Assigning Load " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])
             else:
                 #In some we may have the wrong number of chunks.  To make things more usable
                 #we will also match non-chunks 
@@ -887,38 +887,41 @@ h", src.type_structure))
                 if(match and (match.group(1) in stats)):      
                     dangling.activity = stats[match.group(1)]
                     totalTraffic += stats[match.group(1)]
-                    print "Assigning (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
-
-          # only create a chain when we see the source                                                                                                                                                                                       
-          if(dangling.sc_type == 'ChainSrc'):
+                    print "Assigning Load (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
+          # only create a chain when we see the sink                                                                                                               
+          if(dangling.sc_type == 'ChainSink'):
+  
             chains += 1
             chainName = platform + "_" + targetPlatform + "_" + dangling.name
             if(chainName in stats):
               dangling.activity = stats[chainName]
               totalTraffic += stats[chainName]
-              print "Assigning " + platform + "->" + targetPlatform + " " + chainName + " " + str(stats[chainName])
+              print "Assigning Load " + platform + "->" + targetPlatform + " " + chainName + " " + str(stats[chainName])
             else:
                 match = re.search(r'(\w+)(_chunk_\d+)',chainName)
                 if(match and (match.group(1) in stats)):   
                     dangling.activity = stats[match.group(1)]
                     totalTraffic += stats[match.group(1)]
-                    print "Assigning (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
+                    print "Assigning Load (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
 
         if(totalTraffic == 0):
           totalTraffic = 2*(chains+recvs)
+ 
+        print "Total traffic is: " + str(totalTraffic)
 
         # assign some value to 
         for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
           if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
             if(dangling.activity < 0):
               dangling.activity = float(totalTraffic)/(chains+recvs)
+              print "Defaulting Load " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(dangling.activity)
 
           # only create a chain when we see the source                                                                                                                                                                                       
-          if(dangling.sc_type == 'ChainSrc'):         
+          if(dangling.sc_type == 'ChainSink'):         
             chainName = platform + "_" + targetPlatform + "_" + dangling.name
             if(dangling.activity < 0):
               dangling.activity = (float(totalTraffic)/(2*(chains+recvs))) * 0.1  # no stat?  Make connections better than chains
-
+              print "Defaulting Load " + platform + "->" + targetPlatform + " " + chainName + " " + str(dangling.activity)
 
 
   def analyzeNetwork(self):

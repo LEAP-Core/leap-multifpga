@@ -3168,3 +3168,41 @@ Directory config/pm/hasim-alpha/multifpga
 1) Fixed some APM based on recent refactoring of the multifpga simulator
 
 2) Added some HAsim apm. 
+
+----------
+kfleming    Date: Wed Jan 30 14:21:21 EST 2013  CSN: CSN-multifpga-168
+                  Wed Jan 30 19:21:21 UTC 2013
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-ingress.bsv   Locally Modified          167 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          167 
+ danglingConnection.py     Locally Modified          167 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device.awb Locally Modified          167 
+ unix-communication-device.bsv Locally Modified          167 
+
+
+1) Bug fix in multifpga connect.  Loads for chains and for undefined
+channels were not handled properly.  As a result these channels were
+almost always allocated to the same lane, which is likely to cause
+some performance degredation.  
+
+2) Added an extra parameter to the unix communication device.  This
+parameter controlls word width and can be useful in provoking some
+edge cases of the multifpga compiler.
+
+These fixes were provoked by the mem_perf benchmark not working on the
+ML605.  Although the cause of this is almost assuredly in the
+Scratchpad code, the investigation turned up several other issues in
+multifpga compilation.
+
+We do a bad job of detecting illegal router configurations in the
+python.  Bluespec does catch them and correctly fails to build, but it
+would be better to throw a warning in the python and to choose a legal
+configuration.  These issues typically appear in the case of heavily-
+loaded, narrow lanes (<16 bits, >16 channels).  Such configuarations
+can arise if some of the fast, sub-optimal routing algorithms are used.  

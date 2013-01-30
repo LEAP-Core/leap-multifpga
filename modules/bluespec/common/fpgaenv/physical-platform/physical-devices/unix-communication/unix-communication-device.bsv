@@ -32,6 +32,8 @@ import Clocks::*;
 `define PIPE_NULL       1
 `define POLL_INTERVAL   0
 
+
+
 // BDPI imports
 import "BDPI" function Action                 comm_init();
 import "BDPI" function ActionValue#(Bit#(8))  comm_open(String outgoing, String incoming);
@@ -56,8 +58,8 @@ STATE
 interface UNIX_COMM_DRIVER;
 
     method Action                           deq();
-    method Bit#(TMul#(`UNIX_COMM_WIDTH,64)) first();
-    method Action                           write(Bit#(TMul#(`UNIX_COMM_WIDTH,64)) chunk);
+    method Bit#(TMul#(`UNIX_COMM_NUM_WORDS,`UNIX_COMM_WORD_WIDTH)) first();
+    method Action                           write(Bit#(TMul#(`UNIX_COMM_NUM_WORDS,`UNIX_COMM_WORD_WIDTH)) chunk);
     method Bool                             write_ready();
         
 endinterface
@@ -80,13 +82,13 @@ endinterface
 // We need to provide the illusion that this module is faster inorder to accomodate shifting data out.
 module mkUNIXCommDevice#(String outgoing, String incoming) (UNIX_COMM_DEVICE);
  
-   Clock rawClock <- mkAbsoluteClock(0, max(1,`MAGIC_SIMULATION_CLOCK_FACTOR/(`CRYSTAL_CLOCK_FREQ*`UNIX_COMM_WIDTH*64)));
+   Clock rawClock <- mkAbsoluteClock(0, max(1,`MAGIC_SIMULATION_CLOCK_FACTOR/(`CRYSTAL_CLOCK_FREQ*`UNIX_COMM_NUM_WORDS*64*20)));
    Reset rawReset <- mkInitialReset(10, clocked_by rawClock);
    
    let comm <- mkUNIXCommDeviceShift(outgoing, incoming, clocked_by(rawClock), reset_by(rawReset));
 
-   SyncFIFOIfc#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) rxfifo <- mkSyncFIFOToCC( 16, rawClock, rawReset);
-   SyncFIFOIfc#(Bit#(TMul#(`UNIX_COMM_WIDTH,64))) txfifo <- mkSyncFIFOFromCC( 16, rawClock);
+   SyncFIFOIfc#(Bit#(TMul#(`UNIX_COMM_NUM_WORDS,`UNIX_COMM_WORD_WIDTH))) rxfifo <- mkSyncFIFOToCC( 16, rawClock, rawReset);
+   SyncFIFOIfc#(Bit#(TMul#(`UNIX_COMM_NUM_WORDS,`UNIX_COMM_WORD_WIDTH))) txfifo <- mkSyncFIFOFromCC( 16, rawClock);
 
    rule connectRX;
      rxfifo.enq(comm.driver.first);
@@ -124,8 +126,8 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
     Reg#(STATE)    state       <- mkReg(STATE_init0);
     
     // buffers
-    MARSHALLER#(Bit#(64), Vector#(`UNIX_COMM_WIDTH, Bit#(64))) marshaller <- mkSimpleMarshaller();
-    DEMARSHALLER#(Bit#(64), Vector#(`UNIX_COMM_WIDTH, Bit#(64))) demarshaller <- mkSimpleDemarshaller();
+    MARSHALLER#(Bit#(`UNIX_COMM_WORD_WIDTH), Vector#(`UNIX_COMM_NUM_WORDS, Bit#(`UNIX_COMM_WORD_WIDTH))) marshaller <- mkSimpleMarshaller();
+    DEMARSHALLER#(Bit#(`UNIX_COMM_WORD_WIDTH), Vector#(`UNIX_COMM_NUM_WORDS, Bit#(`UNIX_COMM_WORD_WIDTH))) demarshaller <- mkSimpleDemarshaller();
 
     // ==============================================================
     //                            Rules
@@ -165,7 +167,7 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
                 $display("UNIX Comm RX %h", chunk);
             end
 
-            demarshaller.enq(chunk);
+            demarshaller.enq(truncate(chunk));
             pollCounter <= `POLL_INTERVAL;
        end
     endrule
@@ -175,7 +177,7 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
         let guard <- comm_can_write(handle);
         if(unpack(guard))
           begin 
-            Bit#(64) chunk = marshaller.first();
+            Bit#(64) chunk = zeroExtend(marshaller.first());
             marshaller.deq();
 
             if(`UNIX_COMM_DEBUG > 0)
@@ -195,7 +197,7 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
     // driver interface
     interface UNIX_COMM_DRIVER driver;
                
-        method Bit#(TMul#(`UNIX_COMM_WIDTH,64)) first();
+        method Bit#(TMul#(`UNIX_COMM_NUM_WORDS,`UNIX_COMM_WORD_WIDTH)) first();
             return pack(demarshaller.first);
         endmethod
 
@@ -204,7 +206,7 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
         endmethod
 
         // write
-        method Action write(Bit#(TMul#(`UNIX_COMM_WIDTH,64)) chunk);
+        method Action write(Bit#(TMul#(`UNIX_COMM_NUM_WORDS,`UNIX_COMM_WORD_WIDTH)) chunk);
             marshaller.enq(unpack(chunk));
         endmethod
 
