@@ -140,7 +140,7 @@ fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 
 [Null Channel IO Module/Requires]
-physical_channel=Null Physical Channel
+physical_channel=BlueNoC PCIe Tunnel
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -249,10 +249,6 @@ Packagehint=leap-platforms
 
 [XST Synthesis Tool]
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
-Packagehint=leap
-
-[Null Physical Channel]
-File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
 Packagehint=leap
 
 [Global]
@@ -396,7 +392,7 @@ fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 
 [Null Channel IO Module/Requires]
-physical_channel=Null Physical Channel
+physical_channel=BlueNoC PCIe Tunnel
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -507,10 +503,6 @@ Packagehint=leap-platforms
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
 Packagehint=leap
 
-[Null Physical Channel]
-File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
-Packagehint=leap
-
 [Aurora Device Wrapper/Requires]
 aurora_flowcontrol=Aurora Device Flowcontrol
 aurora_driver=ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
@@ -522,3 +514,7 @@ Packagehint=leap-platforms
 [Aurora Device Wrapper]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device/aurora-device.awb
 Packagehint=leap-platforms
+
+[BlueNoC PCIe Tunnel]
+File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
+Packagehint=leap

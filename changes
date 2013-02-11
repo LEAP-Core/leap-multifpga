@@ -3206,3 +3206,16 @@ would be better to throw a warning in the python and to choose a legal
 configuration.  These issues typically appear in the case of heavily-
 loaded, narrow lanes (<16 bits, >16 channels).  Such configuarations
 can arise if some of the fast, sub-optimal routing algorithms are used.  
+
+----------
+kfleming    Date: Sun Feb 10 23:28:14 EST 2013  CSN: CSN-multifpga-169
+                  Mon Feb 11 04:28:14 UTC 2013
+
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          168 
+
+
+Changed the remote ml605 apm to include the physical channel. This
+patches the dynamic parameters enumeration issue for the ml605.  Not
+satisfying to be sure, but at least we can scale the SSD. 
