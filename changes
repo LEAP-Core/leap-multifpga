@@ -3219,3 +3219,25 @@ Directory config/pm/multifpga/fpga_submodels
 Changed the remote ml605 apm to include the physical channel. This
 patches the dynamic parameters enumeration issue for the ml605.  Not
 satisfying to be sure, but at least we can scale the SSD. 
+
+----------
+kfleming    Date: Sat Feb 16 13:30:46 EST 2013  CSN: CSN-multifpga-170
+                  Sat Feb 16 18:30:46 UTC 2013
+
+
+Directory config/pm/leap/submodels/fpgaenv
+ fpgaenv-hybrid-ml605-pcie-aurora.apm Locally Modified          169 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          169 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          169 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          169 
+
+Directory modules/leap-platforms/fpga-environments/ml605
+ ml605-dual.env            Locally Modified          169 
+
+
+Updated multifpga apm and environment files to reflect the new
+organization of the aurora logic.

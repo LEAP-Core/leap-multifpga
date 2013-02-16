@@ -39,7 +39,7 @@ import Complex::*;
 
 module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) (); 
 
-   AURORA_DRIVER       auroraDriver = drivers.auroraDriver;
+   AURORA_DRIVER auroraDriver = drivers.auroraDriver[0];
    STDIO#(Bit#(64)) stdio <- mkStdIO();  
    let serdes_infifo <- mkSizedBRAMFIFOF(64);
    // make soft connections to PHY
