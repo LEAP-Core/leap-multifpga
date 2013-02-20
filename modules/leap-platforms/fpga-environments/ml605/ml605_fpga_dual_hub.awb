@@ -1,0 +1,9 @@
+%AWB_START
+
+%name ML605 Dual Hub FPGA Environment (SMA)
+%desc ML605 Dual Hub FPGA Environment (SMA)
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC ml605-dual-hub.env
+
+%AWB_END

@@ -3241,3 +3241,53 @@ Directory modules/leap-platforms/fpga-environments/ml605
 
 Updated multifpga apm and environment files to reflect the new
 organization of the aurora logic.
+
+----------
+kfleming    Date: Wed Feb 20 14:16:44 EST 2013  CSN: CSN-multifpga-171
+                  Wed Feb 20 19:16:44 UTC 2013
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_chains_dual_hub_exe.apm Locally Added               0 
+ test_multifpga_chains_quad_hub_ml605.apm Locally Added               0 
+ test_multifpga_chains_quad_hub_exe.apm Locally Added               0 
+ test_multifpga_chains_dual_hub_ml605.apm Locally Added               0 
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave.apm Locally Modified          170 
+
+Directory config/pm/multifpga/fpga_submodels
+ fpga1_8.apm               Locally Modified          170 
+ fpga2_8.apm               Locally Modified          170 
+ fpga3_8.apm               Locally Modified          170 
+ fpga4_8.apm               Locally Modified          170 
+ fpga5_8.apm               Locally Modified          170 
+ fpga6_8.apm               Locally Modified          170 
+ fpga7_8.apm               Locally Modified          170 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          170 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          170 
+
+Directory modules/leap-platforms/fpga-environments/ml605
+ ml605_fpga_quad_hub.awb   Locally Added               0 
+ ml605-dual-hub.env        Locally Added               0 
+ ml605_fpga_dual_hub.awb   Locally Added               0 
+ ml605-quad-hub.env        Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-hub-quad.env          Locally Added               0 
+ sim_fpga_hub_dual.awb     Locally Added               0 
+ sim_fpga_hub_quad.awb     Locally Added               0 
+ sim-quad.env              Locally Modified          170 
+ sim-hub-dual.env          Locally Added               0 
+
+
+1) Fixed bug in routethrough naming - if two routethroughs for the
+same chain were routed through the same platform, these routethroughs
+would have conflicting names.
+
+2) Added ML605 and Simulation models reflecting the Bluessd organization.
+

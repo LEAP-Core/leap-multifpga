@@ -76,6 +76,7 @@ class MultiFPGAConnect():
           if not os.path.exists(config_dir): os.makedirs(config_dir)
           return config_dir + name
 
+      self.unique = 0;
       self.moduleList = moduleList
       self.ANALYZE_NETWORK = moduleList.getAWBParam('multi_fpga_connect', 'ANALYZE_NETWORK')
       self.MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
@@ -187,12 +188,11 @@ class MultiFPGAConnect():
       for hop in path:
           print "Adding hop: " + src.name + "Hop" + hop        
             
-          sinks.append(DanglingConnection("ChainRoutingRecv", src.raw_type, -1, src.name + "Routethrough" + hop, 
+          sinks.append(DanglingConnection("ChainRoutingRecv", src.raw_type, -1, src.name + "RoutethroughTo" + sink.name + "Via" + hop, 
                                           hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure))
-          srcs.append(DanglingConnection("ChainRoutingSend", src.raw_type, -1, src.name + "Routethrough" + hop, 
-                                         hop, "False", src.bitwidth, "RouteThrough", "RouteThroug\
-h", src.type_structure))
-
+          srcs.append(DanglingConnection("ChainRoutingSend", src.raw_type, -1, src.name + "RoutethroughTo" + sink.name + "Via" + hop, 
+                                         hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure))
+          self.unique = self.unique + 1 
 
       sinks.append(sink)
     

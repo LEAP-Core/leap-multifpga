@@ -1,0 +1,113 @@
+
+[Global]
+SaveParameters=0
+Description=has strange module alingments
+File=test_multifpga_chains_quad_hub_exe
+Version=2.2
+Name=Multifpga synthesis test 
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=MultiFPGA Test Connected Application
+environment_description=Simulation Hub Quad FPGA Environment
+build_pipeline=multiFPGA Build Pipeline
+fpga_mapping=Test Sim Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline]
+File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline/Requires]
+multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_generate_bitfile=multiFPGA Generate bitfle
+multi_fpga_log_generator=multiFPGA Log Generation
+
+[MultiFPGA Synthesis test module a]
+File=modules/multifpga/synthTest/test_a.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis test module top/Requires]
+test_c=MultiFPGA Synthesis test module c (with chains)
+test_a=MultiFPGA Synthesis test module a
+test_b=MultiFPGA Synthesis test module b
+
+[MultiFPGA Synthesis test module a/Requires]
+test_d=MultiFPGA Synthesis test module d with rrr and chains
+
+[MultiFPGA Synthesis test module b]
+File=modules/multifpga/synthTest/test_b.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis test module top]
+File=modules/multifpga/synthTest/top.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Requires]
+fpgamap_parser=FPGAMap
+type_parser=Bluespec Type parser
+
+[multiFPGA Generate bitfle]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
+Packagehint=multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+
+[MultiFPGA Test Connected Application/Requires]
+hardware_system=MultiFPGA Synthesis test module top
+
+[MultiFPGA Test Connected Application]
+File=modules/multifpga/synthTest/connected_application/connected-application-test.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis test module d with rrr and chains]
+File=modules/multifpga/synthTest/test_d_chains.awb
+Packagehint=multifpga
+
+[MultiFPGA Synthesis test module c (with chains)]
+File=modules/multifpga/synthTest/test_c_chains.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=1
+
+[Bluespec Type parser]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+Packagehint=multifpga
+
+[Test Sim Mapping]
+File=modules/multifpga/synthTest/sim_mapping.awb
+Packagehint=multifpga
+
+[Simulation Hub Quad FPGA Environment]
+File=modules/leap-platforms/fpga-environments/sim/sim_fpga_hub_quad.awb
+Packagehint=multifpga
