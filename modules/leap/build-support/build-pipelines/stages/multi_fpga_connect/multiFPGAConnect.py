@@ -188,9 +188,11 @@ class MultiFPGAConnect():
       for hop in path:
           print "Adding hop: " + src.name + "Hop" + hop        
             
-          sinks.append(DanglingConnection("ChainRoutingRecv", src.raw_type, -1, src.name + "RoutethroughTo" + sink.name + "Via" + hop, 
+          sinks.append(DanglingConnection("ChainRoutingRecv", src.raw_type, -1, 
+                                          src.name + "RoutethroughFrom_" + src.platform + "_To_" + sink.platform + "_Via" + hop, 
                                           hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure))
-          srcs.append(DanglingConnection("ChainRoutingSend", src.raw_type, -1, src.name + "RoutethroughTo" + sink.name + "Via" + hop, 
+          srcs.append(DanglingConnection("ChainRoutingSend", src.raw_type, -1, 
+                                          src.name + "RoutethroughFrom_" + src.platform + "_To_" + sink.platform + "_Via" + hop, 
                                          hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure))
           self.unique = self.unique + 1 
 

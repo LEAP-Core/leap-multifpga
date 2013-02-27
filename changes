@@ -3291,3 +3291,22 @@ would have conflicting names.
 
 2) Added ML605 and Simulation models reflecting the Bluessd organization.
 
+
+----------
+kfleming    Date: Tue Feb 26 20:50:35 EST 2013  CSN: CSN-multifpga-172
+                  Wed Feb 27 01:50:35 UTC 2013
+
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN.apm Locally Modified          171 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          171 
+
+
+Two bug fixes
+
+1) Bug fix from last week was not actually a bug fix in all cases - in
+some cases chains could arise that had the same name.
+
+2) The fpgaN module was building software.

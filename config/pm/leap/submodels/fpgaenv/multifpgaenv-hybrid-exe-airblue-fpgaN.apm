@@ -113,12 +113,8 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
 Packagehint=leap
 
-[Software build tool]
-File=modules/leap/build-support/build-pipelines/stages/software/software.awb
-Packagehint=leap
-
 [MultiFPGA BlueSim Platform Build Pipeline/Requires]
-software_tool=Software build tool
+software_tool=Null software build tool
 iface_tool=Interface builder
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
@@ -183,3 +179,7 @@ Packagehint=multifpga
 
 [Simlutation Communication Device with raw UNIX Communication/Requires]
 unix_comm_device=UNIX Communication Physical Device
+
+[Null software build tool]
+File=modules/leap/build-support/build-pipelines/stages/null_software/null_software.awb
+Packagehint=multifpga
