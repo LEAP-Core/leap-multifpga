@@ -35,8 +35,6 @@ typedef enum
 {
     STATE_start,
     STATE_say_hello,
-    STATE_sync,
-    STATE_exit,
     STATE_finish
 } 
 STATE deriving (Bits, Eq);
@@ -51,38 +49,17 @@ module [CONNECTED_MODULE] mkConnectedApplication ();
     Reg#(STATE) state <- mkReg(STATE_start);
 
     rule start (state == STATE_start);
-    
         linkStarterStartRun.deq();
         state <= STATE_say_hello;
-
     endrule
 
     let msg <- getGlobalStringUID("Hello, World! This is hardware speaking.\n");
 
     rule hello (state == STATE_say_hello);
-  
         stdio.printf(msg, List::nil);
-        state <= STATE_sync;
-
-    endrule
-
-
-    rule sync (state == STATE_sync);
-  
-        stdio.sync_req();
-        state <= STATE_exit;
-
-    endrule
-
-
-    rule exit (state == STATE_exit);
-    
-        stdio.sync_rsp();
-        //linkStarterFinishRun.send(0);
         state <= STATE_finish;
-
+        //linkStarterFinishRun.send(0);
     endrule
-
 
     rule finish (state == STATE_finish);
         noAction;

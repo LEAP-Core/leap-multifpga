@@ -3310,3 +3310,13 @@ Two bug fixes
 some cases chains could arise that had the same name.
 
 2) The fpgaN module was building software.
+
+----------
+mcadler     Date: Wed Feb 27 09:31:42 EST 2013  CSN: CSN-multifpga-173
+                  Wed Feb 27 14:31:42 UTC 2013
+
+
+Directory modules/leap/examples/hello-fellow
+ hello-world.bsv           Locally Modified          172 
+
+STDIO sync at end of run now automatic.
