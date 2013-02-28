@@ -204,10 +204,6 @@ aurora_device=Aurora Device Wrapper ML605
 File=modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma/aurora-ml605-v6-pcie-dma.awb
 Packagehint=leap-platforms
 
-[ML605 Aurora Device, Single Lane, 3.125gbps (SMA)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605/aurora-sma.awb
-Packagehint=leap-platforms
-
 [Local Memory using DDR DRAM (burst holds at least one line)]
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-ddr-wide.awb
 Packagehint=leap
@@ -456,10 +452,6 @@ aurora_device=Aurora Device Wrapper ML605
 File=modules/bluespec/common/fpgaenv/physical-platform/ml605/aurora-pcie-dma/aurora-ml605-v6-pcie-dma.awb
 Packagehint=leap-platforms
 
-[ML605 Aurora Device, Single Lane, 3.125gbps (SMA)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605/aurora-sma.awb
-Packagehint=leap-platforms
-
 [Local Memory using DDR DRAM (burst holds at least one line)]
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-ddr-wide.awb
 Packagehint=leap
@@ -513,8 +505,12 @@ Packagehint=leap
 
 [Aurora Device Wrapper ML605/Requires]
 aurora_flowcontrol=Aurora Device Flowcontrol
-aurora_driver=ML605 Aurora Device, Single Lane, 3.125gbps (SMA)
+aurora_driver=ML605 Aurora Device, Single Lane, 16-bit, 4 gbps
 
 [Aurora Device Wrapper ML605]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605/aurora-device-ml605.awb
+Packagehint=leap-platforms
+
+[ML605 Aurora Device, Single Lane, 16-bit, 4 gbps]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605/aurora-virtex6-4gbps.awb
 Packagehint=leap-platforms

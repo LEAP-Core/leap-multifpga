@@ -3320,3 +3320,28 @@ Directory modules/leap/examples/hello-fellow
  hello-world.bsv           Locally Modified          172 
 
 STDIO sync at end of run now automatic.
+
+----------
+kfleming    Date: Thu Feb 28 16:59:45 EST 2013  CSN: CSN-multifpga-174
+                  Thu Feb 28 21:59:45 UTC 2013
+
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          173 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          173 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          173 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.cpp Locally Modified          173 
+
+
+1) Upgraded the main ml605 targets to use the 4gbps SERDES.  In practice
+this gets us a thoughput of 350MB/s/lane and a latency of about
+~.3-.5us for each FPGA hop.
+
+
+2) Upgraded the aurora debug interface to support vectors of FPGAs.
+
+3) Extend range of throughput testing code. 

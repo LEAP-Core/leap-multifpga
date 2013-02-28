@@ -40,6 +40,7 @@ import Complex::*;
 module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) (); 
 
    AURORA_DRIVER auroraDriver = drivers.auroraDriver[0];
+
    STDIO#(Bit#(64)) stdio <- mkStdIO();  
    let serdes_infifo <- mkSizedBRAMFIFOF(64);
    // make soft connections to PHY
@@ -87,27 +88,38 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
     end
 
     // periodic debug printout
-    let aurSndMsg <- getGlobalStringUID("Aurora channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
+    let aurSndMsg <- getGlobalStringUID("Aurora %d channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
     let aurFCMsg <- getGlobalStringUID("Flowcontrol tokens RX'ed: %x, Flowcontrol tokens TX'ed %x\n");
     let aurCreditMsg <- getGlobalStringUID("Debug Mode: %x, Aurora credit_underflow %x, rx_credit %x, tx_credit %x, data_drops %x\n");
     let txDebugMsg <- getGlobalStringUID("TXBuffer %x\n");
     let rxDebugMsg <- getGlobalStringUID("RXBuffer %x\n");
 
     Reg#(Bit#(26)) counter <- mkReg(0);
+    Reg#(Bit#(TAdd#(1,TLog#(`NUM_AURORA_IFCS)))) ifc <- mkReg(0);
+    AURORA_DRIVER targetDriver = drivers.auroraDriver[ifc];
 
     rule printf;
         counter <= counter + 1;
+        
         if(counter + 1 == 0) 
         begin
-            stdio.printf(aurSndMsg, list7(zeroExtend(pack(auroraDriver.channel_up)), zeroExtend(pack(auroraDriver.lane_up)), zeroExtend(auroraDriver.error_count), zeroExtend(auroraDriver.rx_count), zeroExtend(auroraDriver.tx_count), zeroExtend(pack(auroraDriver.rx_fifo_count)), zeroExtend(pack(auroraDriver.tx_fifo_count))));
+            stdio.printf(aurSndMsg, list8(zeroExtend(ifc),zeroExtend(pack(targetDriver.channel_up)), zeroExtend(pack(targetDriver.lane_up)), zeroExtend(targetDriver.error_count), zeroExtend(targetDriver.rx_count), zeroExtend(targetDriver.tx_count), zeroExtend(pack(targetDriver.rx_fifo_count)), zeroExtend(pack(targetDriver.tx_fifo_count))));
         end
         else if (counter + 1 == 1)
         begin
-            stdio.printf(aurCreditMsg, list5(`DEBUG_ONLY, zeroExtend(pack(auroraDriver.credit_underflow)), zeroExtend(pack(auroraDriver.rx_credit)), zeroExtend(auroraDriver.tx_credit), zeroExtend(pack(auroraDriver.data_drops))));
+            stdio.printf(aurCreditMsg, list5(`DEBUG_ONLY, zeroExtend(pack(targetDriver.credit_underflow)), zeroExtend(pack(targetDriver.rx_credit)), zeroExtend(targetDriver.tx_credit), zeroExtend(pack(targetDriver.data_drops))));
         end
         else if (counter + 1 == 2)
         begin
-            stdio.printf(aurFCMsg, list2(zeroExtend(pack(auroraDriver.rx_fc)), zeroExtend(pack(auroraDriver.tx_fc))));
+            stdio.printf(aurFCMsg, list2(zeroExtend(pack(targetDriver.rx_fc)), zeroExtend(pack(targetDriver.tx_fc))));
+	    if(ifc + 1 == `NUM_AURORA_IFCS)
+            begin
+	        ifc <= 0;
+            end
+            else
+            begin
+	        ifc <= ifc + 1;
+            end
         end
     endrule
        
