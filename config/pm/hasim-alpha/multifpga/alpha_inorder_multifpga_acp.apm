@@ -164,7 +164,7 @@ FUNCP_PHYSICAL_REG_INDEX_BITS=12
 MAX_NUM_CONTEXTS=64
 
 [Chip Base Types/Params]
-NUM_CPUS=64
+MAX_NUM_CPUS=64
 
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb

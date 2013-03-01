@@ -159,7 +159,7 @@ Packagehint=multifpga
 CONTEXT_ID_BITS=4
 
 [Chip Base Types/Params]
-NUM_CPUS=16
+MAX_NUM_CPUS=16
 
 [Alpha Functional Model/Params]
 FUNCP_PHYSICAL_REG_INDEX_BITS=11

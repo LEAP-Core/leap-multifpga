@@ -57,7 +57,7 @@ hasim_pipeline=Inorder Pipeline, 2-bit branch predictor
 hasim_l1_caches=Direct Mapped, Writethrough
 
 [Chip Base Types/Params]
-NUM_CPUS=64
+MAX_NUM_CPUS=64
 
 [Multi-Core Chip/Requires]
 chip_base_types=Chip Base Types
