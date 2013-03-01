@@ -3345,3 +3345,21 @@ this gets us a thoughput of 350MB/s/lane and a latency of about
 2) Upgraded the aurora debug interface to support vectors of FPGAs.
 
 3) Extend range of throughput testing code. 
+
+----------
+kfleming    Date: Fri Mar  1 11:49:59 EST 2013  CSN: CSN-multifpga-175
+                  Fri Mar  1 16:49:59 UTC 2013
+
+
+Directory modules/multifpga/throughputTest
+ test-d-throughput.bsv     Locally Modified          174 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.cpp Locally Modified          174 
+
+Directory modules/multifpga/throughputTest
+ test-d-throughput.rrr     Locally Modified          174 
+
+
+The throughput test now also tracks average latency.  Little's law
+rides again.

@@ -1,5 +1,9 @@
-`include "asim/provides/soft_connections.bsh"
+import FIFO::*;
+
+`include "awb/provides/soft_connections.bsh"
 `include "awb/rrr/remote_server_stub_TESTDRRR.bsh"
+`include "awb/provides/fpga_components.bsh"
+`include "awb/provides/librl_bsv_storage.bsh"
 
 module [CONNECTED_MODULE] mkD (Empty);
 
@@ -17,16 +21,18 @@ module [CONNECTED_MODULE] mkD (Empty);
     Connection_Send#(Bit#(256)) aliveOut256 <- mkConnection_Send("fromD256");
     Connection_Receive#(Bit#(256)) aliveIn256 <- mkConnection_Receive("fromB256");
 
-    Reg#(Bit#(48)) ticks     <- mkReg(0);
-    Reg#(Bit#(32)) errors    <- mkReg(0);
-    Reg#(Bit#(48)) testStart <- mkReg(0);
-    Reg#(Bit#(32)) testWidth <- mkReg(0);
-    Reg#(Bit#(32)) testTX    <- mkReg(0);
-    Reg#(Bit#(32)) testRX    <- mkReg(0);
+    Reg#(Bit#(48)) ticks       <- mkReg(0);
+    Reg#(Bit#(32)) errors      <- mkReg(0);
+    Reg#(Bit#(48)) testStart   <- mkReg(0);
+    Reg#(Bit#(48)) testLatency <- mkReg(0);
+    Reg#(Bit#(32)) testWidth   <- mkReg(0);
+    Reg#(Bit#(32)) testTX      <- mkReg(0);
+    Reg#(Bit#(32)) testRX      <- mkReg(0);
 
+    FIFO#(Bit#(48)) latencyFIFO <- mkSizedBRAMFIFO(2048); //Make this big in case we have a lot of inter-fpga latency.
 
     rule tickUp;
-      ticks <= ticks +1;
+      ticks <= ticks + 1;
     endrule
   
 
@@ -38,12 +44,14 @@ module [CONNECTED_MODULE] mkD (Empty);
         testRX <= data.count;
 	testStart <= ticks;
 	errors <= 0;
+        testLatency <= 0;
     endrule
   
     rule tx16(testWidth == 16 && testTX > 0);
         aliveOut16.send(truncate(testTX));
    	testTX <= testTX - 1;
         $display("Sending test 16 %d",testTX);
+        latencyFIFO.enq(ticks);
     endrule
 
     rule rx16(testWidth == 16 && testRX > 0);
@@ -53,9 +61,13 @@ module [CONNECTED_MODULE] mkD (Empty);
 	    errors <= errors + 1;
         end
 
+        latencyFIFO.deq;
+
+        testLatency <= testLatency + (ticks - latencyFIFO.first());
+
 	if(testRX - 1 == 0)  
 	begin
-            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),errors);
+            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),zeroExtend(testLatency + (ticks - latencyFIFO.first())),errors);
         end
 
         $display("Receiving test 16 %d",testTX);
@@ -68,6 +80,7 @@ module [CONNECTED_MODULE] mkD (Empty);
     rule tx32(testWidth == 32 && testTX > 0);
         aliveOut32.send(truncate(testTX));
    	testTX <= testTX - 1;
+        latencyFIFO.enq(ticks);
     endrule
 
     rule rx32(testWidth == 32 && testRX > 0);
@@ -77,9 +90,13 @@ module [CONNECTED_MODULE] mkD (Empty);
 	    errors <= errors + 1;
         end
 
+        latencyFIFO.deq;
+
+        testLatency <= testLatency + (ticks - latencyFIFO.first());
+
 	if(testRX - 1 == 0)  
 	begin
-            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),errors);
+            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),zeroExtend(testLatency + (ticks - latencyFIFO.first())),errors);
         end
 
    	testRX <= testRX - 1;
@@ -90,6 +107,7 @@ module [CONNECTED_MODULE] mkD (Empty);
     rule tx64(testWidth == 64 && testTX > 0);
         aliveOut64.send(zeroExtend(testTX));
    	testTX <= testTX - 1;
+        latencyFIFO.enq(ticks);
     endrule
 
     rule rx64(testWidth == 64 && testRX > 0);
@@ -99,9 +117,13 @@ module [CONNECTED_MODULE] mkD (Empty);
 	    errors <= errors + 1;
         end
 
+        latencyFIFO.deq;
+
+        testLatency <= testLatency + (ticks - latencyFIFO.first());
+
 	if(testRX - 1 == 0)  
 	begin
-            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),errors);
+            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),zeroExtend(testLatency + (ticks - latencyFIFO.first())),errors);
         end
 
    	testRX <= testRX - 1;
@@ -112,6 +134,7 @@ module [CONNECTED_MODULE] mkD (Empty);
     rule tx128(testWidth == 128 && testTX > 0);
         aliveOut128.send(zeroExtend(testTX));
    	testTX <= testTX - 1;
+        latencyFIFO.enq(ticks);
     endrule
 
     rule rx128(testWidth == 128 && testRX > 0);
@@ -121,9 +144,13 @@ module [CONNECTED_MODULE] mkD (Empty);
 	    errors <= errors + 1;
         end
 
+        latencyFIFO.deq;
+
+        testLatency <= testLatency + (ticks - latencyFIFO.first());
+
 	if(testRX - 1 == 0)  
 	begin
-            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),errors);
+            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),zeroExtend(testLatency + (ticks - latencyFIFO.first())),errors);
         end
 
    	testRX <= testRX - 1;
@@ -133,6 +160,7 @@ module [CONNECTED_MODULE] mkD (Empty);
     rule tx256(testWidth == 256 && testTX > 0);
         aliveOut256.send(zeroExtend(testTX));
    	testTX <= testTX - 1;
+        latencyFIFO.enq(ticks);
     endrule
 
     rule rx256(testWidth == 256 && testRX > 0);
@@ -142,9 +170,13 @@ module [CONNECTED_MODULE] mkD (Empty);
 	    errors <= errors + 1;
         end
 
+        latencyFIFO.deq;
+
+        testLatency <= testLatency + (ticks - latencyFIFO.first());
+
 	if(testRX - 1 == 0)  
 	begin
-            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),errors);
+            serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),zeroExtend(testLatency + (ticks - latencyFIFO.first())),errors);
         end
 
    	testRX <= testRX - 1;
