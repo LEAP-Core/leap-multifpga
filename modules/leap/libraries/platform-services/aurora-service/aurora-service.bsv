@@ -39,7 +39,7 @@ import Complex::*;
 
 module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) (); 
 
-   AURORA_DRIVER auroraDriver = drivers.auroraDriver[0];
+   AURORA_COMPLEX_DRIVER auroraDriver = drivers.auroraDriver[0];
 
    STDIO#(Bit#(64)) stdio <- mkStdIO();  
    let serdes_infifo <- mkSizedBRAMFIFOF(64);
@@ -81,7 +81,7 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
     if(`DEBUG_ONLY == 0)
     begin
         rule sendToSERDESData;
-            auroraDriver.write(serdes_send.first());  // Byte endian issue?
+            auroraDriver.write(resizeNP(serdes_send.first()));  // Byte endian issue?
             txCount <= txCount + 1;
             serdes_send.deq();
         endrule
@@ -96,7 +96,7 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
 
     Reg#(Bit#(26)) counter <- mkReg(0);
     Reg#(Bit#(TAdd#(1,TLog#(`NUM_AURORA_IFCS)))) ifc <- mkReg(0);
-    AURORA_DRIVER targetDriver = drivers.auroraDriver[ifc];
+    AURORA_COMPLEX_DRIVER targetDriver = drivers.auroraDriver[ifc];
 
     rule printf;
         counter <= counter + 1;
@@ -123,14 +123,5 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
         end
     endrule
        
-    rule drainTX;
-       let data <- auroraDriver.txDebug.get();
-       stdio.printf(txDebugMsg, list1(zeroExtend(data)));
-    endrule
-
-    rule drainRX;
-       let data <- auroraDriver.rxDebug.get();
-       stdio.printf(rxDebugMsg, list1(zeroExtend(data)));
-    endrule
 
 endmodule

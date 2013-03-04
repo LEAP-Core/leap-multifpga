@@ -3382,3 +3382,18 @@ Directory config/pm/hasim-alpha/multifpga
  alpha_inorder_multifpga_time_func_16_acp_sram.apm Locally Modified          175 
 
 Changed AWB parameter NUM_CPUS to MAX_NUM_CPUS.
+
+----------
+kfleming    Date: Mon Mar  4 13:50:27 EST 2013  CSN: CSN-multifpga-177
+                  Mon Mar  4 18:50:27 UTC 2013
+
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          176 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          176 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          176 
+
+
+Upgraded ml605 builds to use the 5gbps transceivers. 

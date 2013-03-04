@@ -215,7 +215,6 @@ Packagehint=leap-platforms
 [Differential Crystal Clocks Device from Clocks/Params]
 CRYSTAL_CLOCK_FREQ=200
 RESET_ACTIVE_HIGH=1
-MODEL_CLOCK_FREQ=100
 
 [Virtex-6 PCIE Device (BlueNoC)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex6/pcie-virtex6.awb
@@ -511,12 +510,12 @@ Packagehint=leap-platforms
 
 [Aurora Device Wrapper ML605/Requires]
 aurora_flowcontrol=Aurora Device Flowcontrol
-aurora_driver=ML605 Aurora Device, Single Lane, 16-bit, 4 gbps
+aurora_driver=ML605 Aurora Device, Single Lane, 32-bit, 5 gbps
 
 [Aurora Device Wrapper ML605]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-ml605/aurora-device-ml605.awb
 Packagehint=leap-platforms
 
-[ML605 Aurora Device, Single Lane, 16-bit, 4 gbps]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605/aurora-virtex6-4gbps.awb
+[ML605 Aurora Device, Single Lane, 32-bit, 5 gbps]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605/aurora-virtex6-5gbps-32.awb
 Packagehint=leap-platforms
