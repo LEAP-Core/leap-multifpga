@@ -3397,3 +3397,23 @@ Directory modules/leap/libraries/platform-services/aurora-service
 
 
 Upgraded ml605 builds to use the 5gbps transceivers. 
+
+----------
+kfleming    Date: Wed Mar  6 16:02:14 EST 2013  CSN: CSN-multifpga-178
+                  Wed Mar  6 21:02:14 UTC 2013
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_dual_hub_ml605.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          177 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          177 
+
+Directory modules/leap-platforms/fpga-environments/ml605
+ ml605-dual-hub.env        Locally Modified          177 
+
+
+Added new dual-hub design.  This runs on a 3-FPGA configuration of
+ML605s.  Also updated the ml605 apm to reflect the new code in the
+aurora.
