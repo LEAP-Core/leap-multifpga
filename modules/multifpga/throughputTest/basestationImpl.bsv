@@ -1,25 +1,26 @@
 import FIFO::*;
 
 `include "awb/provides/soft_connections.bsh"
-`include "awb/rrr/remote_server_stub_TESTDRRR.bsh"
+`include "awb/rrr/remote_server_stub_BASESTATIONRRR.bsh"
 `include "awb/provides/fpga_components.bsh"
 `include "awb/provides/librl_bsv_storage.bsh"
+`include "awb/provides/throughput_repeater.bsh"
 
-module [CONNECTED_MODULE] mkD (Empty);
+module [CONNECTED_MODULE] mkBasestation (Empty);
 
-    ServerStub_TESTDRRR serverStub <- mkServerStub_TESTDRRR();
+    ServerStub_BASESTATIONRRR serverStub <- mkServerStub_BASESTATIONRRR();
 
     // Grumble.  I wish I could write these in a for loop.
-    Connection_Send#(Bit#(16)) aliveOut16 <- mkConnection_Send("fromD16");
-    Connection_Receive#(Bit#(16)) aliveIn16 <- mkConnection_Receive("fromB16");
-    Connection_Send#(Bit#(32)) aliveOut32 <- mkConnection_Send("fromD32");
-    Connection_Receive#(Bit#(32)) aliveIn32 <- mkConnection_Receive("fromB32");
-    Connection_Send#(Bit#(64)) aliveOut64 <- mkConnection_Send("fromD64");
-    Connection_Receive#(Bit#(64)) aliveIn64 <- mkConnection_Receive("fromB64");
-    Connection_Send#(Bit#(128)) aliveOut128 <- mkConnection_Send("fromD128");
-    Connection_Receive#(Bit#(128)) aliveIn128 <- mkConnection_Receive("fromB128");
-    Connection_Send#(Bit#(256)) aliveOut256 <- mkConnection_Send("fromD256");
-    Connection_Receive#(Bit#(256)) aliveIn256 <- mkConnection_Receive("fromB256");
+    Connection_Send#(Bit#(16)) aliveOut16 <- mkConnection_Send("16_0");
+    Connection_Receive#(Bit#(16)) aliveIn16 <- mkConnection_Receive("16_" + integerToString(`NUM_REPEATERS));
+    Connection_Send#(Bit#(32)) aliveOut32 <- mkConnection_Send("32_0");
+    Connection_Receive#(Bit#(32)) aliveIn32 <- mkConnection_Receive("32_" + integerToString(`NUM_REPEATERS));
+    Connection_Send#(Bit#(64)) aliveOut64 <- mkConnection_Send("64_0");
+    Connection_Receive#(Bit#(64)) aliveIn64 <- mkConnection_Receive("64_" + integerToString(`NUM_REPEATERS));
+    Connection_Send#(Bit#(128)) aliveOut128 <- mkConnection_Send("128_0");
+    Connection_Receive#(Bit#(128)) aliveIn128 <- mkConnection_Receive("128_" + integerToString(`NUM_REPEATERS));
+    Connection_Send#(Bit#(256)) aliveOut256 <- mkConnection_Send("256_0");
+    Connection_Receive#(Bit#(256)) aliveIn256 <- mkConnection_Receive("256_" + integerToString(`NUM_REPEATERS));
 
     Reg#(Bit#(48)) ticks       <- mkReg(0);
     Reg#(Bit#(32)) errors      <- mkReg(0);
@@ -29,7 +30,7 @@ module [CONNECTED_MODULE] mkD (Empty);
     Reg#(Bit#(32)) testTX      <- mkReg(0);
     Reg#(Bit#(32)) testRX      <- mkReg(0);
 
-    FIFO#(Bit#(48)) latencyFIFO <- mkSizedBRAMFIFO(2048); //Make this big in case we have a lot of inter-fpga latency.
+    FIFO#(Bit#(48)) latencyFIFO <- mkSizedBRAMFIFO(16384); //Make this big in case we have a lot of inter-fpga latency. Each K covers ~1us of latency
 
     rule tickUp;
       ticks <= ticks + 1;

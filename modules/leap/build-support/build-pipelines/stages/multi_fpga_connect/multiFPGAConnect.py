@@ -1468,8 +1468,10 @@ class MultiFPGAConnect():
             # for now we will assume that flow control is twinned - that is the egress 2 uses ingress 2 for its flow control
             # this might well need to change as we introduce assymetry x_X
             # we actually should be allocating the feedback channel as part of the analysis phase, but that can happen later.             
+            via_dbg = 'via_' + platform + '_' + targetPlatform + '_dbg_list';
             if (self.GENERATE_ROUTER_DEBUG):
-              header.write('\nDEBUG_SCAN_FIELD_LIST egress_via_dbg_list = List::nil;\n')
+              
+              header.write('\nDEBUG_SCAN_FIELD_LIST ' + via_dbg + ' = List::nil;\n')
 
             for via_idx in range(len(egressVias)):
               if(egressVias[via_idx].via_links > 0):                
@@ -1503,11 +1505,11 @@ class MultiFPGAConnect():
                 header.write('EGRESS_SWITCH#(' + str(egressVias[via_idx].via_links) + ') ' + egressVias[via_idx].via_switch + '<- mkEgressSwitch( links_' + egressVias[via_idx].via_switch + ', ' + ingressVias[egressVias[via_idx].via_outgoing_flowcontrol_via].via_switch + '.ingressPorts[' + str(egressVias[via_idx].via_outgoing_flowcontrol_link) +'], compose(' + egress_multiplexor_names[targetPlatform] + '.' + egressVias[via_idx].via_method + ',pack), "' + egressVias[via_idx].via_switch + '", ' + single_cycle_arb + ');\n')
 
                 if(self.GENERATE_ROUTER_DEBUG):   
-                  header.write('egress_via_dbg_list <- addDebugScanField(egress_via_dbg_list, "' + egressVias[via_idx].via_switch + ' buffer status", ' + egressVias[via_idx].via_switch + '.bufferStatus);\n')
-                  header.write('egress_via_dbg_list <- addDebugScanField(egress_via_dbg_list, "' + egressVias[via_idx].via_switch + ' fifo status", ' + egressVias[via_idx].via_switch + '.fifoStatus);\n')
+                  header.write(via_dbg + ' <- addDebugScanField(' + via_dbg + ', "' + egressVias[via_idx].via_switch + ' buffer status", ' + egressVias[via_idx].via_switch + '.bufferStatus);\n')
+                  header.write(via_dbg + ' <- addDebugScanField(' + via_dbg + ', "' + egressVias[via_idx].via_switch + ' fifo status", ' + egressVias[via_idx].via_switch + '.fifoStatus);\n')
 
             if(self.GENERATE_ROUTER_DEBUG):   
-              header.write('let egressViaDbg <- mkDebugScanNode("Multi-FPGA Router Egress VIAs", egress_via_dbg_list);\n')
+              header.write('let ' + via_dbg + '_Node <- mkDebugScanNode("Multi-FPGA Router Egress VIAs", ' + via_dbg + ' );\n')
 
             # Hook up the ingress links
             # We also want to build a listing of the mapping in an easy to consume 

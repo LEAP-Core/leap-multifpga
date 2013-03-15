@@ -1,0 +1,12 @@
+%AWB_START
+
+%name MultiFPGA Throughput Repeater
+%desc MultiFPGA Throughput Repeater
+
+%provides throughput_repeater
+
+%public throughput-repeater.bsv
+
+%param NUM_REPEATERS 1 "number of repeaters in test"
+
+%AWB_END

@@ -3,7 +3,7 @@
 #include "asim/provides/stats_service.h"
 #include "asim/provides/connected_application.h"
 #include "asim/provides/clocks_device.h"
-#include "asim/rrr/client_stub_TESTDRRR.h"
+#include "asim/rrr/client_stub_BASESTATIONRRR.h"
 
 
 using namespace std;
@@ -12,7 +12,7 @@ using namespace std;
 CONNECTED_APPLICATION_CLASS::CONNECTED_APPLICATION_CLASS(VIRTUAL_PLATFORM vp)
   
 {
-    clientStub = new TESTDRRR_CLIENT_STUB_CLASS(NULL);
+    clientStub = new BASESTATIONRRR_CLIENT_STUB_CLASS(NULL);
 }
 
 // destructor                                                                                                                       

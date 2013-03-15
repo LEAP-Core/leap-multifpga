@@ -1,4 +1,4 @@
-service TESTDRRR
+service BASESTATIONRRR
 {
    server hw (bsv, connection) <- sw (cpp, method)
    {

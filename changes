@@ -3417,3 +3417,72 @@ Directory modules/leap-platforms/fpga-environments/ml605
 Added new dual-hub design.  This runs on a 3-FPGA configuration of
 ML605s.  Also updated the ml605 apm to reflect the new code in the
 aurora.
+
+----------
+kfleming    Date: Fri Mar 15 17:47:04 EDT 2013  CSN: CSN-multifpga-179
+                  Fri Mar 15 21:47:04 UTC 2013
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_exe.apm Locally Modified          178 
+ test_multifpga_throughput_dual_hub_ml605.apm Locally Modified          178 
+ test_multifpga_throughput_tri_hub_ml605.apm Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          178 
+
+Directory modules/leap-platforms/fpga-environments/ml605
+ ml605-tri-hub.env         Locally Added               0 
+ ml605_fpga_tri_hub.awb    Locally Added               0 
+
+Directory modules/multifpga/throughputTest
+ test_c_throughput.awb     Locally Removed           178 
+ test_d_throughput.awb     Locally Removed           178 
+ basestation.awb           Locally Added               0 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.h Locally Modified          178 
+ connected-application-throughput.cpp Locally Modified          178 
+
+Directory modules/multifpga/throughputTest
+ basestationImpl.bsv       Locally Added               0 
+ repeater-1.bsv            Locally Added               - 
+ repeater-2.bsv            Locally Added               0 
+ test-c-throughput.bsv     Locally Removed           178 
+ test-d-throughput.bsv     Locally Removed           178 
+ repeater_2.awb            Locally Added               0 
+ basestationImpl.rrr       Locally Added               0 
+ test-c-throughput.dic     Locally Removed           178 
+ test-d-throughput.dic     Locally Removed           178 
+ throughput-repeater.bsv   Locally Added               0 
+ throughput_repeater.awb   Locally Added               0 
+ singleRepeater/           Locally Added               0 
+
+Directory modules/multifpga/throughputTest/singleRepeater
+ singleRepeater.awb        Locally Added               0 
+ mapping.map               Locally Added               0 
+ test_top.bsv              Locally Added               0 
+ sim_mapping.awb           Locally Added               0 
+
+Directory modules/multifpga/throughputTest
+ test-d-throughput.rrr     Locally Removed           178 
+ repeater-1.awb            Locally Added               - 
+ dualRepeater/             Locally Added               0 
+
+Directory modules/multifpga/throughputTest/dualRepeater
+ dualRepeater.awb          Locally Added               0 
+ mapping.map               Locally Added               0 
+ test_top.bsv              Locally Added               0 
+ sim_mapping.awb           Locally Added               0 
+
+
+1) Fixed bug in the multifpga debug.  Debug was not being uniquified
+and failed if more than two platforms were in an environment.
+
+2) Made the throughput test more general so that it can be scaled more
+easily to larger fpga systems.  Until I destroy synthesis boundaries,
+this expansion will still be clunky but at least the amount of code is
+reduced.
+
+
+3) Added some new FPGA environments.

@@ -1,0 +1,15 @@
+%AWB_START
+
+%name MultiFPGA Throughput Single Repeater
+%desc MultiFPGA	Throughput Single Repeater
+
+%provides hardware_system
+%requires basestation
+%requires repeater1
+%requires throughput_repeater
+
+%public test_top.bsv
+
+%param SYNTH_BOUNDARY mkSystem "name of synthesis boundary"
+
+%AWB_END

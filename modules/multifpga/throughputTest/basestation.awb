@@ -1,0 +1,14 @@
+%AWB_START
+
+%name MultiFPGA Throughput Test (D) 
+%desc MultiFPGA	Throughput Test (D)
+
+%provides basestation
+
+%sources -t RRR -v PUBLIC basestationImpl.rrr
+%sources -t BSV -v PUBLIC basestationImpl.bsv
+
+
+%param SYNTH_BOUNDARY mkBasestation "name of synthesis boundary"
+
+%AWB_END

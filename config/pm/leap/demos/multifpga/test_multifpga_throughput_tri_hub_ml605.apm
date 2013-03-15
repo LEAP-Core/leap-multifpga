@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_throughput_exe
+File=test_multifpga_throughput_tri_hub_ml605
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -18,9 +18,9 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=MultiFPGA Throughput Test Connected Application
-environment_description=Simulation Dual FPGA Environment with Dual Cache
+environment_description=ML605 Tri Hub FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Single Repeater Mapping
+fpga_mapping=Dual Repeater Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -75,14 +75,10 @@ File=modules/multifpga/throughputTest/repeater-1.awb
 Packagehint=multifpga
 
 [MultiFPGA Throughput Test Connected Application/Requires]
-hardware_system=MultiFPGA Throughput Single Repeater
+hardware_system=MultiFPGA Throughput Dual Repeater
 
 [MultiFPGA Throughput Test Connected Application]
 File=modules/multifpga/throughputTest/connected_application/connected-application-throughput.awb
-Packagehint=multifpga
-
-[Simulation Dual FPGA Environment with Dual Cache]
-File=modules/leap-platforms/fpga-environments/sim/sim_fpga_cache_env.awb
 Packagehint=multifpga
 
 [Bluespec Type parser]
@@ -93,15 +89,27 @@ Packagehint=multifpga
 File=modules/multifpga/throughputTest/throughput_repeater.awb
 Packagehint=multifpga
 
-[MultiFPGA Throughput Single Repeater]
-File=modules/multifpga/throughputTest/singleRepeater/singleRepeater.awb
+[ML605 Tri Hub FPGA Environment (SMA)]
+File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_tri_hub.awb
 Packagehint=multifpga
 
-[MultiFPGA Throughput Single Repeater/Requires]
+[Dual Repeater Mapping]
+File=modules/multifpga/throughputTest/dualRepeater/sim_mapping.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Dual Repeater/Requires]
 basestation=MultiFPGA Throughput Test (D)
+repeater2=MultiFPGA Throughput Repeater 2
 throughput_repeater=MultiFPGA Throughput Repeater
 repeater1=MultiFPGA Throughput Test (C)
 
-[Single Repeater Mapping]
-File=modules/multifpga/throughputTest/singleRepeater/sim_mapping.awb
+[MultiFPGA Throughput Repeater 2]
+File=modules/multifpga/throughputTest/repeater_2.awb
 Packagehint=multifpga
+
+[MultiFPGA Throughput Dual Repeater]
+File=modules/multifpga/throughputTest/dualRepeater/dualRepeater.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Repeater/Params]
+NUM_REPEATERS=2

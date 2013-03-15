@@ -1,0 +1,12 @@
+%AWB_START
+
+%name MultiFPGA Throughput Repeater 2
+%desc MultiFPGA Throughput Repeater 2
+
+%provides repeater2
+
+%public repeater-2.bsv
+
+%param SYNTH_BOUNDARY mk2 "name of synthesis boundary"
+
+%AWB_END

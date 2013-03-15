@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=MultiFPGA Throughput Test Connected Application
 environment_description=ML605 Dual Hub FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Test Sim Mapping
+fpga_mapping=Single Repeater Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -34,26 +34,6 @@ Packagehint=multifpga
 multi_fpga_log_generator=multiFPGA Log Generation
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_generate_bitfile=multiFPGA Generate bitfle
-
-[MultiFPGA Synthesis test module a]
-File=modules/multifpga/synthTest/test_a.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module top/Requires]
-test_c=MultiFPGA Throughput Test (C)
-test_a=MultiFPGA Synthesis test module a
-test_b=MultiFPGA Synthesis test module b
-
-[MultiFPGA Synthesis test module a/Requires]
-test_d=MultiFPGA Throughput Test (D)
-
-[MultiFPGA Synthesis test module b]
-File=modules/multifpga/synthTest/test_b.awb
-Packagehint=multifpga
-
-[MultiFPGA Synthesis test module top]
-File=modules/multifpga/synthTest/top.awb
-Packagehint=multifpga
 
 [multiFPGA Log Generation]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
@@ -95,7 +75,7 @@ File=modules/multifpga/throughputTest/test_c_throughput.awb
 Packagehint=multifpga
 
 [MultiFPGA Throughput Test Connected Application/Requires]
-hardware_system=MultiFPGA Synthesis test module top
+hardware_system=MultiFPGA Throughput Single Repeater
 
 [MultiFPGA Throughput Test Connected Application]
 File=modules/multifpga/throughputTest/connected_application/connected-application-throughput.awb
@@ -109,6 +89,19 @@ Packagehint=multifpga
 File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_dual_hub.awb
 Packagehint=multifpga
 
-[Test Sim Mapping]
-File=modules/multifpga/synthTest/sim_mapping.awb
+[MultiFPGA Throughput Repeater]
+File=modules/multifpga/throughputTest/throughput_repeater.awb
 Packagehint=multifpga
+
+[Single Repeater Mapping]
+File=modules/multifpga/throughputTest/singleRepeater/sim_mapping.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Single Repeater]
+File=modules/multifpga/throughputTest/singleRepeater/singleRepeater.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Single Repeater/Requires]
+basestation=MultiFPGA Throughput Test (D)
+throughput_repeater=MultiFPGA Throughput Repeater
+repeater1=MultiFPGA Throughput Test (C)
