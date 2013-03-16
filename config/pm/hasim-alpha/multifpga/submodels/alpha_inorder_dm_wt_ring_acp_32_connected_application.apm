@@ -58,6 +58,7 @@ MAX_NUM_CPUS=32
 chip_base_types=Chip Base Types
 hasim_core=Pipeline and Caches
 hasim_uncore=Uncore with Interconnect
+hasim_chip_topology=Standard Topology Manager
 
 [Alpha ISA Definition]
 File=modules/hasim/functional-partition/isa/definition/isa_definition_alpha.awb
@@ -140,4 +141,8 @@ Packagehint=hasim-models
 
 [Ring Interconnect]
 File=modules/hasim/timing-models/uncore/interconnects/ring/icn-ring.awb
+Packagehint=hasim-models
+
+[Standard Topology Manager]
+File=modules/hasim/timing-models/chip/topology/std/topology-std.awb
 Packagehint=hasim-models

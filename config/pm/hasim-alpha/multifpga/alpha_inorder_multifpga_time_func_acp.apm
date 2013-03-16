@@ -130,6 +130,7 @@ hasim_model_services=Default HAsim Model Services
 [Single Core Chip/Requires]
 chip_base_types=Chip Base Types
 hasim_core=Pipeline and Caches
+hasim_chip_topology=Standard Topology Manager
 
 [Single Core Chip]
 File=modules/hasim/timing-models/chip/single-core-chip.awb
@@ -159,3 +160,6 @@ Packagehint=multifpga
 GENERATE_ROUTER_STATS=1
 GENERATE_ROUTER_DEBUG=1
 
+[Standard Topology Manager]
+File=modules/hasim/timing-models/chip/topology/std/topology-std.awb
+Packagehint=hasim-models

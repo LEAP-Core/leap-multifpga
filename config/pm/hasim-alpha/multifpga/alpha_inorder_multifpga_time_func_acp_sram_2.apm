@@ -130,6 +130,7 @@ hasim_model_services=Default HAsim Model Services
 [Single Core Chip/Requires]
 chip_base_types=Chip Base Types
 hasim_core=Pipeline and Caches
+hasim_chip_topology=Standard Topology Manager
 
 [Single Core Chip]
 File=modules/hasim/timing-models/chip/single-core-chip.awb
@@ -154,3 +155,7 @@ Packagehint=multifpga
 [ACP Dual FPGA Env with Dual SRAM]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
 Packagehint=multifpga
+
+[Standard Topology Manager]
+File=modules/hasim/timing-models/chip/topology/std/topology-std.awb
+Packagehint=hasim-models

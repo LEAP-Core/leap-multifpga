@@ -131,6 +131,7 @@ hasim_model_services=Default HAsim Model Services
 [Single Core Chip/Requires]
 chip_base_types=Chip Base Types
 hasim_core=Pipeline and Caches
+hasim_chip_topology=Standard Topology Manager
 
 [Single Core Chip]
 File=modules/hasim/timing-models/chip/single-core-chip.awb
@@ -162,3 +163,7 @@ MAX_NUMBER_OF_VIAS=2
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
+
+[Standard Topology Manager]
+File=modules/hasim/timing-models/chip/topology/std/topology-std.awb
+Packagehint=hasim-models

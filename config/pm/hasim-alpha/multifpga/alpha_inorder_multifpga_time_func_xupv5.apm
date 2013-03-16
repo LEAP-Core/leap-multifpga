@@ -130,6 +130,7 @@ hasim_model_services=Default HAsim Model Services
 [Single Core Chip/Requires]
 chip_base_types=Chip Base Types
 hasim_core=Pipeline and Caches
+hasim_chip_topology=Standard Topology Manager
 
 [Single Core Chip]
 File=modules/hasim/timing-models/chip/single-core-chip.awb
@@ -157,3 +158,7 @@ MAX_NUM_CONTEXTS=2
 [XUPV5 Dual FPGA Environment (SMA)]
 File=modules/leap-platforms/fpga-environments/xupv5/xupv5_fpga_env.awb
 Packagehint=multifpga
+
+[Standard Topology Manager]
+File=modules/hasim/timing-models/chip/topology/std/topology-std.awb
+Packagehint=hasim-models
