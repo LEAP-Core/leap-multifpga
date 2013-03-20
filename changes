@@ -3530,3 +3530,15 @@ Directory config/pm/hasim-alpha/multifpga/submodels
 Set MAX_NUM_MEM_CTRLS to a value that would permit up to one memory controller
 at each node on the edge of two sides of a mesh.  The true number can be
 set at run time.
+
+----------
+mcadler     Date: Wed Mar 20 11:37:58 EDT 2013  CSN: CSN-multifpga-182
+                  Wed Mar 20 15:37:58 UTC 2013
+
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_acp_16_connected_application.apm Locally Modified          181 
+ alpha_inorder_dm_wt_mesh_acp_64_connected_application.apm Locally Modified          181 
+ alpha_inorder_dm_wt_mesh_acp_128_connected_application.apm Locally Modified          181 
+
+Mesh model memory controller location(s) now determined algorithmically.
