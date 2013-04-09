@@ -1,0 +1,106 @@
+
+[Global]
+SaveParameters=0
+Description=ML605 slave fpga
+File=vc707_1
+Version=2.2
+Type=Leap
+Name=ML605 FPGA 1
+Class=Asim::Model
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+DefaultRunOpts=
+RootName=MultiFPGA Platform
+RootProvides=model
+
+[Model]
+DefaultAttributes=
+model=MultiFPGA Platform
+
+[Null Connected Application]
+File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
+Packagehint=leap-platforms
+
+[Soft Services Hybrid Application Environment/Requires]
+connected_application=Null Connected Application
+
+[MultiFPGA Platform]
+File=modules/leap/build-support/project/platform-multifpga.awb
+Packagehint=multifpga
+
+[Null FPGA Environment]
+File=modules/leap/build-support/project/null_environment.awb
+Packagehint=multifpga
+
+[MultiFPGA Platform/Requires]
+fpga_mapping=Null FPGA Mapping
+project_common=Default Hybrid Project Common Utilities
+environment_description=Null FPGA Environment
+fpgaenv=VC707 FPGA 1 
+application_env=Soft Services Hybrid Application Environment
+
+[Null FPGA Mapping]
+File=modules/leap/build-support/project/null_mapping.awb
+Packagehint=multifpga
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/leap/submodels/common/project-common-default.apm
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+[Global]
+SaveParameters=0
+Description=ML605 slave fpga
+File=vc707_1
+Version=2.2
+Type=Leap
+Name=ML605 FPGA 1
+Class=Asim::Model
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+DefaultRunOpts=
+RootName=MultiFPGA Platform
+RootProvides=model
+
+[Model]
+DefaultAttributes=
+model=MultiFPGA Platform
+
+[Null Connected Application]
+File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
+Packagehint=leap-platforms
+
+[Soft Services Hybrid Application Environment/Requires]
+connected_application=Null Connected Application
+
+[MultiFPGA Platform]
+File=modules/leap/build-support/project/platform-multifpga.awb
+Packagehint=multifpga
+
+[Null FPGA Environment]
+File=modules/leap/build-support/project/null_environment.awb
+Packagehint=multifpga
+
+[MultiFPGA Platform/Requires]
+fpga_mapping=Null FPGA Mapping
+project_common=Default Hybrid Project Common Utilities
+environment_description=Null FPGA Environment
+fpgaenv=VC707 FPGA 1 
+application_env=Soft Services Hybrid Application Environment
+
+[Null FPGA Mapping]
+File=modules/leap/build-support/project/null_mapping.awb
+Packagehint=multifpga
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/leap/submodels/common/project-common-default.apm
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+[VC707 FPGA 1 ]
+File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-vc707-fpga1.apm
+Packagehint=multifpga

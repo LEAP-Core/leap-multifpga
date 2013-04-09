@@ -44,7 +44,7 @@ module [CONNECTED_MODULE] mkConnectedApplication ();
 
     Connection_Receive#(Bool) linkStarterStartRun <- mkConnectionRecv("vdev_starter_start_run");
     Connection_Send#(Bit#(8)) linkStarterFinishRun <- mkConnectionSend("vdev_starter_finish_run");
-    STDIO#(Bit#(32)) stdio <- mkStdIO();
+    STDIO#(Bit#(64)) stdio <- mkStdIO();
 
     Reg#(STATE) state <- mkReg(STATE_start);
 
@@ -72,13 +72,13 @@ module [CONNECTED_MODULE] mkConnectedApplication ();
             
 
 
-		Connection_Receive#(Bit#(16)) auroraRecv <- mkConnectionRecv("AuroraRX");
-    Connection_Send#(Bit#(16)) auroraSend <- mkConnectionSend("AuroraTX");
+		Connection_Receive#(Bit#(63)) auroraRecv <- mkConnectionRecv("AuroraRX");
+    Connection_Send#(Bit#(63)) auroraSend <- mkConnectionSend("AuroraTX");
 		let aurMsg <- getGlobalStringUID("Aurora recv'd %x \n");
 		let aurSndMsg <- getGlobalStringUID("Aurora sent %x \n");
 		let aurErrorMsg <- getGlobalStringUID("Aurora recv'd %x expected %x total errors %x\n");
-		Reg#(Bit#(16)) auroraTestVal <- mkReg(0);
-		Reg#(Bit#(16)) recvExpected <- mkReg(0);
+		Reg#(Bit#(63)) auroraTestVal <- mkReg(0);
+		Reg#(Bit#(63)) recvExpected <- mkReg(0);
 		Reg#(Bit#(8)) sleep  <- mkReg(0);
                 Reg#(Bit#(32)) errors <- mkReg(0); 
 

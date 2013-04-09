@@ -235,6 +235,7 @@ class MultiFPGAGenerateLogfile():
       header = open(routerBSH,'w')
       header.write('`include "awb/provides/stats_service.bsh"\n')
       header.write('`include "awb/provides/debug_scan_service.bsh"\n')
+      header.write('`include "awb/provides/physical_platform.bsh"\n')
       header.write('// we need to pick up the module sizes\n')
       header.write('module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);\n')
       header.write('let m <- mkCommunicationModuleIfaces(vplat ') 

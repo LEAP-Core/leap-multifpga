@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=test_multifpga_throughput_ml605
+File=test_multifpga_throughput_vc707
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -18,7 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=MultiFPGA Throughput Test Connected Application
-environment_description=ML605 Dual FPGA Environment (SMA)
+environment_description=VC707 Dual FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Single Repeater Mapping
 
@@ -65,6 +65,7 @@ Packagehint=multifpga
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_DEBUG=1
 GENERATE_ROUTER_STATS=1
+SOFT_CONN_CWIDTH=300
 
 [MultiFPGA Throughput Test (D)]
 File=modules/multifpga/throughputTest/basestation.awb
@@ -85,10 +86,6 @@ Packagehint=multifpga
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
 
-[ML605 Dual FPGA Environment (SMA)]
-File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_env.awb
-Packagehint=multifpga
-
 [MultiFPGA Throughput Repeater]
 File=modules/multifpga/throughputTest/throughput_repeater.awb
 Packagehint=multifpga
@@ -105,3 +102,10 @@ repeater1=MultiFPGA Throughput Test (C)
 [Single Repeater Mapping]
 File=modules/multifpga/throughputTest/singleRepeater/sim_mapping.awb
 Packagehint=multifpga
+
+[VC707 Dual FPGA Environment (SMA)]
+File=modules/leap-platforms/fpga-environments/vc707/vc707_dual_env.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=1

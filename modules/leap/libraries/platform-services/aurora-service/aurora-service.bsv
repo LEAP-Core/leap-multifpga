@@ -27,6 +27,7 @@ import Complex::*;
 
 `include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/physical_platform.bsh"
+`include "asim/provides/aurora_device.bsh"
 `include "asim/provides/soft_services.bsh"
 `include "asim/provides/soft_connections.bsh"
 `include "asim/provides/soft_clocks.bsh"
@@ -36,15 +37,20 @@ import Complex::*;
 `include "asim/provides/fpga_components.bsh"
 `include "asim/provides/librl_bsv_storage.bsh"
 `include "asim/provides/librl_bsv_base.bsh"
+`include "awb/provides/dynamic_parameters_service.bsh"
+`include "awb/dict/PARAMS_AURORA_SERVICE.bsh"
 
 module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) (); 
 
-   AURORA_COMPLEX_DRIVER auroraDriver = drivers.auroraDriver[0];
+   PARAMETER_NODE paramNode  <- mkDynamicParameterNode();
+   Param#(8) targetAurora <- mkDynamicParameter(`PARAMS_AURORA_SERVICE_TARGET_AURORA,paramNode);
+  
+   AURORA_COMPLEX_DRIVER auroraDriver = drivers.auroraDriver[targetAurora];
 
    STDIO#(Bit#(64)) stdio <- mkStdIO();  
    let serdes_infifo <- mkSizedBRAMFIFOF(64);
    // make soft connections to PHY
-   Connection_Send#(Bit#(16)) analogRX <- mkConnectionSendOptional("AuroraRX");
+   Connection_Send#(Bit#(63)) analogRX <- mkConnectionSendOptional("AuroraRX");
    Reg#(Bit#(40)) rxCount <- mkReg(0);
    Reg#(Bit#(40)) sampleDropped <- mkReg(0);
    Reg#(Bit#(40)) sampleSent <- mkReg(0);
@@ -65,7 +71,7 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
         analogRX.send(truncate(serdes_infifo.first()));       
     endrule
 
-    Connection_Receive#(Bit#(16)) analogTX  <- mkConnectionRecvOptional("AuroraTX");
+    Connection_Receive#(Bit#(63)) analogTX  <- mkConnectionRecvOptional("AuroraTX");
 
     FIFOF#(Bit#(63)) serdes_send <- mkSizedFIFOF(32);  
 
@@ -81,7 +87,7 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
     if(`DEBUG_ONLY == 0)
     begin
         rule sendToSERDESData;
-            auroraDriver.write(resizeNP(serdes_send.first()));  // Byte endian issue?
+            auroraDriver.write(resize(serdes_send.first()));  // Byte endian issue?
             txCount <= txCount + 1;
             serdes_send.deq();
         endrule
@@ -90,7 +96,7 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
     // periodic debug printout
     let aurSndMsg <- getGlobalStringUID("Aurora %d channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
     let aurFCMsg <- getGlobalStringUID("Flowcontrol tokens RX'ed: %x, Flowcontrol tokens TX'ed %x\n");
-    let aurCreditMsg <- getGlobalStringUID("Debug Mode: %x, Aurora credit_underflow %x, rx_credit %x, tx_credit %x, data_drops %x\n");
+    let aurCreditMsg <- getGlobalStringUID("Debug Mode: %x, Aurora credit_underflow %x, rx_credit %x, tx_credit %x, data_drops %x  heartbeat_count %x\n");
     let txDebugMsg <- getGlobalStringUID("TXBuffer %x\n");
     let rxDebugMsg <- getGlobalStringUID("RXBuffer %x\n");
 
@@ -107,7 +113,7 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
         end
         else if (counter + 1 == 1)
         begin
-            stdio.printf(aurCreditMsg, list5(`DEBUG_ONLY, zeroExtend(pack(targetDriver.credit_underflow)), zeroExtend(pack(targetDriver.rx_credit)), zeroExtend(targetDriver.tx_credit), zeroExtend(pack(targetDriver.data_drops))));
+            stdio.printf(aurCreditMsg, list6(`DEBUG_ONLY, zeroExtend(pack(targetDriver.credit_underflow)), zeroExtend(pack(targetDriver.rx_credit)), zeroExtend(targetDriver.tx_credit), zeroExtend(pack(targetDriver.data_drops)), zeroExtend(pack(targetDriver.heartbeat_count))));
         end
         else if (counter + 1 == 2)
         begin
