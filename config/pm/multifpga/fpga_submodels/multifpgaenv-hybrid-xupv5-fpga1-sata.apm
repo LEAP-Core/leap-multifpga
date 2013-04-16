@@ -150,6 +150,7 @@ synthesis_tool=Synplify/XST Synthesis Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
+li_module=LEAP LI Module Handler
 
 [Null Physical Channel]
 File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
@@ -216,11 +217,14 @@ Packagehint=multifpga
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
 Packagehint=multifpga
 
-
 [XUPv5 PCIE Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-xupv5/pcie-bluespec.awb
 Packagehint=leap-platforms
 
 [NULL Local Memory Interface]
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
+Packagehint=leap
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap

@@ -138,6 +138,7 @@ synthesis_tool=XST Synthesis Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
+li_module=LEAP LI Module Handler
 
 [Null Channel IO Module/Requires]
 physical_channel=BlueNoC PCIe Tunnel
@@ -387,6 +388,7 @@ synthesis_tool=XST Synthesis Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
+li_module=LEAP LI Module Handler
 
 [Null Channel IO Module/Requires]
 physical_channel=BlueNoC PCIe Tunnel
@@ -521,3 +523,7 @@ Packagehint=leap-platforms
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
 Packagehint=leap-platforms
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

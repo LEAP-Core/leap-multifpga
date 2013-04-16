@@ -112,9 +112,6 @@ rrr_common=RRR Common Module
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
 
-[UNIX Communication Physical Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
-Packagehint=multifpga
 
 [FPGA0 Simulation Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0/sim-physical-platform-fpga0.awb
@@ -122,7 +119,6 @@ Packagehint=multifpga
 
 [FPGA0 Simulation Physical Platform/Requires]
 clocks_device=Simulation Clocks Device
-unix_comm_device=UNIX Communication Physical Device
 physical_platform_utils=Common Physical Platform Utilities
 unix_pipe_device=UNIX Pipe Physical Device
 
@@ -150,6 +146,7 @@ bluesim_tool=BSV Bluesim Build Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpga_environment_parser=FPGA Environment Datatype
 fpgamap_parser=FPGAMap
+li_module=LEAP LI Module Handler
 
 [MultiFPGA BlueSim Platform Build Pipeline]
 File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
@@ -181,3 +178,7 @@ Packagehint=multifpga
 [FPGAMap]
 File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
 Packagehint=multifpga
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

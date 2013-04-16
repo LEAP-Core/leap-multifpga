@@ -41,6 +41,7 @@ iface_tool=Interface builder
 bsv_tool=BSV Build Tool (First Phase)
 fpga_program_tool=FPGA Programming Tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+li_module=LEAP LI Module Handler
 
 [Xilinx Post-synthesis Toolchain]
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-post-synth.awb
@@ -77,7 +78,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/fpgaprog/fpgaprog.awb
 Packagehint=leap
 
-
 [Synthesis Boundary Wrapper generation tool]
 File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
 Packagehint=leap
@@ -92,3 +92,7 @@ Packagehint=leap
 
 [BSV Build Tool (First Phase)/Params]
 BSC_FLAGS="-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -show-range-conflict -remove-dollar"
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

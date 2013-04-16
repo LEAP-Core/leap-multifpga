@@ -120,12 +120,8 @@ mem_services=Standard Mem Services
 multifpga_router_service=MultiFPGA Router Service
 front_panel_service=Front Panel Service
 starter_service=Starter Service
-aurora_service=Aurora Service
 
 [Standard I/O Services]
 File=modules/leap/libraries/platform-services/common-services/stdio-service/stdio-service.awb
 Packagehint=leap
 
-[Aurora Service]
-File=modules/leap/libraries/platform-services/aurora-service/aurora-service.awb
-Packagehint=multifpga

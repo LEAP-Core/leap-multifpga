@@ -121,6 +121,7 @@ bluesim_tool=BSV Bluesim Build Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
+li_module=LEAP LI Module Handler
 
 [MultiFPGA BlueSim Platform Build Pipeline]
 File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
@@ -181,3 +182,7 @@ Packagehint=multifpga
 
 [Simlutation Communication Device with raw UNIX Communication/Requires]
 unix_comm_device=UNIX Communication Physical Device
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

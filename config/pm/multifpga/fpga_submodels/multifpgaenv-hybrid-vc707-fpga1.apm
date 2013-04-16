@@ -138,6 +138,7 @@ synthesis_tool=XST Synthesis Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
+li_module=LEAP LI Module Handler
 
 [Null Channel IO Module/Requires]
 physical_channel=BlueNoC PCIe Tunnel
@@ -359,6 +360,7 @@ synthesis_tool=XST Synthesis Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
+li_module=LEAP LI Module Handler
 
 [Null Channel IO Module/Requires]
 physical_channel=BlueNoC PCIe Tunnel
@@ -493,3 +495,7 @@ aurora_common=Aurora Common Definitions
 [VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 5 gbps]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b/aurora-virtex7-5gbps-64.awb
 Packagehint=leap-platforms
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap
