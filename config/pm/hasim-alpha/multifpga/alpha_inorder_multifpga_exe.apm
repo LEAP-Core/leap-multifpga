@@ -86,7 +86,7 @@ Packagehint=hasim-models
 
 [Pipeline and Caches/Requires]
 hasim_pipeline=Inorder Pipeline, 2-bit branch predictor
-hasim_l1_caches=Null L1 caches
+hasim_private_caches=Null Private caches
 
 [Alpha ISA Definition]
 File=modules/hasim/functional-partition/isa/definition/isa_definition_alpha.awb
@@ -121,9 +121,6 @@ Packagehint=hasim-models
 File=config/pm/hasim/submodels/common/hasim-model-services.apm
 Packagehint=hasim
 
-[Null L1 caches]
-File=config/pm/hasim-models/l1-caches/null_l1_caches.apm
-Packagehint=hasim-models
 
 [HAsim Performance Model/Requires]
 hasim_common=HAsim Common Default Configuration
@@ -163,4 +160,8 @@ Packagehint=multifpga
 
 [Standard Topology Manager]
 File=modules/hasim/timing-models/chip/topology/std/topology-std.awb
+Packagehint=hasim-models
+
+[Null Private caches]
+File=config/pm/hasim-models/private-caches/null-private-caches.apm
 Packagehint=hasim-models

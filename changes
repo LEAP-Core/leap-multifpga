@@ -3661,3 +3661,38 @@ Directory modules/leap/build-support/pipelines/multifpga_platform
 
 
 Multifpga apms/build pipelines need to include li_module.
+
+----------
+mcadler     Date: Sat Apr 20 08:54:58 EDT 2013  CSN: CSN-multifpga-187
+                  Sat Apr 20 12:54:58 UTC 2013
+
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_time_func_exe.apm Locally Modified          186 
+ alpha_inorder_multifpga_exe.apm Locally Modified          186 
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_acp_16_connected_application.apm Locally Modified          186 
+ alpha_inorder_dm_wt_ring_acp_32_connected_application.apm Locally Modified          186 
+ alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm Locally Modified          186 
+ alpha_inorder_dm_wt_mesh_acp_64_connected_application.apm Locally Modified          186 
+ alpha_inorder_dm_wt_ring_acp_16_connected_application.apm Locally Modified          186 
+ alpha_inorder_dm_wt_mesh_acp_128_connected_application.apm Locally Modified          186 
+ alpha_inorder_dm_wt_ring_acp_64_connected_application.apm Locally Modified          186 
+ alpha_inorder_dm_wt_mesh_acp_256_connected_application.apm Locally Modified          186 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_aurora_exe.apm Locally Modified          186 
+ alpha_inorder_multifpga_time_func_acp.apm Locally Modified          186 
+ alpha_inorder_multifpga_time_func_acp_sram_2.apm Locally Modified          186 
+ alpha_inorder_multifpga_acp.apm Locally Modified          186 
+ alpha_inorder_multifpga_time_func_acp_sram.apm Locally Modified          186 
+ alpha_inorder_multifpga_time_func_xupv5.apm Locally Modified          186 
+ alpha_inorder_multifpga_time_func_dist_cache_exe.apm Locally Modified          186 
+ alpha_inorder_multifpga_time_func_16_acp_sram.apm Locally Modified          186 
+ alpha_inorder_multifpga_ml605.apm Locally Modified          186 
+
+Change awb type name from hasim_l1_caches to hasim_private_caches in preparation
+for adding an L2 cache.  The private caches will hold all CPU-private caches
+and, as a group, will have connections up to the CPU and down to the
+uncore.

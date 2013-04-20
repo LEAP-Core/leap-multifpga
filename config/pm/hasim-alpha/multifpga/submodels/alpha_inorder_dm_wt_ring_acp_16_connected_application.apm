@@ -49,7 +49,7 @@ Packagehint=hasim-models
 
 [Pipeline and Caches/Requires]
 hasim_pipeline=Inorder Pipeline, 2-bit branch predictor
-hasim_l1_caches=Direct Mapped, Writethrough
+hasim_private_caches=Direct Mapped, Writethrough Private Caches
 
 [Chip Base Types/Params]
 MAX_NUM_CPUS=16
@@ -105,9 +105,6 @@ Packagehint=hasim-models
 File=config/pm/hasim/submodels/common/hasim-model-services.apm
 Packagehint=hasim
 
-[Direct Mapped, Writethrough]
-File=config/pm/hasim-models/l1-caches/l1_caches.apm
-Packagehint=hasim-models
 
 [Multi-Core Chip]
 File=modules/hasim/timing-models/chip/multi-core/multi-core-chip.awb
@@ -145,4 +142,8 @@ Packagehint=hasim-models
 
 [Standard Topology Manager]
 File=modules/hasim/timing-models/chip/topology/std/topology-std.awb
+Packagehint=hasim-models
+
+[Direct Mapped, Writethrough Private Caches]
+File=config/pm/hasim-models/private-caches/private-caches.apm
 Packagehint=hasim-models
