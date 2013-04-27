@@ -104,3 +104,6 @@ Packagehint=leap
 [VC707 FPGA 1 ]
 File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-vc707-fpga1.apm
 Packagehint=multifpga
+
+[VC707 FPGA 1 /Params]
+MODEL_CLOCK_FREQ=50

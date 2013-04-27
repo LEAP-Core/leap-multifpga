@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Inorder Alpha Direct Writethrough Caches Mesh ACP
-File=alpha_inorder_dm_wt_mesh_vc707_256_multifpga_dual_sram
+File=alpha_inorder_dm_wt_mesh_vc707_512_multifpga_quad
 Version=2.2
 Name=Inorder Alpha Writethrough Caches Mesh VC707 256
 Type=HAsim
@@ -45,9 +45,9 @@ Packagehint=multifpga
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 build_pipeline=multiFPGA Build Pipeline
-connected_application=Alpha Inorder DM, WT, Mesh 256 cores
-environment_description=VC707 Dual FPGA Environment (SMA)
-fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition with Cache
+connected_application=Alpha Inorder DM, WT, Mesh 512 cores
+environment_description=VC707 Quad FPGA Environment (SMA)
+fpga_mapping=Alpha Inorder Sim Mapping Timing/Functional partition with Cache (Sim 4)
 
 [HW/SW Hybrid Multifpga Project Foundation/Params]
 SYNTH_BOUNDARY=mkModel
@@ -65,18 +65,24 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
-[Alpha Inorder ACP Mapping Timing/Functional partition with Cache]
-File=modules/multifpga/alpha_inorder/acp_mapping_time_func_cache.awb
-Packagehint=multifpga
-
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
 
-[Alpha Inorder DM, WT, Mesh 256 cores]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_256_connected_application.apm
+[multiFPGA Log Generation/Params]
+SOFT_CONN_CWIDTH=256
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=2
+
+[Alpha Inorder DM, WT, Mesh 512 cores]
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm
 Packagehint=multifpga
 
-[VC707 Dual FPGA Environment (SMA)]
-File=modules/leap-platforms/fpga-environments/vc707/vc707_dual_env.awb
+[VC707 Quad FPGA Environment (SMA)]
+File=modules/leap-platforms/fpga-environments/vc707/vc707_quad_env.awb
+Packagehint=multifpga
+
+[Alpha Inorder Sim Mapping Timing/Functional partition with Cache (Sim 4)]
+File=modules/multifpga/alpha_inorder/sim_mapping_time_func_cache_4.awb
 Packagehint=multifpga

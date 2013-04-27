@@ -12,5 +12,6 @@ decode_stage -> FPGA3;
 inorder_pipeline_back_end -> FPGA3;
 hasim_l1_caches-> FPGA3;
 hasim_last_level_cache -> FPGA2;
+hasim_private_caches -> FPGA2;
 
 

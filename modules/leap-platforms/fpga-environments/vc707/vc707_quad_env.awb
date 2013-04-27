@@ -1,0 +1,10 @@
+%AWB_START
+
+%name VC707 Quad FPGA Environment (SMA)
+%desc VC707 Quad FPGA Environment (SMA)
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC vc707-quad.env
+
+
+%AWB_END

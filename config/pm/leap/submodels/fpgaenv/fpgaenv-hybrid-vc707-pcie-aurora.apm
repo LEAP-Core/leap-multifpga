@@ -182,13 +182,13 @@ Packagehint=leap-platforms
 
 [Aurora Device Wrapper VC707/Requires]
 aurora_flowcontrol=Aurora Device Flowcontrol
-aurora_driver=VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 5 gbps
+aurora_driver=VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps
 aurora_common=Aurora Common Definitions
 
 [Hardware FPGA Components for Virtex 7]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex7.awb
 Packagehint=leap-platforms
 
-[VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 5 gbps]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b/aurora-virtex7-5gbps-64.awb
+[VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-5gbps-64.awb
 Packagehint=leap-platforms

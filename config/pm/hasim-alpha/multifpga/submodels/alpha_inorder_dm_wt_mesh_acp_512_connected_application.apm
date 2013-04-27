@@ -3,8 +3,8 @@
 memory_base_types=Memory Base Types
 
 [Mesh Interconnect/Params]
-MESH_HEIGHT=23
-MESH_WIDTH=23
+MESH_HEIGHT=13
+MESH_WIDTH=13
 
 [Global]
 SaveParameters=0
@@ -16,7 +16,7 @@ RootProvides=connected_application
 File=alpha_inorder_dm_wt_mesh_acp_512_connected_application
 Class=Asim::Model
 DefaultRunOpts=
-Name=Alpha Inorder DM, WT, Mesh 256 cores
+Name=Alpha Inorder DM, WT, Mesh 512 cores
 Description=
 
 [HAsim Common Default Configuration/Params]
