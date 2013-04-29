@@ -3732,3 +3732,14 @@ Directory modules/multifpga/alpha_inorder
 
 2) Upgraded aurora in vc707.
 
+
+----------
+mcadler     Date: Mon Apr 29 15:28:30 EDT 2013  CSN: CSN-multifpga-189
+                  Mon Apr 29 19:28:30 UTC 2013
+
+
+Directory modules/leap/build-support/project
+ platform-multifpga.awb    Locally Modified          188 
+ project-multifpga.awb     Locally Modified          188 
+
+Top level model now defines AWB parameters naming the leap_debug directory.
