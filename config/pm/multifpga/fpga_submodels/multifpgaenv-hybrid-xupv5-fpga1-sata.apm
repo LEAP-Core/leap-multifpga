@@ -151,6 +151,7 @@ bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 li_module=LEAP LI Module Handler
+parameter_substitution=AWB Parameter Substitution Parser
 
 [Null Physical Channel]
 File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
@@ -227,4 +228,8 @@ Packagehint=leap
 
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap
+
+[AWB Parameter Substitution Parser]
+File=modules/leap/build-support/build-pipelines/stages/parameter_substitution/parameter_substitution.awb
 Packagehint=leap

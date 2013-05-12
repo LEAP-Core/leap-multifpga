@@ -18,6 +18,7 @@
 %requires mcd_tool
 %requires fpga_program_tool
 %requires li_module
+%requires parameter_substitution
 
 %scons %library FPGAPlatformPipeline.py
 
