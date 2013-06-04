@@ -7,6 +7,7 @@
 %sources -t BSV    -v PUBLIC  unix-communication-device.bsv
 %sources -t BDPI_H -v PUBLIC  unix-communication-device-bdpi.h
 %sources -t BDPI_C -v PRIVATE unix-communication-device-bdpi.c
+%sources -t BLUESIM_LDFLAGS -v PRIVATE unix-communication-device.ld
 
 %library libglib-2.0.a
 %library libgthread-2.0.a

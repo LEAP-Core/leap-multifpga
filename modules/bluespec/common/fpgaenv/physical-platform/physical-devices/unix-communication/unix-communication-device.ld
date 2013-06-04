@@ -1,0 +1,1 @@
+-l glib-2.0 -l gthread-2.0 -l glib-2.0 -l gthread-2.0

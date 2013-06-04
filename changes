@@ -3780,3 +3780,16 @@ Directory config/pm/leap/submodels/common
  multifpga-soft-services.apm Locally Modified          190 
 
 We aren't using many to one or one to many connections.  Use a NULL version.
+
+----------
+keflemin    Date: Tue Jun  4 16:10:17 EDT 2013  CSN: CSN-multifpga-192
+                  Tue Jun  4 20:10:17 UTC 2013
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device.ld Locally Added               0 
+ unix-communication-device.awb Locally Modified          191 
+
+
+The interfpga communication device uses glib and gthread. We express
+those library dependencies in the .ld file.
