@@ -3793,3 +3793,24 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 The interfpga communication device uses glib and gthread. We express
 those library dependencies in the .ld file.
+
+----------
+keflemin    Date: Thu Jun  6 16:17:03 EDT 2013  CSN: CSN-multifpga-193
+                  Thu Jun  6 20:17:03 UTC 2013
+
+
+Directory config/pm/leap/submodels/pipelines
+ build-pipeline-xilinx-multifpga.apm Locally Modified          192 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-vc707-fpga0.apm Locally Modified          192 
+ multifpgaenv-hybrid-vc707-fpga1.apm Locally Modified          192 
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified          192 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified          192 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified          192 
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          192 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          192 
+ multifpgaenv-hybrid-xupv5-fpga0-sata.apm Locally Modified          192 
+
+
+Changed apms to use synplify library.  But really, we should use a submodel.
