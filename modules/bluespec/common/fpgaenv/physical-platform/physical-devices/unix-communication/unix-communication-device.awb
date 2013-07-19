@@ -24,4 +24,6 @@
 %param UNIX_COMM_WORD_WIDTH 64 "Width of unix comm device words. This must be less than or equal to 64."
 
 %param UNIX_COMM_DEBUG 0 "Unix communication device"
+%param UNIX_COMM_ERRORS 0 "Turns on occasional bit errors"
+
 

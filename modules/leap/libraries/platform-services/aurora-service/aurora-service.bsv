@@ -25,38 +25,41 @@ import FIFO::*;
 import FixedPoint::*;
 import Complex::*;
 
-`include "asim/provides/low_level_platform_interface.bsh"
-`include "asim/provides/physical_platform.bsh"
-`include "asim/provides/aurora_device.bsh"
-`include "asim/provides/soft_services.bsh"
-`include "asim/provides/soft_connections.bsh"
-`include "asim/provides/soft_clocks.bsh"
-`include "asim/provides/stdio_service.bsh"
-`include "asim/provides/soft_strings.bsh"
-`include "asim/provides/clocks_device.bsh"
-`include "asim/provides/fpga_components.bsh"
-`include "asim/provides/librl_bsv_storage.bsh"
-`include "asim/provides/librl_bsv_base.bsh"
+`include "awb/provides/low_level_platform_interface.bsh"
+`include "awb/provides/physical_platform.bsh"
+`include "awb/provides/aurora_device.bsh"
+`include "awb/provides/aurora_flowcontrol_debugger.bsh"
+`include "awb/provides/soft_services.bsh"
+`include "awb/provides/soft_connections.bsh"
+`include "awb/provides/soft_clocks.bsh"
+`include "awb/provides/stdio_service.bsh"
+`include "awb/provides/soft_strings.bsh"
+`include "awb/provides/clocks_device.bsh"
+`include "awb/provides/fpga_components.bsh"
+`include "awb/provides/librl_bsv_storage.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/dynamic_parameters_service.bsh"
 `include "awb/dict/PARAMS_AURORA_SERVICE.bsh"
 
 module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) (); 
 
-   PARAMETER_NODE paramNode  <- mkDynamicParameterNode();
-   Param#(8) targetAurora <- mkDynamicParameter(`PARAMS_AURORA_SERVICE_TARGET_AURORA,paramNode);
-  
-   AURORA_COMPLEX_DRIVER auroraDriver = drivers.auroraDriver[targetAurora];
 
-   STDIO#(Bit#(64)) stdio <- mkStdIO();  
-   let serdes_infifo <- mkSizedBRAMFIFOF(64);
-   // make soft connections to PHY
-   Connection_Send#(Bit#(63)) analogRX <- mkConnectionSendOptional("AuroraRX");
-   Reg#(Bit#(40)) rxCount <- mkReg(0);
-   Reg#(Bit#(40)) sampleDropped <- mkReg(0);
-   Reg#(Bit#(40)) sampleSent <- mkReg(0);
-   
-    if(`DEBUG_ONLY == 0)
+    if(`DEBUG_DRIVER_MODE != 0)
     begin
+        PARAMETER_NODE paramNode  <- mkDynamicParameterNode();
+        Param#(8) targetAurora <- mkDynamicParameter(`PARAMS_AURORA_SERVICE_TARGET_AURORA,paramNode);
+  
+        AURORA_COMPLEX_DRIVER auroraDriver = drivers.auroraDriver[targetAurora];
+
+
+        let serdes_infifo <- mkSizedBRAMFIFOF(64);
+        // make soft connections to PHY
+        Connection_Send#(Bit#(63)) analogRX <- mkConnectionSendOptional("AuroraRX");
+        Reg#(Bit#(40)) rxCount <- mkReg(0);
+        Reg#(Bit#(40)) sampleDropped <- mkReg(0);
+        Reg#(Bit#(40)) sampleSent <- mkReg(0);
+   
+
         rule sendToSW (serdes_infifo.notFull);
             auroraDriver.deq;
             rxCount <= rxCount + 1;           
@@ -64,28 +67,26 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
             serdes_infifo.enq(auroraDriver.first);
    
         endrule
-    end
 
-    rule toAnalog;
-        serdes_infifo.deq;
-        analogRX.send(truncate(serdes_infifo.first()));       
-    endrule
+        rule toAnalog;
+            serdes_infifo.deq;
+            analogRX.send(truncate(serdes_infifo.first()));        
+        endrule
 
-    Connection_Receive#(Bit#(63)) analogTX  <- mkConnectionRecvOptional("AuroraTX");
+        Connection_Receive#(Bit#(63)) analogTX  <- mkConnectionRecvOptional("AuroraTX");
 
-    FIFOF#(Bit#(63)) serdes_send <- mkSizedFIFOF(32);  
+        FIFOF#(Bit#(63)) serdes_send <- mkSizedFIFOF(32);  
 
-    Reg#(Bit#(40)) txCountIn <- mkReg(0);  
-    Reg#(Bit#(40)) txCount <- mkReg(0);  
+        Reg#(Bit#(40)) txCountIn <- mkReg(0);  
+        Reg#(Bit#(40)) txCount <- mkReg(0);  
 
-    rule forwardToLL; 
-        analogTX.deq();
-        txCountIn <= txCountIn + 1;
-        serdes_send.enq(zeroExtend(analogTX.receive));
-    endrule
 
-    if(`DEBUG_ONLY == 0)
-    begin
+        rule forwardToLL; 
+            analogTX.deq();
+            txCountIn <= txCountIn + 1;
+            serdes_send.enq(zeroExtend(analogTX.receive));
+        endrule
+
         rule sendToSERDESData;
             auroraDriver.write(resize(serdes_send.first()));  // Byte endian issue?
             txCount <= txCount + 1;
@@ -93,41 +94,14 @@ module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) ();
         endrule
     end
 
-    // periodic debug printout
-    let aurSndMsg <- getGlobalStringUID("Aurora %d channel_up %x, lane_up %x, error_count %x rx_count %x tx_count %x rx_fifo_count %x tx_fifo_count %x\n");
-    let aurFCMsg <- getGlobalStringUID("Flowcontrol tokens RX'ed: %x, Flowcontrol tokens TX'ed %x\n");
-    let aurCreditMsg <- getGlobalStringUID("Debug Mode: %x, Aurora credit_underflow %x, rx_credit %x, tx_credit %x, data_drops %x  heartbeat_count %x\n");
-    let txDebugMsg <- getGlobalStringUID("TXBuffer %x\n");
-    let rxDebugMsg <- getGlobalStringUID("RXBuffer %x\n");
 
-    Reg#(Bit#(26)) counter <- mkReg(0);
-    Reg#(Bit#(TAdd#(1,TLog#(`NUM_AURORA_IFCS)))) ifc <- mkReg(0);
-    AURORA_COMPLEX_DRIVER targetDriver = drivers.auroraDriver[ifc];
-
-    rule printf;
-        counter <= counter + 1;
-        
-        if(counter + 1 == 0) 
+    if(`MONITOR_DRIVER_MODE != 0)
+    begin
+        // instantiate an aurora debug module for each physical aurora interface.
+        for(Integer i = 0; i < `NUM_AURORA_IFCS; i = i + 1)
         begin
-            stdio.printf(aurSndMsg, list8(zeroExtend(ifc),zeroExtend(pack(targetDriver.channel_up)), zeroExtend(pack(targetDriver.lane_up)), zeroExtend(targetDriver.error_count), zeroExtend(targetDriver.rx_count), zeroExtend(targetDriver.tx_count), zeroExtend(pack(targetDriver.rx_fifo_count)), zeroExtend(pack(targetDriver.tx_fifo_count))));
-        end
-        else if (counter + 1 == 1)
-        begin
-            stdio.printf(aurCreditMsg, list6(`DEBUG_ONLY, zeroExtend(pack(targetDriver.credit_underflow)), zeroExtend(pack(targetDriver.rx_credit)), zeroExtend(targetDriver.tx_credit), zeroExtend(pack(targetDriver.data_drops)), zeroExtend(pack(targetDriver.heartbeat_count))));
-        end
-        else if (counter + 1 == 2)
-        begin
-            stdio.printf(aurFCMsg, list2(zeroExtend(pack(targetDriver.rx_fc)), zeroExtend(pack(targetDriver.tx_fc))));
-	    if(ifc + 1 == `NUM_AURORA_IFCS)
-            begin
-	        ifc <= 0;
-            end
-            else
-            begin
-	        ifc <= ifc + 1;
-            end
-        end
-    endrule
-       
-
+            AURORA_COMPLEX_DRIVER auroraDriver = drivers.auroraDriver[i];
+            let debugger <- mkAuroraDebugger(i,auroraDriver); 
+        end  
+    end
 endmodule

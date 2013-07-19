@@ -3814,3 +3814,46 @@ Directory config/pm/multifpga/fpga_submodels
 
 
 Changed apms to use synplify library.  But really, we should use a submodel.
+
+----------
+keflemin    Date: Fri Jul 19 16:25:36 EDT 2013  CSN: CSN-multifpga-194
+                  Fri Jul 19 20:25:36 UTC 2013
+
+
+Directory config/pm/leap/demos/hello_fellow
+ hello_fellow_hybrid_vc707.apm Locally Modified          193 
+
+Directory config/pm/leap/submodels/fpgaenv
+ fpgaenv-hybrid-ml605-pcie-aurora.apm Locally Modified          193 
+ fpgaenv-hybrid-vc707-pcie-aurora.apm Locally Modified          193 
+ multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm Locally Modified          193 
+ multifpgaenv-hybrid-exe-fpga0-aurora.apm Locally Modified          193 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-vc707-fpga0.apm Locally Modified          193 
+ multifpgaenv-hybrid-vc707-fpga1.apm Locally Modified          193 
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          193 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          193 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.awb        Locally Modified          193 
+ aurora-service.bsv        Locally Modified          193 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device.awb Locally Modified          193 
+ unix-communication-device.bsv Locally Modified          193 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-cache-dual.env        Locally Modified          193 
+
+Directory modules/multifpga/throughputTest
+ basestationImpl.bsv       Locally Modified          193 
+
+
+1) Adjusted aurora apms to use aurora debugger.
+
+2) Added an error generation mode to the unix communication simulator.
+This models bit flips and data drops in the real hardware.
+
+3) Changed the memory test code to exit simulation if an error is detected. 
+

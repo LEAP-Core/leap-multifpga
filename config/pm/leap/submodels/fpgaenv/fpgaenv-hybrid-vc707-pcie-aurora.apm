@@ -141,13 +141,6 @@ Packagehint=leap-platforms
 CRYSTAL_CLOCK_FREQ=200
 RESET_ACTIVE_HIGH=1
 
-[Aurora Platform Services Submodel/Params]
-DEBUG_ONLY=0
-
-[Aurora Device Flowcontrol]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/aurora-device.awb
-Packagehint=leap-platforms
-
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
 Packagehint=leap-platforms
@@ -191,4 +184,15 @@ Packagehint=leap-platforms
 
 [VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-5gbps-64.awb
+Packagehint=leap-platforms
+
+[Aurora Device Flowcontrol/Requires]
+aurora_flowcontrol_debugger=Aurora Device Flowcontrol Debugger
+
+[Aurora Device Flowcontrol]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/aurora-device.awb
+Packagehint=leap-platforms
+
+[Aurora Device Flowcontrol Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/debugger/aurora-debugger.awb
 Packagehint=leap-platforms

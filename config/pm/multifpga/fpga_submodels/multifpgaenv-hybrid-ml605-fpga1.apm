@@ -540,3 +540,10 @@ Packagehint=leap
 
 [XST Synthesis Tool/Requires]
 synthesis_library=Synthesis library
+
+[Aurora Device Flowcontrol/Requires]
+aurora_flowcontrol_debugger=Aurora Device Flowcontrol Debugger
+
+[Aurora Device Flowcontrol Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/debugger/aurora-debugger.awb
+Packagehint=leap-platforms

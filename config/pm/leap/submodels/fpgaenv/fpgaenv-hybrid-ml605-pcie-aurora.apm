@@ -169,9 +169,6 @@ Packagehint=leap-platforms
 CRYSTAL_CLOCK_FREQ=200
 RESET_ACTIVE_HIGH=1
 
-[Aurora Platform Services Submodel/Params]
-DEBUG_ONLY=0
-
 [Aurora Device Flowcontrol]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/aurora-device.awb
 Packagehint=leap-platforms
@@ -191,4 +188,11 @@ Packagehint=leap-platforms
 
 [ML605 Aurora Device, Single Lane, 32-bit, 5 gbps]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora-sma-ml605/aurora-virtex6-5gbps-32.awb
+Packagehint=leap-platforms
+
+[Aurora Device Flowcontrol/Requires]
+aurora_flowcontrol_debugger=Aurora Device Flowcontrol Debugger
+
+[Aurora Device Flowcontrol Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/debugger/aurora-debugger.awb
 Packagehint=leap-platforms

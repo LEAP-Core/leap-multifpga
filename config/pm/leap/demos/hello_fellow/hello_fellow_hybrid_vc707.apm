@@ -43,3 +43,6 @@ Packagehint=multifpga
 [Hybrid VC707 PCIE FPGA Environment with Aurora]
 File=config/pm/leap/submodels/fpgaenv/fpgaenv-hybrid-vc707-pcie-aurora.apm
 Packagehint=multifpga
+
+[Hybrid VC707 PCIE FPGA Environment with Aurora/Params]
+DEBUG_DRIVER_MODE=1

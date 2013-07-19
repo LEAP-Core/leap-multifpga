@@ -189,6 +189,7 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
           end
     endrule
 
+   Reg#(Bit#(13)) count <- mkReg(0); 
 
     // ==============================================================
     //                          Methods
@@ -207,7 +208,29 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
 
         // write
         method Action write(Bit#(TMul#(`UNIX_COMM_NUM_WORDS,`UNIX_COMM_WORD_WIDTH)) chunk);
-            marshaller.enq(unpack(chunk));
+
+            if(`UNIX_COMM_ERRORS > 0)
+            begin
+                let flip = 0;
+                // occasionally damage a message
+                if(count + 1 == 0)
+                begin 
+                    flip = ~0;
+                end
+  
+                count <= count + 1;
+ 
+                // occasionally drop a message.
+                if(count != {1'b0,~0})
+                begin
+                    marshaller.enq(unpack(chunk^flip));
+                end
+            end
+            else
+            begin
+                marshaller.enq(unpack(chunk));
+            end
+
         endmethod
 
         method Bool write_ready = marshaller.notFull;

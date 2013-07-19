@@ -453,10 +453,6 @@ UMF_CHUNK_BYTES=16
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
 Packagehint=leap
 
-[Aurora Device Flowcontrol]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/aurora-device.awb
-Packagehint=leap-platforms
-
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
 Packagehint=leap-platforms
@@ -490,7 +486,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdra
 Packagehint=leap-platforms
 
 [Aurora Device Wrapper VC707/Requires]
-aurora_flowcontrol=Aurora Device Flowcontrol
+aurora_flowcontrol=Aurora Device Reliable Flowcontrol
 aurora_driver=VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps
 aurora_common=Aurora Common Definitions
 
@@ -516,3 +512,14 @@ Packagehint=leap
 
 [XST Synthesis Tool/Requires]
 synthesis_library=Synthesis library
+
+[Aurora Device Reliable Flowcontrol Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
+Packagehint=leap-platforms
+
+[Aurora Device Reliable Flowcontrol/Requires]
+aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
+
+[Aurora Device Reliable Flowcontrol]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/aurora-device.awb
+Packagehint=leap-platforms

@@ -60,6 +60,8 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
         if(aliveIn16.receive() != (truncate(testRX)))
 	begin
 	    errors <= errors + 1;
+            $display("Received wrong value %h, expected %h", aliveIn16.receive(), testRX);
+            $finish;
         end
 
         latencyFIFO.deq;
@@ -89,6 +91,8 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
         if(aliveIn32.receive() != (truncate(testRX)))
 	begin
 	    errors <= errors + 1;
+            $display("Received wrong value %h, expected %h", aliveIn32.receive(), testRX);
+            $finish;
         end
 
         latencyFIFO.deq;
@@ -116,6 +120,8 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
         if(aliveIn64.receive() != (zeroExtend(testRX)))
 	begin
 	    errors <= errors + 1;
+            $display("Received wrong value %h, expected %h", aliveIn64.receive(), testRX);
+            $finish;
         end
 
         latencyFIFO.deq;
@@ -143,6 +149,8 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
         if(aliveIn128.receive() != (zeroExtend(testRX)))
 	begin
 	    errors <= errors + 1;
+            $display("Received wrong value %h, expected %h", aliveIn128.receive(), testRX);
+            $finish;
         end
 
         latencyFIFO.deq;
@@ -169,6 +177,8 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
         if(aliveIn256.receive() != (zeroExtend(testRX)))
 	begin
 	    errors <= errors + 1;
+            $display("Received wrong value %h, expected %h", aliveIn256.receive(), testRX);
+            $finish;
         end
 
         latencyFIFO.deq;

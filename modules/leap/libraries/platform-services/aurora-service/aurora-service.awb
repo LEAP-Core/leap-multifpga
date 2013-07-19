@@ -7,5 +7,6 @@
 
 %public aurora-service.bsv
 
-%param --global DEBUG_ONLY 1 "Limits aurora service to dumping debug about device"
+%param --global DEBUG_DRIVER_MODE 0 "Exposes a direct driver interface to user program"
+%param --global MONITOR_DRIVER_MODE 1 "Instantiates a runtime monitor for the aurora driver"
 %param --dynamic TARGET_AURORA 0  "Time between attempts to transmit"
