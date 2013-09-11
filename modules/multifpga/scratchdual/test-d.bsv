@@ -1,3 +1,5 @@
+import DefaultValue::*;
+
 `include "asim/provides/librl_bsv_base.bsh"
 `include "asim/provides/librl_bsv_storage.bsh"
 
@@ -5,6 +7,7 @@
 
 `include "asim/provides/mem_services.bsh"
 `include "asim/provides/common_services.bsh"
+`include "asim/provides/scratchpad_memory_common.bsh"
 
 `include "asim/dict/VDEV_SCRATCH.bsh"
 
@@ -14,7 +17,7 @@ module [CONNECTED_MODULE] mkD (Empty);
 
   Connection_Send#(Bool) sendDone <- mkConnection_Send("Done");
      
-  MEMORY_IFC#(MEM_ADDRESS, Bit#(32)) memoryLG <- mkScratchpad(`VDEV_SCRATCH_D, SCRATCHPAD_CACHED);  
+  MEMORY_IFC#(MEM_ADDRESS, Bit#(32)) memoryLG <- mkScratchpad(`VDEV_SCRATCH_D, defaultValue);
  
   Reg#(MEM_ADDRESS) addr <- mkReg(0);
   Reg#(MEM_ADDRESS) addrResps <- mkReg(0);

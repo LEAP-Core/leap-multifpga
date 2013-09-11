@@ -110,7 +110,6 @@ Packagehint=hasim-models
 File=config/pm/hasim/submodels/common/hasim-model-services.apm
 Packagehint=hasim
 
-
 [Multi-Core Chip]
 File=modules/hasim/timing-models/chip/multi-core/multi-core-chip.awb
 Packagehint=hasim-models
@@ -152,3 +151,10 @@ Packagehint=hasim-models
 [Direct Mapped, Writethrough Private Caches]
 File=config/pm/hasim-models/private-caches/private-caches.apm
 Packagehint=hasim-models
+
+[Interconnect Common]
+File=modules/hasim/timing-models/uncore/interconnects/common/icn-common.awb
+Packagehint=hasim-models
+
+[Mesh Interconnect/Requires]
+hasim_interconnect_common=Interconnect Common

@@ -3857,3 +3857,22 @@ This models bit flips and data drops in the real hardware.
 
 3) Changed the memory test code to exit simulation if an error is detected. 
 
+
+----------
+mcadler     Date: Wed Sep 11 15:54:56 EDT 2013  CSN: CSN-multifpga-195
+                  Wed Sep 11 19:54:56 UTC 2013
+
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_acp_16_connected_application.apm Locally Modified          194 
+ alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm Locally Modified          194 
+ alpha_inorder_dm_wt_mesh_acp_64_connected_application.apm Locally Modified          194 
+ alpha_inorder_dm_wt_mesh_acp_128_connected_application.apm Locally Modified          194 
+ alpha_inorder_dm_wt_mesh_acp_256_connected_application.apm Locally Modified          194 
+
+Directory modules/multifpga/scratchdual
+ test-c.bsv                Locally Modified          194 
+ test-d.bsv                Locally Modified          194 
+
+- New scratchpad parameters.
+- Update models for new interconnect modules.
