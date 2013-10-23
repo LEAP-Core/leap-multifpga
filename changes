@@ -3876,3 +3876,18 @@ Directory modules/multifpga/scratchdual
 
 - New scratchpad parameters.
 - Update models for new interconnect modules.
+
+----------
+keflemin    Date: Wed Oct 23 12:37:35 EDT 2013  CSN: CSN-multifpga-196
+                  Wed Oct 23 16:37:35 UTC 2013
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ pointer-egress.bsv        Locally Added               0 
+ pointer-ingress.bsv       Locally Added               0 
+ pointer-switch.awb        Locally Added               0 
+
+
+Added a pointer-based channel virtualization implementation.  This
+layer is designed to operate with high-latency inter-plarform links
+like PCI-e and ethernet.

@@ -1,0 +1,19 @@
+%name MultiFPGA Pointer-based Switch with Flowcontrol 
+%desc MultiFPGA Pointer-based Switch with Flowcontrol 
+
+%provides multifpga_switch
+
+%notes README
+
+%sources -t BSV -v PUBLIC  pointer-ingress.bsv
+%sources -t BSV -v PUBLIC  pointer-egress.bsv
+%sources -t BSV -v PUBLIC  EHRReg.bsv
+%sources -t BSV -v PUBLIC  VLevelFIFO.bsv
+%sources -t BSV -v PUBLIC  BRAMVLevelFIFO.bsv
+%sources -t BSV -v PUBLIC  Schedulers.bsv
+
+
+%param --global MULTIFPGA_FIFO_SIZES 8192 "Total buffer size"
+%param --global MINIMUM_CHANNEL_BUFFER 64 "Minimum guranteed buffer per channel"
+%param  SWITCH_DEBUG 1 "Enables copious switch debug printing"
+
