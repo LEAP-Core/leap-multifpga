@@ -18,31 +18,31 @@ def p_environment(p):
 def p_platform_list(p):
     """
     platform_list :
-    platform_list : PLATFORM NAME STRING SEMICOLON connection_list ENDPLATFORM platform_list
-    platform_list : MASTER NAME STRING SEMICOLON connection_list ENDMASTER platform_list
+    platform_list : PLATFORM NAME NAME STRING SEMICOLON connection_list ENDPLATFORM platform_list
+    platform_list : MASTER NAME NAME STRING SEMICOLON connection_list ENDMASTER platform_list
     """
     if len(p) == 1:
         p[0] = []  # end of list - may want to do stuff here.
     elif p[1] == "master":
         # the eval strips out the "" on the string
-        p[0] = [Platform(p[2],True,eval(p[3]),p[5])] + p[7] 
+        p[0] = [Platform(p[2], p[3], True, eval(p[4]), p[6])] + p[8] 
     else:
         # the eval strips out the "" on the string
-        p[0] = [Platform(p[2],False,eval(p[3]),p[5])] + p[7] 
+        p[0] = [Platform(p[2], p[3], False, eval(p[4]), p[6])] + p[8] 
         
 def p_connection_list(p):
     """
     connection_list :
-    connection_list : NAME RARROW path SEMICOLON connection_list
-    connection_list : NAME LARROW path SEMICOLON connection_list
+    connection_list : NAME RARROW STRING SEMICOLON connection_list
+    connection_list : NAME LARROW STRING SEMICOLON connection_list
     """     
     if len(p) == 1:
         p[0] = []
     else:
         if(p[2] == '<-'):
-            p[0] = [Connection(Connection.sink,p[1],p[3])] + p[5]
+            p[0] = [Connection(Connection.sink,p[1],eval(p[3]))] + p[5]
         else:
-            p[0] = [Connection(Connection.source,p[1],p[3])] + p[5]
+            p[0] = [Connection(Connection.source,p[1],eval(p[3]))] + p[5]
 
 def p_path(p):
     """

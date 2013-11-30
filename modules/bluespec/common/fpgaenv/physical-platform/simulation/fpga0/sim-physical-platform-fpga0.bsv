@@ -35,7 +35,7 @@ import Vector::*;
 interface PHYSICAL_DRIVERS;
 
     interface CLOCKS_DRIVER    clocksDriver;
-    interface UNIX_PIPE_DRIVER unixPipeDriver;
+    interface UNIX_PIPE_LI_DRIVER unixPipeLIDriver;
     interface Vector#(`NUM_FPGA,SIMULATION_COMMUNICATION_DRIVER) simCommDrivers;
 
 endinterface
@@ -50,7 +50,7 @@ endinterface
 interface TOP_LEVEL_WIRES;
     
     interface CLOCKS_WIRES    clocksWires;
-    interface UNIX_PIPE_WIRES unixPipeWires;
+    interface UNIX_PIPE_LI_WIRES unixPipeLIWires;
     interface Vector#(`NUM_FPGA, SIMULATION_COMMUNICATION_WIRES) simCommWires;
 
 endinterface
@@ -87,9 +87,9 @@ module mkPhysicalPlatform
     // Next, create the physical device that can trigger a soft reset. Pass along the
     // interface to the trigger module that the clocks device has given us.
 
-    UNIX_PIPE_DEVICE unix_pipe_device  <- mkUNIXPipeDevice(clocks_device.softResetTrigger,
-                                                           clocked_by clk,
-                                                           reset_by rst);
+    UNIX_PIPE_LI_DEVICE unix_pipe_li_device  <- mkUNIXPipeLIDevice(?, // No support for soft reset
+                                                                   clocked_by clk,
+                                                                   reset_by   rst);
 
     Vector#(`NUM_FPGA, SIMULATION_COMMUNICATION_DRIVER) simDrivers = newVector();
     Vector#(`NUM_FPGA, SIMULATION_COMMUNICATION_WIRES)  simWires = newVector();
@@ -113,7 +113,7 @@ module mkPhysicalPlatform
     interface PHYSICAL_DRIVERS physicalDrivers;
     
         interface clocksDriver   = clocks_device.driver;
-        interface unixPipeDriver = unix_pipe_device.driver;
+        interface unixPipeLIDriver = unix_pipe_li_device.driver;
         interface simCommDrivers = simDrivers;
 
     endinterface
@@ -123,8 +123,8 @@ module mkPhysicalPlatform
     interface TOP_LEVEL_WIRES topLevelWires;
     
         interface clocksWires    = clocks_device.wires;
-        interface unixPipeWires  = unix_pipe_device.wires;
-        interface simCommWires  = simWires;
+        interface simCommWires   = simWires;
+        interface unixPipeLIWires = unix_pipe_li_device.wires;
 
     endinterface
                

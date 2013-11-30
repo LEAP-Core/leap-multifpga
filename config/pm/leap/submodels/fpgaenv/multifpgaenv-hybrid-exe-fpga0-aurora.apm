@@ -128,7 +128,7 @@ Packagehint=multifpga
 clocks_device=Simulation Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 unix_pipe_device=UNIX Pipe Physical Device
-simulation_communication_device=Simlutation Communication Device with Aurora Stack
+simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
 
 [BSV Bluesim Build Tool]
 File=modules/leap/build-support/build-pipelines/stages/bluesim/bsv-exe.awb
@@ -183,33 +183,13 @@ Packagehint=multifpga
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
 Packagehint=multifpga
 
-[Simlutation Communication Device with Aurora Stack/Requires]
-aurora_flowcontrol=Aurora Device Reliable Flowcontrol
-aurora_driver=Aurora Driver, Simulation
-
-[Simlutation Communication Device with Aurora Stack]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation/aurora-device-simulation.awb
-Packagehint=leap-platforms
-
-[Aurora Driver, Simulation]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation/aurora-driver-simulation.awb
-Packagehint=leap-platforms
-
-[Aurora Driver, Simulation/Requires]
-unix_comm_device=UNIX Communication Physical Device
-
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
 
+[Simlutation Communication Device with raw UNIX Communication]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
+Packagehint=multifpga
 
-[Aurora Device Reliable Flowcontrol Debugger]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
-Packagehint=leap-platforms
-
-[Aurora Device Reliable Flowcontrol]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/aurora-device.awb
-Packagehint=leap-platforms
-
-[Aurora Device Reliable Flowcontrol/Requires]
-aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
+[Simlutation Communication Device with raw UNIX Communication/Requires]
+unix_comm_device=UNIX Communication Physical Device

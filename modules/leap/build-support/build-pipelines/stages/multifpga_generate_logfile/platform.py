@@ -14,8 +14,9 @@ class Platform(object):
     def insertSource(self,target,via):
         self.sources[target] = via
     
-    def __init__(self, name, isMaster, path, connectionList):
+    def __init__(self, platformType, name, isMaster, path, connectionList):
         self.name = name
+        self.platformType = platformType
         self.path = path
         self.master = isMaster
         self.sources = {}

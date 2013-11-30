@@ -30,7 +30,7 @@ import Vector::*;
 import FIFOF::*;import DReg::*;
 
 `include "awb/provides/channelio.bsh"
-`include "awb/provides/rrr.bsh"
+`include "awb/provides/rrr_common.bsh"
 `include "awb/provides/umf.bsh"
 `include "awb/provides/stats_service.bsh"
 `include "awb/provides/soft_connections.bsh"

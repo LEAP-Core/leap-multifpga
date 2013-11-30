@@ -95,7 +95,7 @@ class MultiFPGAGenerateBitfile():
 
            # only the master needs the whole list of strings.
            print "appending " + masterstr
-           fileHandle = open(masterstr,"a")
+           fileHandle = open(masterstr,"w")
            fileHandle.write(strings)
            fileHandle.close()
            
@@ -112,9 +112,11 @@ class MultiFPGAGenerateBitfile():
     # copy the environment descriptions to private 
     #APM_FILE
     #WORKSPACE_ROOT
-    slaves = []
+    platformMetadata = []
+    
     for platformName in self.environment.getPlatformNames():
       platform = self.environment.getPlatform(platformName)
+      platformType = platform.platformType
       platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
       platformPath = makePlatformConfigPath(platformAPMName)
       platformBuildDir = makePlatformBuildDir(platform.name)
@@ -124,14 +126,20 @@ class MultiFPGAGenerateBitfile():
       print "platformPath: " + platformPath
 
       #sprinkle breadcrumbs in config file
+      master = 0
+
       if(platform.master):
-        configFile.write('master="'+ platformBuildDir +'"\n')
-        #override the existing models. They are surely wrong.
-        configFile.write('# overrides model defined by run script\n')
-        configFile.write('model="'+ makePlatformBitfileName(platform.name,APM_NAME) +'"\n')
-      else:
-        #we are a slave 
-        slaves.append('"' + makePlatformBitfileName(platform.name,APM_NAME) + '" => "' + platformBuildDir + '"')
+        master = 1
+
+      # in legacy multifpga compiles, master refers to the platform with the CPU attached. 
+      # to maintain compatibility, we inject a pointer to the CPU in this case.
+      if(master):
+          platformMetadata.append('{"name" =>"' + makePlatformBitfileName(platform.name,APM_NAME) + '", "type" => "CPU"' + \
+                                  ', "directory" => "' + platformBuildDir + '", "master", "0"}')
+    
+      platformMetadata.append('{"name" =>"' + makePlatformBitfileName(platform.name,APM_NAME) + '", "type" => "' + platformType + \
+                              '", "directory" => "' + platformBuildDir + '", "master", "' + str(platform.master) + '"}')
+
       execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
       execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
       execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
@@ -234,26 +242,25 @@ class MultiFPGAGenerateBitfile():
       moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] += [bitfile] 
 
     # END for platform
-    configFile.write('slaves={'+ ",".join(slaves) +'}\n')
+    configFile.write('platforms=['+ ",".join(platformMetadata) +']\n')
     configFile.close()
     # each platform can have a different strings file.  Let's cat all the strings files together...
     # because the hash signatures are unique we can be quite sloppy in this.
     strlist = []
-    master = ""
+    master = moduleList.buildDirectory + '/' + moduleList.apmName + ".str"
     for platformName in self.environment.getPlatformNames():
       platform = self.environment.getPlatform(platformName)
       platformAPMName = makePlatformBitfileName(platform.name,APM_NAME)
       platformBuildDir = makePlatformBuildDir(platform.name)
       strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMName + '.str'
       print "string file is??? " +  strfile
-      if(platform.master):
-        master = strfile
-      else:
+      # CPUs don't have strings (maybe they should?)
+      if(platform.platformType == 'FPGA' or platform.platformType == 'BLUESIM'):
         strlist.append(strfile)
 
     strcat = moduleList.env.Command(
           [moduleList.apmName + ".str"],
-          moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'],
+          strlist + moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'],
           strcat_closure(strlist,master)
           )
 

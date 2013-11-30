@@ -3891,3 +3891,47 @@ Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router
 Added a pointer-based channel virtualization implementation.  This
 layer is designed to operate with high-latency inter-plarform links
 like PCI-e and ethernet.
+
+----------
+keflemin    Date: Sat Nov 30 16:12:09 EST 2013  CSN: CSN-multifpga-197
+                  Sat Nov 30 21:12:09 UTC 2013
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave.apm Locally Modified          196 
+ multifpga-platform-services-master.apm Locally Modified          196 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm Locally Modified          196 
+ multifpgaenv-hybrid-exe-fpga0-aurora.apm Locally Modified          196 
+
+Directory config/pm/leap/submodels/common
+ multifpga-soft-services.apm Locally Modified          196 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-ingress.bsv   Locally Modified          196 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          196 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ platform.py               Locally Modified          196 
+ multiparse.py             Locally Modified          196 
+
+Directory modules/leap/build-support/project
+ platform-multifpga.awb    Locally Modified          196 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.h Locally Modified          196 
+ sim-physical-platform-fpga0.bsv Locally Modified          196 
+
+Directory modules/leap-platforms/fpga-environments/vc707
+ vc707-dual.env            Locally Modified          196 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-cache-dual.env        Locally Modified          196 
+
+
+Updated multifpga to fix bit rot from recent code
+reorganizations. Most of this code came from the new LIM compiler, but
+I have backported it to ensure continuity.
