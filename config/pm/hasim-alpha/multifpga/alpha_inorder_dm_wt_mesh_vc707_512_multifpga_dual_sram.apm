@@ -45,7 +45,7 @@ Packagehint=multifpga
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 build_pipeline=multiFPGA Build Pipeline
-connected_application=Alpha Inorder DM, WT, Mesh 256 cores
+connected_application=Alpha Inorder DM, WT, Mesh 512 cores
 environment_description=VC707 Dual FPGA Environment (SMA)
 fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition with Cache
 
@@ -73,9 +73,6 @@ Packagehint=multifpga
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
 
-[Alpha Inorder DM, WT, Mesh 256 cores]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm
-Packagehint=multifpga
 
 [VC707 Dual FPGA Environment (SMA)]
 File=modules/leap-platforms/fpga-environments/vc707/vc707_dual_env.awb
@@ -86,3 +83,7 @@ SOFT_CONN_CWIDTH=256
 
 [MultiFPGA Communication Complex Generator/Params]
 MAX_NUMBER_OF_VIAS=2
+
+[Alpha Inorder DM, WT, Mesh 512 cores]
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm
+Packagehint=multifpga

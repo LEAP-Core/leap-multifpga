@@ -22,7 +22,7 @@ Description=
 [HAsim Common Default Configuration/Params]
 CONTEXT_ID_BITS=9
 TOKEN_ID_BITS=7
-CONTEXT_ID_BITS_RRR=9
+CONTEXT_ID_BITS_RRR=16
 
 [HAsim Modeling Library/Requires]
 hasim_cache_algorithms=Cache Modeling Algorithms

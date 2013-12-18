@@ -3935,3 +3935,17 @@ Directory modules/leap-platforms/fpga-environments/sim
 Updated multifpga to fix bit rot from recent code
 reorganizations. Most of this code came from the new LIM compiler, but
 I have backported it to ensure continuity.
+
+----------
+mcadler     Date: Wed Dec 18 09:49:47 EST 2013  CSN: CSN-multifpga-198
+                  Wed Dec 18 14:49:47 UTC 2013
+
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm Locally Modified          197 
+ alpha_inorder_dm_wt_mesh_acp_256_connected_application.apm Locally Modified          197 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_vc707_512_multifpga_dual_sram.apm Locally Modified          197 
+
+Fix a few configuration errors.
