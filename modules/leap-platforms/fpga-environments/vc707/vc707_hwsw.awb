@@ -1,0 +1,8 @@
+%AWB_START
+
+%name VC707 HW/SW Environment
+%desc VC707 HW/SW Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC vc707-hwsw.env
+%AWB_END

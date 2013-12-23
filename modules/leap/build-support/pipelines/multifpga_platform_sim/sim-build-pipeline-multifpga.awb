@@ -2,8 +2,8 @@
 #* Generic FPGA build pipeline
 #********************************************************************/
 
-%name MultiFPGA BlueSim Platform Build Pipeline
-%desc MultiFPGA BlueSim Platform Build Pipeline
+%name MultiFPGA BlueSim Platform Build Pipeline (Legacy)
+%desc MultiFPGA BlueSim Platform Build Pipeline (Legacy)
 %attributes tool
 
 %provides build_pipeline

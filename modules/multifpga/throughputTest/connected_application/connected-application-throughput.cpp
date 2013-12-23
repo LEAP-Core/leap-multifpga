@@ -35,7 +35,8 @@ CONNECTED_APPLICATION_CLASS::Main()
     UINT32 width = 0, count = 1;
     for(width = 16; width < 512; width = width * 2) {
         for(count = 1; count < 10000000; count = count * 10) {
-	  OUT_TYPE_RunTest result = clientStub->RunTest(count, width);
+  	    printf("Width %d Test\n", width); 
+   	    OUT_TYPE_RunTest result = clientStub->RunTest(count, width);
             printf("Transfer %d in %d Ticks -- Tokens/s:%f\tMB/s:%f\tAverageLatency:%fus\tErrors:%d\n", 
                    count, 
                    result.cycles, 

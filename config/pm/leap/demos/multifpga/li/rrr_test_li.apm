@@ -1,0 +1,85 @@
+
+[Global]
+SaveParameters=0
+Description=Traffic Light from Bluespec Tutorial for simulation w. synthesis boundary
+File=rrr_test_li
+Version=2.2
+Name=Traffic Light Model - Exe with synthesis boundary
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=Bluespec RRR Test and Benchmarking Program
+environment_description=Simulation HW/SW Environment
+build_pipeline=multiFPGA Build Pipeline
+fpga_mapping=Test ACP Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline]
+File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
+Packagehint=multifpga
+
+[multiFPGA Build Pipeline/Requires]
+multi_fpga_generate_bitfile=multiFPGA Generate bitfle
+multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_log_generator=multiFPGA Log Generation
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Requires]
+fpgamap_parser=FPGAMap
+type_parser=Bluespec Type parser
+
+[multiFPGA Log Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
+Packagehint=multifpga
+
+[multiFPGA Generate bitfle]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
+Packagehint=multifpga
+
+[Test ACP Mapping]
+File=modules/multifpga/synthTest/acp_mapping.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[multiFPGA Log Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+Packagehint=multifpga
+
+[Bluespec Type parser]
+File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+Packagehint=multifpga
+
+[Simulation HW/SW Environment]
+File=modules/leap-platforms/fpga-environments/sim/sim_hwsw.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=1
+
+[Bluespec RRR Test and Benchmarking Program]
+File=modules/apps/examples/rrrtest/rrrtest.awb
+Packagehint=leap-examples
+
+[multiFPGA Log Generation/Params]
+SOFT_CONN_CWIDTH=512

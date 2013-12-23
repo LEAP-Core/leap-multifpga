@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation HW/SW Environment
+%desc Simulation HW/SW Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-hwsw.env
+%AWB_END

@@ -2,8 +2,8 @@
 #* Generic FPGA build pipeline
 #********************************************************************/
 
-%name FPGA Platform Build Pipeline
-%desc FPGA Platform Build Pipeline
+%name FPGA Platform Build Pipeline (Legacy)
+%desc FPGA Platform Build Pipeline (Legacy)
 %attributes tool
 
 %provides build_pipeline

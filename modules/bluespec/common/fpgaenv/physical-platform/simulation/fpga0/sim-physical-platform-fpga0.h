@@ -14,7 +14,8 @@ typedef class PHYSICAL_DEVICES_CLASS* PHYSICAL_DEVICES;
 class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
 {
     private:
-        PHYSICAL_CHANNEL_CLASS unixPipeDevice;
+        PHYSICAL_CHANNEL_CLASS unixPipeDevice0;
+        //PHYSICAL_CHANNEL_CLASS unixPipeDevice1;
 
     public:
         // constructor-destructor
@@ -22,7 +23,9 @@ class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
         ~PHYSICAL_DEVICES_CLASS();
 
         // accessors to individual devices
-	PHYSICAL_CHANNEL GetLegacyPhysicalChannel() { return &unixPipeDevice; }
+        PHYSICAL_CHANNEL GetUNIXPipeDevice0() { return &unixPipeDevice0; }
+        //PHYSICAL_CHANNEL GetUNIXPipeDevice1() { return &unixPipeDevice1; }
+	PHYSICAL_CHANNEL GetLegacyPhysicalChannel() { return &unixPipeDevice0; }
 };
 
 #endif

@@ -31,9 +31,9 @@ import DReg::*;
 
 
 `include "awb/provides/channelio.bsh"
-`include "awb/provides/rrr.bsh"
+`include "awb/provides/rrr_common.bsh"
 `include "awb/provides/umf.bsh"
-
+`include "awb/provides/librl_bsv_base.bsh"
 `include "awb/rrr/service_ids.bsh"
 
 // request/response port interfaces
@@ -199,8 +199,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
     // scan channel for incoming flowcontrol headers
     // in some cases we can fit the flow control bits in the header, saving bandwidth
-    if(valueof(filler_bits_r) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))
-)))     
+    if((`PACK_FLOWCONTROL == 1) && (valueof(filler_bits_r) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))
+))))     
     begin
 
 	rule creditReadReady (creditDelay.notFull());
@@ -417,7 +417,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             if(`SWITCH_DEBUG == 1)
             begin
-                $display("Setting portCredits for %d to %d", s, newCount);
+                $display("Setting portCredits for port %d to %d", s, newCount);
             end
 
             if (oldCredits < zeroExtendNP(requestChunks) && (s != 0))

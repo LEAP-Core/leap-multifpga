@@ -1,0 +1,21 @@
+%name Low Level Platform LI
+%desc Low Level Platform LI
+
+%provides low_level_platform_interface
+
+%requires channelio
+%requires local_mem
+%requires remote_memory
+%requires rrr
+%requires physical_platform
+%requires physical_channel
+%requires physical_platform_debugger
+
+%notes README
+
+%sources --t BSH --v PUBLIC  llpi-li.bsh
+%public  llpi-li.bsv
+%public  llpi-li.h
+%private llpi-li.cpp
+%public  platforms-module.h
+%private platforms-module.cpp

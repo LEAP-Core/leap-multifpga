@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation HW/SW Dual FPGA Environment with Dual Cache
+%desc Simulation HW/SW Dual FPGA Environment with Dual Cache
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-hwsw-dual-fpga.env
+%AWB_END

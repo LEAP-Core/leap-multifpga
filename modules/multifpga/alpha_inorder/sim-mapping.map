@@ -7,6 +7,7 @@ funcp_memstate -> FPGA0;
 funcp_memstate_tlb -> FPGA0;
 commands_service -> FPGA0;
 hasim_timep -> FPGA0;
+hasim_private_caches -> FPGA0;
 inorder_pipeline_front_end -> FPGA0;
 decode_stage -> FPGA0;
 inorder_pipeline_back_end -> FPGA0;

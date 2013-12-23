@@ -46,6 +46,7 @@ Packagehint=multifpga
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
+umf=Little-Endian Unified Message Format
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -121,7 +122,6 @@ Packagehint=hasim-models
 File=config/pm/hasim/submodels/common/hasim-model-services.apm
 Packagehint=hasim
 
-
 [HAsim Performance Model/Requires]
 hasim_common=HAsim Common Default Configuration
 hasim_timep=Single Chip Timing Partition
@@ -165,3 +165,13 @@ Packagehint=hasim-models
 [Null Private caches]
 File=config/pm/hasim-models/private-caches/null-private-caches.apm
 Packagehint=hasim-models
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[multiFPGA Log Generation/Params]
+GENERATE_ROUTER_STATS=1
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=1

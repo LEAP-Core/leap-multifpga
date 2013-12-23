@@ -21,7 +21,6 @@ import Vector::*;
 `include "awb/provides/virtual_platform.bsh"
 `include "awb/provides/virtual_devices.bsh"
 `include "awb/provides/low_level_platform_interface.bsh"
-`include "awb/provides/rrr.bsh"
 
 `include "awb/provides/soft_connections.bsh"
 

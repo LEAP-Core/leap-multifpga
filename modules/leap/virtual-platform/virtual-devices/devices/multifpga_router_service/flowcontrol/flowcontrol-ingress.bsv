@@ -30,7 +30,9 @@ import Vector::*;
 import FIFOF::*;import DReg::*;
 
 `include "awb/provides/channelio.bsh"
+
 `include "awb/provides/rrr_common.bsh"
+`include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/umf.bsh"
 `include "awb/provides/stats_service.bsh"
 `include "awb/provides/soft_connections.bsh"
@@ -197,7 +199,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
     
     // Depending on packet header parameters, we can be clever and pack flow control tokens along with the header
     // saving a cycle.
-    if(valueof(filler_bits_w) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))))))
+    if((`PACK_FLOWCONTROL == 1) && (valueof(filler_bits_w) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))))))
     begin
  
         rule startSendEmpty;
@@ -224,7 +226,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
 
                 if(`SWITCH_DEBUG == 1)
                 begin
-                    $display("Sending %d tokens to %d my id %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
+                    $display("Flowcontrol Sending %d tokens to %d my id %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
                 end
 
                 Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) control_packet = tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx]));
@@ -239,7 +241,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
                                          phyChannelPvt: ?,
                                          channelID: ?, // for now we must preserve this because the egress side expects it. 
                                          serviceID: fromInteger(flowcontrolID), // We're moving in this direction - the feed back uses channel 0
-                                         methodID : ?,
+                                         methodID : 0,
                                          numChunks: 0
                                         };
 
@@ -274,7 +276,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
             begin 
                 if(`SWITCH_DEBUG == 1)
                 begin
-                    $display("Sending %d tokens to %d my idx %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
+                    $display("Flowcontrol Sending %d tokens to %d my idx %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
                 end
 
                 // This is the flow control packet header. 
@@ -287,7 +289,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
                                          phyChannelPvt: ?,
                                          channelID: ?, // for now we must preserve this because the egress side expects it. 
                                          serviceID: fromInteger(flowcontrolID), // We're moving in this direction 
-                                         methodID : ?,
+                                         methodID : 0,
                                          numChunks: 1
                                         };
 
@@ -337,9 +339,9 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
 
         if(`SWITCH_DEBUG == 1)
           begin
-            $display("ingress got a packet for service %d", packet.serviceID);
+            $write("Flowcontrol ingress got a packet ");
+            $display("channelID: %d, serviceID: %d, method: %d, numChunks: %d, filler: %d", packet.channelID, packet.serviceID, packet.methodID, packet.numChunks, packet.filler); 
           end
-
 
         // set up remaining chunks
         requestChunksRemaining <= packet.numChunks;

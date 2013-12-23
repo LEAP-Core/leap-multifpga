@@ -6,6 +6,7 @@
 %provides basestation
 
 %sources -t RRR -v PUBLIC basestationImpl.rrr
+%sources -t LOG -v PUBLIC basestationImpl.log
 %sources -t BSV -v PUBLIC basestationImpl.bsv
 
 

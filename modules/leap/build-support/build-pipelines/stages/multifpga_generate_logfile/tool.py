@@ -123,29 +123,34 @@ class MultiFPGAGenerateLogfile():
       for rrr in moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'] [platformName].getAllDependenciesWithPaths('GIVEN_RRRS'):
         if(not rrr in moduleList.topModule.moduleDependency['MISSING_RRRS']):                                                     
           moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr] = platform.name
-                                        
+    
+    # We can now set up each platform for the first stage of compilation. 
+    # this chiefly involves distributing rrr and dict files around.                                
     for platformName in environment.getPlatformNames():
+
       platform = environment.getPlatform(platformName)
       platformAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
       platformPath = makePlatformConfigPath(platformAPMName)
       platformBuildDir = makePlatformBuildDir(platformName)
-      wrapperLogTgt =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log.multi_fpga'
-      wrapperLogBld =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
-      routerBSH =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
 
-      print "wrapper: " + wrapperLogTgt
-      print "platformPath: " + platformPath
+      # Make a symlink locally
+      platformAPMPath = (Popen(["awb-resolver", platform.path], stdout=PIPE).communicate()[0]).strip()
+      relativeAPMPath = os.path.relpath(platformAPMPath, makePlatformConfigPath("")) 
+      linkAPMPath = makePlatformConfigPath(platform.getAPMName())
 
-      execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
+      execute('ln -s  ' + relativeAPMPath + ' ' + linkAPMPath)
+      
+      execute('asim-shell --batch cp ' + platform.path +" "+ platformPath) 
       execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
       execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
       execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)
+
+     
       execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_ID ' + str((environment.getSynthesisBoundaryPlatformID(platform.name))))
       execute('asim-shell --batch set parameter ' + platformPath + ' CON_CWIDTH ' +  str(moduleList.getAWBParam('multi_fpga_log_generator', 'SOFT_CONN_CWIDTH')))
       execute('asim-shell --batch set parameter ' + platformPath + ' CON_CHAIN_CWIDTH ' +  str(moduleList.getAWBParam('multi_fpga_log_generator', 'SOFT_CONN_CWIDTH')))
       execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_NAME \\"' + platform.name + '\\"')
       execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_NUM_PLATFORMS ' + str(len(environment.getPlatformNames())))
-
       execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 1 ')
       execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 1 ')
       execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 0 ')
@@ -186,7 +191,9 @@ class MultiFPGAGenerateLogfile():
       execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"')
 
       # Configure the build tree
-      if not os.path.exists(platformBuildDir): os.makedirs(platformBuildDir) 
+      if not os.path.exists(platformBuildDir): 
+        os.makedirs(platformBuildDir) 
+      
       execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
 
       # set up the symlinks to missing dictionaries- they aree broken
@@ -221,69 +228,87 @@ class MultiFPGAGenerateLogfile():
             os.symlink(relpath(rrrpath, linkDir), linkPath)
 
 
-      subbuild = moduleList.env.Command( 
-          [wrapperLogTgt],
-          [routerBSH],
-          [ compile_closure(platform),
-            SCons.Script.Copy(wrapperLogTgt, wrapperLogBld) ]
-          )
+
+
+      # Take platform specific build actions  
+      # Note that for CPU platforms, we don't 
+      if(platform.platformType == 'FPGA' or platform.platformType == 'BLUESIM'):
+
+        wrapperLogTgt =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log.multi_fpga'
+        wrapperLogBld =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
+ 
+
+        routerBSH =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
+
+        print "wrapper: " + wrapperLogTgt
+        print "platformPath: " + platformPath
+
+
+        subbuild = moduleList.env.Command( 
+            [wrapperLogTgt],
+            [routerBSH],
+            [ compile_closure(platform),
+              SCons.Script.Copy(wrapperLogTgt, wrapperLogBld) ]
+            )
                    
-      moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += [wrapperLogTgt]
+        moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += [wrapperLogTgt]
 
-      # we now need to create a multifpga_routing.bsh so that we can get the sizes of the various links.
-      # we'll need this later on. 
-      header = open(routerBSH,'w')
-      header.write('`include "awb/provides/stats_service.bsh"\n')
-      header.write('`include "awb/provides/debug_scan_service.bsh"\n')
-      header.write('`include "awb/provides/physical_platform.bsh"\n')
-      header.write('// we need to pick up the module sizes\n')
-      header.write('module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);\n')
-      header.write('let m <- mkCommunicationModuleIfaces(vplat ') 
-      for target in  platform.getSinks().keys():
-        header.write(', ' + platform.getSinks()[target].physicalName + '.write')
-      for target in  platform.getSources().keys():
-        header.write(', ' + platform.getSources()[target].physicalName + '.first')
+        # we now need to create a multifpga_routing.bsh so that we can get the sizes of the various links.
+        # we'll need this later on. 
+        header = open(routerBSH,'w')
+        header.write('`include "awb/provides/stats_service.bsh"\n')
+        header.write('`include "awb/provides/debug_scan_service.bsh"\n')
+        header.write('`include "awb/provides/physical_platform.bsh"\n')
+        header.write('`include "awb/provides/low_level_platform_interface.bsh"\n')
+        header.write('// we need to pick up the module sizes\n')
+        header.write('module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);\n')
+        header.write('let m <- mkCommunicationModuleIfaces(vplat ') 
+        for target in  platform.getSinks().keys():
+          header.write(', ' + platform.getSinks()[target].physicalName + '.write')
+        for target in  platform.getSources().keys():
+          header.write(', ' + platform.getSources()[target].physicalName + '.first')
      
-      header.write(');\n')
-      # we also need a stat here to make the stats work right.  
-      # we don't care about the ID because it will get replaced later during the second compilation pass
-      if (moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_STATS')):
-        header.write('let stat <- mkStatCounter(statName("DUMMY", "Dummy stat"));\n')   
+        header.write(');\n')
+        # we also need a stat here to make the stats work right.  
+        # we don't care about the ID because it will get replaced later during the second compilation pass
+        if (moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_STATS')):
+          header.write('let stat <- mkStatCounter(statName("DUMMY", "Dummy stat"));\n')   
 
-      if (moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_DEBUG')):
-        header.write('mkDebugScanNode("dummy",List::nil);\n')   
+        if (moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_DEBUG')):
+          header.write('mkDebugScanNode("dummy",List::nil);\n')   
 
-      header.write('endmodule\n')
+        header.write('endmodule\n')
 
-      header.write('module [CONNECTED_MODULE] mkCommunicationModuleIfaces#(VIRTUAL_PLATFORM vplat ')
+        header.write('module [CONNECTED_MODULE] mkCommunicationModuleIfaces#(VIRTUAL_PLATFORM vplat ')
 
-      for target in  platform.getSinks().keys():
-        # really I should disambiguate by way of a unique path
-        via  = (platform.getSinks()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_write'
-        header.write(', function Action write_' + via + '_egress(Bit#(p' + via + '_egress_SZ) data)') 
+        for target in  platform.getSinks().keys():
+          # really I should disambiguate by way of a unique path
+          via  = (platform.getSinks()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_write'
+          header.write(', function Action write_' + via + '_egress(Bit#(p' + via + '_egress_SZ) data)') 
 
-      for target in  platform.getSources().keys():
-        # really I should disambiguate by way of a unique path
-        via  = (platform.getSources()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_read'
-        header.write(', function Bit#(p'+ via + '_ingress_SZ) read_' + via + '_ingress()') 
+        for target in  platform.getSources().keys():
+          # really I should disambiguate by way of a unique path
+          via  = (platform.getSources()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_read'
+          header.write(', function Bit#(p'+ via + '_ingress_SZ) read_' + via + '_ingress()') 
 
-      header.write(') (Empty);\n')
+        header.write(') (Empty);\n')
 
-      for target in  platform.getSinks().keys():
-        via  = (platform.getSinks()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_write'
-        header.write('messageM("SizeOfVia:'+via+':" + integerToString(valueof(p' + via + '_egress_SZ)));\n')
+        for target in  platform.getSinks().keys():
+          via  = (platform.getSinks()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_write'
+          header.write('messageM("SizeOfVia:'+via+':" + integerToString(valueof(p' + via + '_egress_SZ)));\n')
         
-      for target in  platform.getSources().keys():
-        # really I should disambiguate by way of a unique path
-        via  = (platform.getSources()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_read' 
-        header.write('messageM("SizeOfVia:'+via+':" + integerToString(valueof(p' + via + '_ingress_SZ)));\n')
-      header.write('endmodule\n')
+        for target in  platform.getSources().keys():
+          # really I should disambiguate by way of a unique path
+          via  = (platform.getSources()[target]).physicalName.replace(".","_").replace("[","_").replace("]","_") + '_read' 
+          header.write('messageM("SizeOfVia:'+via+':" + integerToString(valueof(p' + via + '_ingress_SZ)));\n')
+        header.write('endmodule\n')
 
-      header.close();
+        header.close();
 
-      #force build remove me later....          
-      moduleList.topDependency += [subbuild]
-      moduleList.env.AlwaysBuild(subbuild)
+        #force build remove me later....          
+        moduleList.topDependency += [subbuild]
+        moduleList.env.AlwaysBuild(subbuild)
+
 
     # now that we configured things, let's check that the dicts and rrrs are sane
     # we use os.stat to check file equality. It follows symlinks,

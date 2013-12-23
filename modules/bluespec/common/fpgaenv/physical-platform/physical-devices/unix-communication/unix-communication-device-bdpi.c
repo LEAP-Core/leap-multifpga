@@ -93,6 +93,7 @@ void process_incoming(Channel * descriptor) {
   int bytes_read;
   CommBlock buffer;
 
+  // We need to loop because the other side may not have created our fifo yet.
   do {
     infile = open(descriptor->incomingFIFO, O_RDONLY);
     retries ++;
@@ -138,7 +139,7 @@ void process_incoming(Channel * descriptor) {
       exit(1);
     } else if(bytes_read == 0) {
       // looks like the other side died 
-      break; // we really should not exit(0)
+      break; // we really should not exit(0) becasue in some deployments, there may not be an other side.
     }
 
     // push the data out.  we will free the data on deq.
@@ -183,7 +184,7 @@ void process_outgoing(Channel * channel) {
   // someone probably already set this up. 
   mkfifo(channel->outgoingFIFO, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
   
-  outfile = open(channel->outgoingFIFO, O_WRONLY);
+  outfile = open(channel->outgoingFIFO, O_WRONLY | O_SYNC);
   if (outfile < 0)
   {
       fprintf(stderr, "Error with %s\n", channel->outgoingFIFO);
@@ -221,14 +222,8 @@ unsigned char comm_open(char* outgoing, char* incoming)
 {
     int i;
     Channel *channel;
-    const char *home = getenv("HOME");
-    const char *commDirectory = "/.multifpga/";
 
-    if(home == NULL) {
-        fprintf(stderr, "Environment variable HOME not defined.\n");
-        cleanup_comm();
-        exit(1);
-    }
+    const char *commDirectory = "pipes/";
 
     if(DEBUG_COMM) {
       printf("Calling comm open\n");
@@ -271,9 +266,8 @@ unsigned char comm_open(char* outgoing, char* incoming)
     channel->outgoingQ = g_async_queue_new();
 
 
-    channel->incomingFIFO = (char*) malloc( (strlen(incoming) + strlen(home) + strlen(commDirectory)) * sizeof(char));
-    strcpy(channel->incomingFIFO,home);
-    strcat(channel->incomingFIFO,commDirectory);
+    channel->incomingFIFO = (char*) malloc( (strlen(incoming) + strlen(commDirectory) + 1) * sizeof(char));
+    strcpy(channel->incomingFIFO, commDirectory);
     if(mkdir(channel->incomingFIFO, S_IRWXU) != 0) {
         if(errno != EEXIST) {
             fprintf(stderr, "Comm directory creation failed, bailing\n");
@@ -284,11 +278,8 @@ unsigned char comm_open(char* outgoing, char* incoming)
  
     strcat(channel->incomingFIFO,incoming);
 
-
-
-    channel->outgoingFIFO = (char*) malloc( (strlen(outgoing) + strlen(home) + strlen(commDirectory)) * sizeof(char));
-    strcpy(channel->outgoingFIFO,home);
-    strcat(channel->outgoingFIFO,commDirectory);
+    channel->outgoingFIFO = (char*) malloc( (strlen(outgoing) + strlen(commDirectory) + 1) * sizeof(char));
+    strcpy(channel->outgoingFIFO, commDirectory);
     if(mkdir(channel->outgoingFIFO, S_IRWXU) != 0) {
         if(errno != EEXIST) {
             fprintf(stderr, "Comm directory creation failed, bailing\n");

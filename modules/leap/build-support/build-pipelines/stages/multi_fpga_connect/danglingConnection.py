@@ -82,3 +82,13 @@ class DanglingConnection():
         return 1
       else:
         return 2
+
+  def CPPType(self):
+        typeMod = self.raw_type.replace('#', '_po_')
+        typeMod = typeMod.replace('(', '_lp_')
+        typeMod = typeMod.replace(')', '_rp_')
+        typeMod = typeMod.replace(',', '_cm_')
+        typeMod = typeMod.replace(':', '_cn_')
+        typeMod = typeMod.replace(' ', '_s_')
+
+        return typeMod

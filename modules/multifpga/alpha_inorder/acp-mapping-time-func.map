@@ -1,14 +1,14 @@
-model -> ACP0;
-common_services -> ACP0;
-connected_application -> ACP0;
-hasim_funcp -> ACP0;
-hasim_isa_datapath -> ACP0;
-funcp_memstate -> ACP0;
-funcp_memstate_tlb -> ACP0;
-commands_service -> ACP1;
-hasim_timep -> ACP1;
-inorder_pipeline_front_end -> ACP1;
-decode_stage -> ACP1;
-inorder_pipeline_back_end -> ACP1;
-hasim_l1_caches-> ACP1;
-
+model -> FPGA0;
+common_services -> FPGA0;
+connected_application -> FPGA0;
+hasim_funcp -> FPGA0;
+hasim_isa_datapath -> FPGA0;
+funcp_memstate -> FPGA0;
+funcp_memstate_tlb -> FPGA0;
+commands_service -> FPGA1;
+hasim_timep -> FPGA1;
+inorder_pipeline_front_end -> FPGA1;
+decode_stage -> FPGA1;
+inorder_pipeline_back_end -> FPGA1;
+hasim_l1_caches-> FPGA1;
+hasim_private_caches -> FPGA0;

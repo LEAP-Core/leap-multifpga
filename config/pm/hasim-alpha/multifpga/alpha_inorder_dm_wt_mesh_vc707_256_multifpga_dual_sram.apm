@@ -19,6 +19,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
+umf=Little-Endian Unified Message Format
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -80,3 +81,7 @@ Packagehint=multifpga
 [VC707 Dual FPGA Environment (SMA)]
 File=modules/leap-platforms/fpga-environments/vc707/vc707_dual_env.awb
 Packagehint=multifpga
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms

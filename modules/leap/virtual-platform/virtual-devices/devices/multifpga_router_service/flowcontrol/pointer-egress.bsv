@@ -143,6 +143,9 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
               Add#(umf_message_len, size_extra,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),
               Add#(extraServices, n_FIFOS_SAFE_SZ, umf_service_id));
 
+    // definition of maximum length message
+    Bit#(umf_message_len)  maxMessageLength = maxBound;
+
 
     // =====
     //   Debug Registers
@@ -162,6 +165,9 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
     Reg#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) totalCreditsUsed <- mkReg(0);    
 
+    // If we have a lot of credit, all queues can contend. 
+    Reg#(Bool) creditsHigh <- mkReg(False);
+
     Vector#(n,Reg#(Bool)) bufferAvailable <- replicateM(mkReg(True));
     Vector#(n,Bool) requestQueuesNotEmpty = newVector();
 
@@ -174,16 +180,31 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
     Reg#(Bit#(10)) count <- mkReg(0);
 
-    rule debug(`SWITCH_DEBUG == 1);
-        count <= count + 1;
+    Reg#(Bool) activity <- mkDReg(False);
+
+
+    function Action dumpState();
+      action
         $display("Egress Queue Total Credits: %d, returnThreshold: %d, totalSent: %d, totalCreditsReceived: %d", totalCreditsUsed, returnThreshold, totalSent, totalCreditsReceived);
-        if(count == 0)
+        for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
         begin
-            for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
-            begin
-                $display("Egress Queue %d thinks bufferAvailable %b creditsUsed: %d", i, bufferAvailable[i], portCreditsUsedDebug[i]);
-            end
+            $display("Egress Queue %d thinks bufferAvailable %b creditsUsed: %d", i, bufferAvailable[i], portCreditsUsedDebug[i]);
         end
+      endaction
+    endfunction
+
+    rule debug(`SWITCH_DEBUG == 1 && activity);
+        dumpState();
+        if(totalCreditsUsed > `MULTIFPGA_FIFO_SIZES) 
+        begin
+            $display("Egress uses too many credits");
+            $finish;
+        end
+    endrule
+
+    rule tooManyCredits(totalCreditsUsed > `MULTIFPGA_FIFO_SIZES);
+        dumpState();
+        $display("Egress uses too many credits");
     endrule
 
     // Use a random arbiter since the arbitration runs speculatively and
@@ -205,6 +226,11 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     Reg#(Bool) deqHeader <- mkReg(True);
 
 
+    // We subtract an extra credit just to make sure that the value is conservative, since the register
+    // will be used to arbitrate in the next cycle. 
+    rule updateCreditsHigh;
+        creditsHigh <= (totalCreditsUsed < returnThreshold - zeroExtend(maxMessageLength) - 1); 
+    endrule
 
     // ==============================================================
     //                          Response Rules
@@ -215,7 +241,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     // scan channel for incoming flowcontrol headers
     // in some cases we can fit the flow control bits in the header, saving bandwidth
     if(valueof(filler_bits_r) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))
-)))     
+)) && `PACK_FLOWCONTROL == 1)     
     begin
 
 	rule creditReadReady (creditDelay.notFull());
@@ -237,6 +263,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
         endrule
  
         rule adjustCredits;
+            activity <= True;
             // enqueue header in service's queue
             // set up remaining chunks
             let payload = creditDelay.first();
@@ -246,9 +273,9 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             let creditsNext = currentCredits - tpl_2(payload);
             let totalCreditsNext = totalCreditsUsed - tpl_2(payload); 
             totalCreditsReceived <= totalCreditsReceived + zeroExtendNP(tpl_2(payload));
-            Bit#(umf_message_len)  max = maxBound;
-            bufferAvailable[responseActiveQueue] <= (creditsNext < `MINIMUM_CHANNEL_BUFFER) ||
-                                                    (totalCreditsNext < returnThreshold); 
+
+            // Channel has guaranteed buffer, if it is under the minimum channel threshold
+            bufferAvailable[responseActiveQueue] <= (creditsNext < min(0,`MINIMUM_CHANNEL_BUFFER - zeroExtend(maxMessageLength))); 
 
             portCreditsUsed.upd(truncate(responseActiveQueue), creditsNext);
             portCreditsUsedDebug[responseActiveQueue] <= creditsNext;
@@ -259,10 +286,17 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                 $display("Got flowcontrol body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
             end
 
+            if(tpl_2(payload) > `MULTIFPGA_FIFO_SIZES)
+            begin
+                $display("pointer-egress Got too many credits: %d", tpl_2(payload));
+                $finish;
+            end
+
             if(creditsNext > currentCredits)
             begin
                 $display("Setting credits to zero... this is a bug");
                 $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
+                dumpState();
                 $finish;
             end      
 
@@ -283,6 +317,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
         endrule
   
         rule scan_responses (!deqHeader);
+            activity <= True;
             deqHeader <= !deqHeader;
             GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                     umf_channel_id_r, umf_service_id_r,
@@ -299,20 +334,29 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             let totalCreditsUsedNext = totalCreditsUsed - tpl_2(payload);	 
             totalCreditsUsed <= totalCreditsUsedNext;
             totalCreditsReceived <= totalCreditsReceived + zeroExtendNP(tpl_2(payload));
-            Bit#(umf_message_len) max = maxBound;
-            bufferAvailable[responseActiveQueue] <= (creditsNext < `MINIMUM_CHANNEL_BUFFER) ||
-                                                    (totalCreditsUsedNext < `MULTIFPGA_FIFO_SIZES - fromInteger(valueof(n) * `MINIMUM_CHANNEL_BUFFER)); 
+            
+            // Channel has guaranteed buffer, if it is under the minimum channel threshold
+            bufferAvailable[responseActiveQueue] <= (creditsNext < min(0,`MINIMUM_CHANNEL_BUFFER - zeroExtend(maxMessageLength))); 
+
             portCreditsUsed.upd(truncate(responseActiveQueue), creditsNext);
             portCreditsUsedDebug[responseActiveQueue] <= creditsNext;
+
             if(`SWITCH_DEBUG == 1)
             begin
-                $display("Got flowcontrol body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, payload, currentCredits, creditsNext);
+                $display("Got flowcontrol body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
+            end
+
+            if(tpl_2(payload) > `MULTIFPGA_FIFO_SIZES)
+            begin
+                $display("pointer-egress Got too many credits: %d", tpl_2(payload));
+                $finish;
             end
 
             if(creditsNext > currentCredits)
             begin
                 $display("Setting credits to zero... this is a bug");
                 $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
+                dumpState();
                 $finish;
             end      
 
@@ -347,20 +391,18 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
         Vector#(n, Bool) has_request = map(hasRequest, genVector());
 
-
         // Buffers available for normal requests
         function Bool bufAvailNormal(Integer s) =
-            bufferAvailable[s] && ! requestQueues[s].bypassFlowcontrol;
+            (creditsHigh || bufferAvailable[s]) && !requestQueues[s].bypassFlowcontrol;
 
         Vector#(n, Bool) buf_avail_normal = map(bufAvailNormal, genVector());
 
+        // Flow control is always sendable.
+        function Bool bypassFlowcontrol(Integer s) =
+           requestQueues[s].bypassFlowcontrol;
 
-        // Buffers available for flow control requests
-        function Bool bufAvailFC(Integer s) =
-            requestQueues[s].bypassFlowcontrol;
-
-        Vector#(n, Bool) buf_avail_fc = map(bufAvailFC, genVector());
-
+        Vector#(n, Bool) buf_avail_fc = map(bypassFlowcontrol, genVector());
+    
 
         // Generate the request vectors
         let req_normal = zipWith(\&& , has_request, buf_avail_normal);
@@ -415,6 +457,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                   requestChunksRemaining == 0 &&&
                                   !creditDelay.notEmpty() &&&
                                   deqHeader);
+            activity <= True;
             let header = requestQueues[s].firstHeader;
             Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) requestChunks = zeroExtend(header.numChunks) + 1; // also sending header
             Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) oldCredits = portCreditsUsed.sub(fromInteger(s));
@@ -434,16 +477,18 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) creditsNext =  oldCredits + zeroExtendNP(requestChunks);
             Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) totalCreditsUsedNext =  totalCreditsUsed + zeroExtendNP(requestChunks);	
-            portCreditsUsed.upd(fromInteger(s), creditsNext);
-            portCreditsUsedDebug[fromInteger(s)] <= creditsNext;
-            bufferAvailable[s] <= (creditsNext < `MINIMUM_CHANNEL_BUFFER) ||
-                                  (totalCreditsUsedNext < `MULTIFPGA_FIFO_SIZES - fromInteger(valueof(n) * `MINIMUM_CHANNEL_BUFFER)); 
+            
+            // Channel has guaranteed buffer, if it is under the minimum channel threshold
+            bufferAvailable[fromInteger(s)] <= (creditsNext < min(0,`MINIMUM_CHANNEL_BUFFER - zeroExtend(maxMessageLength))); 
+
 
             totalCreditsUsed <= totalCreditsUsedNext;
+            portCreditsUsed.upd(fromInteger(s), creditsNext);
+            portCreditsUsedDebug[fromInteger(s)] <= creditsNext;
 
             if(`SWITCH_DEBUG == 1)
             begin
-                $display("Setting portCredits for port %d from %d to %d ", s, oldCredits, creditsNext);
+                $display("Setting portCredits for port %d from %d to %d totalCredits", s, oldCredits, creditsNext);
             end
 
         endrule
@@ -452,6 +497,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
     // continue writing message
     rule writeRequestContinue (requestChunksRemaining != 0);
+        activity <= True;
         if(`SWITCH_DEBUG == 1)
         begin
             $display("sending packet on  %d", requestActiveQueue);  

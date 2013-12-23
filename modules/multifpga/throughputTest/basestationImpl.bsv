@@ -11,6 +11,7 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
     ServerStub_BASESTATIONRRR serverStub <- mkServerStub_BASESTATIONRRR();
 
     // Grumble.  I wish I could write these in a for loop.
+    // The rules below however, can be refactored in terms of functions
     Connection_Send#(Bit#(16)) aliveOut16 <- mkConnection_Send("16_0");
     Connection_Receive#(Bit#(16)) aliveIn16 <- mkConnection_Receive("16_" + integerToString(`NUM_REPEATERS));
     Connection_Send#(Bit#(32)) aliveOut32 <- mkConnection_Send("32_0");

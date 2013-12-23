@@ -11,9 +11,16 @@
 %sources -t BSV -v PUBLIC  VLevelFIFO.bsv
 %sources -t BSV -v PUBLIC  BRAMVLevelFIFO.bsv
 %sources -t BSV -v PUBLIC  Schedulers.bsv
+%sources -t CPP -v PRIVATE  pointer-ingress.cpp
+%sources -t CPP -v PRIVATE  pointer-egress.cpp
+%sources -t H -v PUBLIC  pointer-ingress.h
+%sources -t H -v PUBLIC  pointer-egress.h
+%sources -t H -v PUBLIC  pointer-ingress-regional.h
+%sources -t H -v PUBLIC  pointer-egress-regional.h
 
-
-%param --global MULTIFPGA_FIFO_SIZES 8192 "Total buffer size"
-%param --global MINIMUM_CHANNEL_BUFFER 64 "Minimum guranteed buffer per channel"
-%param  SWITCH_DEBUG 1 "Enables copious switch debug printing"
+%param --global MULTIFPGA_FIFO_SIZES 131072 "Total buffer size"
+%param --global MINIMUM_CHANNEL_BUFFER 16 "Minimum guranteed buffer per channel"
+%param  SWITCH_DEBUG 0 "Enables copious switch debug printing"
+%param  PACK_FLOWCONTROL 0 "Try to pack flowcontrol messages with header"
+%param  TIME_SWITCH 0 "Enables performance timing of switch"
 

@@ -1,9 +1,7 @@
-model -> ACP0;
-common_services -> ACP0;
-connected_application -> ACP0;
-hardware_system -> ACP0;
-test_a -> ACP0;
-test_c -> ACP0;
-test_b -> ACP1;
-test_d -> ACP1;
+model -> FPGA0;
+common_services -> FPGA0;
+connected_application -> FPGA0;
+
+
+
 

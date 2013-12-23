@@ -18,7 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=MultiFPGA Throughput Test Connected Application
-environment_description=Simulation Dual FPGA Environment with Dual Cache
+environment_description=Simulation Dual FPGA Environment
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Single Repeater Mapping
 
@@ -57,6 +57,7 @@ Packagehint=multifpga
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
+umf=Little-Endian Unified Message Format
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -65,6 +66,7 @@ Packagehint=multifpga
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_DEBUG=1
 GENERATE_ROUTER_STATS=1
+SOFT_CONN_CWIDTH=300
 
 [MultiFPGA Throughput Test (D)]
 File=modules/multifpga/throughputTest/basestation.awb
@@ -79,10 +81,6 @@ hardware_system=MultiFPGA Throughput Single Repeater
 
 [MultiFPGA Throughput Test Connected Application]
 File=modules/multifpga/throughputTest/connected_application/connected-application-throughput.awb
-Packagehint=multifpga
-
-[Simulation Dual FPGA Environment with Dual Cache]
-File=modules/leap-platforms/fpga-environments/sim/sim_fpga_cache_env.awb
 Packagehint=multifpga
 
 [Bluespec Type parser]
@@ -105,3 +103,14 @@ repeater1=MultiFPGA Throughput Test (C)
 [Single Repeater Mapping]
 File=modules/multifpga/throughputTest/singleRepeater/sim_mapping.awb
 Packagehint=multifpga
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[Simulation Dual FPGA Environment]
+File=modules/leap-platforms/fpga-environments/sim/sim_fpga_env.awb
+Packagehint=multifpga
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=1

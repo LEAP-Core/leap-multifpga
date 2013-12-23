@@ -20,7 +20,7 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for Virtex 7
 librl_bsv=RL Bluespec Library Submodel
-build_pipeline=FPGA Platform Build Pipeline
+build_pipeline=FPGA Platform Build Pipeline (Legacy)
 soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
@@ -123,26 +123,8 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-[FPGA Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
-Packagehint=multifpga
 
-[FPGA Platform Build Pipeline/Requires]
-fpga_program_tool=FPGA Programming Tool
-post_synthesis_tool=Xilinx Post-synthesis Toolchain
-software_tool=Null software build tool
-mcd_tool=MCD Tool for Xilinx
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-synthesis_tool=XST Synthesis Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpgamap_parser=FPGAMap
-fpga_environment_parser=FPGA Environment Datatype
-li_module=LEAP LI Module Handler
-parameter_substitution=AWB Parameter Substitution Parser
 
-[Null Channel IO Module/Requires]
-physical_channel=BlueNoC PCIe Tunnel
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -243,7 +225,7 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for Virtex 7
 librl_bsv=RL Bluespec Library Submodel
-build_pipeline=FPGA Platform Build Pipeline
+build_pipeline=FPGA Platform Build Pipeline (Legacy)
 soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
@@ -347,25 +329,10 @@ File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
 [FPGA Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
-Packagehint=multifpga
 
 [FPGA Platform Build Pipeline/Requires]
-fpga_program_tool=FPGA Programming Tool
-post_synthesis_tool=Xilinx Post-synthesis Toolchain
-software_tool=Null software build tool
-mcd_tool=MCD Tool for Xilinx
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-synthesis_tool=XST Synthesis Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpgamap_parser=FPGAMap
-fpga_environment_parser=FPGA Environment Datatype
-li_module=LEAP LI Module Handler
-parameter_substitution=AWB Parameter Substitution Parser
 
 [Null Channel IO Module/Requires]
-physical_channel=BlueNoC PCIe Tunnel
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -445,9 +412,6 @@ UMF_CHUNK_BYTES=16
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
 Packagehint=leap
 
-[BlueNoC PCIe Tunnel]
-File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
-Packagehint=leap
 
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
@@ -519,3 +483,24 @@ aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
 [Aurora Device Reliable Flowcontrol]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/aurora-device.awb
 Packagehint=leap-platforms
+
+[BlueNoC PCIe Bridge/Params]
+DO_SOFT_RESET=0
+
+[FPGA Platform Build Pipeline (Legacy)]
+File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
+Packagehint=multifpga
+
+[FPGA Platform Build Pipeline (Legacy)/Requires]
+fpga_program_tool=FPGA Programming Tool
+li_module=LEAP LI Module Handler
+mcd_tool=MCD Tool for Xilinx
+iface_tool=Interface builder
+parameter_substitution=AWB Parameter Substitution Parser
+synthesis_tool=XST Synthesis Tool
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Null software build tool
+post_synthesis_tool=Xilinx Post-synthesis Toolchain
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool

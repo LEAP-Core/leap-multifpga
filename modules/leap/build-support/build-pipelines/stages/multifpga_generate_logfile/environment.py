@@ -33,16 +33,19 @@ class FPGAEnvironment(object):
 
     def getSynthesisBoundaryPlatformID(self,boundary):
         print 'Looking up: ' + boundary
-        # Master platform must be assinged the 0 id
-        # TODO: remove this requirement
-        def checkMaster(plat):
-          return not self.platforms[plat].master
+        # Master platform/some FPGA must be assinged the 0 id
+        # for backwards compatibility.  We achieve this by using
+        # a sort function that orders by master and thence by platform 
+        # type.  This is a major hack. 
+        def platformSort(plat):
+            if(self.platforms[plat].master):
+                return 0
+            elif (self.platforms[plat].platformType == 'FPGA'):
+                return 1
+            else:
+                return 2
 
-        if self.platforms[boundary].master:
-          return 0
-        else:
-          # remove the master and assign unique ids
-          return sorted(filter(checkMaster,self.platforms.keys())).index(boundary) + 1
+        return (sorted(self.platforms.keys(), key=platformSort)).index(boundary)
 
     # build a graph. This will make life easier
     # graph legalization consists of ensuring that if a platform claims to 
@@ -81,7 +84,7 @@ class FPGAEnvironment(object):
                     error = 1
 
                 if(error == 1):
-                    print 'Illegal graph: ' + sinks[sink].endpointName + ' and ' + platform + ' improperly connected'
+                    print 'Illegal graph: sink ' + sinks[sink].endpointName + ' and ' + platform + ' improperly connected'
                     raise SyntaxError(sinks[sink].endpointName + ' and ' + platform + ' improperly connected')
 
                 # although we've already added a edge for the legal connections, we need to check the reverse
@@ -98,7 +101,7 @@ class FPGAEnvironment(object):
                     error = 1
 
                 if(error == 1):
-                    print 'Illegal graph: ' + sources[source].endpointName + ' and ' + platform + ' improperly connected'
+                    print 'Illegal graph: source ' + sources[source].endpointName + ' and ' + platform + ' improperly connected'
                     raise SyntaxError(sources[source].endpointName + ' and ' + platform + ' improperly connected')
 
     # finds/returns the link to use on a path hop from 

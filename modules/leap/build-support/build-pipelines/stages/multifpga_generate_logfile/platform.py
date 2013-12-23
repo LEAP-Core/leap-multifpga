@@ -37,3 +37,7 @@ class Platform(object):
            sinkRepr = sinkRepr + self.sinks[sink].__repr__() + '\n'
            
        return 'Platform ' + self.name + '\n Sources: \n' + sourceRepr + '\n Sinks: \n' + sinkRepr
+  
+    def getAPMName(self):
+       tokens = (self.path).split("/")
+       return tokens[-1]

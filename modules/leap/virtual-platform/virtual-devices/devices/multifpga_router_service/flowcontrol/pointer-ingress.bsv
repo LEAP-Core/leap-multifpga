@@ -194,6 +194,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
 
     FIFOF#(umf_chunk_w) bodyFIFO <- mkFIFOF();
 
+    Reg#(Bool) activity <- mkDReg(False);
     Reg#(Bit#(10)) count <- mkReg(0);
 
     // need to initialize free list.  Because it is a freelist, 
@@ -218,8 +219,8 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
     endrule
 
 
-    rule debug (`SWITCH_DEBUG == 1);
-        count <= count + 1;
+    rule debug (`SWITCH_DEBUG == 1 && activity);
+        
         $display("Ingress Queue Total Credits Used: %d, Total Credits Free: %d, returnThreshold: %d, totalReceived: %d, totalDequeued: %d, totalCreditsReturned: %d", creditsUsedTotal.value, creditsFreeTotal.value, returnThreshold, totalReceived, totalDequeued, totalCreditsReturned);
         if(count == 0)
         begin
@@ -231,13 +232,29 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
                                                                      readReady[i]);
            end
         end
+
+    endrule
+
+    rule doAssert(activity);
+        // Some assertions relating to statistics and metadata values.
+        if(totalCreditsReturned + zeroExtend(creditsUsedTotal.value) + zeroExtend(creditsFreeTotal.value) != totalReceived)
+        begin
+             $display("Stats Error: totalReceived probably lost credit");
+           
+        end
+
+        if(totalCreditsReturned + zeroExtend(creditsFreeTotal.value) != totalDequeued)
+        begin
+             $display("Stats Error: totalDequeued probably lost credit");
+           
+        end
     endrule
 
     // Flowcontrol credit return 
     
     // Depending on packet header parameters, we can be clever and pack flow control tokens along with the header
     // saving a cycle.
-    if(valueof(filler_bits_w) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))))))
+    if(`PACK_FLOWCONTROL == 1 && valueof(filler_bits_w) > valueof(SizeOf#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))))))
     begin
  
         rule startSendEmpty;
@@ -264,6 +281,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
                (creditsFree[use_idx].value > returnThreshold / 2))
             begin 
 
+                activity <= True;
                 if(`SWITCH_DEBUG == 1)
                 begin
                     $display("Flowcontrol Sending %d tokens to %d my id %d",creditsFree[use_idx].value,use_idx, fromInteger(flowcontrolID));
@@ -319,7 +337,8 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
             if(((creditsFree[use_idx].value > 0) && (creditsFreeTotal.value > returnThreshold)) ||
                (creditsFree[use_idx].value > returnThreshold / 2))
             begin 
-                if(`SWITCH_DEBUG == 1)
+                activity <= True;
+                //if(`SWITCH_DEBUG == 1)
                 begin
                     $display("Flowcontrol Sending %d tokens to %d my idx %d",creditsFree[use_idx].value,use_idx, fromInteger(flowcontrolID));
                 end
@@ -331,7 +350,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
                     umf_phy_pvt_w,    filler_bits_w) header = GENERIC_UMF_PACKET_HEADER
                                        {
                                          filler: ?,
-                                         phyChannelPvt: ?,
+                                         phyChannelPvt: 0,
                                          channelID: ?, // for now we must preserve this because the egress side expects it. 
                                          serviceID: fromInteger(flowcontrolID), // We're moving in this direction 
                                          methodID : 0,
@@ -349,11 +368,13 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
         endrule
 
         rule finishSendEmpty;
-            if(`SWITCH_DEBUG == 1)
-            begin
-                $display("Finished sending tokens");
-            end
+            activity <= True;
             umf_chunk_w body = unpack(zeroExtend(pack(sendSize.first)));
+            //if(`SWITCH_DEBUG == 1)
+            begin
+                $display("Finished sending tokens %h ", body);
+            end
+
             sendSize.deq;
             bodyFIFO.enq(body);
         endrule
@@ -384,6 +405,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
     // this rule handles the buffered case.
     // It might be that for uncommon values, we want to bypass the buffer.
     rule scan_requests (requestChunksRemaining == 0);
+        activity <= True;
         totalReceived <= totalReceived + 1;
 	deq();
 
@@ -407,13 +429,21 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
         if(creditsUsed[idx].value == 0)
         begin
             // set head and tail pointers to same value
-            $display("%t Ingress: Incoming %d empty, setting header to %d", $time, idx, freeList.first); 
+            if(`SWITCH_DEBUG == 1)
+            begin
+                $display("%t Ingress: Incoming %d empty, setting header to %d", $time, idx, freeList.first);
+            end
+ 
             incomingHeaderUpdate <= tagged Valid tuple2(idx,freeList.first);
             tailPointers[idx] <= freeList.first;     
         end
         else
         begin
-            $display("%t Ingress: Incoming %d not empty, setting header previous tail to ", $time, tailPointers[idx], freeList.first); 
+            if(`SWITCH_DEBUG == 1)
+            begin
+                $display("%t Ingress: Incoming %d not empty, setting header previous tail to ", $time, tailPointers[idx], freeList.first);
+            end
+ 
 	    pointers.write(tailPointers[idx], freeList.first);
             tailPointers[idx] <= freeList.first;     
         end
@@ -421,6 +451,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
 
     // scan channel for request message chunks
     rule scan_params (requestChunksRemaining != 0);
+        activity <= True;
         totalReceived <= totalReceived + 1;
         // grab a chunk from channelio and place it into the active request queue
         umf_chunk packet = first();
@@ -436,13 +467,21 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
         if(creditsUsed[requestActiveQueue].value == 0)
         begin
             // set head and tail pointers to same value
-            $display("%t Ingress: Incoming %d empty, setting header to %d", $time, requestActiveQueue, freeList.first); 
+            if(`SWITCH_DEBUG == 1)
+            begin
+                $display("%t Ingress: Incoming %d empty, setting header to %d", $time, requestActiveQueue, freeList.first); 
+            end
+
             incomingHeaderUpdate <= tagged Valid tuple2(requestActiveQueue, freeList.first);
             tailPointers[requestActiveQueue] <= freeList.first;     
         end
         else
         begin
-            $display("%t Ingress: Incoming %d not empty, setting header previous tail to ", $time, tailPointers[requestActiveQueue], freeList.first); 
+            if(`SWITCH_DEBUG == 1)
+            begin
+                $display("%t Ingress: Incoming %d not empty, setting header previous tail to ", $time, tailPointers[requestActiveQueue], freeList.first);
+            end
+ 
 	    pointers.write(tailPointers[requestActiveQueue], freeList.first);
             tailPointers[requestActiveQueue] <= freeList.first;     
         end
@@ -491,7 +530,12 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
         headPointers[idx].deq();
         mem.readReq(headPointers[idx].first); // request Data
         pointers.readReq(headPointers[idx].first); // request next data Pointer (need to be careful, as it may be bogus)
-        $display("%t Ingress: Dequeue %d from location %d", $time, idx, headPointers[idx].first); 
+
+        if(`SWITCH_DEBUG == 1)
+        begin
+            $display("%t Ingress: Dequeue %d from location %d", $time, idx, headPointers[idx].first); 
+        end
+
         reqIdx <= tagged Valid pack(idx);
         schedIdx <= tagged Valid pack(idx);
 
@@ -502,6 +546,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
         creditsFree[idx].upBy(1);
         creditsFreeTotal.upBy(1);
         freeList.enq(headPointers[idx].first);
+        activity <= True;
     endrule
 
     // update the pointer from the previous request. 
@@ -511,7 +556,10 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
     rule updateHeadPointer(reqIdx matches tagged Valid .idx &&& creditsUsed[idx].value > 0);
         let nextPointer <- pointers.readRsp;
         pointerTableHeaderUpdate <= tagged Valid tuple2(idx, nextPointer);
-        $display("%t Ingress: Dequeue %d trying to set header to %d ", $time, idx, nextPointer); 
+        if(`SWITCH_DEBUG == 1)
+        begin
+            $display("%t Ingress: Dequeue %d trying to set header to %d ", $time, idx, nextPointer); 
+        end
     endrule
 
     // The remaining indices are normal i/o
@@ -524,12 +572,20 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
          rule assignHeader;
              if(incomingHeaderUpdate matches tagged Valid .head &&& fromInteger(s) == tpl_1(head))
              begin
-                 $display("%t Ingress: Incoming %d setting header to %d ", $time, s, tpl_2(head)); 
+                 if(`SWITCH_DEBUG == 1)
+                 begin
+                     $display("%t Ingress: Incoming %d setting header to %d ", $time, s, tpl_2(head)); 
+                 end
+
                  headPointers[fromInteger(s)].enq(tpl_2(head));
              end
              else if(pointerTableHeaderUpdate matches tagged Valid .head &&& fromInteger(s) == tpl_1(head))
              begin
-                 $display("%t Ingress: Table %d setting header to %d ", $time, s, tpl_2(head)); 
+                 if(`SWITCH_DEBUG == 1)
+                 begin
+                     $display("%t Ingress: Table %d setting header to %d ", $time, s, tpl_2(head)); 
+                 end
+
                  headPointers[fromInteger(s)].enq(tpl_2(head));
              end
 
@@ -562,11 +618,11 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
                                    val <- mem.readRsp();
                                deqFired.send();
                                totalDequeued <= totalDequeued + 1;
-
+                               activity <= True;
                                if(`SWITCH_DEBUG == 1)
-                                 begin
+                               begin
                                    $display("%t read dequeue for %d: %h", $time, idx, val); 
-                                 end
+                               end
 
                                return val;
 
@@ -588,8 +644,6 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
                        endinterface;
 
     end
-
-
 
     rule warnOnNonDeq(reqIdx matches tagged Valid .idx  &&& !deqFired);
       if(`SWITCH_DEBUG == 1)

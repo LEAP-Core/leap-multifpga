@@ -1,0 +1,16 @@
+
+%name LIM Compiler Standard Virtual Platform
+%desc LIM Compiler Standard Virtual Platform
+
+%provides virtual_platform
+
+%requires platform_services
+%requires virtual_devices
+%requires low_level_platform_interface
+%requires umf
+
+%notes README
+
+%sources -v PUBLIC  virtual-platform-li.bsv
+%sources -v PUBLIC  virtual-platform-li.h
+%sources -v PRIVATE virtual-platform-li.cpp

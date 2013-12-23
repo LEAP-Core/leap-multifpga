@@ -3962,3 +3962,182 @@ Directory modules/leap-platforms/fpga-environments/ml605
  ml605-dual.env            Locally Modified          198 
 
 A couple of repairs to ML605 configuration.
+
+----------
+keflemin    Date: Mon Dec 23 17:14:03 EST 2013  CSN: CSN-multifpga-200
+                  Mon Dec 23 22:14:03 UTC 2013
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_exe.apm Locally Modified          199 
+ li/                       Locally Added               0 
+
+Directory config/pm/leap/demos/multifpga/li
+ traffic_light_acp_synth_multifpga.apm Locally Added               0 
+ hasim_test_vc707.apm      Locally Added               0 
+ rrr_test_li.apm           Locally Added               0 
+ hasim_test_sim.apm        Locally Added               0 
+ li_test_vc707.apm         Locally Added               0 
+ traffic_light_li.apm      Locally Added               0 
+ test_multifpga_throughput_hwsw_exe.apm Locally Added               0 
+ li_test_sim.apm           Locally Added               0 
+ rrr_test_li_vc707.apm     Locally Added               0 
+ li_test_dual_sim.apm      Locally Added               0 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_vc707.apm Locally Modified          199 
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-slave-li.apm Locally Added               0 
+ multifpga-platform-services-master-li.apm Locally Added               0 
+ multifpga-platform-services-master-hwsw.apm Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv
+ hwsw/                     Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hybrid-pcie-cpu0.apm Locally Added               0 
+ multifpgaenv-hybrid-exe-cpu0.apm Locally Added               0 
+ multifpgaenv-hwsw-exe-fpga0-aurora.apm Locally Added               0 
+ multifpgaenv-hwsw-exe-fpga0.apm Locally Added               0 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_vc707_256_multifpga_exe.apm Locally Added               0 
+ alpha_inorder_multifpga_exe.apm Locally Modified          199 
+ alpha_inorder_dm_wt_mesh_vc707_256_multifpga_dual_sram.apm Locally Modified          199 
+ alpha_inorder_multifpga_vc707.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-vc707-fpga0.apm Locally Modified          199 
+ multifpgaenv-hybrid-vc707-fpga1.apm Locally Modified          199 
+ hwsw/                     Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels/hwsw
+ fpga0-hwsw.apm            Locally Added               0 
+ multifpgaenv-hwsw-vc707-fpga0.apm Locally Added               0 
+ cpu0.apm                  Locally Added               0 
+ cpu0_pcie.apm             Locally Added               0 
+ fpga0-aurora-hwsw.apm     Locally Added               0 
+ vc707_0-hwsw.apm          Locally Added               0 
+ fpga0-dual-sim-vestigial-aurora.apm Locally Added               0 
+
+Directory modules/leap/virtual-platform
+ virtual-platform-li.h     Locally Added               0 
+ virtual-platform-li.awb   Locally Added               0 
+ virtual-platform-li.bsv   Locally Added               0 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          199 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.cpp    Locally Added               0 
+ flowcontrol-switch.awb    Locally Modified          199 
+ flowcontrol-switch-li.awb Locally Added               - 
+ pointer-ingress.bsv       Locally Modified          199 
+ flowcontrol-egress.h      Locally Added               0 
+ pointer-switch.awb        Locally Modified          199 
+ flowcontrol-egress.bsv    Locally Modified          199 
+ pointer-egress.cpp        Locally Added               0 
+ pointer-egress-regional.h Locally Added               0 
+ pointer-egress.h          Locally Added               0 
+ pointer-egress.bsv        Locally Modified          199 
+ flowcontrol-ingress.cpp   Locally Added               0 
+ flowcontrol-ingress.h     Locally Added               0 
+ flowcontrol-ingress.bsv   Locally Modified          199 
+ pointer-ingress.cpp       Locally Added               0 
+ pointer-ingress-regional.h Locally Added               0 
+ pointer-ingress.h         Locally Added               0 
+
+Directory modules/leap/virtual-platform/virtual-devices/platform-services
+ platform-services-master.bsv Locally Modified          199 
+
+Directory modules/leap/virtual-platform
+ low-level-platform-interface/ Locally Added               0 
+
+Directory modules/leap/virtual-platform/low-level-platform-interface
+ llpi-li.cpp               Locally Added               0 
+ llpi-li.h                 Locally Added               0 
+ llpi-li.awb               Locally Added               0 
+ llpi-li.bsv               Locally Added               0 
+ README                    Locally Added               0 
+ llpi-li.bsh               Locally Added               0 
+
+Directory modules/leap/virtual-platform
+ virtual-platform-li.cpp   Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ umfType.py                Locally Added               0 
+ multiFPGAConnect.py       Locally Modified          199 
+ danglingConnection.py     Locally Modified          199 
+ multi-fpga-connect.awb    Locally Modified          199 
+ via.py                    Locally Modified          199 
+ viaType.py                Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ tool.py                   Locally Modified          199 
+ environment.py            Locally Modified          199 
+ platform.py               Locally Modified          199 
+
+Directory modules/leap/build-support/project
+ platform-multifpga.awb    Locally Modified          199 
+ null_environment.awb      Locally Modified          199 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform_sim
+ sim-build-pipeline-multifpga.awb Locally Modified          199 
+
+Directory modules/leap/build-support/pipelines
+ hwsw/                     Locally Added               0 
+
+Directory modules/leap/build-support/pipelines/hwsw
+ multifpga_platform_sim/   Locally Added               - 
+ multifpga_platform/       Locally Added               - 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform
+ fpga-platform-build-pipeline.awb Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.cpp Locally Modified          199 
+ sim-physical-platform-fpga0.h Locally Modified          199 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device-bdpi.c Locally Modified          199 
+
+Directory modules/leap-platforms/fpga-environments/vc707
+ vc707-hwsw.env            Locally Added               0 
+ vc707_hwsw.awb            Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-dual-hwsw.env         Locally Added               0 
+ sim-dual.env              Locally Modified          199 
+ sim-hwsw-dual-fpga.env    Locally Added               0 
+ sim-hwsw.env              Locally Added               0 
+ sim_hwsw.awb              Locally Added               0 
+ sim_hwsw_dual_fpga.awb    Locally Added               0 
+ sim_dual_hwsw.awb         Locally Added               0 
+
+Directory modules/multifpga/synthTest
+ acp-mapping.map           Locally Modified          199 
+
+Directory modules/multifpga/alpha_inorder
+ sim_mapping_hwsw.awb      Locally Added               0 
+ sim-mapping-hwsw.map      Locally Added               0 
+ sim-mapping.map           Locally Modified          199 
+ acp-mapping-time-func.map Locally Modified          199 
+
+Directory modules/multifpga/throughputTest
+ basestation.awb           Locally Modified          199 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.cpp Locally Modified          199 
+
+Directory modules/multifpga/throughputTest
+ basestationImpl.bsv       Locally Modified          199 
+ basestationImpl.log       Locally Added               0 
+
+
+This massive check-in adds support for LIM-style hardware-software
+latency-insensitive channels. All previous multiple FPGA designs will
+remain fully functional (I hope.)  
+
+Merry Christmas. 
+

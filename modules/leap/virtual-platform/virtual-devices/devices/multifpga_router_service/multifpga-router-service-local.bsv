@@ -29,7 +29,6 @@ import Vector::*;
 `include "awb/provides/virtual_platform.bsh"
 `include "awb/provides/virtual_devices.bsh"
 `include "awb/provides/low_level_platform_interface.bsh"
-`include "awb/provides/rrr.bsh"
 `include "awb/provides/umf.bsh"
 `include "awb/provides/channelio.bsh"
 `include "awb/provides/physical_platform.bsh"
@@ -53,6 +52,157 @@ import Vector::*;
 // * cases are impossible to resolve into a unified set.  Notice that Send/Receive polarity is reversed - it is the opposite
 // * the user code.  
 // *******
+
+
+module mkPacketizeConnectionSendNoPack#(String name, 
+                                        PHYSICAL_SEND#(t_DATA) send, 
+                                        SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                                                                         umf_channel_id, umf_service_id,
+                                                                                         umf_method_id,  umf_message_len,
+                                                                                         umf_phy_pvt,    filler_bits), 
+                                                                     umf_chunk)) port, 
+                                        Integer id, 
+                                        NumTypeParam#(bitwidth) width, 
+                                        function Action statIncrReceived()) (Empty)
+   provisos(Bits#(t_DATA, t_DATA_SZ),
+            Div#(bitwidth,SizeOf#(umf_chunk),t_NUM_CHUNKS),
+            Add#(n_EXTRA_SZ_2, bitwidth, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))),
+            Add#(TAdd#(t_NUM_CHUNKS,1), 0, t_WORD_CHUNKS), // we already add the header in here..
+            Add#(TMul#(t_WORD_CHUNKS,`CON_BUFFERING), 0, t_BUFFER_CHUNKS),
+            Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(SizeOf#(umf_chunk), TMul#(TSub#(t_NUM_CHUNKS, 1), SizeOf#(umf_chunk)))),
+            Add#(n_EXTRA_SZ, bitwidth, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+
+     Reg#(Bool) waiting <- mkReg(True);
+ 
+     COUNTER#(TLog#(TAdd#(1,t_BUFFER_CHUNKS))) tokens <- mkLCounter(0);
+
+     DEMARSHALLER#(umf_chunk, Vector#(TSub#(t_NUM_CHUNKS,1), umf_chunk)) dem <- mkSimpleDemarshaller();  
+
+     if(`MARSHALLING_DEBUG == 1)
+     begin
+         rule view(tokens.value > 0);
+             $display("%s has value %d a multiple of %d? %d filler 0chunks %d width", 
+                      name, tokens.value, valueof(t_WORD_CHUNKS), 
+                      valueof(t_NUM_CHUNKS), valueof(SizeOf#(umf_chunk)));
+         endrule
+     end
+
+     (* execution_order = "sendReady, enqTok" *) 
+
+     rule sendReady(tokens.value < fromInteger(valueof(t_BUFFER_CHUNKS)));
+         port.read_ready();
+     endrule
+
+     rule enqTok(port.read_allocated());
+         if(`MARSHALLING_DEBUG == 1)
+         begin
+             $display("%s has value up by %d?", name, 1);
+         end
+
+         tokens.up();
+     endrule
+
+     rule returnTokens(send.dequeued);
+         if(`MARSHALLING_DEBUG == 1)
+         begin
+   	     $display("%s has value down by %d?", name, valueof(t_WORD_CHUNKS));
+         end
+
+         tokens.downBy(fromInteger(valueof(t_WORD_CHUNKS)));
+     endrule
+
+     rule startRequest (waiting);
+         GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                             umf_channel_id, umf_service_id,
+                             umf_method_id,  umf_message_len,
+                             umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
+         if(`MARSHALLING_DEBUG == 1)
+         begin
+             $display("Send NoPack Data Header: %h", pack(packet));
+             $display("NoPack Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+         end
+
+         if(packet.UMF_PACKET_header.numChunks != fromInteger(valueof(t_NUM_CHUNKS)))
+         begin
+             $display("NoPack Connection %s RX starting request dataSz: %d chunkSz: %d header chunks:  %d expected chunks: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+	     $finish;
+         end
+
+         waiting <= False;
+         statIncrReceived();
+    endrule
+
+
+    if(valueof(t_NUM_CHUNKS) > 1)
+    begin
+        rule continueRequest (!waiting && !dem.notEmpty());
+            GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                               umf_channel_id, umf_service_id,
+                               umf_method_id,  umf_message_len,
+                               umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
+            dem.enq(packet.UMF_PACKET_dataChunk);
+            statIncrReceived();
+            if(`MARSHALLING_DEBUG == 1)
+            begin
+                $display("Send NoPack Data Packet: %h", pack(packet));
+                $display("Connection RX %s receives: %h", name, packet.UMF_PACKET_dataChunk);
+            end
+        endrule
+
+        // Lurking latency here...
+        // Should try to fix at some point.    
+        rule sendData(!waiting && dem.notEmpty());
+            GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                               umf_channel_id, umf_service_id,
+                               umf_method_id,  umf_message_len,
+                              umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
+            dem.deq();
+
+            if(!send.notFull)
+            begin
+	        $display("%s Attempting to send to full send!", name);
+    	        $finish;
+            end
+
+            Bit#(bitwidth) truncatedData = truncate({pack(packet.UMF_PACKET_dataChunk),pack(dem.first)});
+            send.send(unpack(zeroExtendNP(truncatedData)));
+            if(`MARSHALLING_DEBUG == 1)
+            begin
+                $display("Data Packet: %h", pack(packet));
+  
+
+                $display("Connection %s RX %d emits out: %h", name, id, truncatedData);
+            end
+
+            waiting <= True;         
+        endrule
+    end
+    else // No demarshaller necessary.
+    begin
+          rule sendDataShort(!waiting);
+            GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                               umf_channel_id, umf_service_id,
+                               umf_method_id,  umf_message_len,
+                              umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
+
+            if(!send.notFull)
+            begin
+	        $display("%s Attempting to send to full send!", name);
+    	        $finish;
+            end
+
+            Bit#(bitwidth) truncatedData = truncateNP(pack(packet.UMF_PACKET_dataChunk));
+            send.send(unpack(zeroExtendNP(truncatedData)));
+            if(`MARSHALLING_DEBUG == 1)
+            begin
+                $display("Data Packet: %h", pack(packet));
+                $display("Connection %s RX %d emits out: %h", name, id, truncatedData);
+            end
+
+             waiting <= True;         
+        endrule
+    end
+endmodule
 
 module mkPacketizeConnectionSendMarshalled#(String name, 
                                             PHYSICAL_SEND#(t_DATA) send, 
@@ -119,15 +269,14 @@ module mkPacketizeConnectionSendMarshalled#(String name,
                              umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
          if(`MARSHALLING_DEBUG == 1)
          begin
-             $display("Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+             $display("Marshalled Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
          end
 
          if(packet.UMF_PACKET_header.numChunks != fromInteger(valueof(t_NUM_CHUNKS)))
          begin
-             $display("Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+             $display("Marshalled Connection %s RX starting request dataSz: %d chunkSz: %d header chunks:  %d expected chunks: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
 	     $finish;
          end
-
 
          waiting <= False;
          fillerBits <= packet.UMF_PACKET_header.filler;        
@@ -234,12 +383,12 @@ module mkPacketizeConnectionSendPartialMarshalled#(String name,
 
          if(`MARSHALLING_DEBUG == 1)
          begin
-             $display("Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, 1);
+             $display("Partial Marshall Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, 1);
          end
 
          if(packet.UMF_PACKET_header.numChunks != 1)
          begin
-             $display("Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, 1);
+             $display("Partial Marshall Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, 1);
 	     $finish;
          end
 
@@ -345,11 +494,99 @@ module mkPacketizeConnectionSendUnmarshalled#(String name,
 
          if(packet.UMF_PACKET_header.numChunks != 0)
          begin
-             $display("Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, 0);
+             $display("Unmarshalled Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, 0);
 	     $finish;
          end
 
         endrule
+
+endmodule
+
+
+// ********
+// *
+// * Receive endpoints
+// *
+// ********
+
+module mkPacketizeConnectionReceiveNoPack#(String name,
+                                           Connection_Receive#(t_DATA) recv,                                             
+                                           Integer id, 
+                                           NumTypeParam#(bitwidth) width,
+                                           function Action statIncrBlocked(), 
+                                           function Action statIncrSent()) 
+    (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                    umf_channel_id, umf_service_id,
+                                    umf_method_id,  umf_message_len,
+                                    umf_phy_pvt,    filler_bits),
+                                umf_chunk)) // Interface
+    provisos(Bits#(t_DATA, t_DATA_SZ),             
+             Div#(bitwidth,SizeOf#(umf_chunk),t_NUM_CHUNKS),
+             
+             // this proviso allows us to stuff payload bits into the packet header which sometimes saves a 
+             // a cycle
+             Add#(n_EXTRA_SZ, bitwidth, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+
+    PulseWire continueRequestFired <- mkPulseWire(); 
+    PulseWire startRequestFired <- mkPulseWire(); 
+
+    // Strong assumption that the marshaller holds only one data at a time
+    MARSHALLER#(umf_chunk, Vector#(t_NUM_CHUNKS, umf_chunk)) mar <- mkSimpleMarshaller();
+
+    Bit#(bitwidth) truncatedData = truncateNP(pack(recv.receive));
+   
+    method Action deqHeader() if(recv.notEmpty() && !mar.notEmpty());
+        recv.deq;
+        statIncrSent();
+        mar.enq(unpack(zeroExtend(truncatedData)));
+        startRequestFired.send();
+        if(`MARSHALLING_DEBUG == 1)
+        begin
+            $display("ReceiveNoPack got %h", recv.receive);
+
+            $display("Connection %s TX %d            chunks %d       emits out: %h", name, id, valueof(t_NUM_CHUNKS), recv.receive);
+            $display("              umf_chunk %d     filler_bits %d", valueof(SizeOf#(umf_chunk)), valueof(filler_bits));
+            $display("              extra_sz %d      data_sz %d", valueof(n_EXTRA_SZ), valueof(t_DATA_SZ));
+        end
+    endmethod
+
+    method GENERIC_UMF_PACKET_HEADER#(
+               umf_channel_id, umf_service_id,
+               umf_method_id,  umf_message_len,
+               umf_phy_pvt,    filler_bits) firstHeader() if(recv.notEmpty() && !mar.notEmpty());
+
+        return GENERIC_UMF_PACKET_HEADER
+               {
+                   filler: ?,
+                   phyChannelPvt: ?,
+                   channelID: ?, // we use this elsewhere to refer to flow control messages
+                   serviceID: fromInteger(id),
+                   methodID : 0, 
+                   numChunks: fromInteger(valueof(t_NUM_CHUNKS))
+               };
+
+
+    endmethod
+
+    method Bool notEmptyHeader;
+        return recv.notEmpty();
+    endmethod
+ 
+    method Action deqBody();
+        mar.deq();
+        statIncrSent();
+        if(`MARSHALLING_DEBUG == 1)
+        begin
+            $display("Connection %s TX sends: %h", name, mar.first);
+        end
+        continueRequestFired.send();
+    endmethod
+
+    method firstBody = mar.first;
+
+    method notEmptyBody = mar.notEmpty;
+
+    method bypassFlowcontrol = False;
 
 endmodule
 
@@ -393,6 +630,7 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
         startRequestFired.send();
         if(`MARSHALLING_DEBUG == 1)
         begin
+            $display("ReceiveMarshalled got %h", recv.receive);
             $display("Connection %s TX %d            chunks %d       emits out: %h", name, id, valueof(t_NUM_CHUNKS), recv.receive);
             $display("              umf_chunk %d     filler_bits %d", valueof(SizeOf#(umf_chunk)), valueof(filler_bits));
             $display("              extra_sz %d     extra_sz_2 %d    data_sz %d", valueof(n_EXTRA_SZ), valueof(n_EXTRA_SZ_2), valueof(t_DATA_SZ));
@@ -410,7 +648,7 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
                    phyChannelPvt: ?,
                    channelID: ?, // we use this elsewhere to refer to flow control messages
                    serviceID: fromInteger(id),
-                   methodID : ?, 
+                   methodID : 0, 
                    numChunks: fromInteger(valueof(t_NUM_CHUNKS))
                };
 
@@ -486,7 +724,7 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
                     phyChannelPvt: ?,
                     channelID: ?, // we use this elsewhere to refer to flow control messages
                     serviceID: fromInteger(id),
-                    methodID : ?,
+                    methodID : 0,
                     numChunks: 0
                 };
      endfunction
@@ -555,7 +793,8 @@ module mkPacketizeOutgoingChainMarshalled#(String name,
               Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
               Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(SizeOf#(umf_chunk), TAdd#(TMul#(TSub#(t_NUM_CHUNKS, 1), SizeOf#(umf_chunk)),filler_bits))),
               Add#(TMul#(TSub#(t_NUM_CHUNKS, 1), umf_chunk_SZ), umf_chunk_SZ, TMul#(t_NUM_CHUNKS, umf_chunk_SZ)),
-              Add#(n_EXTRA_SZ, TSub#(bitwidth, filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+              Add#(n_EXTRA_SZ, TSub#(bitwidth, filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))),
+              Mul#(t_NUM_CHUNKS, umf_chunk_SZ, TAdd#(TMul#(TSub#(t_NUM_CHUNKS, 1),umf_chunk_SZ), umf_chunk_SZ)));
 
     // We need a clock and reset due to MCD code
     let myClock <- exposeCurrentClock;

@@ -6,6 +6,7 @@
 %provides multi_fpga_connect
 %requires fpgamap_parser
 %requires type_parser
+%requires umf
 
 %scons %library multiFPGAConnect.py
 %scons %library taggedUnionCompress.py
@@ -14,11 +15,14 @@
 %scons %library linkType.py
 %scons %library danglingConnection.py
 %scons %library via.py
+%scons %library umfType.py
 %scons %library code.py
 
 
 
 %param --global MAX_NUMBER_OF_VIAS 4 "True if we can expect that the router has been generated"
 %param --global ENABLE_TYPE_COMPRESSION 0 "Should we enable experimental type compression?"
+%param --global ENABLE_AGRESSIVE_UMF_PARAMETERS 0 "Should we enable experimental type compression?"
+%param --global USE_DEFAULT_UMF_PARAMETERS 1 "Should we enable experimental type compression?"
 %param --global MIN_NUMBER_OF_VIAS 1 "True if we can expect that the router has been generated"
 %param --global ANALYZE_NETWORK "analyzeNetworkRandom" "Which analysis function should we be calling."
