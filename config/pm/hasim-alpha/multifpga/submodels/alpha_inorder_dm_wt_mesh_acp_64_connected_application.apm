@@ -57,7 +57,8 @@ hasim_private_caches=Direct Mapped, Writethrough Private Caches
 
 [Chip Base Types/Params]
 MAX_NUM_CPUS=64
-MAX_NUM_MEM_CTRLS=16
+MAX_NUM_MEM_CTRLS=8
+NUM_EXTRA_OCN_STATIONS=8
 
 [Multi-Core Chip/Requires]
 chip_base_types=Chip Base Types

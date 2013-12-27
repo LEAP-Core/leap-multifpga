@@ -4141,3 +4141,16 @@ remain fully functional (I hope.)
 
 Merry Christmas. 
 
+
+----------
+mcadler     Date: Thu Dec 26 22:50:47 EST 2013  CSN: CSN-multifpga-201
+                  Fri Dec 27 03:50:47 UTC 2013
+
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm Locally Modified          200 
+ alpha_inorder_dm_wt_mesh_acp_64_connected_application.apm Locally Modified          200 
+ alpha_inorder_dm_wt_mesh_acp_128_connected_application.apm Locally Modified          200 
+ alpha_inorder_dm_wt_mesh_acp_256_connected_application.apm Locally Modified          200 
+
+Match single FPGA configurations.
