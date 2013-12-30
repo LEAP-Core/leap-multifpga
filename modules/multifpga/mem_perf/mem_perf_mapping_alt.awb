@@ -1,0 +1,8 @@
+%name Mem Perf Alternate Mapping
+%desc Mem Perf Alternate Mapping
+
+%attributes tool
+
+%provides fpga_mapping
+
+%sources -t FPGAENV_MAPPING -v PUBLIC mem-perf-mapping-alt.map

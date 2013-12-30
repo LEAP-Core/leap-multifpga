@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=Scratchpad Perf Test Connected Application
 environment_description=Simulation Dual FPGA Environment with Dual Cache
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Mem Perf Simulation Mapping
+fpga_mapping=Mem Perf Standard Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -46,6 +46,7 @@ Packagehint=multifpga
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
+umf=Little-Endian Unified Message Format
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -82,16 +83,11 @@ Packagehint=leap-debug
 
 [Scratchpad Memory Performance Test System Wrapper/Requires]
 mem_perf_tester=Scratchpad Memory Performance Test System
-mem_perf_tester_alt=Scratchpad Memory Performance Test System (FPGA1)
 mem_perf_common=Mem perf common types
 
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
-
-[Scratchpad Memory Performance Test System (FPGA1)]
-File=modules/apps/tests/mem_perf/mem-perf-alt.awb
-Packagehint=leap-debug
 
 [Mem perf common types]
 File=modules/apps/tests/mem_perf/mem-perf-common.awb
@@ -101,6 +97,11 @@ Packagehint=leap-debug
 File=modules/leap-platforms/fpga-environments/sim/sim_fpga_cache_env.awb
 Packagehint=multifpga
 
-[Mem Perf Simulation Mapping]
-File=modules/multifpga/mem_perf/sim_mapping.awb
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[Mem Perf Standard Mapping]
+File=modules/multifpga/mem_perf/mem_perf_mapping_std.awb
 Packagehint=multifpga

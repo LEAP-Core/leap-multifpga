@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=mem_perf_multifpga_ml605
+File=mem_perf_multifpga_vc707
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -18,7 +18,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=Scratchpad Perf Test Connected Application
-environment_description=ML605 Dual FPGA Environment (SMA)
+environment_description=VC707 Dual FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Mem Perf Standard Mapping
 
@@ -94,14 +94,10 @@ Packagehint=multifpga
 File=modules/apps/tests/mem_perf/mem-perf-common.awb
 Packagehint=leap-debug
 
-[ML605 Dual FPGA Environment (SMA)]
-File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_env.awb
-Packagehint=multifpga
-
 [Global]
 SaveParameters=0
 Description=has strange module alingments
-File=mem_perf_multifpga_ml605
+File=mem_perf_multifpga_vc707
 Version=2.2
 Name=Multifpga synthesis test 
 DefaultBenchmark=
@@ -117,7 +113,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=Scratchpad Perf Test Connected Application
-environment_description=ML605 Dual FPGA Environment (SMA)
+environment_description=VC707 Dual FPGA Environment (SMA)
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=Mem Perf Standard Mapping
 
@@ -190,18 +186,18 @@ mem_perf_common=Mem perf common types
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
 Packagehint=multifpga
 
-
 [Mem perf common types]
 File=modules/apps/tests/mem_perf/mem-perf-common.awb
 Packagehint=leap-debug
 
-[ML605 Dual FPGA Environment (SMA)]
-File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_env.awb
-Packagehint=multifpga
 
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=leap-platforms
+
+[VC707 Dual FPGA Environment (SMA)]
+File=modules/leap-platforms/fpga-environments/vc707/vc707_dual_env.awb
+Packagehint=multifpga
 
 [Mem Perf Standard Mapping]
 File=modules/multifpga/mem_perf/mem_perf_mapping_std.awb

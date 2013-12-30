@@ -1,9 +1,0 @@
-model -> ACP0;
-common_services -> ACP0;
-connected_application -> ACP0;
-hardware_system -> ACP0;
-mem_perf_tester -> ACP1;
-mem_perf_wrapper -> ACP0;
-mem_perf_tester_alt -> ACP0;
-
-

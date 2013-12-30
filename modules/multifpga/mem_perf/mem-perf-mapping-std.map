@@ -1,0 +1,9 @@
+model -> FPGA0;
+common_services -> FPGA0;
+connected_application -> FPGA0;
+hardware_system -> FPGA0;
+mem_perf_tester -> FPGA1;
+mem_perf_wrapper -> FPGA0;
+mem_perf_tester_alt -> FPGA0;
+
+

@@ -85,7 +85,9 @@ void comm_init()
 
 }
 
-void process_incoming(Channel * descriptor) {
+void* process_incoming(void* arg) {
+  Channel* descriptor = (Channel*)arg;
+
   // I assume that the sender will create the fifo for me. 
  
   // There's probably a race condition here.  We should sleep and retry for a while. 
@@ -105,7 +107,7 @@ void process_incoming(Channel * descriptor) {
     // This isn't necessarily an error.
     // We probably need some better phase in which we attempt to communicate with everything that 
     // should exist.
-    return;
+    return NULL;
   } else {
     if(DEBUG_COMM) {
       fprintf(stderr, "Opened %s\n", descriptor->incomingFIFO);
@@ -116,8 +118,8 @@ void process_incoming(Channel * descriptor) {
 
   do {
     bytes_read = read(infile,
-		      &buffer,
-		      sizeof(CommBlock));
+                      &buffer,
+                      sizeof(CommBlock));
   } while ((bytes_read < sizeof(CommBlock)) || !buffer.sync);
 
   if(DEBUG_COMM) {
@@ -131,8 +133,8 @@ void process_incoming(Channel * descriptor) {
     CommBlock * buffer = (CommBlock*) malloc(sizeof(CommBlock));
   
     bytes_read = read(infile,
-		      buffer,
-		      sizeof(CommBlock));
+                      buffer,
+                      sizeof(CommBlock));
 
     if(bytes_read == -1) {
       fprintf(stderr, "Error %d in unix-pipe-device-bdpi::pipe_read()\n", errno);
@@ -146,6 +148,7 @@ void process_incoming(Channel * descriptor) {
     g_async_queue_push(descriptor->incomingQ,buffer);     
   }
 
+  return NULL;
 }
 
 int send_block(int fd, CommBlock *block, Channel *channel) {
@@ -173,7 +176,9 @@ int send_block(int fd, CommBlock *block, Channel *channel) {
     return bytes_written;
 }
 
-void process_outgoing(Channel * channel) {
+void* process_outgoing(void* arg) {
+  Channel* channel = (Channel*)arg;
+
   // It's our responsibility to unlink an existing fifo and to set it up.                                                                                           
   int outfile;
 
@@ -214,6 +219,7 @@ void process_outgoing(Channel * channel) {
     free(block); 
   }
 
+  return NULL;
 }
 
 
@@ -290,8 +296,8 @@ unsigned char comm_open(char* outgoing, char* incoming)
  
     strcat(channel->outgoingFIFO,outgoing);
 
-    pthread_create(&(channel->incomingThread), NULL, &process_incoming,channel);
-    pthread_create(&(channel->outgoingThread), NULL, &process_outgoing,channel);
+    pthread_create(&(channel->incomingThread), NULL, &process_incoming, channel);
+    pthread_create(&(channel->outgoingThread), NULL, &process_outgoing, channel);
 
     /* initialize channel */
     channel->open = 1;
@@ -345,12 +351,12 @@ unsigned long long comm_read(unsigned char handle)
     block = g_async_queue_pop(channel->incomingQ); 
     for (i = 0; i < BDPI_CHUNK_BYTES; i++)
     {
-    	unsigned long long byte = block->chunk[i];
-	if(DEBUG_COMM) {
-	  printf("comm byte %d = %x\n", byte, block->chunk[i]);
-	}
+        unsigned long long byte = block->chunk[i];
+        if(DEBUG_COMM) {
+          printf("comm byte %lld = %x\n", byte, block->chunk[i]);
+        }
 
-    	retval |= ((byte & 0xff) << (i * 8));
+        retval |= ((byte & 0xff) << (i * 8));
     }
 
     if(DEBUG_COMM) {
@@ -421,9 +427,9 @@ void comm_write(unsigned char handle, unsigned long long data)
         unsigned char byte = (mask & data) >> (i * 8);
         buffer->chunk[i] = (unsigned char)byte;
         mask = mask << 8;
-	if(DEBUG_COMM) {
-	  printf("comm byte %d = %x\n", i, buffer->chunk[i]);
-	}
+        if(DEBUG_COMM) {
+          printf("comm byte %d = %x\n", i, buffer->chunk[i]);
+        }
     }
 
 

@@ -4154,3 +4154,36 @@ Directory config/pm/hasim-alpha/multifpga/submodels
  alpha_inorder_dm_wt_mesh_acp_256_connected_application.apm Locally Modified          200 
 
 Match single FPGA configurations.
+
+----------
+mcadler     Date: Mon Dec 30 14:38:38 EST 2013  CSN: CSN-multifpga-202
+                  Mon Dec 30 19:38:38 UTC 2013
+
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_exe.apm Locally Modified          201 
+ mem_perf_multifpga_acp.apm Locally Modified          201 
+ mem_perf_multifpga_alt_acp.apm Locally Modified          201 
+ mem_perf_multifpga_ml605.apm Locally Modified          201 
+ mem_perf_multifpga_vc707.apm Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm Locally Modified          201 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device-bdpi.c Locally Modified          201 
+
+Directory modules/multifpga/mem_perf
+ mem-perf-mapping-std.map  Locally Added               - 
+ acp_mapping.awb           Locally Removed           201 
+ acp-mapping-alt.map       Locally Removed           201 
+ acp_mapping_alt.awb       Locally Removed           201 
+ mem_perf_mapping_std.awb  Locally Added               - 
+ acp-mapping.map           Locally Removed           201 
+ sim_mapping.awb           Locally Removed           201 
+ mem-perf-mapping-alt.map  Locally Added               0 
+ sim-mapping.map           Locally Removed           201 
+ mem_perf_mapping_alt.awb  Locally Added               0 
+
+- Clean up mem_perf configurations.
+- Fix compilation warnings in unix-communication-device-bdpi.c

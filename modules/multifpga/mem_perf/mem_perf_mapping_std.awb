@@ -1,0 +1,8 @@
+%name Mem Perf Standard Mapping
+%desc Mem Perf Standard Mapping
+
+%attributes tool
+
+%provides fpga_mapping
+
+%sources -t FPGAENV_MAPPING -v PUBLIC mem-perf-mapping-std.map
