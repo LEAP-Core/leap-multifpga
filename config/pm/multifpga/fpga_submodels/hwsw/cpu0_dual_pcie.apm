@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=ACP FPGA 0 compute platform for multiple FPGA
-File=fpga0-hwsw
+Description=CPU 0 compute platform for multiple FPGA
+File=cpu0_dual_pcie
 Version=2.2
-Name=ACP FPGA 0
+Name=CPU 0
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -38,7 +38,7 @@ Packagehint=multifpga
 [MultiFPGA Platform/Requires]
 fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=HWSW MultiFPGA Simulation Aurora FPGA0 Environment
+fpgaenv=LEAP Dual PCIE CPU0 Environment
 application_env=Soft Services Hybrid Application Environment
 environment_description=Null FPGA Environment
 
@@ -50,10 +50,6 @@ Packagehint=multifpga
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
 
-[HWSW MultiFPGA Simulation Aurora FPGA0 Environment/Params]
-NUM_FPGA=2
-PLATFORM_ID="FPGA0"
-
-[HWSW MultiFPGA Simulation Aurora FPGA0 Environment]
-File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hwsw-exe-fpga0-aurora.apm
+[LEAP Dual PCIE CPU0 Environment]
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-dual-pcie-cpu0.apm
 Packagehint=multifpga

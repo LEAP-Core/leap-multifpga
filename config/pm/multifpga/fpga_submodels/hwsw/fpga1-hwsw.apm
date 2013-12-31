@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=ACP FPGA 0 compute platform for multiple FPGA
-File=fpga0-hwsw
+File=fpga1-hwsw
 Version=2.2
 Name=ACP FPGA 0
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
@@ -52,7 +52,7 @@ Packagehint=multifpga
 
 [HWSW MultiFPGA Simulation Aurora FPGA0 Environment/Params]
 NUM_FPGA=2
-PLATFORM_ID="FPGA0"
+PLATFORM_ID="FPGA1"
 
 [HWSW MultiFPGA Simulation Aurora FPGA0 Environment]
 File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hwsw-exe-fpga0-aurora.apm

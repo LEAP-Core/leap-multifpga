@@ -1,0 +1,15 @@
+
+%name Dual PCIE Software Physical Platform
+%desc Dual PCIE Software Physical Platform
+
+%provides physical_platform
+
+%requires physical_platform_config
+%requires pcie_device
+%requires physical_platform_utils
+
+%sources --t H   --v PUBLIC  dual-pcie-physical-platform.h
+%sources --t CPP --v PRIVATE dual-pcie-physical-platform.cpp
+
+
+

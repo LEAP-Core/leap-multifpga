@@ -4229,3 +4229,86 @@ Directory config/pm/multifpga/fpga_submodels
  multifpgaenv-hybrid-xupv5-fpga0-sata.apm Locally Modified          202 
 
 Remove non-default BSC_FLAGS specification.
+
+----------
+keflemin    Date: Tue Dec 31 14:45:10 EST 2013  CSN: CSN-multifpga-204
+                  Tue Dec 31 19:45:10 UTC 2013
+
+
+Directory experiments
+ multifpga/                Locally Added               0 
+
+Directory experiments/multifpga
+ nightly/                  Locally Added               0 
+
+Directory experiments/multifpga/nightly
+ nightly.models            Locally Added               0 
+ nightly.benchmarks        Locally Added               0 
+
+Directory .
+ experiments/              Locally Added               0 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_exe.apm Locally Modified          203 
+
+Directory config/pm/leap/demos/multifpga/li
+ rrr_test_li.apm           Locally Modified          203 
+ li_test_vc707.apm         Locally Modified          203 
+ li_test_sim.apm           Locally Modified          203 
+ li_test_dual_vc707.apm    Locally Added               0 
+ li_test_dual_sim.apm      Locally Modified          203 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-dual-pcie-cpu0.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels/hwsw
+ fpga0-hwsw.apm            Locally Modified          203 
+ fpga1-hwsw.apm            Locally Added               0 
+ cpu0_dual_pcie.apm        Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          203 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          203 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform
+ pcie/                     Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pcie
+ dualPCIE/                 Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pcie/dualPCIE
+ dual-pcie-physical-platform.cpp Locally Added               0 
+ dual-pcie-physical-platform.h Locally Added               0 
+ dual-pcie-physical-platform.awb Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpgaN
+ sim-physical-platform-fpgaN.h Locally Modified          203 
+ sim-physical-platform-fpgaN.cpp Locally Modified          203 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.cpp Locally Modified          203 
+ sim-physical-platform-fpga0.h Locally Modified          203 
+
+Directory modules/leap-platforms/fpga-environments/vc707
+ vc707-dual-hwsw.env       Locally Added               0 
+ vc707_dual_hwsw.awb       Locally Added               0 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-dual-hwsw.env         Locally Modified          203 
+ sim-hwsw.env              Locally Modified          203 
+
+Directory modules/multifpga/synthTest
+ acp-mapping.map           Locally Modified          203 
+
+
+1) Added support for multiple platforms communicating simultaneously
+with software.
+
+2) Fixed build rules for CPU and FPGA platforms.  The dependencies for
+producing the FPGA strings files were not correct.
+
+3) Added a nightly regression test for the multifpga package. 
+
+

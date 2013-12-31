@@ -44,14 +44,12 @@ class MultiFPGAGenerateBitfile():
     if(len(envFile) != 1):
       print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
     self.mapping = parseFPGAMap(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
-    print "mapping keys: " + str(self.mapping.getPlatformNames)
+
   
     envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENVS')
     if(len(envFile) != 1):
       print "Found more than one environment file: " + str(envFile) + ", exiting\n"
     self.environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
-    print "environment keys: " + str(self.environment.getPlatformNames)
-
 
     def compile_closure(platform):
 
@@ -60,8 +58,6 @@ class MultiFPGAGenerateBitfile():
            platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
            platformPath = makePlatformConfigPath(platformAPMName)
            platformBuildDir = makePlatformBuildDir(platform.name)
-
-           print "alive in call platform log " + platformPath
 
            ##
            ## Did the user specify a command to compile the bitfiles as an
@@ -76,10 +72,9 @@ class MultiFPGAGenerateBitfile():
                compile_cmd += ' EVENTS=' + str(getEvents(moduleList))
 
            compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
-           print compile_cmd
-
+ 
            sts = execute(compile_cmd)
-           print "dead in call platform log"
+           
            return sts
          return compile_platform_log
 
@@ -88,19 +83,16 @@ class MultiFPGAGenerateBitfile():
          def cat_string_files(target, source, env):
            strings = ""
            for file in strlist:
-             print "Catting " + file
              fileHandle = open(file,"r")
              strings += fileHandle.read()
              fileHandle.close()
 
            # only the master needs the whole list of strings.
-           print "appending " + masterstr
            fileHandle = open(masterstr,"w")
            fileHandle.write(strings)
            fileHandle.close()
            
          return cat_string_files
-
 
     moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] = []
 
@@ -117,13 +109,12 @@ class MultiFPGAGenerateBitfile():
     for platformName in self.environment.getPlatformNames():
       platform = self.environment.getPlatform(platformName)
       platformType = platform.platformType
-      platformAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
+      platformAPMBaseName = makePlatformBitfileName(platform.name,APM_NAME)
+      platformAPMName = platformAPMBaseName + '.apm'
       platformPath = makePlatformConfigPath(platformAPMName)
       platformBuildDir = makePlatformBuildDir(platform.name)
       bitfile = platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.xilinx/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_'
 
-      print "wrapper: " + bitfile
-      print "platformPath: " + platformPath
 
       #sprinkle breadcrumbs in config file
       master = 0
@@ -135,10 +126,11 @@ class MultiFPGAGenerateBitfile():
       # to maintain compatibility, we inject a pointer to the CPU in this case.
       if(master):
           platformMetadata.append('{"name" =>"' + makePlatformBitfileName(platform.name,APM_NAME) + '", "type" => "CPU"' + \
-                                  ', "directory" => "' + platformBuildDir + '", "master", "0"}')
+                                  ', "directory" => "' + platformBuildDir + '", "master" => "0" , "logicalName" => "CPU0"}')
     
       platformMetadata.append('{"name" =>"' + makePlatformBitfileName(platform.name,APM_NAME) + '", "type" => "' + platformType + \
-                              '", "directory" => "' + platformBuildDir + '", "master", "' + str(platform.master) + '"}')
+                              '", "directory" => "' + platformBuildDir + '", "master" => "' + str(platform.master) + \
+                              '", "logicalName" => "' + platform.name + '"}')
 
       execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
       execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
@@ -174,7 +166,6 @@ class MultiFPGAGenerateBitfile():
           missingDicts += seperator+dict
           firstPass = False
 
-      print "missingDicts: " + missingDicts
 
 
       # RRRs can appear in services sometimes and thereby lack global 
@@ -189,8 +180,6 @@ class MultiFPGAGenerateBitfile():
             seperator = ''
           missingRRRs += seperator+rrr
           firstPass = False
-
-      print "missingRRRsBitfiles: " + missingRRRs
 
     
       execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_DICTS \\"' + missingDicts  + '\\"')
@@ -211,7 +200,6 @@ class MultiFPGAGenerateBitfile():
           linkDir  = makePlatformDictDir(platform.name)  
           linkPath = linkDir  + '/' + dict
           relDictPath = relpath(dictPath, linkDir)
-          print "missing link: " + linkPath + ' -> ' + relDictPath
           if(os.path.lexists(linkPath)):
             print("This symlink already exists: " + makePlatformDictDir(platform.name)  + '/' + dict)
           else:
@@ -229,18 +217,17 @@ class MultiFPGAGenerateBitfile():
             #the rrr values have some hierarchical information in them...
             linkPath  = makePlatformRRRDir(platform.name)  + '/' + rrr
             linkDir = os.path.dirname(linkPath)
-            print ('Link dir is ' + linkDir)
             os.symlink(relpath(rrrPath, linkDir), linkPath)
 
-      strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMName + '.str'
+      strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMBaseName + '.str'
       # this dependency on platform logs is coarse.  we could do better, but it may not be necessary
       subbuild = moduleList.env.Command( 
-          [bitfile,strfile],
+          [bitfile, strfile],
           moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
           compile_closure(platform)
           )                   
       moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] += [bitfile] 
-
+      
     # END for platform
     configFile.write('platforms=['+ ",".join(platformMetadata) +']\n')
     configFile.close()
@@ -250,18 +237,20 @@ class MultiFPGAGenerateBitfile():
     master = moduleList.buildDirectory + '/' + moduleList.apmName + ".str"
     for platformName in self.environment.getPlatformNames():
       platform = self.environment.getPlatform(platformName)
-      platformAPMName = makePlatformBitfileName(platform.name,APM_NAME)
+      platformAPMBaseName = makePlatformBitfileName(platform.name,APM_NAME)
       platformBuildDir = makePlatformBuildDir(platform.name)
-      strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMName + '.str'
-      print "string file is??? " +  strfile
+      strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMBaseName + '.str'
+
       # CPUs don't have strings (maybe they should?)
       if(platform.platformType == 'FPGA' or platform.platformType == 'BLUESIM'):
         strlist.append(strfile)
 
+
     strcat = moduleList.env.Command(
           [moduleList.apmName + ".str"],
-          strlist + moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'],
+          strlist,
           strcat_closure(strlist,master)
           )
 
-    moduleList.topDependency += [strcat]
+    # not all top-level targets produce bitfiles.
+    moduleList.topDependency += [strcat] + moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES']

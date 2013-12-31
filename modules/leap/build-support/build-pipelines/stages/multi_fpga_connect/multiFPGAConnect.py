@@ -1391,8 +1391,9 @@ class MultiFPGAConnect():
           egressFactoryNames = []
           ingressFactoryNames = []
           factoryInitializers = []
-          incomingChannels = []
-          outgoingChannels = []
+          # Each physical channel will have its own set of incoming/outgoing channels.
+          incomingChannels = {}
+          outgoingChannels = {}
           flowcontrolInit = []
 
           print "CPU connected to " + str(self.platformData[platform]['CONNECTED'].keys())
@@ -1402,6 +1403,9 @@ class MultiFPGAConnect():
           for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
               hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
               hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]  
+
+              incomingChannels[targetPlatform] = []
+              outgoingChannels[targetPlatform] = []
 
               egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
               ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
@@ -1428,17 +1432,17 @@ class MultiFPGAConnect():
               viaIdx = range(len(ingressVias))    
               for via in ingressVias:
 
-                  outgoingChannels.append('\t\toutgoingChannels[' + str(via.via_outgoing_flowcontrol_via) + ']->at(' + str(via.via_outgoing_flowcontrol_link) + ') = new  FLOWCONTROL_OUT_CLASS(incomingChannels[' + str(viaIdx[0])+ '],mergedOutQ['+ str(via.via_outgoing_flowcontrol_via) +']);\n')
+                  outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(via.via_outgoing_flowcontrol_link) + ') = new  FLOWCONTROL_OUT_CLASS(incomingChannels["' + targetPlatform + '"],mergedOutQ["'+ targetPlatform +'"]);\n')
 
-                  flowcontrolInit.append('\t\t((FLOWCONTROL_OUT_CLASS*)outgoingChannels[' + str(via.via_outgoing_flowcontrol_via) + ']->at(' + str(via.via_outgoing_flowcontrol_link) + '))->Init();\n')
+                  flowcontrolInit.append('\t\t((FLOWCONTROL_OUT_CLASS*)outgoingChannels["' + targetPlatform + '"]->at(' + str(via.via_outgoing_flowcontrol_link) + '))->Init();\n')
                   viaIdx.pop()
 
               viaIdx = range(len(egressVias))    
               for via in egressVias:
 
-                  incomingChannels.append('\t\tincomingChannels[' + str(via.via_outgoing_flowcontrol_via) + ']->at(' + str(via.via_outgoing_flowcontrol_link) + ') = new FLOWCONTROL_IN_CLASS(outgoingChannels[' + str(viaIdx[0])+ '],mergedOutQ['+ str(viaIdx[0]) +'],(UMF_FACTORY) new ' + egressFactoryNames[via.via_outgoing_flowcontrol_link] + '(),' + str(via.via_outgoing_flowcontrol_link) +');\n')
+                  incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(via.via_outgoing_flowcontrol_link) + ') = new FLOWCONTROL_IN_CLASS(outgoingChannels["' + targetPlatform + '"],mergedOutQ["'+ targetPlatform + '"],(UMF_FACTORY) new ' + egressFactoryNames[via.via_outgoing_flowcontrol_link] + '(),' + str(via.via_outgoing_flowcontrol_link) +');\n')
 
-                  flowcontrolInit.append('\t\t((FLOWCONTROL_IN_CLASS*)incomingChannels[' + str(via.via_outgoing_flowcontrol_via) + ']->at(' + str(via.via_outgoing_flowcontrol_link) + '))->Init();\n')
+                  flowcontrolInit.append('\t\t((FLOWCONTROL_IN_CLASS*)incomingChannels["' + targetPlatform + '"]->at(' + str(via.via_outgoing_flowcontrol_link) + '))->Init();\n')
                   viaIdx.pop()
                     
               if(len(egressVias) != 1  or len(ingressVias) != 1):
@@ -1510,7 +1514,7 @@ class MultiFPGAConnect():
                       print "Error: software can't handle chains at this time...:  " + str(dangling)
                       sys.exit(-1)
                       
-          header.write("\tvector<tbb::concurrent_bounded_queue<UMF_MESSAGE>*> mergedOutQ;\n")
+          header.write("\tmap<string, tbb::concurrent_bounded_queue<UMF_MESSAGE>*> mergedOutQ;\n")
           connections.pop()
 
           platformSends.append(sends)
@@ -1544,28 +1548,30 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
                   if(dangling.inverse_sc_type == 'Recv'):
                       print " CPU lays down (inverse Recv)" + str(dangling) 
                       #these need to be ordered so that the index operator in the read thread will do the right thing.  
-                      incomingChannels.append('\t\tincomingChannels[' + str(dangling.via_idx) + ']->at(' + str(dangling.via_link) + ') = new MARSHALLED_LI_CHANNEL_IN_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ['+ str(ingressVias[dangling.via_idx].via_outgoing_flowcontrol_via) +'], "'+ dangling.name + '", (UMF_FACTORY) new ' + egressFactoryNames[ingressVias[0].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link) +'\n\n')
+                      incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new MARSHALLED_LI_CHANNEL_IN_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.name + '", (UMF_FACTORY) new ' + egressFactoryNames[ingressVias[0].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link) +'\n\n')
                   elif(dangling.inverse_sc_type == 'Send'):
                       print " CPU lays down (inverse Send) " + str(dangling) 
-                      outgoingChannels.append('\t\toutgoingChannels[' + str(dangling.via_idx) + ']->at(' + str(dangling.via_link) + ') = new MARSHALLED_LI_CHANNEL_OUT_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ['+ str(dangling.via_idx) +'],(UMF_FACTORY) new ' + egressFactoryNames[connections[0]] + '(),\n\t\t"'+ dangling.name + '",' + str(dangling.via_link) + ');\n\n')
+                      outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new MARSHALLED_LI_CHANNEL_OUT_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[connections[0]] + '(),\n\t\t"'+ dangling.name + '",' + str(dangling.via_link) + ');\n\n')
 
 
           # During the first pass, we construct the data types.  From the preceding loop, we know the number of channels.
           for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
               hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-              header.write('\t\tincomingChannels.push_back(new vector<LI_CHANNEL_IN>());\n')
-              header.write('\t\toutgoingChannels.push_back(new vector<LI_CHANNEL_OUT>());\n')
+              header.write('\t\tincomingChannels["' + targetPlatform + '"] = (new vector<LI_CHANNEL_IN>());\n')
+              header.write('\t\toutgoingChannels["' + targetPlatform + '"] = (new vector<LI_CHANNEL_OUT>());\n')
               #header.write('\t\tmergedOutQ.push_back(new tbb::concurrent_bounded_queue<UMF_MESSAGE>());\n')
-              header.write('\t\tmergedOutQ.push_back(' + hopFromTarget +'->GetWriteQ());\n')
-              
-              for channel in incomingChannels:              
-                  header.write('\t\tincomingChannels.back()->push_back(NULL);\n')
-              for channel in outgoingChannels:                                           
-                  header.write('\t\toutgoingChannels.back()->push_back(NULL);\n')
+              header.write('\t\tmergedOutQ["' + targetPlatform + '"] = (' + hopFromTarget +'->GetWriteQ());\n')
+              header.write('\t\t' + hopFromTarget +'->RegisterLogicalDeviceName("' + targetPlatform + '");\n')
+
+              for channel in incomingChannels[targetPlatform]:              
+                  header.write('\t\tincomingChannels["' + targetPlatform + '"]->push_back(NULL);/*' + channel+ '*/\n')
+              for channel in outgoingChannels[targetPlatform]:                                           
+                  header.write('\t\toutgoingChannels["' + targetPlatform + '"]->push_back(NULL);/*' + channel + '*/\n')
 
           # we've collected all of the channels, now emit them.
-          for channel in incomingChannels + outgoingChannels:
-              header.write(channel)
+          for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():          
+              for channel in incomingChannels[targetPlatform] + outgoingChannels[targetPlatform]:
+                  header.write(channel)
 
           for init in flowcontrolInit:
               header.write(init)
@@ -1587,7 +1593,7 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
               hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]  
               header.write("\t\treaderArgs = (void**) malloc(2*sizeof(void*));\n")
               header.write("\t\treaderArgs[0] = " + hopFromTarget + ";\n")
-              header.write("\t\treaderArgs[1] = incomingChannels[" + str(connections[0]) + "];\n")
+              header.write('\t\treaderArgs[1] = incomingChannels["' + targetPlatform + '"];\n')
               header.write("\t\tif (pthread_create(&ReaderThreads[" + str(connections[0]) + "],\n")
               header.write("\t\t                   NULL,\n")
               header.write("\t\t                   " + incomingThreadFuncName(platform, targetPlatform) + ",\n")
@@ -1599,7 +1605,7 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
 
               header.write("\t\twriterArgs = (void**) malloc(2*sizeof(void*));\n")
               header.write("\t\twriterArgs[0] = " + hopToTarget + ";\n")
-              header.write("\t\twriterArgs[1] = mergedOutQ[" + str(connections[0]) + "];\n")
+              header.write('\t\twriterArgs[1] = mergedOutQ["' + targetPlatform + '"];\n')
               #header.write("\t\tif (pthread_create(&WriterThreads[" + str(connections[0]) + "],\n")
               #header.write("\t\t                   NULL,\n")
               #header.write("\t\t                   " + outgoingThreadFuncName(platform, targetPlatform) +",\n")

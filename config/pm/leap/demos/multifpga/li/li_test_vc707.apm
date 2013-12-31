@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=Latency-insensitive Channel Test and Benchmarking Program
 environment_description=VC707 HW/SW Environment
 build_pipeline=multiFPGA Build Pipeline
-fpga_mapping=Test ACP Mapping
+fpga_mapping=LI Test Single FPGA Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -50,10 +50,6 @@ Packagehint=multifpga
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
-Packagehint=multifpga
-
-[Test ACP Mapping]
-File=modules/multifpga/synthTest/acp_mapping.awb
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator]
@@ -89,3 +85,7 @@ Packagehint=multifpga
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=leap-platforms
+
+[LI Test Single FPGA Mapping]
+File=modules/apps/examples/litest/mappings/single_fpga.awb
+Packagehint=leap-examples
