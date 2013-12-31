@@ -4187,3 +4187,45 @@ Directory modules/multifpga/mem_perf
 
 - Clean up mem_perf configurations.
 - Fix compilation warnings in unix-communication-device-bdpi.c
+
+----------
+mcadler     Date: Tue Dec 31 13:46:35 EST 2013  CSN: CSN-multifpga-203
+                  Tue Dec 31 18:46:35 UTC 2013
+
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN.apm Locally Modified          202 
+ multifpgaenv-hybrid-exe-fpga0.apm Locally Modified          202 
+ multifpgaenv-hybrid-exe-airblue-fpga0.apm Locally Modified          202 
+ multifpgaenv-hybrid-exe-fpga1.apm Locally Modified          202 
+ multifpgaenv-hybrid-exe-airblue-fpga1.apm Locally Modified          202 
+ multifpgaenv-hybrid-exe-fpga0-dist-cache.apm Locally Modified          202 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hwsw-exe-fpga0.apm Locally Modified          202 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga1-dist-cache.apm Locally Modified          202 
+ multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm Locally Modified          202 
+ multifpgaenv-hybrid-exe-fpga0-aurora.apm Locally Modified          202 
+ multifpgaenv-hybrid-exe-fpga0-quad.apm Locally Modified          202 
+
+Directory config/pm/leap/submodels/pipelines
+ build-pipeline-xilinx-multifpga.apm Locally Modified          202 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-vc707-fpga0.apm Locally Modified          202 
+ multifpgaenv-hybrid-vc707-fpga1.apm Locally Modified          202 
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified          202 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified          202 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified          202 
+
+Directory config/pm/multifpga/fpga_submodels/hwsw
+ multifpgaenv-hwsw-vc707-fpga0.apm Locally Modified          202 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          202 
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          202 
+ multifpgaenv-hybrid-xupv5-fpga0-sata.apm Locally Modified          202 
+
+Remove non-default BSC_FLAGS specification.
