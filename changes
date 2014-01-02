@@ -4312,3 +4312,24 @@ producing the FPGA strings files were not correct.
 3) Added a nightly regression test for the multifpga package. 
 
 
+
+----------
+mcadler     Date: Wed Jan  1 21:16:43 EST 2014  CSN: CSN-multifpga-205
+                  Thu Jan  2 02:16:43 UTC 2014
+
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-vc707-fpga1.apm Locally Modified          204 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpgaN
+ sim-physical-platform-fpgaN.cpp Locally Modified          204 
+
+- Temporary hack to make the platform's set of AWB parameters identical on both master
+  and slave VC707s.  The master defines a BlueNoC PCIe channel, which has a few AWB
+  parameters.  Add a dummy physical channel to the slave build where the same
+  parameters can be defined.  The real solution is for the multi-FPGA compiler
+  to unify the dynamic parameter dictionaries across all FPGAs.  It does not,
+  currently, and variations in the dynamic parameter namespaces lead to improper
+  initialization.
+
+- `PLATFORM_ID isn't defined in fpgaN simulation environment.

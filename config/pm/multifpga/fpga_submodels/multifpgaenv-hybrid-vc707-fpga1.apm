@@ -46,7 +46,7 @@ File=modules/leap/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
 Packagehint=leap
 
 [Low Level Platform Interface Hybrid/Requires]
-channelio=Null Channel IO Module
+channelio=Null Channel IO Module with Dummy Physical
 rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=Local Memory using DDR DRAM (burst holds at least one line)
@@ -123,12 +123,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-
-
-
-[Null Channel IO Module]
-File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
-Packagehint=leap
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
@@ -248,7 +242,7 @@ File=modules/leap/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
 Packagehint=leap
 
 [Low Level Platform Interface Hybrid/Requires]
-channelio=Null Channel IO Module
+channelio=Null Channel IO Module with Dummy Physical
 rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=Local Memory using DDR DRAM (burst holds at least one line)
@@ -325,15 +319,10 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-[FPGA Platform Build Pipeline]
 
-[FPGA Platform Build Pipeline/Requires]
 
-[Null Channel IO Module/Requires]
 
 [Null Channel IO Module]
-File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
-Packagehint=leap
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
@@ -405,7 +394,6 @@ UMF_CHUNK_BYTES=16
 [XST Synthesis Tool]
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
 Packagehint=leap
-
 
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
@@ -498,3 +486,14 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Null software build tool
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+
+[Null Channel IO Module with Dummy Physical/Requires]
+physical_channel=BlueNoC PCIe Tunnel
+
+[BlueNoC PCIe Tunnel]
+File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
+Packagehint=leap
+
+[Null Channel IO Module with Dummy Physical]
+File=modules/leap/virtual-platform/channelio/null/null-channelio-with-dummy-physical.awb
+Packagehint=leap
