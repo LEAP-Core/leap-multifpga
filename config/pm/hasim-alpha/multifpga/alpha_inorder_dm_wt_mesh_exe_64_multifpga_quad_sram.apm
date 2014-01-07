@@ -66,7 +66,7 @@ multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [Alpha Inorder DM, WT, Mesh 64 cores]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_64_connected_application.apm
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_0064_connected_application.apm
 Packagehint=multifpga
 
 [Alpha Inorder DM, WT, Mesh 64 cores/Params]

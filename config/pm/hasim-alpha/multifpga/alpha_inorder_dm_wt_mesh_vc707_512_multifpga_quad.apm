@@ -76,7 +76,7 @@ SOFT_CONN_CWIDTH=256
 MAX_NUMBER_OF_VIAS=2
 
 [Alpha Inorder DM, WT, Mesh 512 cores]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_0512_connected_application.apm
 Packagehint=multifpga
 
 [VC707 Quad FPGA Environment (SMA)]

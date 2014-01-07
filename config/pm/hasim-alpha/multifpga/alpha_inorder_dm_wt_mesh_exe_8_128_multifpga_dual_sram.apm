@@ -71,7 +71,7 @@ TOKEN_ID_BITS=6
 FUNCP_PVT_CACHE_ENTRIES=16384
 
 [Alpha Inorder DM, WT, Mesh 128 cores]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_128_connected_application.apm
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_0128_connected_application.apm
 Packagehint=multifpga
 
 [Bluespec Type parser]

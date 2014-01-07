@@ -75,7 +75,7 @@ File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typepa
 Packagehint=multifpga
 
 [Alpha Inorder DM, WT, Mesh 256 cores]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_256_connected_application.apm
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_0256_connected_application.apm
 Packagehint=multifpga
 
 [VC707 Dual FPGA Environment (SMA)]

@@ -66,7 +66,7 @@ multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [New Asim Model]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_acp_16_connected_application.apm
+File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_0016_connected_application.apm
 Packagehint=multifpga
 
 [New Asim Model/Params]

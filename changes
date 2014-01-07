@@ -4333,3 +4333,67 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpgaN
   initialization.
 
 - `PLATFORM_ID isn't defined in fpgaN simulation environment.
+
+----------
+mcadler     Date: Mon Jan  6 23:05:37 EST 2014  CSN: CSN-multifpga-206
+                  Tue Jan  7 04:05:37 UTC 2014
+
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga0.apm Locally Modified          205 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_ring_acp_16_multifpga_sram.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_ml605_16_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_ring_acp_64_multifpga_sram.apm Locally Removed           205 
+ alpha_inorder_dm_wt_ring_acp_16_dual_multifpga_sram.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_acp_64_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_mesh_vc707_256_multifpga_exe.apm Locally Modified          205 
+
+Directory config/pm/hasim-alpha/multifpga/submodels
+ alpha_inorder_dm_wt_mesh_0016_connected_application.apm Locally Added               - 
+ alpha_inorder_dm_wt_mesh_0512_connected_application.apm Locally Added               - 
+ alpha_inorder_dm_wt_mesh_acp_16_connected_application.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_0064_connected_application.apm Locally Added               - 
+ alpha_inorder_dm_wt_ring_acp_32_connected_application.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_acp_512_connected_application.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_0128_connected_application.apm Locally Added               - 
+ alpha_inorder_dm_wt_mesh_acp_64_connected_application.apm Locally Removed           205 
+ alpha_inorder_dm_wt_ring_acp_16_connected_application.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_0256_connected_application.apm Locally Added               - 
+ alpha_inorder_dm_wt_mesh_acp_128_connected_application.apm Locally Removed           205 
+ alpha_inorder_dm_wt_ring_acp_64_connected_application.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_acp_256_connected_application.apm Locally Removed           205 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_dm_wt_mesh_exe_16_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_ring_acp_64_multifpga.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_exe_16_multifpga_quad_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_mesh_vc707_512_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_mesh_exe_8_128_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_mesh_vc707_256_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_ring_exe_16_multifpga.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_mesh_exe_64_multifpga_octo_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_ring_acp_16_multifpga_sram_big_cache.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_acp_16_multifpga_dual_sram_4_lanes.apm Locally Modified          205 
+ alpha_inorder_dm_wt_mesh_vc707_512_multifpga_quad.apm Locally Modified          205 
+ alpha_inorder_dm_wt_ring_acp_32_multifpga.apm Locally Removed           205 
+ alpha_inorder_dm_wt_ring_acp_16_multifpga.apm Locally Removed           205 
+ alpha_inorder_dm_wt_ring_acp_16_multifpga_sram_2.apm Locally Removed           205 
+ alpha_inorder_dm_wt_ring_acp_16_multifpga_sram_3.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_exe_64_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_multifpga_time_func_16_acp_dual_sram.apm Locally Removed           205 
+ alpha_inorder_dm_wt_mesh_acp_128_multifpga_dual_sram.apm Locally Modified          205 
+ alpha_inorder_dm_wt_mesh_exe_64_multifpga_quad_sram.apm Locally Modified          205 
+
+Directory modules/leap-platforms/fpga-environments/acp
+ acp-dual-sram-dual.env    Locally Modified          205 
+
+- A few tweaks to make ACP models compile.
+
+- Delete ring models.  They haven't been updated in quite a while and the mesh
+  model can be configured as a ring.
+
+- Rename "ACP" submodels so they are generic.  They are also used on other
+  physical platforms.
