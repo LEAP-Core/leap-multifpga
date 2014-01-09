@@ -176,7 +176,6 @@ Packagehint=leap-platforms
 [Differential Crystal Clocks Device from Clocks/Params]
 RESET_ACTIVE_HIGH=1
 CRYSTAL_CLOCK_FREQ=200
-MODEL_CLOCK_FREQ=100
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
@@ -352,9 +351,6 @@ Packagehint=multifpga
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
 
-[BSV Build Tool (First Phase)/Params]
-BSC_FLAGS="-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -show-range-conflict -remove-dollar"
-
 [BSV Build Tool (First Phase)]
 File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
 Packagehint=leap
@@ -385,7 +381,6 @@ Packagehint=leap-platforms
 [Differential Crystal Clocks Device from Clocks/Params]
 RESET_ACTIVE_HIGH=1
 CRYSTAL_CLOCK_FREQ=200
-MODEL_CLOCK_FREQ=100
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces

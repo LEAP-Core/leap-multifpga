@@ -23,7 +23,7 @@ Packagehint=leap
 [FPGA Environment/Requires]
 virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
-build_pipeline=MultiFPGA BlueSim Platform Build Pipeline
+build_pipeline=MultiFPGA BlueSim Platform Build Pipeline (Legacy)
 soft_services=Soft Services Submodel
 librl_bsv=RL Bluespec Library Submodel
 
@@ -84,7 +84,6 @@ Packagehint=leap
 [RRR Clients and Servers/Requires]
 rrr_common=RRR Common Module
 
-
 [FPGA1 Simulation Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga1/sim-physical-platform-fpga1.awb
 Packagehint=multifpga
@@ -92,6 +91,7 @@ Packagehint=multifpga
 [FPGA1 Simulation Physical Platform/Requires]
 clocks_device=Simulation Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
+simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
 
 [NULL Local Memory Interface]
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-null.awb
@@ -112,20 +112,6 @@ Packagehint=leap
 [Software build tool]
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
-
-[MultiFPGA BlueSim Platform Build Pipeline/Requires]
-software_tool=Software build tool
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-bluesim_tool=BSV Bluesim Build Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpga_environment_parser=FPGA Environment Datatype
-fpgamap_parser=FPGAMap
-li_module=LEAP LI Module Handler
-
-[MultiFPGA BlueSim Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
-Packagehint=multifpga
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -157,13 +143,6 @@ starter_service=Starter Service
 File=modules/leap/libraries/platform-services/starter-service/starter-service.awb
 Packagehint=leap
 
-[Simulation Physical Channel]
-File=modules/leap/virtual-platform/physical-channel/sim/sim-physical-channel.awb
-Packagehint=leap
-
-[Null Channel IO Module/Requires]
-physical_channel=Simulation Physical Channel
-
 [RL Bluespec Library Submodel]
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
@@ -183,3 +162,28 @@ Packagehint=multifpga
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
+
+[Simlutation Communication Device with raw UNIX Communication]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
+Packagehint=multifpga
+
+[Simlutation Communication Device with raw UNIX Communication/Requires]
+unix_comm_device=UNIX Communication Physical Device
+
+[MultiFPGA BlueSim Platform Build Pipeline (Legacy)]
+File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
+Packagehint=multifpga
+
+[UNIX Communication Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
+Packagehint=multifpga
+
+[MultiFPGA BlueSim Platform Build Pipeline (Legacy)/Requires]
+li_module=LEAP LI Module Handler
+iface_tool=Interface builder
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Software build tool
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+bluesim_tool=BSV Bluesim Build Tool

@@ -85,3 +85,6 @@ Packagehint=multifpga
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=leap-platforms
+
+[multiFPGA Log Generation/Params]
+SOFT_CONN_CWIDTH=300

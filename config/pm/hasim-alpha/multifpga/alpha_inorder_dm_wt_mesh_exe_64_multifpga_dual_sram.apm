@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=Inorder Alpha Direct Writethrough Caches Mesh ACP
+Description=Inorder Alpha Direct Writethrough Caches Mesh
 File=alpha_inorder_dm_wt_mesh_exe_64_multifpga_dual_sram
 Version=2.2
-Name=Inorder Alpha Writethrough Caches Mesh ACP 16
+Name=Inorder Alpha Writethrough Caches Mesh Simulation 64
 Type=HAsim
 Class=Asim::Model
 DefaultBenchmark=
@@ -19,6 +19,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
+umf=Little-Endian Unified Message Format
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -69,9 +70,6 @@ multi_fpga_log_generator=multiFPGA Log Generation
 File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_0064_connected_application.apm
 Packagehint=multifpga
 
-[Alpha Inorder DM, WT, Mesh 64 cores/Params]
-FUNCP_TLB_PVT_ENTRIES=4096
-FUNCP_PVT_CACHE_ENTRIES=16384
 
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
@@ -79,6 +77,7 @@ Packagehint=multifpga
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
+SOFT_CONN_CWIDTH=512
 
 [Simulation Dual FPGA Environment with Dual Cache]
 File=modules/leap-platforms/fpga-environments/sim/sim_fpga_cache_env.awb
@@ -87,3 +86,7 @@ Packagehint=multifpga
 [Alpha Inorder Sim Mapping Timing/Functional partition with Cache]
 File=modules/multifpga/alpha_inorder/sim_mapping_time_func_cache.awb
 Packagehint=multifpga
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms

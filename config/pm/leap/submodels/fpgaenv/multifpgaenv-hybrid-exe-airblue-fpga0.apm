@@ -24,7 +24,7 @@ Packagehint=leap
 virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
 librl_bsv=RL Bluespec Library Submodel
-build_pipeline=MultiFPGA BlueSim Platform Build Pipeline
+build_pipeline=MultiFPGA BlueSim Platform Build Pipeline (Legacy)
 soft_services=Soft Services Submodel
 
 [Standard Virtual Platform]
@@ -112,7 +112,6 @@ rrr_common=RRR Common Module
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
 
-
 [FPGA0 Simulation Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0/sim-physical-platform-fpga0.awb
 Packagehint=multifpga
@@ -121,6 +120,7 @@ Packagehint=multifpga
 clocks_device=Simulation Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 unix_pipe_device=UNIX Pipe Physical Device
+simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
 
 [Synthesis Boundary Wrapper generation tool]
 File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
@@ -137,20 +137,6 @@ Packagehint=leap
 [Software build tool]
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
-
-[MultiFPGA BlueSim Platform Build Pipeline/Requires]
-software_tool=Software build tool
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-bluesim_tool=BSV Bluesim Build Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpga_environment_parser=FPGA Environment Datatype
-fpgamap_parser=FPGAMap
-li_module=LEAP LI Module Handler
-
-[MultiFPGA BlueSim Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
-Packagehint=multifpga
 
 [RL Bluespec Library Submodel]
 File=config/pm/leap/submodels/common/librl-bsv.apm
@@ -179,3 +165,35 @@ Packagehint=multifpga
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
+
+
+[MultiFPGA BlueSim Platform Build Pipeline (Legacy)]
+File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
+Packagehint=multifpga
+
+
+
+
+
+
+
+[UNIX Communication Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
+Packagehint=multifpga
+
+[MultiFPGA BlueSim Platform Build Pipeline (Legacy)/Requires]
+li_module=LEAP LI Module Handler
+iface_tool=Interface builder
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Software build tool
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+bluesim_tool=BSV Bluesim Build Tool
+
+[Simlutation Communication Device with raw UNIX Communication]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
+Packagehint=multifpga
+
+[Simlutation Communication Device with raw UNIX Communication/Requires]
+unix_comm_device=UNIX Communication Physical Device

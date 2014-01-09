@@ -105,5 +105,3 @@ Packagehint=multifpga
 File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-vc707-fpga0.apm
 Packagehint=multifpga
 
-[VC707 FPGA 0/Params]
-MODEL_CLOCK_FREQ=50
