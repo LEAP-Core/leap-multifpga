@@ -48,7 +48,7 @@ Packagehint=multifpga
 build_pipeline=multiFPGA Build Pipeline
 connected_application=Alpha Inorder DM, WT, Mesh 64 cores
 environment_description=ACP Dual FPGA Env with Dual SRAM
-fpga_mapping=Alpha Inorder ACP Mapping Timing/Functional partition with Cache
+fpga_mapping=Alpha Inorder Mapping Timing/Functional partition with Cache
 
 [HW/SW Hybrid Multifpga Project Foundation/Params]
 SYNTH_BOUNDARY=mkModel
@@ -66,9 +66,6 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
-[Alpha Inorder ACP Mapping Timing/Functional partition with Cache]
-File=modules/multifpga/alpha_inorder/acp_mapping_time_func_cache.awb
-Packagehint=multifpga
 
 [Alpha Inorder DM, WT, Mesh 64 cores]
 File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_0064_connected_application.apm
@@ -85,3 +82,7 @@ Packagehint=multifpga
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=leap-platforms
+
+[Alpha Inorder Mapping Timing/Functional partition with Cache]
+File=modules/multifpga/alpha_inorder/inorder_mapping_time_func_cache.awb
+Packagehint=multifpga

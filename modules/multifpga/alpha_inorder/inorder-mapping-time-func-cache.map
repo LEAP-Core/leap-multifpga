@@ -12,4 +12,4 @@ decode_stage -> FPGA1;
 inorder_pipeline_back_end -> FPGA1;
 hasim_l1_caches-> FPGA1;
 hasim_last_level_cache-> FPGA1;
-
+hasim_private_caches-> FPGA1;
