@@ -4466,3 +4466,21 @@ Directory modules/multifpga/alpha_inorder
 - Share HAsim Alpha in-order model mapping for FPGA and simulation.
 
 - Update statistics using alpha_inorder_dm_wt_mesh_vc707_64_multifpga_dual_sram.
+
+----------
+keflemin    Date: Sun Jan 12 14:27:40 EST 2014  CSN: CSN-multifpga-209
+                  Sun Jan 12 19:27:40 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          208 
+
+
+1) Fixed bug with compiler optimization
+flags. ENABLE_AGRESSIVE_UMF_PARAMETERS was used where
+USE_DEFAULT_UMF_PARAMETERS was intended.
+
+2) Corrected off by one error in lane sizing code.  Valid bits were
+removed for single lane routers to simplify software
+decoding. However, this bit needs to be added back for multiple lane
+routers.

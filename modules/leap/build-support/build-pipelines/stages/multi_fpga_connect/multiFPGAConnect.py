@@ -84,7 +84,7 @@ class MultiFPGAConnect():
       self.MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
       self.ENABLE_TYPE_COMPRESSION = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_TYPE_COMPRESSION')
       self.ENABLE_AGRESSIVE_UMF_PARAMETERS = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_AGRESSIVE_UMF_PARAMETERS')
-      self.USE_DEFAULT_UMF_PARAMETERS = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_AGRESSIVE_UMF_PARAMETERS')
+      self.USE_DEFAULT_UMF_PARAMETERS = moduleList.getAWBParam('multi_fpga_connect', 'USE_DEFAULT_UMF_PARAMETERS')
       self.MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MIN_NUMBER_OF_VIAS')
       self.GENERATE_ROUTER_DEBUG = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_DEBUG')
       self.GENERATE_ROUTER_STATS = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_STATS')
@@ -823,7 +823,7 @@ class MultiFPGAConnect():
         fillerWidthNext = viaWidth - links - chunks - methodDummy
 
     fillerWidth = fillerWidthNext
-    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " calc" + str(1.0+math.ceil(float(max([0.0, maxWidth - fillerWidth]))/viaWidth)) +") max link " + str(maxWidth) + " via links " + str(viaLinks) 
+    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " calc" + str(1.0+math.ceil(float(max([0.0, maxWidth - fillerWidth]))/viaWidth)) +") max link " + str(maxWidth) + " via links " + str(viaLinks) + " method dummy " + str(methodDummy)
   
     return UMFType(0, links, methodDummy, chunks, 0, fillerWidth, viaWidth)
 
@@ -1015,15 +1015,24 @@ class MultiFPGAConnect():
           # pick our via links deterministically
           viaWidths = []
           for via in range(numberOfVias):
-            # A singleton via doesn't require a valid bit
+            # A singleton via doesn't require a valid bit.  This is a software optimization.
+            # however, we must repair this assumption if we end up choosing 
+            # multiple vias.
             if(via == 0):
               viaWidths.append(self.platformData[platform]['WIDTHS'][egressVia])
             else: # carve off a lane for the longest running jobs
-              
+              # If we're selecting the second via, we need to subtract a bit for the first via's 
+              # valid bit. We left this bit out of single via routers to optmize software decoding. 
+              if(len(viaWidths) == 1):
+                viaWidths[0] = viaWidths[0] - 1
               while(viaWidths[0] < (sortedLinks[viaSizingIdx].bitwidth + 2*(headerSize + 1))): # Give extra for header sizing - the base via should also have space
                 if(viaSizingIdx + 1 == len(sortedLinks)):
                   noViasRemaining = 1
                   print "No suitable vias remain"
+                  # we aren't actually going to pick a second via, 
+                  # so give back the valid bit to the first via.
+                  if(len(viaWidths) == 1):
+                    viaWidths[0] = viaWidths[0] + 1
                   break
                 else:
                   viaSizingIdx += 1
