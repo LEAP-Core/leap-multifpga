@@ -112,3 +112,6 @@ Packagehint=leap-platforms
 File=modules/leap-platforms/fpga-environments/sim/sim_fpga_env.awb
 Packagehint=multifpga
 
+
+[MultiFPGA Communication Complex Generator/Params]
+MAX_NUMBER_OF_VIAS=1

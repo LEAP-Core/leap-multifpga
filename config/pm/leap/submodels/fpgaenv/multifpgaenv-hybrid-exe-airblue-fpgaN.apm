@@ -24,7 +24,7 @@ Packagehint=leap
 virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
 librl_bsv=RL Bluespec Library Submodel
-build_pipeline=MultiFPGA BlueSim Platform Build Pipeline
+build_pipeline=MultiFPGA BlueSim Platform Build Pipeline (Legacy)
 soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
@@ -113,19 +113,7 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
 Packagehint=leap
 
-[MultiFPGA BlueSim Platform Build Pipeline/Requires]
-software_tool=Null software build tool
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-bluesim_tool=BSV Bluesim Build Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpgamap_parser=FPGAMap
-fpga_environment_parser=FPGA Environment Datatype
-li_module=LEAP LI Module Handler
 
-[MultiFPGA BlueSim Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
-Packagehint=multifpga
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
@@ -140,12 +128,7 @@ clocks_device=Simulation Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
 
-[Null Channel IO Module/Requires]
-physical_channel=Null Physical Channel
 
-[Null Physical Channel]
-File=modules/leap/virtual-platform/physical-channel/null/null-physical-channel.awb
-Packagehint=leap
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -185,3 +168,17 @@ Packagehint=multifpga
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
+
+[MultiFPGA BlueSim Platform Build Pipeline (Legacy)]
+File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
+Packagehint=multifpga
+
+[MultiFPGA BlueSim Platform Build Pipeline (Legacy)/Requires]
+li_module=LEAP LI Module Handler
+iface_tool=Interface builder
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Null software build tool
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+bluesim_tool=BSV Bluesim Build Tool

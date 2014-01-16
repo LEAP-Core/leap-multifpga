@@ -19,10 +19,9 @@
 %scons %library code.py
 
 
-
-%param --global MAX_NUMBER_OF_VIAS 4 "True if we can expect that the router has been generated"
-%param --global ENABLE_TYPE_COMPRESSION 0 "Should we enable experimental type compression?"
-%param --global ENABLE_AGRESSIVE_UMF_PARAMETERS 0 "Should we enable experimental type compression?"
-%param --global USE_DEFAULT_UMF_PARAMETERS 1 "Should we enable experimental type compression?"
-%param --global MIN_NUMBER_OF_VIAS 1 "True if we can expect that the router has been generated"
-%param --global ANALYZE_NETWORK "analyzeNetworkRandom" "Which analysis function should we be calling."
+%param --global MIN_NUMBER_OF_VIAS         1      "Minumum number of vias (lanes)"
+%param --global MAX_NUMBER_OF_VIAS         3      "Maximum number of vias (lanes)"
+%param --global ENABLE_TYPE_COMPRESSION    0      "Should we enable experimental type compression?"
+%param --global ENABLE_AGRESSIVE_UMF_PARAMETERS 1 "Vary UMF header sizes depending on channels assigned to a via?"
+%param --global USE_DEFAULT_UMF_PARAMETERS 0      "Static (default) UMF parameters?"
+%param --global ANALYZE_NETWORK "analyzeNetworkLJF" "Which analysis function should we be calling."
