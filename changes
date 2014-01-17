@@ -4513,3 +4513,13 @@ Directory modules/leap-platforms/fpga-environments/sim
 - Set appropriate max timing model inter-stage buffer sizes for HAsim models.
 
 - Fix sim Aurora config and test.
+
+----------
+mcadler     Date: Fri Jan 17 16:43:05 EST 2014  CSN: CSN-multifpga-211
+                  Fri Jan 17 21:43:05 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ dumpStructures.tcl        Locally Modified          210 
+
+Fix handling of "-p" argument.

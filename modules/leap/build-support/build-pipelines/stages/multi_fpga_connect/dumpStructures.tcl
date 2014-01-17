@@ -1,13 +1,12 @@
 #!/bin/sh
 # Copyright 2007--2009 Bluespec, Inc.  All rights reserved.
-# $Id: dumpStructures.tcl 25464 2011-09-25 20:01:45Z czeck $
+# $Id: dumpStructures.tcl 29251 2012-07-31 20:15:20Z czeck $
 # \
 exec $BLUESPECDIR/bin/bluetcl "$0" "$@"
 
 package require Bluetcl
 package require types 1.0
-namespace import types::getNonPolyType types::showTypeSize types::processFullType types::fullType
-
+namespace import types::getNonPolyType types::showTypeSize
 
 namespace import utils::map_
 
@@ -48,7 +47,7 @@ if { $packName == "" } { usage }
 
 ## Set any flags for search path, e,g -p
 if { [info exists OPT(-p)] } {
-    Bluetcl::flags set "-p $OPT(-p):+"
+    Bluetcl::flags set -p $OPT(-p):+
 }
 
 Bluetcl::bpackage load $packName
@@ -61,7 +60,7 @@ foreach t $types {
 
     set ct [Bluetcl::type constr $t]
     set ft [Bluetcl::type full $ct]
-    puts "$ft\n"
+    puts "$ft"
 
 }
 
