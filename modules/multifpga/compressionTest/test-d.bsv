@@ -45,8 +45,8 @@ module [CONNECTED_MODULE] mkD (Empty);
     endrule
 
 
-    function UnbalancedMaybe#(Bit#(`WIDTH)) expected(Bit#(32) counter);
-	UnbalancedMaybe#(Bit#(`WIDTH)) expectedResult = tagged UnbalancedValid (truncate(counter));
+    function UNBALANCED_MAYBE#(Bit#(`WIDTH)) expected(Bit#(32) counter);
+	UNBALANCED_MAYBE#(Bit#(`WIDTH)) expectedResult = tagged UnbalancedValid (truncate(counter));
 	if(counter[4:0] < threshold)
 	begin
 	    expectedResult = tagged UnbalancedInvalid;
@@ -54,8 +54,8 @@ module [CONNECTED_MODULE] mkD (Empty);
 	return expectedResult;
     endfunction
 
-    Connection_Send#(UnbalancedMaybe#(Bit#(`WIDTH))) send0 <- mkConnection_Send("fromD0");
-    Connection_Receive#(UnbalancedMaybe#(Bit#(`WIDTH))) recvLast <- mkConnection_Receive("fromB" + integerToString(`NUM_CONNS));
+    Connection_Send#(UNBALANCED_MAYBE#(Bit#(`WIDTH))) send0 <- mkConnection_Send("fromD0");
+    Connection_Receive#(UNBALANCED_MAYBE#(Bit#(`WIDTH))) recvLast <- mkConnection_Receive("fromB" + integerToString(`NUM_CONNS));
 
     Reg#(Bit#(32)) testLength <- mkReg(0);
     Reg#(Bit#(32)) counter    <- mkReg(0);
@@ -108,8 +108,8 @@ module [CONNECTED_MODULE] mkD (Empty);
 
   for(Integer i=1; i < `NUM_CONNS; i = i + 1) 
     begin   
-      Connection_Send#(UnbalancedMaybe#(Bit#(`WIDTH))) sendX <- mkConnection_Send("fromD" + integerToString(i));
-      Connection_Receive#(UnbalancedMaybe#(Bit#(`WIDTH))) recvX <- mkConnection_Receive("fromB" + integerToString(i));
+      Connection_Send#(UNBALANCED_MAYBE#(Bit#(`WIDTH))) sendX <- mkConnection_Send("fromD" + integerToString(i));
+      Connection_Receive#(UNBALANCED_MAYBE#(Bit#(`WIDTH))) recvX <- mkConnection_Receive("fromB" + integerToString(i));
       LFSR#(Bit#(32)) reflectCounter <- mkLFSR_32();
       rule reflect;
          sendX.send(recvX.receive);

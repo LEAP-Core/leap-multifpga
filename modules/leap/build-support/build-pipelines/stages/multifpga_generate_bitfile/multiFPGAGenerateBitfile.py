@@ -78,22 +78,6 @@ class MultiFPGAGenerateBitfile():
            return sts
          return compile_platform_log
 
-    def strcat_closure(strlistIn,masterstr):
-         strlist = strlistIn[:] # make a copy of strlist
-         def cat_string_files(target, source, env):
-           strings = ""
-           for file in strlist:
-             fileHandle = open(file,"r")
-             strings += fileHandle.read()
-             fileHandle.close()
-
-           # only the master needs the whole list of strings.
-           fileHandle = open(masterstr,"w")
-           fileHandle.write(strings)
-           fileHandle.close()
-           
-         return cat_string_files
-
     moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] = []
 
     # now that we know what the structure of the design, we can write to the config file
@@ -245,12 +229,5 @@ class MultiFPGAGenerateBitfile():
       if(platform.platformType == 'FPGA' or platform.platformType == 'BLUESIM'):
         strlist.append(strfile)
 
-
-    strcat = moduleList.env.Command(
-          [moduleList.apmName + ".str"],
-          strlist,
-          strcat_closure(strlist,master)
-          )
-
     # not all top-level targets produce bitfiles.
-    moduleList.topDependency += [strcat] + moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES']
+    moduleList.topDependency += moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES']

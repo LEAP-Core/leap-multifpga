@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=Inorder Alpha Direct Writethrough Caches Mesh ACP
-File=alpha_inorder_dm_wt_mesh_acp_64_multifpga_dual_sram
+Description=Inorder Alpha Mesh with shared LLC and MESI Coherence (0064 cores) MultiFPGA ACP
+File=alpha_inorder_mesh_sharedLLC_MESI_acp_0064_multifpga
 Version=2.2
-Name=Inorder Alpha Writethrough Caches Mesh ACP 64
+Name=Inorder Alpha Mesh with shared LLC and MESI Coherence (0064 cores) MultiFPGA ACP
 Type=HAsim
 Class=Asim::Model
 DefaultBenchmark=
@@ -46,7 +46,7 @@ Packagehint=multifpga
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 build_pipeline=multiFPGA Build Pipeline
-connected_application=Alpha Inorder DM, WT, Mesh 64 cores
+connected_application=Inorder Alpha Mesh with shared LLC and MESI Coherence (0064 cores)
 environment_description=ACP Dual FPGA Env with Dual SRAM
 fpga_mapping=Alpha Inorder Mapping Timing/Functional partition with Cache
 
@@ -67,10 +67,6 @@ multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
 
-[Alpha Inorder DM, WT, Mesh 64 cores]
-File=config/pm/hasim-alpha/multifpga/submodels/alpha_inorder_dm_wt_mesh_0064_connected_application.apm
-Packagehint=multifpga
-
 [ACP Dual FPGA Env with Dual SRAM]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
 Packagehint=multifpga
@@ -86,3 +82,7 @@ Packagehint=leap-platforms
 [Alpha Inorder Mapping Timing/Functional partition with Cache]
 File=modules/multifpga/alpha_inorder/inorder_mapping_time_func_cache.awb
 Packagehint=multifpga
+
+[Inorder Alpha Mesh with shared LLC and MESI Coherence (0064 cores)]
+File=config/pm/hasim-alpha/alpha-inorder/cache-models/submodels/app_alpha_inorder_mesh_sharedLLC_MESI_0064.apm
+Packagehint=hasim-alpha
