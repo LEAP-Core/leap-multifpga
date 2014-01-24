@@ -11,8 +11,8 @@
 %scons %library platform.py
 %scons %library environment.py
 %scons %library connection.py
-%scons %library multifpga_parser.py
-%scons %private multilex.py
-%scons %private multiparse.py
+%scons %library environment_parser.py
+%scons %private environment_lex.py
+%scons %private environment_parse.py
 
 

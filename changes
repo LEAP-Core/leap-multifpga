@@ -4595,3 +4595,23 @@ Directory config/pm/leap/demos/multifpga
 
 
 Added new hello world apms for DTS inspection.
+
+----------
+keflemin    Date: Fri Jan 24 04:52:07 EST 2014  CSN: CSN-multifpga-214
+                  Fri Jan 24 09:52:07 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ generate_logfile.py       Locally Added               - 
+ environment_parse.py      Locally Added               - 
+ multi_fpga_parse.awb      Locally Modified          213 
+ multilex.py               Locally Removed           213 
+ multifpga_parser.py       Locally Removed           213 
+ environment_lex.py        Locally Added               - 
+ tool.py                   Locally Removed           213 
+ environment_parser.py     Locally Added               - 
+ fpgaenvironment.awb       Locally Modified          213 
+ multiparse.py             Locally Removed           213 
+
+
+Reorganizing files to improve code readability.
