@@ -4576,3 +4576,22 @@ Directory modules/multifpga/compressionTest
   Run scripts now look for strings in all platform builds.
 
 - Update compression test for changed type names.
+
+----------
+keflemin    Date: Thu Jan 23 23:32:51 EST 2014  CSN: CSN-multifpga-213
+                  Fri Jan 24 04:32:51 UTC 2014
+
+
+Directory config/pm/leap/demos
+ hello/                    Locally Added               0 
+
+Directory config/pm/leap/demos/hello
+ hello_hybrid_dual_exe.apm Locally Added               0 
+ hello_hybrid_dual_acp.apm Locally Added               0 
+ hello_hybrid_dual_vc707.apm Locally Added               0 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_exe.apm    Locally Modified          212 
+
+
+Added new hello world apms for DTS inspection.
