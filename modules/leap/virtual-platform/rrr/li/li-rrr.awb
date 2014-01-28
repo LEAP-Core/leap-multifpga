@@ -1,0 +1,12 @@
+%name LI RRR Interface Module
+%desc Serves to Interface old-style RRR to new-style LI Channels
+
+%provides rrr
+
+%requires rrr_common
+
+%notes README
+
+%sources -t BSV -v PUBLIC  li-rrr.bsv
+%sources -t H   -v PUBLIC  li-rrr-server.h li-rrr-client.h li-rrr-common.h
+%sources -t CPP -v PUBLIC  li-rrr-server.cpp li-rrr-client.cpp li-rrr-common.cpp

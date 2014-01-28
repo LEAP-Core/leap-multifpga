@@ -4615,3 +4615,32 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 
 
 Reorganizing files to improve code readability.
+
+----------
+keflemin    Date: Mon Jan 27 21:07:19 EST 2014  CSN: CSN-multifpga-215
+                  Tue Jan 28 02:07:19 UTC 2014
+
+
+Directory modules/leap/virtual-platform
+ rrr/                      Locally Added               0 
+
+Directory modules/leap/virtual-platform/rrr
+ li/                       Locally Added               0 
+
+Directory modules/leap/virtual-platform/rrr/li
+ li-rrr.awb                Locally Added               0 
+ li-rrr.bsv                Locally Added               0 
+ li-rrr-server.h           Locally Added               0 
+ li-rrr-common.h           Locally Added               0 
+ li-rrr-client.cpp         Locally Added               0 
+ li-rrr-client.h           Locally Added               0 
+ li-rrr-server.cpp         Locally Added               0 
+ README                    Locally Added               0 
+ li-rrr-common.cpp         Locally Added               0 
+
+
+Added a latency-insensitive RRR implementation.  This implementation
+makes use of the new LI channel name matching service. Each service
+makes use of a dedicated service thread.  This architecture needs to
+be compared against other threading architectures, including the
+orignal single threaded architecture.
