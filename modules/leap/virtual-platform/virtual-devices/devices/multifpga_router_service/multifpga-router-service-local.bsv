@@ -588,6 +588,8 @@ module mkPacketizeConnectionReceiveNoPack#(String name,
 
     method bypassFlowcontrol = False;
 
+    method Integer maxPacketSize = valueof(t_NUM_CHUNKS);
+
 endmodule
 
 
@@ -674,6 +676,8 @@ module mkPacketizeConnectionReceiveMarshalled#(String name,
     method notEmptyBody = mar.notEmpty;
 
     method bypassFlowcontrol = False;
+
+    method Integer maxPacketSize = valueof(t_NUM_CHUNKS);
 
 endmodule
 
@@ -763,6 +767,8 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
                         method notEmptyBody = True;
 
                         method bypassFlowcontrol = False;
+
+                        method Integer maxPacketSize = 0;
                     endinterface;
 
     return unmarshalled;

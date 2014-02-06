@@ -73,6 +73,9 @@ Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Params]
 MAX_NUMBER_OF_VIAS=1
+USE_DEFAULT_UMF_PARAMETERS=1
+ENABLE_AGRESSIVE_UMF_PARAMETERS=0
+ANALYZE_NETWORK="analyzeNetworkRandom"
 
 [multiFPGA Log Generation/Params]
 SOFT_CONN_CWIDTH=512

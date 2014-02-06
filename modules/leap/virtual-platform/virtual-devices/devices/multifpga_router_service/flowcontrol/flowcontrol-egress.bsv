@@ -55,6 +55,8 @@ interface EGRESS_PACKET_GENERATOR#(type header, type body);
 
     method Bool   bypassFlowcontrol(); // Some of these are flowcontrol, so they must be declared
 
+    method Integer maxPacketSize();
+
 endinterface
 
 
@@ -84,12 +86,10 @@ module mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
              Log#(n_FIFOS_SAFE, n_SAFE_FIFOS_SZ),
              Bits#(umf_chunk_r, umf_chunk_r_SZ),
              Bits#(umf_chunk, umf_chunk_SZ),
-             Bits#(umf_chunk_r, umf_chunk_r_SZ),
              Bits#(umf_chunk,SizeOf#(GENERIC_UMF_PACKET_HEADER#(
                                                     umf_channel_id, umf_service_id,
                                                     umf_method_id,  umf_message_len,
                                                     umf_phy_pvt,    filler_bits))),
-             Add#(umf_message_len, size_extra,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),
              Add#(chunk_extra, TAdd#(umf_service_id,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))), umf_chunk_r_SZ),
              Add#(serviceExcess, n_SAFE_FIFOS_SZ, umf_service_id));
 
@@ -140,8 +140,23 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                                     umf_method_id,  umf_message_len,
                                                     umf_phy_pvt,    filler_bits))),
               Log#(n_FIFOS_SAFE, n_FIFOS_SAFE_SZ),
-              Add#(umf_message_len, size_extra,TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))),
               Add#(extraServices, n_FIFOS_SAFE_SZ, umf_service_id));
+
+    // Packets may only be sent if the receiving queue is known to have
+    // buffer space. To help with timing, we calculate this buffer space
+    // based on some maximum packet size. Each egress generator will tell
+    // us its maximum packet size, and we will use the maximum, maximum
+    // packet size to determine whether to send.  This is suboptimal, but
+    // uses less hardware, since only one value needs to be stored.
+
+    Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) maximumPacketSize = 0;
+    for (Integer s = 0; s < valueof(n); s = s + 1)
+    begin   
+        if(fromInteger(requestQueues[s].maxPacketSize()) > maximumPacketSize)
+        begin
+            maximumPacketSize = fromInteger(requestQueues[s].maxPacketSize());
+        end
+    end
 
     // ==============================================================
     //                        Ports and Queues
@@ -227,8 +242,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             let responseActiveQueue  = tpl_1(payload);
             let currentCredits = portCredits.sub(truncate(responseActiveQueue));
             let creditsNext = tpl_2(payload) + currentCredits;
-            Bit#(umf_message_len)  max = maxBound;
-            bufferAvailable[responseActiveQueue] <= creditsNext >= zeroExtend(max) + 1; // This should always be true...
+           
+            bufferAvailable[responseActiveQueue] <= creditsNext >= maximumPacketSize + 1; // This should always be true...
             portCredits.upd(truncate(responseActiveQueue), creditsNext);
       
             if(`SWITCH_DEBUG == 1)
@@ -236,7 +251,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                 $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
             end
 
-            if(creditsNext < zeroExtend(max))
+            if(creditsNext < maximumPacketSize)
             begin
                 $display("Setting credits to zero... this is a bug");
                 $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
@@ -281,15 +296,15 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             let responseActiveQueue  = tpl_1(payload);
             let currentCredits = portCredits.sub(truncate(responseActiveQueue));
             let creditsNext = tpl_2(payload) + currentCredits;
-            Bit#(umf_message_len) max = maxBound;
-            bufferAvailable[responseActiveQueue] <= creditsNext >= zeroExtend(max); // This should always be true...
+            
+            bufferAvailable[responseActiveQueue] <= creditsNext >= maximumPacketSize; // This should always be true...
             portCredits.upd(truncate(responseActiveQueue), creditsNext);
             if(`SWITCH_DEBUG == 1)
             begin
                 $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, payload, currentCredits, creditsNext);
             end
 
-            if(creditsNext < zeroExtend(max))
+            if(creditsNext < maximumPacketSize)
             begin
                 $display("Setting credits to zero... this is a bug");
                 $finish;
@@ -394,7 +409,14 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                   !creditDelay.notEmpty() &&&
                                   deqHeader);
             let header = requestQueues[s].firstHeader;
-            Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) requestChunks = zeroExtend(header.numChunks) + 1; // also sending header
+
+            // We can use resize here without danger because of the
+            // way we calculate the maximumPacketSize. The fromInteger in
+            // that function will fail at compile time if the
+            // maximumPacketSize is bigger than the number fo credits
+            // available.
+ 
+            Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) requestChunks = resize(header.numChunks) + 1; // also sending header
             Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) oldCredits = portCredits.sub(fromInteger(s));
 
             if(`SWITCH_DEBUG == 1)
@@ -412,8 +434,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  oldCredits - zeroExtendNP(requestChunks);
             portCredits.upd(fromInteger(s), newCount);
-            Bit#(umf_message_len) max = maxBound;
-            bufferAvailable[s] <= newCount >= zeroExtend(max) + 1; 
+           
+            bufferAvailable[s] <= newCount >= maximumPacketSize + 1; 
 
             if(`SWITCH_DEBUG == 1)
             begin
@@ -422,7 +444,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             if (oldCredits < zeroExtendNP(requestChunks) && (s != 0))
             begin
-                $display("Bizzarre Credit Underflow oldCredit %d messageSize %d newCount %d max %d", oldCredits, requestChunks, newCount, max);
+                $display("Bizzarre Credit Underflow oldCredit %d messageSize %d newCount %d max %d", oldCredits, requestChunks, newCount, maximumPacketSize);
                 $finish;               
             end
         endrule

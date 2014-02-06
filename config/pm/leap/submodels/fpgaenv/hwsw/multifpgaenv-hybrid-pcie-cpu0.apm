@@ -76,10 +76,6 @@ Packagehint=leap
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=multifpga
 
-[MultiFPGA Master Platform Services]
-File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master.apm
-Packagehint=multifpga
-
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
@@ -110,7 +106,7 @@ Packagehint=leap
 
 [LIM Compiler Standard Virtual Platform/Requires]
 umf=Little-Endian Unified Message Format
-platform_services=MultiFPGA Master Platform Services
+platform_services=MultiFPGA Master Platform Services (LI)
 low_level_platform_interface=Low Level Platform LI
 virtual_devices=Standard Virtual Devices Submodel
 
@@ -224,3 +220,7 @@ li_base_types=LI Channel Base Types
 [LI Channel Base Types]
 File=modules/leap/virtual-platform/channelio/li/li-base-types.awb
 Packagehint=leap
+
+[MultiFPGA Master Platform Services (LI)]
+File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master-li.apm
+Packagehint=multifpga

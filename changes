@@ -4644,3 +4644,39 @@ makes use of the new LI channel name matching service. Each service
 makes use of a dedicated service thread.  This architecture needs to
 be compared against other threading architectures, including the
 orignal single threaded architecture.
+
+----------
+keflemin    Date: Wed Feb  5 19:53:51 EST 2014  CSN: CSN-multifpga-216
+                  Thu Feb  6 00:53:51 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga/li
+ hasim_test_sim.apm        Locally Modified          215 
+ li_test_vc707.apm         Locally Modified          215 
+ li_test_sim.apm           Locally Modified          215 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hybrid-pcie-cpu0.apm Locally Modified          215 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          215 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified          215 
+
+Directory modules/leap-platforms/fpga-environments/vc707
+ vc707-hwsw.env            Locally Modified          215 
+
+
+Fixed bug in LI compiler.  To simplify software, we use fixed umf
+protocol parameters as provided by the legacy umf code.  However,
+these parameters were causing proviso failures in the router code
+because some of the code was written in terms of the maximum value of
+the parameter rather than the maximum value actually used in the
+router. 
+
+Changed the router to use the values provided by the actual channels,
+rather than the absolute maximum of the parameter. Values that are too
+large will still result in a compile time error, but only a
+pathalogical program would run in to this case (i.e. LI channel width
+>> 100000 bits).
