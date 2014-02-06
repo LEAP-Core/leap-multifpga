@@ -80,17 +80,6 @@ Packagehint=multifpga
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
 
-[Aurora Device Reliable Flowcontrol Debugger]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
-Packagehint=leap-platforms
-
-[Aurora Device Reliable Flowcontrol]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/aurora-device.awb
-Packagehint=leap-platforms
-
-[Aurora Device Reliable Flowcontrol/Requires]
-aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
-
 [LEAP Software Build Pipeline/Requires]
 li_module=LEAP LI Module Handler
 software_tool=Software build tool
@@ -126,7 +115,7 @@ File=modules/leap/virtual-platform/rrr/li/li-rrr.awb
 Packagehint=multifpga
 
 [Low Level Platform LI/Requires]
-physical_platform=PCIe Board with DDR
+physical_platform=Dual PCIE Software Physical Platform
 rrr=LI RRR Interface Module
 remote_memory=Null Remote Memory
 channelio=LI Channel Multiplexer
@@ -138,32 +127,9 @@ physical_channel=BlueNoC PCIe Tunnel
 File=modules/leap/virtual-platform/low-level-platform-interface/llpi-li.awb
 Packagehint=multifpga
 
-[PCIe Board with DDR]
-File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/pcie-generic-platform.awb
-Packagehint=leap-platforms
-
-[Xilinx DDR SDRAM Physical Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
-Packagehint=leap-platforms
-
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
 pcie_bluenoc_device=Virtex-7 PCIE Device (BlueNoC)
-
-[Xilinx DDR SDRAM Physical Device/Requires]
-ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
-
-[Aurora Device Wrapper VC707]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707/aurora-device-vc707.awb
-Packagehint=leap-platforms
-
-[PCIe Board with DDR/Requires]
-pcie_device=BlueNoC PCIe Bridge
-clocks_device=Differential Crystal Clocks Device from Clocks
-physical_platform_config=VC707 Virtex-7 Platform with PCIe
-physical_platform_utils=Common Physical Platform Utilities
-ddr_sdram_device=Xilinx DDR SDRAM Physical Device
-aurora_device=Aurora Device Wrapper VC707
 
 [BlueNoC PCIe Tunnel]
 File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
@@ -177,35 +143,9 @@ Packagehint=leap-platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707/vc707-v7-pcie-dma.awb
 Packagehint=leap-platforms
 
-[Aurora Common Definitions]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
-Packagehint=leap-platforms
-
 [Virtex-7 PCIE Device (BlueNoC)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/pcie-virtex7.awb
 Packagehint=leap-platforms
-
-[VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-5gbps-64.awb
-Packagehint=leap-platforms
-
-[Differential Crystal Clocks Device from Clocks]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-from-clocks.awb
-Packagehint=leap-platforms
-
-[VC707 DDR3 SDRAM]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707/ddr3-sdram-device.awb
-Packagehint=leap-platforms
-
-[Aurora Device Wrapper VC707/Requires]
-aurora_flowcontrol=Aurora Device Reliable Flowcontrol
-aurora_driver=VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps
-aurora_common=Aurora Common Definitions
-
-[Differential Crystal Clocks Device from Clocks/Params]
-CRYSTAL_CLOCK_FREQ=200
-MODEL_CLOCK_FREQ=100
-RESET_ACTIVE_HIGH=1
 
 [BlueNoC PCIe Bridge Interfaces]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc-ifc.awb
@@ -224,3 +164,12 @@ Packagehint=leap
 [MultiFPGA Master Platform Services (LI)]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master-li.apm
 Packagehint=multifpga
+
+[Dual PCIE Software Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/pcie/dualPCIE/dual-pcie-physical-platform.awb
+Packagehint=multifpga
+
+[Dual PCIE Software Physical Platform/Requires]
+pcie_device=BlueNoC PCIe Bridge
+physical_platform_config=VC707 Virtex-7 Platform with PCIe
+physical_platform_utils=Common Physical Platform Utilities

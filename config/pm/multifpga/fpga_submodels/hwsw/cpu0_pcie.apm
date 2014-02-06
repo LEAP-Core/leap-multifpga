@@ -50,9 +50,6 @@ Packagehint=multifpga
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
 
-[LEAP PCIE CPU0 Environment/Params]
-NUM_FPGA=2
-
 [LEAP PCIE CPU0 Environment]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-pcie-cpu0.apm
+File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hybrid-pcie-cpu0.apm
 Packagehint=multifpga
