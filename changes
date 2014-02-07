@@ -4694,3 +4694,28 @@ Directory config/pm/multifpga/fpga_submodels/hwsw
 
 
 Some apms were using the wrong physical platforms.
+
+----------
+keflemin    Date: Fri Feb  7 13:19:33 EST 2014  CSN: CSN-multifpga-218
+                  Fri Feb  7 18:19:33 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga/li
+ li_test_dual_vc707.apm    Locally Modified          217 
+ li_test_dual_sim.apm      Locally Modified          217 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-dual-pcie-cpu0.apm Locally Modified          217 
+
+Directory config/pm/multifpga/fpga_submodels/hwsw
+ fpga1-hwsw.apm            Locally Modified          217 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pcie/dualPCIE
+ dual-pcie-physical-platform.awb Locally Modified          217 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device-bdpi.c Locally Modified          217 
+
+
+Fixed some rotted APMs -- multiple PCIE now functions again.  Cleaned
+up communications code.

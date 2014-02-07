@@ -169,7 +169,12 @@ Packagehint=multifpga
 pcie_device=BlueNoC PCIe Bridge
 physical_platform_config=VC707 Virtex-7 Platform with PCIe
 physical_platform_utils=Common Physical Platform Utilities
+clocks_device=Differential Crystal Clocks Device from Clocks
 
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=leap-platforms
+
+[Differential Crystal Clocks Device from Clocks]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-from-clocks.awb
 Packagehint=leap-platforms

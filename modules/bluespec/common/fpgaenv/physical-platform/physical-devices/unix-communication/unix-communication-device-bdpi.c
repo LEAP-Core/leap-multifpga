@@ -51,17 +51,19 @@ void comm_init()
     int i;
     char buf[32];
 
-    if(DEBUG_COMM) {
-      printf("Calling comm init\n");
-      fflush(stdout);
+    if (DEBUG_COMM) 
+    {
+        printf("Calling comm init\n");
+        fflush(stdout);
     }
 
     if (initialized) return;
     initialized = 1;
 
     // Allows us to fork g_threads
-    if(!g_thread_supported()) {
-      g_thread_init(NULL);
+    if(!g_thread_supported()) 
+    {
+        g_thread_init(NULL);
     }
 
     assert(MAX_OPEN_CHANNELS >= 2);
@@ -73,6 +75,7 @@ void comm_init()
     freeList = &OCHT[0];
     OCHT[0].prev = &OCHT[MAX_OPEN_CHANNELS - 1];
     OCHT[0].next = &OCHT[1];
+
     for (i = 1; i < MAX_OPEN_CHANNELS - 1; i++)
     {
         OCHT[i].tableIndex = i;
@@ -80,75 +83,88 @@ void comm_init()
         OCHT[i].next = &OCHT[i+1];
         OCHT[i].open = 0;
     }
+
     OCHT[MAX_OPEN_CHANNELS - 1].prev = &OCHT[MAX_OPEN_CHANNELS - 2];
     OCHT[MAX_OPEN_CHANNELS - 1].next = &OCHT[0];
 
 }
 
 void* process_incoming(void* arg) {
-  Channel* descriptor = (Channel*)arg;
 
-  // I assume that the sender will create the fifo for me. 
+    Channel* descriptor = (Channel*)arg;
+
+    // I assume that the sender will create the fifo for me. 
  
-  // There's probably a race condition here.  We should sleep and retry for a while. 
-  int infile, retries = 0;
-  int bytes_read;
-  CommBlock buffer;
-
-  // We need to loop because the other side may not have created our fifo yet.
-  do {
-    infile = open(descriptor->incomingFIFO, O_RDONLY);
-    retries ++;
-    sleep(1);
-  } while (infile < 0 && retries < 120);
-
-  if(infile < 0) {
-    fprintf(stderr, "Timed out waiting for %s, transfers on this line result in deadlocks\n", descriptor->incomingFIFO);
-    // This isn't necessarily an error.
-    // We probably need some better phase in which we attempt to communicate with everything that 
-    // should exist.
-    return NULL;
-  } else {
-    if(DEBUG_COMM) {
-      fprintf(stderr, "Opened %s\n", descriptor->incomingFIFO);
-    }
-  }
-
-  // Clear out everything unil sync word
-
-  do {
-    bytes_read = read(infile,
-                      &buffer,
-                      sizeof(CommBlock));
-  } while ((bytes_read < sizeof(CommBlock)) || !buffer.sync);
-
-  if(DEBUG_COMM) {
-    printf("Received Sync\n");
-    fflush(stdout);
-  }
-
-  while(1) {
+    // There's probably a race condition here.  We should sleep and retry for a while. 
+    int infile, retries = 0;
     int bytes_read;
-    // this is probably inefficient but who cares.  
-    CommBlock * buffer = (CommBlock*) malloc(sizeof(CommBlock));
-  
-    bytes_read = read(infile,
-                      buffer,
-                      sizeof(CommBlock));
+    CommBlock buffer;
 
-    if(bytes_read == -1) {
-      fprintf(stderr, "Error %d in unix-pipe-device-bdpi::pipe_read()\n", errno);
-      exit(1);
-    } else if(bytes_read == 0) {
-      // looks like the other side died 
-      break; // we really should not exit(0) becasue in some deployments, there may not be an other side.
+    // We need to loop because the other side may not have created our fifo yet.
+    do 
+    {
+        infile = open(descriptor->incomingFIFO, O_RDONLY);
+        retries ++;
+        sleep(1);
+    } while (infile < 0 && retries < 120);
+
+    if (infile < 0) 
+    {
+        fprintf(stderr, "Timed out waiting for %s, transfers on this line result in deadlocks\n", descriptor->incomingFIFO);
+        // This isn't necessarily an error.
+        // We probably need some better phase in which we attempt to communicate with everything that 
+        // should exist.
+        return NULL;
+    } 
+    else 
+    {
+        if (DEBUG_COMM) 
+        {
+            fprintf(stderr, "Opened %s\n", descriptor->incomingFIFO);
+        }
     }
 
-    // push the data out.  we will free the data on deq.
-    g_async_queue_push(descriptor->incomingQ,buffer);     
-  }
+    // Clear out everything unil sync word
 
-  return NULL;
+    do 
+    {
+        bytes_read = read(infile,
+                          &buffer,
+                          sizeof(CommBlock));
+    } while ((bytes_read < sizeof(CommBlock)) || !buffer.sync);
+
+    if (DEBUG_COMM) 
+    {
+        printf("Received Sync\n");
+        fflush(stdout);
+    }
+
+    while (1) 
+    {
+        int bytes_read;
+        // this is probably inefficient but who cares.  
+        CommBlock * buffer = (CommBlock*) malloc(sizeof(CommBlock));
+  
+        bytes_read = read(infile,
+                          buffer,
+                          sizeof(CommBlock));
+
+        if (bytes_read == -1) 
+        {
+            fprintf(stderr, "Error %d in unix-pipe-device-bdpi::pipe_read()\n", errno);
+            exit(1);
+        } 
+        else if (bytes_read == 0) 
+        {
+            // looks like the other side died 
+            break; // we really should not exit(0) becasue in some deployments, there may not be an other side.
+        }
+
+        // push the data out.  we will free the data on deq.
+        g_async_queue_push(descriptor->incomingQ,buffer);     
+    }
+
+    return NULL;
 }
 
 int send_block(int fd, CommBlock *block, Channel *channel) {
@@ -163,7 +179,7 @@ int send_block(int fd, CommBlock *block, Channel *channel) {
         // system. 
         exit(0); 
     }
-  else if (bytes_written < sizeof(CommBlock))
+    else if (bytes_written < sizeof(CommBlock))
     {
         fprintf(stderr, "could not write complete chunk.\n");
     }
@@ -177,49 +193,53 @@ int send_block(int fd, CommBlock *block, Channel *channel) {
 }
 
 void* process_outgoing(void* arg) {
-  Channel* channel = (Channel*)arg;
+    Channel* channel = (Channel*)arg;
 
-  // It's our responsibility to unlink an existing fifo and to set it up.                                                                                           
-  int outfile;
+    // It's our responsibility to unlink an existing fifo and to set it up.                                                                                           
+    int outfile;
 
-  if(DEBUG_COMM) {
-    fprintf(stderr, "Attempting to open %s\n", channel->outgoingFIFO);
-  }
-
-  // someone probably already set this up. 
-  mkfifo(channel->outgoingFIFO, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
-  
-  outfile = open(channel->outgoingFIFO, O_WRONLY | O_SYNC);
-  if (outfile < 0)
-  {
-      fprintf(stderr, "Error with %s\n", channel->outgoingFIFO);
-      exit(1);
-  }
-  else {
-    if(DEBUG_COMM) {
-      fprintf(stderr, "Opened %s\n", channel->outgoingFIFO);
-      fflush(stderr);
+    if (DEBUG_COMM) 
+    {
+        fprintf(stderr, "Attempting to open %s\n", channel->outgoingFIFO);
     }
-  }
 
-  // send a sync word
-  CommBlock syncBlock;
-  syncBlock.sync = 1;  
+    // someone probably already set this up. 
+    mkfifo(channel->outgoingFIFO, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+  
+    outfile = open(channel->outgoingFIFO, O_WRONLY | O_SYNC);
+    if (outfile < 0)
+    {
+        fprintf(stderr, "Error with %s\n", channel->outgoingFIFO);
+        exit(1);
+    }
+    else 
+    {
+        if (DEBUG_COMM) 
+        {
+            fprintf(stderr, "Opened %s\n", channel->outgoingFIFO);
+            fflush(stderr);
+        }
+    }
 
-  if(DEBUG_COMM) {
-    printf("Sending handshake\n");
-    fflush(stdout);
-  }
+    // send a sync word
+    CommBlock syncBlock;
+    syncBlock.sync = 1;  
 
-  send_block(outfile, &syncBlock, channel);
+    if(DEBUG_COMM) {
+        printf("Sending handshake\n");
+        fflush(stdout);
+    }
 
-  while(1) {
-    CommBlock *block = g_async_queue_pop(channel->outgoingQ);
-    send_block(outfile, block, channel);
-    free(block); 
-  }
+    send_block(outfile, &syncBlock, channel);
 
-  return NULL;
+    while(1) 
+    {
+        CommBlock *block = g_async_queue_pop(channel->outgoingQ);
+        send_block(outfile, block, channel);
+        free(block); 
+    }
+
+    return NULL;
 }
 
 
@@ -231,8 +251,9 @@ unsigned char comm_open(char* outgoing, char* incoming)
 
     const char *commDirectory = "pipes/";
 
-    if(DEBUG_COMM) {
-      printf("Calling comm open\n");
+    if(DEBUG_COMM) 
+    {
+        printf("Calling comm open\n");
     }
 
     assert(initialized == 1);
@@ -274,8 +295,8 @@ unsigned char comm_open(char* outgoing, char* incoming)
 
     channel->incomingFIFO = (char*) malloc( (strlen(incoming) + strlen(commDirectory) + 1) * sizeof(char));
     strcpy(channel->incomingFIFO, commDirectory);
-    if(mkdir(channel->incomingFIFO, S_IRWXU) != 0) {
-        if(errno != EEXIST) {
+    if (mkdir(channel->incomingFIFO, S_IRWXU) != 0) {
+        if (errno != EEXIST) {
             fprintf(stderr, "Comm directory creation failed, bailing\n");
             cleanup_comm();
             exit(1);
@@ -286,8 +307,8 @@ unsigned char comm_open(char* outgoing, char* incoming)
 
     channel->outgoingFIFO = (char*) malloc( (strlen(outgoing) + strlen(commDirectory) + 1) * sizeof(char));
     strcpy(channel->outgoingFIFO, commDirectory);
-    if(mkdir(channel->outgoingFIFO, S_IRWXU) != 0) {
-        if(errno != EEXIST) {
+    if (mkdir(channel->outgoingFIFO, S_IRWXU) != 0) {
+        if (errno != EEXIST) {
             fprintf(stderr, "Comm directory creation failed, bailing\n");
             cleanup_comm();
             exit(1);
@@ -322,17 +343,19 @@ Channel *validate_handle(unsigned char handle)
     }
 
     /* lookup OCHT */
-    if(handle >= MAX_OPEN_CHANNELS) {
-      printf("Handle %d too large\n", handle);
-      fflush(stdout);
-      return NULL;
+    if(handle >= MAX_OPEN_CHANNELS) 
+    {
+        printf("Handle %d too large\n", handle);
+        fflush(stdout);
+        return NULL;
     }
 
     channel = &OCHT[handle];
-    if (!channel->open) {
-      printf("Handle %d not open\n", handle);
-      fflush(stdout);
-      return NULL;
+    if (!channel->open) 
+    {
+        printf("Handle %d not open\n", handle);
+        fflush(stdout);
+        return NULL;
     }
 
     return channel;
@@ -352,15 +375,17 @@ unsigned long long comm_read(unsigned char handle)
     for (i = 0; i < BDPI_CHUNK_BYTES; i++)
     {
         unsigned long long byte = block->chunk[i];
-        if(DEBUG_COMM) {
-          printf("comm byte %lld = %x\n", byte, block->chunk[i]);
+        if(DEBUG_COMM) 
+        {
+            printf("comm byte %lld = %x\n", byte, block->chunk[i]);
         }
 
         retval |= ((byte & 0xff) << (i * 8));
     }
 
-    if(DEBUG_COMM) {
-      printf("comm driver reading: %llx\n", retval);
+    if(DEBUG_COMM) 
+    {
+        printf("comm driver reading: %llx\n", retval);
     }
 
     return retval;
@@ -374,9 +399,10 @@ unsigned char comm_can_write(unsigned char handle)
     Channel *channel;
     channel = validate_handle(handle);
 
-    if(channel == NULL) {
-      // We're not open yet. 
-      return 0;
+    if(channel == NULL) 
+    {
+        // We're not open yet. 
+        return 0;
     }
 
     // otherwise we can always write
@@ -391,9 +417,10 @@ unsigned char comm_can_read(unsigned char handle)
 
     channel = validate_handle(handle);
 
-    if(channel == NULL) {
-      // We're not open yet. 
-      return 0;
+    if(channel == NULL) 
+    {
+        // We're not open yet. 
+        return 0;
     }
 
     return  g_async_queue_length(channel->incomingQ) > 0;
@@ -414,9 +441,10 @@ void comm_write(unsigned char handle, unsigned long long data)
 
     buffer = (CommBlock*) malloc(sizeof(CommBlock));
 
-    if(DEBUG_COMM) {
-      printf("Attempting a write\n");
-      fflush(stdout);
+    if(DEBUG_COMM) 
+    {
+        printf("Attempting a write\n");
+        fflush(stdout);
     }
 
     buffer->sync = 0;
@@ -427,22 +455,25 @@ void comm_write(unsigned char handle, unsigned long long data)
         unsigned char byte = (mask & data) >> (i * 8);
         buffer->chunk[i] = (unsigned char)byte;
         mask = mask << 8;
-        if(DEBUG_COMM) {
-          printf("comm byte %d = %x\n", i, buffer->chunk[i]);
+        if(DEBUG_COMM) 
+        {
+            printf("comm byte %d = %x\n", i, buffer->chunk[i]);
         }
     }
 
 
-    if(DEBUG_COMM) {
-      printf("comm driver writing: %llx\n", data);
-      printf("Attempting to push\n");
-      fflush(stdout);
+    if(DEBUG_COMM) 
+    {
+        printf("comm driver writing: %llx\n", data);
+        printf("Attempting to push\n");
+        fflush(stdout);
     }
 
     g_async_queue_push(channel->outgoingQ,buffer);     
 
-    if(DEBUG_COMM) {
-      printf("Push succeeds\n");
-      fflush(stdout);
+    if(DEBUG_COMM) 
+    {
+        printf("Push succeeds\n");
+        fflush(stdout);
     }
 }

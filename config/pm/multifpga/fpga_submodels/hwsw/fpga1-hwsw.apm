@@ -53,6 +53,7 @@ Packagehint=multifpga
 [HWSW MultiFPGA Simulation Aurora FPGA0 Environment/Params]
 NUM_FPGA=2
 PLATFORM_ID="FPGA1"
+MY_ID=1
 
 [HWSW MultiFPGA Simulation Aurora FPGA0 Environment]
 File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hwsw-exe-fpga0-aurora.apm

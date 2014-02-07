@@ -6,6 +6,7 @@
 
 %requires physical_platform_config
 %requires pcie_device
+%requires clocks_device
 %requires physical_platform_utils
 
 %sources --t H   --v PUBLIC  dual-pcie-physical-platform.h
