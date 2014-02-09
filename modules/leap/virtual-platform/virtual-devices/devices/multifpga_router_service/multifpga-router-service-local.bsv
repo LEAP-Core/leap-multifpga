@@ -42,7 +42,8 @@ import Vector::*;
 
 `include "awb/provides/multifpga_router_service.bsh"
 
-
+typedef function m#(Empty) f(PHYSICAL_SEND#(PHYSICAL_CHAIN_DATA) send) SEND_PACKETIZER_CONSTRUCTOR#(type m);
+typedef function m#(t) f(Connection_Receive#(PHYSICAL_CHAIN_DATA) recv) RECV_PACKETIZER_CONSTRUCTOR#(type m, type t);
 
 // *******
 // * Point to Point Code
@@ -55,7 +56,6 @@ import Vector::*;
 
 
 module mkPacketizeConnectionSendNoPack#(String name, 
-                                        PHYSICAL_SEND#(t_DATA) send, 
                                         SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                                          umf_channel_id, umf_service_id,
                                                                                          umf_method_id,  umf_message_len,
@@ -63,7 +63,8 @@ module mkPacketizeConnectionSendNoPack#(String name,
                                                                      umf_chunk)) port, 
                                         Integer id, 
                                         NumTypeParam#(bitwidth) width, 
-                                        function Action statIncrReceived()) (Empty)
+                                        function Action statIncrReceived(), 
+                                        PHYSICAL_SEND#(t_DATA) send) (Empty)
    provisos(Bits#(t_DATA, t_DATA_SZ),
             Div#(bitwidth,SizeOf#(umf_chunk),t_NUM_CHUNKS),
             Add#(n_EXTRA_SZ_2, bitwidth, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))),
@@ -205,7 +206,6 @@ module mkPacketizeConnectionSendNoPack#(String name,
 endmodule
 
 module mkPacketizeConnectionSendMarshalled#(String name, 
-                                            PHYSICAL_SEND#(t_DATA) send, 
                                             SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                                          umf_channel_id, umf_service_id,
                                                                                          umf_method_id,  umf_message_len,
@@ -213,7 +213,8 @@ module mkPacketizeConnectionSendMarshalled#(String name,
                                                                      umf_chunk)) port, 
                                             Integer id, 
                                             NumTypeParam#(bitwidth) width, 
-                                            function Action statIncrReceived()) (Empty)
+                                            function Action statIncrReceived(),
+                                            PHYSICAL_SEND#(t_DATA) send) (Empty)
    provisos(Bits#(t_DATA, t_DATA_SZ),
             Div#(TSub#(bitwidth, filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
             Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
@@ -324,15 +325,15 @@ module mkPacketizeConnectionSendMarshalled#(String name,
 endmodule
 
 module mkPacketizeConnectionSendPartialMarshalled#(String name, 
-                                                   PHYSICAL_SEND#(t_DATA) send, 
                                                    SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                                                 umf_channel_id, umf_service_id,
                                                                                                 umf_method_id,  umf_message_len,
                                                                                                 umf_phy_pvt,    filler_bits), 
                                                                             umf_chunk)) port, 
-                                            Integer id, 
-                                            NumTypeParam#(bitwidth) width, 
-                                            function Action statIncrReceived()) (Empty)
+                                                   Integer id, 
+                                                   NumTypeParam#(bitwidth) width, 
+                                                   function Action statIncrReceived(),
+                                                   PHYSICAL_SEND#(t_DATA) send) (Empty)
     provisos(Bits#(t_DATA, t_DATA_SZ),
              Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(SizeOf#(umf_chunk),filler_bits)));
 
@@ -424,8 +425,7 @@ endmodule
 
 
 
-module mkPacketizeConnectionSendUnmarshalled#(String name, 
-                                              PHYSICAL_SEND#(t_DATA) send, 
+module mkPacketizeConnectionSendUnmarshalled#(String name, 				       
                                               SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                                            umf_channel_id, umf_service_id,
                                                                                            umf_method_id,  umf_message_len,
@@ -433,7 +433,8 @@ module mkPacketizeConnectionSendUnmarshalled#(String name,
                                                                        umf_chunk)) port, 
                                               Integer id, 
                                               NumTypeParam#(bitwidth) width, 
-                                              function Action statIncrReceived()) (Empty)
+                                              function Action statIncrReceived(),
+                                              PHYSICAL_SEND#(t_DATA) send) (Empty)
     provisos(Bits#(t_DATA, t_DATA_SZ),
              Bits#(umf_chunk,umf_chunk_SZ));
 
@@ -510,11 +511,11 @@ endmodule
 // ********
 
 module mkPacketizeConnectionReceiveNoPack#(String name,
-                                           Connection_Receive#(t_DATA) recv,                                             
                                            Integer id, 
                                            NumTypeParam#(bitwidth) width,
                                            function Action statIncrBlocked(), 
-                                           function Action statIncrSent()) 
+                                           function Action statIncrSent(),
+                                           Connection_Receive#(t_DATA) recv) 
     (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                     umf_channel_id, umf_service_id,
                                     umf_method_id,  umf_message_len,
@@ -596,11 +597,11 @@ endmodule
 // These guys need a FOF interface
 // This one requires some thought 
 module mkPacketizeConnectionReceiveMarshalled#(String name,
-                                               Connection_Receive#(t_DATA) recv,                                             
                                                Integer id, 
                                                NumTypeParam#(bitwidth) width,
                                                function Action statIncrBlocked(), 
-                                               function Action statIncrSent()) 
+                                               function Action statIncrSent(),
+                                               Connection_Receive#(t_DATA) recv) 
     (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                     umf_channel_id, umf_service_id,
                                     umf_method_id,  umf_message_len,
@@ -684,11 +685,11 @@ endmodule
 
 // Actually this is insufficiently aggressive
 module mkPacketizeConnectionReceiveUnmarshalled#(String name,
-                                                 Connection_Receive#(t_DATA) recv, 
                                                  Integer id, 
                                                  NumTypeParam#(bitwidth) width,  
                                                  function Action statIncrBlocked(), 
-                                                 function Action statIncrSent()) 
+                                                 function Action statIncrSent(),
+                                                 Connection_Receive#(t_DATA) recv) 
 
     (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                     umf_channel_id, umf_service_id,
@@ -783,6 +784,69 @@ endmodule
 // *
 // *******
 
+module [m] mkPacketizeOutgoingChainHelper#(SEND_PACKETIZER_CONSTRUCTOR#(m) mkSendPacketizer)
+    (PHYSICAL_CHAIN_OUT)
+    provisos(IsModule#(m, mType));
+
+    // We need a clock and reset due to MCD code
+    let myClock <- exposeCurrentClock;
+    let myReset <- exposeCurrentReset;
+
+    let outfifo <- mkSizedFIFOF(2);
+    let sendDequeue <- mkPulseWire();
+
+    let send = interface PHYSICAL_SEND#(PHYSICAL_CHAIN_DATA);
+                   method Action send(PHYSICAL_CHAIN_DATA data);
+                       outfifo.enq(data);
+                   endmethod
+
+		   method Bool notFull(); 
+		       return outfifo.notFull();
+		   endmethod
+
+		   method Bool dequeued(); 
+		       return sendDequeue;
+		   endmethod
+
+               endinterface;
+
+    let sendPacketizer <- mkSendPacketizer(send);
+
+    interface clock = myClock;
+    interface reset = myReset;
+
+    method Action deq();
+        outfifo.deq();
+        sendDequeue.send();
+    endmethod 
+
+    method first = outfifo.first();
+    method notEmpty = outfifo.notEmpty();
+
+endmodule
+
+module mkPacketizeOutgoingChainNoPack#(String name,
+                                 SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
+                                                                          umf_channel_id, umf_service_id,
+                                                                          umf_method_id,  umf_message_len,
+                                                                          umf_phy_pvt,    filler_bits), umf_chunk)) port,
+                                 Integer id,
+                                 NumTypeParam#(bitwidth) width,
+                                 function Action statIncrReceived())
+    (PHYSICAL_CHAIN_OUT) // module interface
+    provisos(Bits#(umf_chunk, umf_chunk_SZ),
+             Div#(bitwidth,SizeOf#(umf_chunk),t_NUM_CHUNKS),
+             Add#(n_EXTRA_SZ_2, bitwidth, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))),
+             Add#(TAdd#(t_NUM_CHUNKS,1), 0, t_WORD_CHUNKS), // we already add the header in here..
+             Add#(TMul#(t_WORD_CHUNKS,`CON_BUFFERING), 0, t_BUFFER_CHUNKS),
+             Mul#(t_NUM_CHUNKS, umf_chunk_SZ, TAdd#(umf_chunk_SZ,TMul#(TSub#(t_NUM_CHUNKS, 1), umf_chunk_SZ))),
+             Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(SizeOf#(umf_chunk), TMul#(TSub#(t_NUM_CHUNKS, 1), SizeOf#(umf_chunk)))),
+             Add#(n_EXTRA_SZ, bitwidth, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+
+    let packetizer <- mkPacketizeOutgoingChainHelper(mkPacketizeConnectionSendNoPack(name, port, id, width, statIncrReceived));
+    return packetizer;
+
+endmodule
 
 module mkPacketizeOutgoingChainMarshalled#(String name, 
                                  SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -798,94 +862,33 @@ module mkPacketizeOutgoingChainMarshalled#(String name,
               Div#(TSub#(bitwidth, filler_bits),SizeOf#(umf_chunk),t_NUM_CHUNKS),
               Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
               Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(SizeOf#(umf_chunk), TAdd#(TMul#(TSub#(t_NUM_CHUNKS, 1), SizeOf#(umf_chunk)),filler_bits))),
-              Add#(TMul#(TSub#(t_NUM_CHUNKS, 1), umf_chunk_SZ), umf_chunk_SZ, TMul#(t_NUM_CHUNKS, umf_chunk_SZ)),
               Add#(n_EXTRA_SZ, TSub#(bitwidth, filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))),
+              // These provisos are suspicious.
+              Add#(TMul#(TSub#(t_NUM_CHUNKS, 1), umf_chunk_SZ), umf_chunk_SZ, TMul#(t_NUM_CHUNKS, umf_chunk_SZ)),
               Mul#(t_NUM_CHUNKS, umf_chunk_SZ, TAdd#(TMul#(TSub#(t_NUM_CHUNKS, 1),umf_chunk_SZ), umf_chunk_SZ)));
 
-    // We need a clock and reset due to MCD code
-    let myClock <- exposeCurrentClock;
-    let myReset <- exposeCurrentReset;
-
-    let outfifo <- mkSizedFIFOF(2);
-    let sendDequeue <- mkPulseWire();
-
-    let send = interface PHYSICAL_SEND#(PHYSICAL_CHAIN_DATA);
-                   method Action send(PHYSICAL_CHAIN_DATA data);
-                       outfifo.enq(data);
-                   endmethod
-
-		   method Bool notFull(); 
-		       return outfifo.notFull();
-		   endmethod
-
-		   method Bool dequeued(); 
-		       return sendDequeue;
-		   endmethod
-
-               endinterface;
-
-    let unmarshaller <- mkPacketizeConnectionSendMarshalled(name, send, port, id, width, statIncrReceived);
-
-    interface clock = myClock;
-    interface reset = myReset;
-
-    method Action deq();
-        outfifo.deq();
-        sendDequeue.send();
-    endmethod 
-
-    method first = outfifo.first();
-    method notEmpty = outfifo.notEmpty();
+    let packetizer <-  mkPacketizeOutgoingChainHelper(mkPacketizeConnectionSendMarshalled(name, port, id, width, statIncrReceived));
+    return packetizer;
 
 endmodule
 
-module mkPacketizeOutgoingChainPartialMarshalled#(String name, 
+
+module mkPacketizeOutgoingChainPartialMarshalled#(String name,
                                  SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                           umf_channel_id, umf_service_id,
                                                                           umf_method_id,  umf_message_len,
-                                                                          umf_phy_pvt,    filler_bits), umf_chunk)) port, 
-                                 Integer id, 
-                                 NumTypeParam#(bitwidth) width, 
-                                 function Action statIncrReceived()) 
-    (PHYSICAL_CHAIN_OUT) // module interface 
+                                                                          umf_phy_pvt,    filler_bits), umf_chunk)) port,
+                                 Integer id,
+                                 NumTypeParam#(bitwidth) width,
+                                 function Action statIncrReceived())
+    (PHYSICAL_CHAIN_OUT) // module interface
     provisos(Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(SizeOf#(umf_chunk),filler_bits)));
 
-    // We need a clock and reset due to MCD code
-    let myClock <- exposeCurrentClock;
-    let myReset <- exposeCurrentReset;
-
-    let outfifo <- mkSizedFIFOF(2);
-    let sendDequeue <- mkPulseWire();
-
-    let send = interface PHYSICAL_SEND#(PHYSICAL_CHAIN_DATA);
-                   method Action send(PHYSICAL_CHAIN_DATA data);
-                       outfifo.enq(data);
-                   endmethod
-
-		   method Bool notFull(); 
-		       return outfifo.notFull();
-		   endmethod
-
-		   method Bool dequeued(); 
-		       return sendDequeue;
-		   endmethod
-
-               endinterface;
-
-    let unmarshaller <- mkPacketizeConnectionSendPartialMarshalled(name, send, port, id, width, statIncrReceived);
-
-    interface clock = myClock;
-    interface reset = myReset;
-
-    method Action deq();
-        outfifo.deq();
-        sendDequeue.send();
-    endmethod 
-
-    method first = outfifo.first();
-    method notEmpty = outfifo.notEmpty();
+    let packetizer <-  mkPacketizeOutgoingChainHelper(mkPacketizeConnectionSendPartialMarshalled(name, port, id, width, statIncrReceived));
+    return packetizer;
 
 endmodule
+
 
 module mkPacketizeOutgoingChainUnmarshalled#(String name, 
                                  SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -899,49 +902,92 @@ module mkPacketizeOutgoingChainUnmarshalled#(String name,
 
     provisos (Bits#(umf_chunk, umf_chunk_SZ));
 
-    // We need a clock and reset due to MCD code
-    let myClock <- exposeCurrentClock;
-    let myReset <- exposeCurrentReset;
-
-    let outfifo <- mkSizedFIFOF(2);
-    let sendDequeue <- mkPulseWire();
-
-    let send = interface PHYSICAL_SEND#(PHYSICAL_CHAIN_DATA);
-                   method Action send(PHYSICAL_CHAIN_DATA data);
-	               if(`MARSHALLING_DEBUG == 1)
-                       begin
-                           $display("Chain %s outgoing %h", name, data);
-                       end
-
-                       outfifo.enq(data);
-                   endmethod
-
-		   method Bool notFull(); 
-		       return outfifo.notFull();
-		   endmethod
-
-		   method Bool dequeued(); 
-		       return sendDequeue;
-		   endmethod
-
-               endinterface;
-
-    let unmarshaller <- mkPacketizeConnectionSendUnmarshalled(name, send, port, id, width, statIncrReceived);
-
-    interface clock = myClock;
-    interface reset = myReset;
-
-    method Action deq();
-        outfifo.deq();
-        sendDequeue.send();
-    endmethod 
-
-    method first = outfifo.first();
-    method notEmpty = outfifo.notEmpty();
+    let packetizer <-  mkPacketizeOutgoingChainHelper(mkPacketizeConnectionSendUnmarshalled(name, port, id, width, statIncrReceived));
+    return packetizer;
 
 endmodule
 
 
+module [m] mkPacketizeIncomingChainHelper#(RECV_PACKETIZER_CONSTRUCTOR#(m, EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                          umf_channel_id, umf_service_id,
+                                          umf_method_id,  umf_message_len,
+                                          umf_phy_pvt,    filler_bits),
+                 umf_chunk)) mkRecvPacketizer) 
+    (Tuple2#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                          umf_channel_id, umf_service_id,
+                                          umf_method_id,  umf_message_len,
+                                          umf_phy_pvt,    filler_bits),
+                 umf_chunk),
+             PHYSICAL_CHAIN_IN)) // Module interface
+    provisos(IsModule#(m, mType));	 
+
+    // Egress interface to be filled in
+
+    let myClock <- exposeCurrentClock;
+    let myReset <- exposeCurrentReset;
+
+    RWire#(PHYSICAL_CHAIN_DATA) tryData <- mkRWire();
+    PulseWire trySuccess <- mkPulseWire();
+    Bool tryValid = isValid(tryData.wget());
+    
+    let recv = interface Connection_Receive#(PHYSICAL_CHAIN_DATA);
+                   method PHYSICAL_CHAIN_DATA receive() if(tryData.wget matches tagged Valid .data);
+                       return data;    
+                   endmethod
+
+		   method Action deq if(tryValid);
+		       trySuccess.send;
+                   endmethod
+
+		   method Bool notEmpty(); 
+		       return tryValid;
+		   endmethod
+
+               endinterface;
+
+
+    let egress_packet_generator <- mkRecvPacketizer(recv);
+
+
+    let physical_chain_in = interface PHYSICAL_CHAIN_IN;
+                                interface clock = myClock;
+                                interface reset = myReset;
+ 
+                                method Bool success() = trySuccess;
+
+                                method Bool dequeued() = trySuccess; 
+
+                                method Action try(PHYSICAL_CHAIN_DATA d);
+                                   tryData.wset(d);     
+                                endmethod
+                            endinterface;
+
+   return tuple2(egress_packet_generator, physical_chain_in);
+endmodule
+
+module mkPacketizeIncomingChainNoPack#(String name,
+                                 Integer id,  
+                                 NumTypeParam#(bitwidth) width,
+                                 function Action statIncrBlocked(), 
+                                 function Action statIncrSent()) 
+    (Tuple2#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                          umf_channel_id, umf_service_id,
+                                          umf_method_id,  umf_message_len,
+                                          umf_phy_pvt,    filler_bits),
+                 umf_chunk),
+             PHYSICAL_CHAIN_IN)) // Module interface
+
+    provisos (Bits#(umf_chunk, umf_chunk_SZ),
+              Div#(bitwidth,SizeOf#(umf_chunk),t_NUM_CHUNKS),
+
+              // this proviso allows us to stuff payload bits into the packet header which sometimes saves a
+              // a cycle
+              Add#(n_EXTRA_SZ, bitwidth, TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
+
+    let packetizer <- mkPacketizeIncomingChainHelper(mkPacketizeConnectionReceiveNoPack(name, id, width, statIncrBlocked, statIncrSent));
+    return packetizer;
+
+endmodule
 
 module mkPacketizeIncomingChainMarshalled#(String name,
                                  Integer id,  
@@ -965,53 +1011,9 @@ module mkPacketizeIncomingChainMarshalled#(String name,
               Add#(n_EXTRA_SZ_2, bitwidth, TAdd#(TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk)), filler_bits)),
               Add#(n_EXTRA_SZ, TSub#(bitwidth,filler_bits), TMul#(t_NUM_CHUNKS, SizeOf#(umf_chunk))));
 
-    // Egress interface to be filled in
+    let packetizer <- mkPacketizeIncomingChainHelper(mkPacketizeConnectionReceiveMarshalled(name, id, width, statIncrBlocked, statIncrSent));
+    return packetizer;
 
-    let myClock <- exposeCurrentClock;
-    let myReset <- exposeCurrentReset;
-
-    RWire#(PHYSICAL_CHAIN_DATA) tryData <- mkRWire();
-    PulseWire trySuccess <- mkPulseWire();
-    Bool tryValid = isValid(tryData.wget());
-    
-    let recv = interface Connection_Receive#(PHYSICAL_CHAIN_DATA);
-                   method PHYSICAL_CHAIN_DATA receive() if(tryData.wget matches tagged Valid .data);
-                       return data;    
-                   endmethod
-
-		   method Action deq if(tryValid);
-		       trySuccess.send;
-                   endmethod
-
-		   method Bool notEmpty(); 
-		       return tryValid;
-		   endmethod
-
-               endinterface;
-
-
-    let egress_packet_generator <- mkPacketizeConnectionReceiveMarshalled(name,
-                                                                         recv,            
-                                                                         id,
-                                                                         width,
-                                                                         statIncrBlocked,
-                                                                         statIncrSent);
-
-
-    let physical_chain_in = interface PHYSICAL_CHAIN_IN;
-                                interface clock = myClock;
-                                interface reset = myReset;
- 
-                                method Bool success() = trySuccess;
-
-                                method Bool dequeued() = trySuccess; 
-
-                                method Action try(PHYSICAL_CHAIN_DATA d);
-                                   tryData.wset(d);     
-                                endmethod
-                            endinterface;
-
-   return tuple2(egress_packet_generator, physical_chain_in);
 endmodule
 
 
@@ -1030,59 +1032,9 @@ module mkPacketizeIncomingChainUnmarshalled#(String name,
     provisos (Bits#(umf_chunk, umf_chunk_SZ),
               Bits#(PHYSICAL_CHAIN_DATA, t_PHYSICAL_CHAIN_DATA_SZ));
 
-    // Egress interface to be filled in
+    let packetizer <- mkPacketizeIncomingChainHelper(mkPacketizeConnectionReceiveUnmarshalled(name, id, width, statIncrBlocked, statIncrSent));
+    return packetizer;
 
-    let myClock <- exposeCurrentClock;
-    let myReset <- exposeCurrentReset;
-
-    RWire#(PHYSICAL_CHAIN_DATA) tryData <- mkRWire();
-    PulseWire trySuccess <- mkPulseWire();
-    Bool tryValid = isValid(tryData.wget());
-    
-    let recv = interface Connection_Receive#(PHYSICAL_CHAIN_DATA);
-                   method PHYSICAL_CHAIN_DATA receive() if(tryData.wget matches tagged Valid .data);
-                       return data;    
-                   endmethod
-
-		   method Action deq if(tryValid);
-		       trySuccess.send;
-                   endmethod
-
-		   method Bool notEmpty(); 
-		       return tryValid;
-		   endmethod
-
-               endinterface;
-
-    if(`MARSHALLING_DEBUG == 1)
-    begin
-        rule debugR(tryData.wget matches tagged Valid .data &&& trySuccess);
-            $display("Chain %s incoming %h", name, data);
-        endrule
-    end
-
-    let egress_packet_generator <- mkPacketizeConnectionReceiveUnmarshalled(name,
-                                                                         recv,            
-                                                                         id,
-                                                                         width,
-                                                                         statIncrBlocked,
-                                                                         statIncrSent);
-
-
-    let physical_chain_in = interface PHYSICAL_CHAIN_IN;
-                                interface clock = myClock;
-                                interface reset = myReset;
- 
-                                method Bool success() = trySuccess;
-
-                                method Bool dequeued() = trySuccess; 
-
-                                method Action try(PHYSICAL_CHAIN_DATA d);
-                                   tryData.wset(d);     
-                                endmethod
-                            endinterface;
-
-   return tuple2(egress_packet_generator, physical_chain_in);
 endmodule
 
 

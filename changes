@@ -4719,3 +4719,24 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 Fixed some rotted APMs -- multiple PCIE now functions again.  Cleaned
 up communications code.
+
+----------
+keflemin    Date: Sun Feb  9 16:12:21 EST 2014  CSN: CSN-multifpga-219
+                  Sun Feb  9 21:12:21 UTC 2014
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          218 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          218 
+
+
+1) Refactored chain packetization code to use a single parameterized
+constructor with curried packetizers.  This greatly improves the
+maintainability of the packetization code.
+
+2) Added no-pack packetizers for chains. These get used when routing
+chains through software to other platforms.
+
+

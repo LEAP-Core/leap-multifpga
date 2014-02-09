@@ -1862,15 +1862,14 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
                 header.write('// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
                 header.write('let pack_recv_' + dangling.inverse_name + ' <- mkPacketizeConnectionReceive' + packetizerType + '(\n')
                 header.write('\t"' + dangling.inverse_name + '",\n')
-                header.write('\trecv_' + dangling.inverse_name + ',\n')
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_recv_' + dangling.inverse_name + ',\n')
                 if(self.GENERATE_ROUTER_STATS):
                   header.write('\t' + stats.incrCounter('blocked_' + dangling.inverse_name) + ',\n')
-                  header.write('\t' + stats.incrCounter('sent_' + dangling.inverse_name) + ');\n\n')
+                  header.write('\t' + stats.incrCounter('sent_' + dangling.inverse_name) + ',\n')
                 else:
-                  header.write('\t?, ?);\n\n')
-
+                  header.write('\t?, ?,\n')
+                header.write('\trecv_' + dangling.inverse_name + ');\n\n')
 
               if(dangling.inverse_sc_type == 'ChainSrc' ):
                 header.write('// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
@@ -1972,15 +1971,14 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
                 header.write('// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
                 header.write('Empty unpack_send_' + dangling.inverse_name + ' <- mkPacketizeConnectionSend' + packetizerType  + '(\n')
                 header.write('\t"' + dangling.inverse_name + '",\n')
-                header.write('\tsend_' + dangling.inverse_name + ',\n')
                 header.write('\t' + ingressVias[dangling.via_idx].via_switch + '.ingressPorts[' + str(dangling.via_link) + '],\n')
                 header.write('\t' + str(dangling.via_link) + ',\n')
                 header.write('\twidth_send_' + dangling.inverse_name + ',\n')
                 if(self.GENERATE_ROUTER_STATS > 1):
-                  header.write('\t' + stats.incrCounter('received_' + dangling.inverse_name) + ');\n\n')
+                  header.write('\t' + stats.incrCounter('received_' + dangling.inverse_name) + ',\n')
                 else:
-                  header.write('\t?);\n\n')
-
+                  header.write('\t?,\n')
+                header.write('\tsend_' + dangling.inverse_name + ');\n\n')
 
               if(dangling.inverse_sc_type == 'ChainSink' ):
                 print "My type: " + dangling.sc_type
