@@ -4740,3 +4740,29 @@ maintainability of the packetization code.
 chains through software to other platforms.
 
 
+
+----------
+keflemin    Date: Mon Feb 10 15:40:38 EST 2014  CSN: CSN-multifpga-220
+                  Mon Feb 10 20:40:38 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          219 
+
+
+Added support for routing chains through software. Two functionalities
+are partially enabled by this support:
+
+1) We can have a CPU + SIM + FPGA configuration, in which the modules in the
+simulator talk to modules in the FPGA using the CPU as an intermediary.
+
+2) Multiple FPGA configurations no longer require direct physical links. 
+
+These features come with two caveats.  
+
+1) Send/Recv channels are not yet supported.  Support for them will
+come shortly.
+
+2) The software-side route through code has a potential flow-control
+related deadlock.  The software will take some reworking, but this bug
+is not a show stopper. 

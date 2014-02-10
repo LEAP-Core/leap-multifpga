@@ -1515,11 +1515,12 @@ class MultiFPGAConnect():
               sends = 0
               recvs = 0
               for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-                  if(dangling.inverse_sc_type == 'Send'):
+                  if(dangling.inverse_sc_type == 'Send' or dangling.inverse_sc_type == 'ChainRoutingSend'):
                       recvs = recvs + 1
-                  elif(dangling.inverse_sc_type == 'Recv'):
+                  elif(dangling.inverse_sc_type == 'Recv'  or dangling.inverse_sc_type == 'ChainRoutingRecv'):
                       sends = sends + 1
                   else:
+                      print "Dangling type: " + dangling.sc_type + " inverse " + dangling.inverse_sc_type
                       print "Error: software can't handle chains at this time...:  " + str(dangling)
                       sys.exit(-1)
                       
@@ -1554,14 +1555,19 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
           for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
               for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
                   #danglingTypeHack = "UMF_MESSAGE"
+                  # For now, we use the vanilla MARSHALLED_LI_CHANNEL_IN_CLASS for chain route-throughs
+                  # However, route-throughs in general are likely to deadlock, and require special handling. 
                   if(dangling.inverse_sc_type == 'Recv'):
                       print " CPU lays down (inverse Recv)" + str(dangling) 
                       #these need to be ordered so that the index operator in the read thread will do the right thing.  
                       incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new MARSHALLED_LI_CHANNEL_IN_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.name + '", (UMF_FACTORY) new ' + egressFactoryNames[ingressVias[0].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link) +'\n\n')
+                  elif(dangling.inverse_sc_type == 'ChainRoutingRecv'):
+                      incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new ROUTE_THROUGH_LI_CHANNEL_IN_CLASS(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.inverse_name + '", (UMF_FACTORY) new ' + egressFactoryNames[ingressVias[0].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link) +'\n\n')
                   elif(dangling.inverse_sc_type == 'Send'):
                       print " CPU lays down (inverse Send) " + str(dangling) 
                       outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new MARSHALLED_LI_CHANNEL_OUT_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[connections[0]] + '(),\n\t\t"'+ dangling.name + '",' + str(dangling.via_link) + ');\n\n')
-
+                  elif(dangling.inverse_sc_type == 'ChainRoutingSend'):
+                      outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new ROUTE_THROUGH_LI_CHANNEL_OUT_CLASS(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[connections[0]] + '(),\n\t\t"'+ dangling.inverse_name + '",' + str(dangling.via_link) + ');\n\n')
 
           # During the first pass, we construct the data types.  From the preceding loop, we know the number of channels.
           for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
