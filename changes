@@ -4807,3 +4807,103 @@ compilation phase (shared with legacy single platforms).
 
 Fixed small bug in communications simulation code.  Bluespec's
 ClockGen.v has a hard minimum of 5 for its period.  
+
+----------
+mcadler     Date: Thu Feb 13 18:05:58 EST 2014  CSN: CSN-multifpga-222
+                  Thu Feb 13 23:05:58 UTC 2014
+
+
+Directory modules/leap/debug/aurora-flowcontrol-debug
+ aurora-flowcontrol-debug.cpp Locally Modified          221 
+ aurora-flowcontrol-debug.h Locally Modified          221 
+ aurora-flowcontrol-debug.bsv Locally Modified          221 
+ sim-physical-platform.bsv Locally Modified          221 
+
+Directory modules/leap/virtual-platform
+ virtual-platform-li.h     Locally Modified          221 
+ virtual-platform-li.bsv   Locally Modified          221 
+
+Directory modules/leap/virtual-platform/rrr/li
+ li-rrr.bsv                Locally Modified          221 
+ li-rrr-client.cpp         Locally Modified          221 
+ li-rrr-server.cpp         Locally Modified          221 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service-local.bsv Locally Modified          221 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ pointer-ingress.bsv       Locally Modified          221 
+ flowcontrol-egress.bsv    Locally Modified          221 
+ pointer-egress.bsv        Locally Modified          221 
+ flowcontrol-ingress-regs.bsv Locally Modified          221 
+ flowcontrol-ingress.bsv   Locally Modified          221 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service
+ multifpga-router-service.bsv Locally Modified          221 
+
+Directory modules/leap/virtual-platform/virtual-devices/platform-services
+ platform-services-slave.bsv Locally Modified          221 
+ platform-services-master.bsv Locally Modified          221 
+
+Directory modules/leap/virtual-platform/low-level-platform-interface
+ llpi-li.cpp               Locally Modified          221 
+ llpi-li.h                 Locally Modified          221 
+ llpi-li.bsv               Locally Modified          221 
+
+Directory modules/leap/virtual-platform
+ virtual-platform-li.cpp   Locally Modified          221 
+
+Directory modules/leap/libraries/platform-services
+ platform-services-aurora.bsv Locally Modified          221 
+
+Directory modules/leap/libraries/platform-services/aurora-service
+ aurora-service.bsv        Locally Modified          221 
+
+Directory modules/leap/libraries/platform-services
+ platform-services-inter-fpga.bsv Locally Modified          221 
+
+Directory modules/leap/libraries/platform-services/inter-fpga-service/simulation
+ simulation-interfpga-service.bsv Locally Modified          221 
+
+Directory modules/leap/libraries/platform-services/inter-fpga-service/xupv5
+ xupv5-interfpga-service.bsv Locally Modified          221 
+
+Directory modules/leap/examples/hello-fellow
+ hello-world.bsv           Locally Modified          221 
+ hello-world.cpp           Locally Modified          221 
+ hello-world.h             Locally Modified          221 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpgaN
+ sim-physical-platform-fpgaN.bsv Locally Modified          221 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.bsv Locally Modified          221 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga1
+ sim-physical-platform-fpga1.bsv Locally Modified          221 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device-bdpi.c Locally Modified          221 
+ unix-communication-device-bdpi.h Locally Modified          221 
+ unix-communication-device.bsv Locally Modified          221 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication
+ simulation-communication-device.bsv Locally Modified          221 
+
+Directory modules/multifpga/longChain/connected_application
+ connected-application-throughput.bsv Locally Modified          221 
+
+Directory modules/multifpga/synthTest/connected_application
+ connected-application-test.bsv Locally Modified          221 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.bsv Locally Modified          221 
+
+Directory modules/multifpga/spiral
+ test-common-bdpi.c        Locally Modified          221 
+ test-common-bdpi.h        Locally Modified          221 
+
+Directory modules/multifpga/scratchdual/connected_application
+ connected-application-test.bsv Locally Modified          221 
+
+Switch to BSD license.
