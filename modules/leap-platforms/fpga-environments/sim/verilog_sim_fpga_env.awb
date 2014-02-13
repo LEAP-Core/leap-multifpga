@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Verilog Simulation Dual FPGA Environment
+%desc Verilog Simulation Dual FPGA Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC verilog-sim-dual.env
+%AWB_END

@@ -82,7 +82,7 @@ endinterface
 // We need to provide the illusion that this module is faster inorder to accomodate shifting data out.
 module mkUNIXCommDevice#(String outgoing, String incoming) (UNIX_COMM_DEVICE);
  
-   Clock rawClock <- mkAbsoluteClock(0, max(1,`MAGIC_SIMULATION_CLOCK_FACTOR/(`CRYSTAL_CLOCK_FREQ*`UNIX_COMM_NUM_WORDS*64*20)));
+   Clock rawClock <- mkAbsoluteClock(0, max(5,`MAGIC_SIMULATION_CLOCK_FACTOR/(`CRYSTAL_CLOCK_FREQ*`UNIX_COMM_NUM_WORDS*64*20)));
    Reset rawReset <- mkInitialReset(10, clocked_by rawClock);
    
    let comm <- mkUNIXCommDeviceShift(outgoing, incoming, clocked_by(rawClock), reset_by(rawReset));

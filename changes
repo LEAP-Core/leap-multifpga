@@ -4766,3 +4766,44 @@ come shortly.
 2) The software-side route through code has a potential flow-control
 related deadlock.  The software will take some reworking, but this bug
 is not a show stopper. 
+
+----------
+keflemin    Date: Thu Feb 13 16:47:53 EST 2014  CSN: CSN-multifpga-221
+                  Thu Feb 13 21:47:53 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_vexe.apm Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-vexe-fpgaN.apm Locally Added               0 
+ multifpgaenv-hybrid-vexe-fpga0.apm Locally Added               0 
+
+Directory config/pm/multifpga/fpga_submodels
+ fpga1-verilog.apm         Locally Added               0 
+ fpga0-verilog.apm         Locally Added               0 
+
+Directory modules/leap/build-support
+ stages/                   Locally Removed           220 
+
+Directory modules/leap/build-support/pipelines
+ multifpga_platform_verilog/ Locally Added               0 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform_verilog
+ VerilogSimulationPipelineMultiFPGA.py Locally Added               0 
+ verilog-sim-build-pipeline-multifpga.awb Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device.bsv Locally Modified          220 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ verilog_sim_fpga_env.awb  Locally Added               0 
+ verilog-sim-dual.env      Locally Added               0 
+
+
+Added support for verilog simulation platforms in the LIM compiler.
+This consisted of providing a verilog backend for the platform
+compilation phase (shared with legacy single platforms).
+
+Fixed small bug in communications simulation code.  Bluespec's
+ClockGen.v has a hard minimum of 5 for its period.  
