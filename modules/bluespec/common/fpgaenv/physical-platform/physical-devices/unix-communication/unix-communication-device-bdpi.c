@@ -262,7 +262,19 @@ unsigned char comm_open(char* outgoing, char* incoming)
     int i;
     Channel *channel;
 
-    const char *commDirectory = "pipes/";
+    const char *executionDirectory = getenv("LEAP_EXECUTION_DIRECTORY");
+    char *commDirectory = NULL;
+
+    if (executionDirectory != NULL)
+    {
+        commDirectory = (char*) malloc(sizeof(char) *(strlen("/pipes/") + strlen(executionDirectory) + 1));
+        strcpy(commDirectory,executionDirectory);
+        strcat(commDirectory,"/pipes/");
+    } 
+    else
+    {
+        commDirectory = "/pipes/"; 
+    }
 
     if(DEBUG_COMM) 
     {

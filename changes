@@ -4907,3 +4907,15 @@ Directory modules/multifpga/scratchdual/connected_application
  connected-application-test.bsv Locally Modified          221 
 
 Switch to BSD license.
+
+----------
+keflemin    Date: Sat Feb 15 18:11:32 EST 2014  CSN: CSN-multifpga-223
+                  Sat Feb 15 23:11:32 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication
+ unix-communication-device-bdpi.c Locally Modified          222 
+ unix-communication-device.bsv Locally Modified          222 
+
+
+Added support for platform sandboxing. 

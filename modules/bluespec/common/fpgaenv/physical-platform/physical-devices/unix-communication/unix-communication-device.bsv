@@ -43,7 +43,7 @@ import Clocks::*;
 `include "awb/provides/librl_bsv_storage.bsh"
 
 `define PIPE_NULL       1
-`define POLL_INTERVAL   0
+`define POLL_INTERVAL   2
 
 
 
