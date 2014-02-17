@@ -1,0 +1,10 @@
+%name MultiFPGA Combined Physical Channel
+%desc MultiFPGA Combined Physical Channel
+
+%provides physical_channel
+
+%requires sim_physical_channel
+%requires pcie_physical_channel
+
+%public combined-physical-channel.h
+

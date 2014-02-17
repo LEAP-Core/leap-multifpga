@@ -4919,3 +4919,72 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/physical-devices/uni
 
 
 Added support for platform sandboxing. 
+
+----------
+keflemin    Date: Mon Feb 17 16:02:21 EST 2014  CSN: CSN-multifpga-224
+                  Mon Feb 17 21:02:21 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga/li
+ li_test_dual_sim_vc707_hub.apm Locally Added               0 
+ li_test_dual_sim_vc707.apm Locally Added               0 
+ li_test_dual_sim_hub.apm  Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hybrid-exe-cpu0.apm Locally Modified          223 
+
+Directory modules/leap/virtual-platform
+ physical-channel/         Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel
+ pcie/                     Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel/pcie
+ bluenoc/                  Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel/pcie/bluenoc
+ pcie-bluenoc-physical-channel-software.awb Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel
+ combined/                 Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel/combined
+ combined-physical-channel.h Locally Added               0 
+ combined-physical-channel.awb Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel
+ sim/                      Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel/sim
+ sim-physical-channel-software.awb Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          223 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation
+ li/                       Locally Added               0 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/li
+ cpu0/                     Locally Added               - 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/li/cpu0
+ sim-physical-platform-fpga0.cpp Locally Removed           223 
+ physical-platform-cpu0.cpp Locally Added               - 
+ sim-physical-platform-fpga0.h Locally Removed           223 
+ sim-physical-platform-fpga0.awb Locally Removed           223 
+ sim-physical-platform-fpga0.bsv Locally Removed           223 
+ physical-platform-cpu0.h  Locally Added               - 
+ sim-physical-platform-fpga0.bsh Locally Removed           223 
+ physical-platform-cpu0.awb Locally Added               - 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-vc707-hub-li.env      Locally Added               0 
+ sim-dual-hub-hwsw.env     Locally Added               0 
+ sim_vc707_hub_li.awb      Locally Added               0 
+ sim_dual_hub_hwsw.awb     Locally Added               0 
+
+
+1) Added scaffold for latency insensitive channel route-throughs in
+software. The "hub" environments exercise this functionality.
+
+2) Added support for heterogeneous software physical connections. 

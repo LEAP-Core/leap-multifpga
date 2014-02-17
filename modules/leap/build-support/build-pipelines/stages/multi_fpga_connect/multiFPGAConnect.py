@@ -1447,16 +1447,18 @@ class MultiFPGAConnect():
                   viaIdx.pop()
 
               viaIdx = range(len(egressVias))    
-              for via in egressVias:
 
+              if(len(egressVias) != 1  or len(ingressVias) != 1):
+                  print "Error: software platforms can't handle more than one via per link...: "
+                  sys.exit(-1)
+
+              for via in egressVias:
                   incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(via.via_outgoing_flowcontrol_link) + ') = new FLOWCONTROL_IN_CLASS(outgoingChannels["' + targetPlatform + '"],mergedOutQ["'+ targetPlatform + '"],(UMF_FACTORY) new ' + egressFactoryNames[via.via_outgoing_flowcontrol_link] + '(),' + str(via.via_outgoing_flowcontrol_link) +');\n')
 
                   flowcontrolInit.append('\t\t((FLOWCONTROL_IN_CLASS*)incomingChannels["' + targetPlatform + '"]->at(' + str(via.via_outgoing_flowcontrol_link) + '))->Init();\n')
                   viaIdx.pop()
                     
-              if(len(egressVias) != 1  or len(ingressVias) != 1):
-                  print "Error: software can't handle more than one via per link...: "
-                  sys.exit(-1)
+
 
 
 

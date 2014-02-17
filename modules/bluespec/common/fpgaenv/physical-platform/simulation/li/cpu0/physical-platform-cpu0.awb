@@ -1,0 +1,11 @@
+
+%name CPU0 Hybrid Physical Platform
+%desc CPU0 Hybrid Physical Platform
+
+%provides physical_platform
+
+%requires clocks_device unix_pipe_device physical_platform_utils simulation_communication_device pcie_device 
+
+%sources --t H   --v PUBLIC  physical-platform-cpu0.h
+%sources --t CPP --v PRIVATE physical-platform-cpu0.cpp
+

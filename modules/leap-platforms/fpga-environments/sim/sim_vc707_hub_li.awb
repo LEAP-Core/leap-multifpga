@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation-VC707 Hub HW/SW Environment
+%desc Simulation-VC707 Hub HW/SW Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-vc707-hub-li.env
+%AWB_END
