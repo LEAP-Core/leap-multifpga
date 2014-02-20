@@ -4988,3 +4988,19 @@ Directory modules/leap-platforms/fpga-environments/sim
 software. The "hub" environments exercise this functionality.
 
 2) Added support for heterogeneous software physical connections. 
+
+----------
+keflemin    Date: Thu Feb 20 17:41:52 EST 2014  CSN: CSN-multifpga-225
+                  Thu Feb 20 22:41:52 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          224 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.h Locally Modified          224 
+
+
+Refactored channel routing code and router generation to include a
+read thread function.  This became possible due to the physical
+channel refactoring eariler this week. 

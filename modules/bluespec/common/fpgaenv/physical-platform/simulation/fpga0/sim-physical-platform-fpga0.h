@@ -14,8 +14,8 @@ typedef class PHYSICAL_DEVICES_CLASS* PHYSICAL_DEVICES;
 class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
 {
     private:
-        PHYSICAL_CHANNEL_CLASS unixPipeDevice0;
-        PHYSICAL_CHANNEL_CLASS unixPipeDevice1;
+        SIM_PHYSICAL_CHANNEL_CLASS unixPipeDevice0;
+        SIM_PHYSICAL_CHANNEL_CLASS unixPipeDevice1;
 
     public:
         // constructor-destructor

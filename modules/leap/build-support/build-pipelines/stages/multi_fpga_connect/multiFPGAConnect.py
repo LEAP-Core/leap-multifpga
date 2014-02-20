@@ -1472,37 +1472,6 @@ class MultiFPGAConnect():
 
           header.write("\n\n")
 
-          for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
-              hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-              hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
-              # These functions don't need to be generated any longer.
-              header.write("\tstatic void * " + incomingThreadFuncName(platform, targetPlatform) + "(void *argv) {\n")
-              header.write("\t\tvoid ** args = (void**) argv;\n")
-              header.write("\t\tPHYSICAL_CHANNEL_CLASS *physicalChannel = (PHYSICAL_CHANNEL_CLASS*) args[0];\n")
-              header.write("\t\tvector<LI_CHANNEL_IN> *inChannels = (vector<LI_CHANNEL_IN>*) args[1];\n")
-              header.write("\t\twhile(1) {\n")
-              header.write("\t\t\tUMF_MESSAGE msg = physicalChannel->Read();\n") 
-              #header.write('\t\t\tcout << "Message for channel " << msg->GetServiceID() << endl;\n')       
-              header.write("\t\t\tinChannels->at(msg->GetServiceID())->pushUMF(msg);\n")       
-              header.write("\t\t}\n")
-              header.write("\t}\n\n")
-
-
-              # This is dead code...
-              header.write("\tstatic void * " + outgoingThreadFuncName(platform, targetPlatform) + "(void *argv) {\n")
-              header.write("\t\tvoid ** args = (void**) argv;\n")
-              header.write("\t\ttbb::concurrent_bounded_queue<UMF_MESSAGE> * mergedMessages = (tbb::concurrent_bounded_queue<UMF_MESSAGE>*) args[1];\n")
-   
-              header.write("\t\tPHYSICAL_CHANNEL_CLASS *physicalChannel = (PHYSICAL_CHANNEL_CLASS*) args[0];\n")
-              header.write("\t\twhile(1) {\n")
-              header.write("\t\t\tUMF_MESSAGE msg;\n")
-              header.write("\t\t\tmergedMessages->pop(msg);\n")       
-              header.write("\t\t\tphysicalChannel->Write(msg);\n")  
-              header.write("\t\t}\n")
-              header.write("\t}\n\n")
-
-
-
           #vectors for dangling connections
           platformSends = []
           platformRecvs = []
@@ -1613,25 +1582,12 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
               header.write('\t\treaderArgs[1] = incomingChannels["' + targetPlatform + '"];\n')
               header.write("\t\tif (pthread_create(&ReaderThreads[" + str(connections[0]) + "],\n")
               header.write("\t\t                   NULL,\n")
-              header.write("\t\t                   " + incomingThreadFuncName(platform, targetPlatform) + ",\n")
+              header.write("\t\t                   handleIncomingMessages,\n")
               header.write("\t\t                   readerArgs))\n")
               header.write("\t\t{\n")
               header.write('\t\t\tperror("pthread_create, ' + incomingThreadFuncName(platform, targetPlatform) + ':");\n')
               header.write("\t\t\texit(1);\n")
               header.write("\t\t}\n")
-
-              header.write("\t\twriterArgs = (void**) malloc(2*sizeof(void*));\n")
-              header.write("\t\twriterArgs[0] = " + hopToTarget + ";\n")
-              header.write('\t\twriterArgs[1] = mergedOutQ["' + targetPlatform + '"];\n')
-              #header.write("\t\tif (pthread_create(&WriterThreads[" + str(connections[0]) + "],\n")
-              #header.write("\t\t                   NULL,\n")
-              #header.write("\t\t                   " + outgoingThreadFuncName(platform, targetPlatform) +",\n")
-              #header.write("\t\t                   writerArgs))\n")
-              #header.write("\t\t{\n")
-              #header.write('\t\t\tperror("pthread_create, ' + outgoingThreadFuncName(platform, targetPlatform) + ':");\n')
-              #header.write("\t\t\texit(1);\n")
-              #header.write("\t\t}\n")
-
 
               header.write("\t\n")                                                                        
               connections.pop()
