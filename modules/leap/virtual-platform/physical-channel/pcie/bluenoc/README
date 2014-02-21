@@ -1,0 +1,9 @@
+pcie-bluenoc-physical-channel-software.awb
+
+This awb file changes the type of the pcie-bluenoc module from
+physical_channel to pcie_physical_channel, allowing builds supporting
+multiple physical channels to import the pcie implementation in
+addition to other physical device implementations.
+
+This awb file relies on union dir from the leap repository in order
+find its files.  

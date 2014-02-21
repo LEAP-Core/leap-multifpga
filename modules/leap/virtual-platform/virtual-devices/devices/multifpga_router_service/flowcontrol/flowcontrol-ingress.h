@@ -58,13 +58,14 @@ class FLOWCONTROL_LI_CHANNEL_IN_CLASS: public LI_CHANNEL_IN_CLASS
 
     void freeCredits(UINT32 serviceID)
     {
-	if(flowcontrolCredits > ((3 * MULTIFPGA_FIFO_SIZES) / 4))
-	{
 
-            if(SWITCH_DEBUG)
-            {
-	        cout << "Channel " << serviceID  << " sending back credits " <<  flowcontrolCredits << endl;
-   	    }
+        if (SWITCH_DEBUG)
+        {
+	    cout << "Channel " << serviceID  << " has retired  " <<  flowcontrolCredits << "credits " << endl;
+        }
+
+	if (flowcontrolCredits > ((1 * MULTIFPGA_FIFO_SIZES) / 2))
+	{
 
 	    UMF_MESSAGE outMesg = factory->createUMFMessage();
 	    outMesg->SetLength(sizeof(UMF_CHUNK));
@@ -73,6 +74,14 @@ class FLOWCONTROL_LI_CHANNEL_IN_CLASS: public LI_CHANNEL_IN_CLASS
             // Atomic read returns the old value, making this operation thread safe under idempotence.
             UINT32 creditsToReturn = flowcontrolCredits.fetch_and_store(0);                         
             UINT32 phyPvt =  (serviceID * 2 * MULTIFPGA_FIFO_SIZES) | creditsToReturn;  
+
+            if (SWITCH_DEBUG)
+            {
+	      cout << "Credit Chunk " << phyPvt << " from service " << 
+                      (serviceID * 2 * MULTIFPGA_FIFO_SIZES) << " and credits " << creditsToReturn << endl;
+            }
+
+
             outMesg->AppendChunk((UINT128) phyPvt);              
 	    flowcontrolQ->push(outMesg);
 	}

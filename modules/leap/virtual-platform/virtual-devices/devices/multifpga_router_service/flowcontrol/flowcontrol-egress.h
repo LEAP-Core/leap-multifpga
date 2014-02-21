@@ -61,6 +61,7 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
 
     ~FLOWCONTROL_LI_CHANNEL_OUT_CLASS() {};
 
+    // free credits may need to be overridden by route through codes. 
     void freeCredits(UINT32 credits) 
     {
         timespec finish;
@@ -107,19 +108,19 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
 	}
     };
 
-    void acquireCredits(UINT32 messageLength)
+    void acquireCredits(UINT32 credits)
     {
         // it is possible that someone could sneak in an steal our credit even if we are woken.      
         UINT32 retries;        
 
         for(retries = 0; retries < 2500; retries++) 
         {
- 	    UINT32 originalCredits = flowcontrolCredits.fetch_and_add(-1 * messageLength);
+ 	    UINT32 originalCredits = flowcontrolCredits.fetch_and_add(-1 * credits);
 
-            if(originalCredits < messageLength)
+            if(originalCredits < credits)
 	    {
 	        // Oops grabbed too much credit
-  	        flowcontrolCredits.fetch_and_add(messageLength);        
+  	        flowcontrolCredits.fetch_and_add(credits);        
 
 	        if(SWITCH_DEBUG)
 	        {
@@ -139,7 +140,7 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
 	//   	cout << "Channel "<< this << " spins " << retries << endl;
         // We failed to get credit enough times that we're just going to block... 
         unique_lock<std::mutex> flowcontrolLock(flowcontrolMutex);
-	while(flowcontrolCredits < messageLength)
+	while(flowcontrolCredits < credits)
 	{
 	    if(SWITCH_DEBUG)
 	    {
@@ -154,7 +155,7 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
 	    }
 	}
 
-	flowcontrolCredits.fetch_and_add(-1 * messageLength);
+	flowcontrolCredits.fetch_and_add(-1 * credits);
 
 	if(SWITCH_DEBUG)
 	{
@@ -163,35 +164,6 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
 
     };
 
-
-
-    /*    void acquireCredits(UINT32 messageLength)
-    {
-        // it is possible that someone could sneak in an steal our credit even if we are woken.      
-        unique_lock<std::mutex> flowcontrolLock(flowcontrolMutex);
-	while(flowcontrolCredits < messageLength)
-	{
-	    if(SWITCH_DEBUG)
-	    {
-	        cout << "Channel "<< this << " Blocks for flowcontrol credits" << endl;
-	    }
-
-	    flowcontrolVariable.wait(flowcontrolLock);  //Need to wait for a credit message.      
-
-            if(SWITCH_DEBUG)
-	    {
-	        cout << "Channel "<< this << " Wakes" << endl;
-	    }
-	}
-
-	flowcontrolCredits.fetch_and_add(-1 * messageLength);
-
-	if(SWITCH_DEBUG)
-	{
-	    cout << "Credits remaining: " << dec << flowcontrolCredits << endl;
-	}
-
-	};*/
 };
 
 

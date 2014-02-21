@@ -5004,3 +5004,38 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
 Refactored channel routing code and router generation to include a
 read thread function.  This became possible due to the physical
 channel refactoring eariler this week. 
+
+----------
+keflemin    Date: Fri Feb 21 14:16:04 EST 2014  CSN: CSN-multifpga-226
+                  Fri Feb 21 19:16:04 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga/li
+ hasim_test_dual_sim_hub.apm Locally Added               0 
+ test_multifpga_throughput_dual_sim_vc707_hub.apm Locally Added               0 
+ test_multifpga_throughput_dual_sim_hub.apm Locally Added               0 
+ hasim_test_dual_sim_vc707_hub.apm Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel/pcie/bluenoc
+ README                    Locally Added               0 
+
+Directory modules/leap/virtual-platform/physical-channel/sim
+ README                    Locally Added               0 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.h      Locally Modified          225 
+ flowcontrol-egress.bsv    Locally Modified          225 
+ flowcontrol-ingress.h     Locally Modified          225 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.cpp Locally Modified          225 
+
+
+1) Added some apm testing new fpga <-> simulator capabilities 
+
+2) Added readmes documenting some of the new code (these were
+accidentally omitted)
+
+3) Added new debugging mode to flowcontrol-ingress, enabling to dump
+credit counts.  Additionally flowcontrol ingress will halt simultion
+if it encounters a credit overflow. 

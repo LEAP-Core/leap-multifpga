@@ -40,6 +40,7 @@
 import Vector::*;
 import FIFOF::*;
 import DReg::*;
+import ConfigReg::*;
 
 
 `include "awb/provides/channelio.bsh"
@@ -177,24 +178,31 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     // Lutram to store the pointer values
     // For now we do a 'full-knowledge' protocol, where each return token signifies return of credis
     LUTRAM#(Bit#(n_FIFOS_SAFE_SZ), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) portCredits <- mkLUTRAM(`MULTIFPGA_FIFO_SIZES);
+    Vector#(n, Reg#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))) portCreditsReg <- replicateM(mkConfigReg(`MULTIFPGA_FIFO_SIZES));
     Vector#(n,Reg#(Bool)) bufferAvailable <- replicateM(mkReg(True));
     Vector#(n,Bool) requestQueuesNotEmpty = newVector();
+
+    PulseWire adjustCreditsFired <- mkPulseWire;
+    PulseWire scanResponsesFired <- mkPulseWire;
+    PulseWire writeReqNewMsgFired <- mkPulseWire;
 
     for (Integer s = 0; s < valueof(n); s = s + 1)
     begin   
         requestQueuesNotEmpty[s] = requestQueues[s].notEmptyHeader() || requestQueues[s].notEmptyBody();    
     end
 
-    Reg#(Bit#(10)) count <- mkReg(0);
+    Reg#(Bool) stateUpdated <- mkDReg(False);
 
-    rule debug(`SWITCH_DEBUG == 1);
-        count <= count + 1;
-        if(count == 0)
+    rule recordUpdate(adjustCreditsFired || scanResponsesFired || writeReqNewMsgFired);   
+        stateUpdated <= True;
+    endrule
+
+
+
+    rule debug(`SWITCH_DEBUG == 1 && stateUpdated);
+        for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
         begin
-            for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
-            begin
-                $display("Egress Queue %d thinks bufferAvailable %b", i, bufferAvailable[i]);
-            end
+            $display("Egress Queue %d thinks bufferAvailable %b portCredits %d", i, bufferAvailable[i], portCreditsReg[i]);
         end
     endrule
 
@@ -247,6 +255,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
         endrule
  
         rule adjustCredits;
+            adjustCreditsFired.send();
+
             // enqueue header in service's queue
             // set up remaining chunks
             let payload = creditDelay.first();
@@ -257,9 +267,10 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
            
             bufferAvailable[responseActiveQueue] <= creditsNext >= maximumPacketSize + 1; // This should always be true...
             portCredits.upd(truncate(responseActiveQueue), creditsNext);
-      
+
             if(`SWITCH_DEBUG == 1)
             begin
+                portCreditsReg[responseActiveQueue] <= creditsNext;             
                 $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
             end
 
@@ -295,6 +306,8 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
         endrule
   
         rule scan_responses (!deqHeader);
+            scanResponsesFired.send();
+
             deqHeader <= !deqHeader;
             GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                     umf_channel_id_r, umf_service_id_r,
@@ -311,9 +324,17 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             
             bufferAvailable[responseActiveQueue] <= creditsNext >= maximumPacketSize; // This should always be true...
             portCredits.upd(truncate(responseActiveQueue), creditsNext);
+
             if(`SWITCH_DEBUG == 1)
             begin
-                $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, payload, currentCredits, creditsNext);
+                portCreditsReg[responseActiveQueue] <= creditsNext;            
+                $display("Got flow control body %h for service %d got %d credits, had %d credits, setting portCredits %d", payload, responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
+            end
+
+            if(creditsNext > `MULTIFPGA_FIFO_SIZES)
+            begin
+                $display("Credit overflow");
+                $finish;
             end
 
             if(creditsNext < maximumPacketSize)
@@ -420,6 +441,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                                   requestChunksRemaining == 0 &&&
                                   !creditDelay.notEmpty() &&&
                                   deqHeader);
+            writeReqNewMsgFired.send();
             let header = requestQueues[s].firstHeader;
 
             // We can use resize here without danger because of the
@@ -446,11 +468,12 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             Bit#(TAdd#(1, TLog#(`MULTIFPGA_FIFO_SIZES))) newCount =  oldCredits - zeroExtendNP(requestChunks);
             portCredits.upd(fromInteger(s), newCount);
-           
+
             bufferAvailable[s] <= newCount >= maximumPacketSize + 1; 
 
             if(`SWITCH_DEBUG == 1)
             begin
+                portCreditsReg[fromInteger(s)] <= newCount;            
                 $display("Setting portCredits for port %d to %d", s, newCount);
             end
 
