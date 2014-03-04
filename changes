@@ -5074,3 +5074,15 @@ hasim.
 3) Removed display statements from throughput test.  They got
 annoying.
 
+
+----------
+keflemin    Date: Tue Mar  4 18:14:52 EST 2014  CSN: CSN-multifpga-228
+                  Tue Mar  4 23:14:52 UTC 2014
+
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
+ sim-physical-platform-fpga0.h Locally Modified          227 
+
+
+Legacy builds must correctly register at device construction time, or
+the correct pipes will not be used at runtime.
