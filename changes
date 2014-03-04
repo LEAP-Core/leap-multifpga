@@ -5039,3 +5039,38 @@ accidentally omitted)
 3) Added new debugging mode to flowcontrol-ingress, enabling to dump
 credit counts.  Additionally flowcontrol ingress will halt simultion
 if it encounters a credit overflow. 
+
+----------
+keflemin    Date: Tue Mar  4 13:41:57 EST 2014  CSN: CSN-multifpga-227
+                  Tue Mar  4 18:41:57 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga/li
+ hasim_test_dual_sim_hub.apm Locally Modified          226 
+ hasim_test_dual_sim_vc707_hub.apm Locally Modified          226 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          226 
+
+Directory modules/multifpga/alpha_inorder
+ sim-mapping-time-func.map Locally Modified          226 
+ sim-mapping.map           Locally Modified          226 
+ sim_mapping_one.awb       Locally Added               0 
+ sim-mapping-one.map       Locally Added               0 
+
+Directory modules/multifpga/throughputTest
+ basestationImpl.bsv       Locally Modified          226 
+ throughput-repeater.bsv   Locally Modified          226 
+
+
+1) Fixed bug in bitfile generation in which dynamic parameter
+dictionaries were not globally visible.  If different platforms had
+different dynamic parameters, then platforms could disagree on
+dictionary definitions. 
+
+2) Added some new mapping files to support various configurations of
+hasim.
+
+3) Removed display statements from throughput test.  They got
+annoying.
+

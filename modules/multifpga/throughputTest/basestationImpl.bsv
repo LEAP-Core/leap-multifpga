@@ -39,7 +39,6 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
   
 
     rule sendBiscuit (testTX == 0 && testRX == 0);
-        $display("Starting the test");
         let data <- serverStub.acceptRequest_RunTest();
         testWidth <= data.width;
         testTX <= data.count;
@@ -52,7 +51,6 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
     rule tx16(testWidth == 16 && testTX > 0);
         aliveOut16.send(truncate(testTX));
    	testTX <= testTX - 1;
-        $display("Sending test 16 %d",testTX);
         latencyFIFO.enq(ticks);
     endrule
 
@@ -73,8 +71,6 @@ module [CONNECTED_MODULE] mkBasestation (Empty);
 	begin
             serverStub.sendResponse_RunTest(zeroExtend(ticks - testStart),zeroExtend(testLatency + (ticks - latencyFIFO.first())),errors);
         end
-
-        $display("Receiving test 16 %d",testTX);
 
    	testRX <= testRX - 1;
     endrule

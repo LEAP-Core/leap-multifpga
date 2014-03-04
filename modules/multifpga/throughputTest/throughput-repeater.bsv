@@ -14,7 +14,6 @@ module [CONNECTED_MODULE] mkThroughputRepeater#(Integer station) (Empty);
   Connection_Send#(Bit#(256)) aliveOut256 <- mkConnection_Send("256_" + integerToString(station));
 
   rule sayHello16;
-    $display("Alive 16 bounces %d", aliveIn16.receive());
     aliveIn16.deq();
     aliveOut16.send(aliveIn16.receive());
   endrule

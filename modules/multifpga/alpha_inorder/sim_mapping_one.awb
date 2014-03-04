@@ -1,0 +1,12 @@
+%name Alpha Inorder Single Module Partition
+%desc This file describes nothing of importance 
+
+%attributes tool
+
+%provides fpga_mapping
+
+%sources -t FPGAENV_MAPPING -v PUBLIC sim-mapping-one.map
+
+
+
+

@@ -137,35 +137,20 @@ class MultiFPGAGenerateBitfile():
       execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
       execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')    
 
+
+
+
+
       # Dictionaries are global.  Therefore, all builds must see the same context or bad things 
       # will happen.   
-      missingDicts = ""
-      firstPass = True
-      platformDicts = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependencies('GIVEN_DICTS')     
-      for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
-        if(not dict in platformDicts):
-          seperator = ':'
-          if(firstPass):
-            seperator = ''
-          missingDicts += seperator+dict
-          firstPass = False
-
-
+      platformDicts = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependencies('GIVEN_DICTS')   
+      missingDicts = ":".join([dict for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys() if not dict in platformDicts])
 
       # RRRs can appear in services sometimes and thereby lack global 
       # visibility.  We need to treat them in the same way we treat dictionaries. 
-      missingRRRs = ""
-      firstPass = True
       platformRRRs = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_RRRS')     
-      for rrr in moduleList.topModule.moduleDependency['MISSING_RRRS'].keys():
-        if(not rrr in platformRRRs):
-          seperator = ':'
-          if(firstPass):
-            seperator = ''
-          missingRRRs += seperator+rrr
-          firstPass = False
+      missingRRRs = ":".join([rrr for rrr in moduleList.topModule.moduleDependency['MISSING_RRRS'].keys() if not rrr in platformRRRs])
 
-    
       execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_DICTS \\"' + missingDicts  + '\\"')
       execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"')                      
       execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
@@ -174,7 +159,7 @@ class MultiFPGAGenerateBitfile():
 
       execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
 
-      # set up the symlinks to missing dictionaries- they aree broken
+      # set up the symlinks to missing dictionaries- they are broken
       # at first, but as we fill in the platforms, they'll come up
       for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
         if(not dict in platformDicts):
@@ -211,14 +196,38 @@ class MultiFPGAGenerateBitfile():
           compile_closure(platform)
           )                   
       moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] += [bitfile] 
-      
+
+    # Dynamic parameters are global, and each platform may have a few
+    # dynamic parameters.  First we read in the dynamic parameters of
+    # each platform, which are produced at configuration time (above)
+    # Then, we build a representation of all dynamic parameters, and
+    # then overwrite the dynamic parameters of each subordinate build.
+
+    dynamicParamsSet = set() # Use set properties to eliminate duplicates
+    for platformName in self.environment.getPlatformNames():
+      platform = self.environment.getPlatform(platformName)
+      platformBuildDir = makePlatformBuildDir(platform.name)
+      paramsFile = os.getcwd() + '/' + platformBuildDir + '/iface/src/dict/dynamic_params.dic'
+      paramsHandle = open(paramsFile, 'r')
+      for line in paramsHandle.readlines():
+        dynamicParamsSet.add(line)
+
+    # now we overwrite the old files. 
+    for platformName in self.environment.getPlatformNames():
+      platform = self.environment.getPlatform(platformName)
+      platformBuildDir = makePlatformBuildDir(platform.name)
+      paramsFile = os.getcwd() + '/' + platformBuildDir + '/iface/src/dict/dynamic_params.dic'
+      paramsHandle = open(paramsFile, 'w')
+      for line in dynamicParamsSet:
+        paramsHandle.write(line)
+
+           
     # END for platform
     configFile.write('platforms=['+ ",".join(platformMetadata) +']\n')
     configFile.close()
     # each platform can have a different strings file.  Let's cat all the strings files together...
     # because the hash signatures are unique we can be quite sloppy in this.
     strlist = []
-    master = moduleList.buildDirectory + '/' + moduleList.apmName + ".str"
     for platformName in self.environment.getPlatformNames():
       platform = self.environment.getPlatform(platformName)
       platformAPMBaseName = makePlatformBitfileName(platform.name,APM_NAME)
