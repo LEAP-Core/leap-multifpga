@@ -162,14 +162,20 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     // packet size to determine whether to send.  This is suboptimal, but
     // uses less hardware, since only one value needs to be stored.
 
-    Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) maximumPacketSize = 0;
-    for (Integer s = 0; s < valueof(n); s = s + 1)
-    begin   
-        if(fromInteger(requestQueues[s].maxPacketSize()) > maximumPacketSize)
-        begin
-            maximumPacketSize = fromInteger(requestQueues[s].maxPacketSize());
-        end
-    end
+    function Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) getMaxPacketSize (EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                                    umf_channel_id, umf_service_id,
+                                                    umf_method_id,  umf_message_len,
+                                                    umf_phy_pvt,    filler_bits),
+                                                umf_chunk) queue) = fromInteger(queue.maxPacketSize());
+
+    Vector#(n, EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                                    umf_channel_id, umf_service_id,
+                                                    umf_method_id,  umf_message_len,
+                                                    umf_phy_pvt,    filler_bits),
+                                                umf_chunk)) requestQueuesVec = arrayToVector(requestQueues);
+
+    Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))) maximumPacketSize = foldl(max,0,map(getMaxPacketSize, requestQueuesVec));
+
 
     // ==============================================================
     //                        Ports and Queues

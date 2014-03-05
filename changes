@@ -5086,3 +5086,16 @@ Directory modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0
 
 Legacy builds must correctly register at device construction time, or
 the correct pipes will not be used at runtime.
+
+----------
+keflemin    Date: Wed Mar  5 18:25:28 EST 2014  CSN: CSN-multifpga-229
+                  Wed Mar  5 23:25:28 UTC 2014
+
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified          228 
+
+
+
+Converted loop with carry dependency into a foldl, dramatically
+improving compilation time.
