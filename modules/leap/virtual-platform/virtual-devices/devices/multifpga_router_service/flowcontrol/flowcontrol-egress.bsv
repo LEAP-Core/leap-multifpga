@@ -206,9 +206,10 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
 
     rule debug(`SWITCH_DEBUG == 1 && stateUpdated);
+        $display("Egress Queue buffer max: %d", maximumPacketSize);
         for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
         begin
-            $display("Egress Queue %d thinks bufferAvailable %b portCredits %d", i, bufferAvailable[i], portCreditsReg[i]);
+            $display("Egress Queue %d thinks bufferAvailable %b portCredits %d, packetSize: %d", i, bufferAvailable[i], portCreditsReg[i], requestQueuesVec[i].maxPacketSize());
         end
     endrule
 

@@ -52,7 +52,7 @@ class FPGAEnvironment(object):
     # be connected to another platform, that platform also claims that they
     # are connected.  This is not the same a bi-directional connection, 
     # however. It serves to make sure that a directional connection has 
-    # source  and sink.
+    # ingress  and egress.
     def graphize(self):
 	try:
             self.graph = pygraph.digraph()
@@ -64,35 +64,35 @@ class FPGAEnvironment(object):
             self.graph.add_nodes([platform])
 
         for platform in self.platforms:
-            sinks = self.platforms[platform].getSinks()
-            sources = self.platforms[platform].getSources()
-            for sink in sinks:
-                # search for paired source - a specification is illegal if 
-                # sink/source pairing is not made
+            egresses = self.platforms[platform].getEgresses()
+            ingresses = self.platforms[platform].getIngresses()
+            for egress in egresses:
+                # search for paired ingress - a specification is illegal if 
+                # egress/ingress pairing is not made
                 error = 0
-                if(sinks[sink].endpointName in self.platforms):
-                    if(platform in (self.platforms[sinks[sink].endpointName]).sources):
+                if(egresses[egress].endpointName in self.platforms):
+                    if(platform in (self.platforms[egresses[egress].endpointName]).ingresses):
                         # we have a legal connection
 	                try:
-                            self.graph.add_edge(platform,sinks[sink].endpointName)
+                            self.graph.add_edge(platform,egresses[egress].endpointName)
                         except (TypeError, ValueError):
-                            self.graph.add_edge((platform,sinks[sink].endpointName))
-                        #fill in the source with the sink and the sink with the source
+                            self.graph.add_edge((platform,egresses[egress].endpointName))
+                        #fill in the ingress with the egress and the egress with the ingress
                     else:
                         error = 1
                 else:
                     error = 1
 
                 if(error == 1):
-                    print 'Illegal graph: sink ' + sinks[sink].endpointName + ' and ' + platform + ' improperly connected'
-                    raise SyntaxError(sinks[sink].endpointName + ' and ' + platform + ' improperly connected')
+                    print 'Illegal graph: egress ' + egresses[egress].endpointName + ' and ' + platform + ' improperly connected'
+                    raise SyntaxError(egresses[egress].endpointName + ' and ' + platform + ' improperly connected')
 
                 # although we've already added a edge for the legal connections, we need to check the reverse
-                # in case some source lacks a sink
-            for source in sources:
+                # in case some ingress lacks a egress
+            for ingress in ingresses:
                 error = 0
-                if(sources[source].endpointName in self.platforms):
-                    if(platform in (self.platforms[sources[source].endpointName]).sinks):
+                if(ingresses[ingress].endpointName in self.platforms):
+                    if(platform in (self.platforms[ingresses[ingress].endpointName]).egresses):
                         a = 0 # make python happy....
                         
                     else:
@@ -101,27 +101,27 @@ class FPGAEnvironment(object):
                     error = 1
 
                 if(error == 1):
-                    print 'Illegal graph: source ' + sources[source].endpointName + ' and ' + platform + ' improperly connected'
-                    raise SyntaxError(sources[source].endpointName + ' and ' + platform + ' improperly connected')
+                    print 'Illegal graph: ingress ' + ingresses[ingress].endpointName + ' and ' + platform + ' improperly connected'
+                    raise SyntaxError(ingresses[ingress].endpointName + ' and ' + platform + ' improperly connected')
 
     # finds/returns the link to use on a path hop from 
-    def getPathLength(self, source, sink):
+    def getPathLength(self, ingress, egress):
         try:
-            paths = pygraph.algorithms.minmax.shortest_path(self.graph,source)
+            paths = pygraph.algorithms.minmax.shortest_path(self.graph,ingress)
         except AttributeError:
-            paths = mm.shortest_path(self.graph,source)
+            paths = mm.shortest_path(self.graph,ingress)
 
-        if(sink in paths[1]):           
-            return paths[1][sink]
+        if(egress in paths[1]):           
+            return paths[1][egress]
         else:
             return -1
 
-    def getPath(self, source, sink):
-        paths = pygraph.algorithms.minmax.shortest_path(self.graph,source)
+    def getPath(self, ingress, egress):
+        paths = pygraph.algorithms.minmax.shortest_path(self.graph,ingress)
         path = []
-        hop = sink
-        lastNode = sink 
-        while paths[0][hop] != source:
+        hop = egress
+        lastNode = egress 
+        while paths[0][hop] != ingress:
             hop = paths[0][hop]
             path.append(hop)           
         print "getPath: " + str(path)
@@ -130,27 +130,27 @@ class FPGAEnvironment(object):
 
 
     #It would be worth considering how to handle the key error
-    def getPathHopFirst(self, source, sink):
-        paths = pygraph.algorithms.minmax.shortest_path(self.graph,source)
-        hop = sink
-        lastNode = sink 
-        while paths[0][hop] != source:
+    def getPathHopFirst(self, ingress, egress):
+        paths = pygraph.algorithms.minmax.shortest_path(self.graph,ingress)
+        hop = egress
+        lastNode = egress 
+        while paths[0][hop] != ingress:
            
             hop = paths[0][hop]
         return hop
 
-    def getPathHopLast(self, source, sink):
-        paths = pygraph.algorithms.minmax.shortest_path(self.graph,source)
-        return paths[0][sink]
+    def getPathHopLast(self, ingress, egress):
+        paths = pygraph.algorithms.minmax.shortest_path(self.graph,ingress)
+        return paths[0][egress]
 
         
-    # returns the source string for a particular path.  This is currently the min path  
-    def getPhysicalSource(self,platform,source):
-        return self.platforms[platform].sources[source].physicalName
+    # returns the ingress string for a particular path.  This is currently the min path  
+    def getPhysicalIngress(self,platform,ingress):
+        return self.platforms[platform].ingresses[ingress].physicalName
 
-    def getPhysicalSink(self,platform,sink):
+    def getPhysicalEgress(self,platform,egress):
         
-        return self.platforms[platform].sinks[sink].physicalName
+        return self.platforms[platform].egresses[egress].physicalName
 
     
     #build up a keyed dictionary of dictionaries of the single hops to next 
@@ -176,15 +176,15 @@ class FPGAEnvironment(object):
                     hop = self.getPathHopFirst(platformName, target)
                     # pygraph returns something odd for paths of length one
                     
-                    print platformName + ' -> ' + target + ' : ' + self.getPhysicalSink(platformName,hop)
-                    transitTablesOutgoing[platformName][target] = self.getPhysicalSink(platformName,hop)
+                    print platformName + ' -> ' + target + ' : ' + self.getPhysicalEgress(platformName,hop)
+                    transitTablesOutgoing[platformName][target] = self.getPhysicalEgress(platformName,hop)
 
                 if(self.getPathLength(target, platformName) > 0):
                     hop = self.getPathHopLast(target, platformName)
 
-                    # also fill in our sink at the same time
-                    print platformName + ' <- ' + target + ' : ' + self.getPhysicalSource(platformName,hop)
-                    transitTablesIncoming[platformName][target] = self.getPhysicalSource(platformName,hop)
+                    # also fill in our egress at the same time
+                    print platformName + ' <- ' + target + ' : ' + self.getPhysicalIngress(platformName,hop)
+                    transitTablesIncoming[platformName][target] = self.getPhysicalIngress(platformName,hop)
                     
         self.transitTablesOutgoing = transitTablesOutgoing
         self.transitTablesIncoming = transitTablesIncoming

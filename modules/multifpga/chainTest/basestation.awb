@@ -1,0 +1,15 @@
+%AWB_START
+
+%name MultiFPGA Chains Test  
+%desc MultiFPGA	Chains Test 
+
+%provides basestation
+
+%sources -t BSV -v PUBLIC basestationImpl.bsv
+
+
+%param SYNTH_BOUNDARY mkBasestation "name of synthesis boundary"
+
+%param --dynamic BASESTATION_CHAIN_TEST  0  "A dummy parameter used to test chains."
+
+%AWB_END

@@ -2,41 +2,59 @@ from connection import *
 
 class Platform(object):
 
-    def getSinks(self):
-        return self.sinks
+    def getEgresses(self):
+        return self.egresses
 
-    def getSources(self):
-        return self.sources
+    def getEgress(self, targetName):
+        return self.egresses[targetName]
 
-    def insertSink(self,target,via):
-        self.sinks[target] = via
+    def getIngresses(self):
+        return self.ingresses
 
-    def insertSource(self,target,via):
-        self.sources[target] = via
+    def getIngress(self, targetName):
+        return self.ingresses[targetName]
+
+    def insertEgress(self,target,via):
+        self.egresses[target] = via
+
+    def insertIngress(self,target,via):
+        self.ingresses[target] = via
+
+    def getEgressByPhysicalName(self, physicalName):
+        return self.egressesByPhysicalName[physicalName]
+
+    def getIngressByPhysicalName(self, physicalName):
+        return self.ingressesByPhysicalName[physicalName]
     
-    def __init__(self, platformType, name, isMaster, path, connectionList):
+    def __init__(self, platformType, name, isMaster, path, physicalViaList):
         self.name = name
         self.platformType = platformType
         self.path = path
         self.master = isMaster
-        self.sources = {}
-        self.sinks = {}
-        for connection in connectionList:
-            if(connection.direction == Connection.source):
-                self.insertSource(connection.endpointName,connection)
+        self.ingresses = {}
+        self.egresses = {}
+        # a view of the platform useful in parsing via widths.
+        self.ingressesByPhysicalName = {} 
+        self.egressesByPhysicalName = {} 
+
+        for physicalVia in physicalViaList:
+            if(physicalVia.direction == PhysicalVia.ingress):
+                self.insertIngress(physicalVia.endpointName, physicalVia)
+                self.ingressesByPhysicalName[physicalVia.physicalName] = physicalVia
             else:
-                self.insertSink(connection.endpointName,connection)
+                self.insertEgress(physicalVia.endpointName, physicalVia)
+                self.egressesByPhysicalName[physicalVia.physicalName] = physicalVia
 
     def __repr__(self):
-       sourceRepr = ''
-       for source in self.sources:
-           sourceRepr = sourceRepr + self.sources[source].__repr__() + '\n'
+       ingressRepr = ''
+       for ingress in self.ingresses:
+           ingressRepr = ingressRepr + self.ingresses[ingress].__repr__() + '\n'
            
-       sinkRepr = ''
-       for sink in self.sinks:
-           sinkRepr = sinkRepr + self.sinks[sink].__repr__() + '\n'
+       egressRepr = ''
+       for egress in self.egresses:
+           egressRepr = egressRepr + self.egresses[egress].__repr__() + '\n'
            
-       return 'Platform ' + self.name + '\n Sources: \n' + sourceRepr + '\n Sinks: \n' + sinkRepr
+       return 'Platform ' + self.name + '\n Ingresses: \n' + ingressRepr + '\n Egresses: \n' + egressRepr
   
     def getAPMName(self):
        tokens = (self.path).split("/")

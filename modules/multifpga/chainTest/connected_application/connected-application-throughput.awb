@@ -1,0 +1,15 @@
+%name MultiFPGA Chains Test Connected Application
+%desc MultiFPGA Chains Test Connected Application
+
+%attributes slave connected hybrid
+
+%provides connected_application
+
+%requires hardware_system
+
+%public  connected-application-throughput.bsv
+%public  connected-application-throughput.h
+%public  connected-application-throughput.cpp
+
+%param SYNTH_BOUNDARY mkConnectedApplication "name of synthesis boundary"
+

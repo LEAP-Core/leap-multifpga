@@ -47,6 +47,7 @@ Packagehint=multifpga
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
 umf=Little-Endian Unified Message Format
+li_module=LEAP LI Module Handler
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -175,3 +176,7 @@ GENERATE_ROUTER_STATS=1
 
 [MultiFPGA Communication Complex Generator/Params]
 MAX_NUMBER_OF_VIAS=1
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

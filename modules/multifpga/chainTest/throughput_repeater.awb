@@ -1,0 +1,15 @@
+%AWB_START
+
+%name MultiFPGA Chain Test Repeater
+%desc MultiFPGA Chain Test Repeater
+
+%provides throughput_repeater
+
+%public throughput-repeater.bsv
+
+%param NUM_REPEATERS 1 "number of repeaters in test"
+
+%param --dynamic CHAIN_TEST  0  "A dummy parameter used to test chains."
+
+
+%AWB_END

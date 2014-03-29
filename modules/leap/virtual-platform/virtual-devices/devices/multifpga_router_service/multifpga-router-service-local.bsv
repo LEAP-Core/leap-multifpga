@@ -713,6 +713,14 @@ module mkPacketizeConnectionReceiveUnmarshalled#(String name,
     provisos(Bits#(t_DATA, t_DATA_SZ),
              Bits#(umf_chunk,umf_chunk_SZ));
 
+
+    if(`MARSHALLING_DEBUG == 1)
+    begin
+        rule view(recv.notEmpty);
+            $display("%s TX (HO) has data, but does not send", name);
+        endrule
+    end
+
     EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
                                     umf_channel_id, umf_service_id,
                                     umf_method_id,  umf_message_len,

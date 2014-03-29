@@ -1,0 +1,10 @@
+./awb.delete
+./connected_application/connected-application-throughput.awb
+./singleRepeater/singleRepeater.awb
+./singleRepeater/sim_mapping.awb
+./dualRepeater/dualRepeater.awb
+./dualRepeater/sim_mapping.awb
+./repeater_2.awb
+./basestation.awb
+./throughput_repeater.awb
+./repeater-1.awb

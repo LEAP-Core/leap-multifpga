@@ -58,6 +58,7 @@ Packagehint=multifpga
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
 umf=Little-Endian Unified Message Format
+li_module=LEAP LI Module Handler
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -114,3 +115,7 @@ MAX_NUMBER_OF_VIAS=1
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=leap-platforms
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

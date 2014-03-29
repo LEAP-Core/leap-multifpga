@@ -133,6 +133,7 @@ class MultiFPGAGenerateBitfile():
       execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_NUM_PLATFORMS ' + str(len(self.environment.getPlatformNames())))
       execute('asim-shell --batch set parameter ' + platformPath + ' CON_CWIDTH ' +  str(moduleList.getAWBParam('multi_fpga_log_generator', 'SOFT_CONN_CWIDTH')))
       execute('asim-shell --batch set parameter ' + platformPath + ' CON_CHAIN_CWIDTH ' +  str(moduleList.getAWBParam('multi_fpga_log_generator', 'SOFT_CONN_CWIDTH')))
+      execute('asim-shell --batch set parameter ' + platformPath + ' EXPOSE_ALL_CONNECTIONS 0 ')
       execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 0 ')
       execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
       execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')    

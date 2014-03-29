@@ -3,6 +3,8 @@ import sys
 import SCons.Script
 import math
 import itertools
+import dill as pickle
+
 from model import  *
 from fpga_environment_parser import *
 from type_parser import *
@@ -18,6 +20,7 @@ from linkAssignment import *
 from linkType import *
 from umfType import *
 from umf import *
+from li_module import *
 from taggedUnionCompress import *
 
 ##
@@ -125,7 +128,8 @@ class MultiFPGAConnect():
               print "Massaged Logs are : " + str(logs)
 
           moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += logs
-          # bsv builds generate their own log files
+
+          # bsv (FPGA/BLUESIM) builds generate their own log files
           if(platform.platformType == 'FPGA'  or platform.platformType == 'BLUESIM'):
               logs += [platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log']
           
@@ -159,87 +163,79 @@ class MultiFPGAConnect():
           moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] + ['./site_scons/multi_fpga_connect/multiFPGAConnect.py'],
           self.synthesizeRouters
           )                   
-      print "subbuild: " + str(subbuild)
-
 
       moduleList.topDependency += [subbuild]
 
   
-  def assignIndices(self,sourceConn,sinkConn):
-      print "Now processing connection %s between %s (%s) -> %s (%s)" % (sourceConn.name, sourceConn.platform, sourceConn.sc_type, sinkConn.platform, sinkConn.sc_type)
-
-      sourceConn.inverse_sc_type = sinkConn.sc_type
-      sinkConn.inverse_sc_type   = sourceConn.sc_type
-
-      sourceConn.inverse_name = sinkConn.name
-      sinkConn.inverse_name   = sourceConn.name
-
-      if(sinkConn.platform in self.platformData[sourceConn.platform]['INDEX']):
-          # only increment the sourceConn. 
-          self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] += 1
-          index = self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform]
-          sourceConn.idx = index 
-          sinkConn.idx = index 
-          print "Setting index :" + str(index)
-      else:
-          self.platformData[sourceConn.platform]['INDEX'][sinkConn.platform] = 0
-          sourceConn.idx = 0
-          sinkConn.idx = 0 
-          print "Setting index :" + str(0)
-    
-      # Tell the sink about the source.  The sink may have been processed already
-      if(sinkConn.platform in self.platformData[sourceConn.platform]['CONNECTED']):
-          self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] += [sinkConn]
-          print "Sink platform length: " + str(len(self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform]))
-      else:   
-          self.platformData[sourceConn.platform]['CONNECTED'][sinkConn.platform] = [sinkConn]
-
-      if(sourceConn.platform in self.platformData[sinkConn.platform]['CONNECTED']):
-          self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] += [sourceConn]
-          print "Source platform length: " + str(len(self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform]))
-      else:   
-          self.platformData[sinkConn.platform]['CONNECTED'][sourceConn.platform] = [sourceConn]
-
-  def connectPath(self, src, sink):
+  # Expands logical paths to physical paths using Djikstras algorithm.
+  def connectPath(self, src, sink, platformGraph):
 
       path = self.environment.getPath(src.platform, sink.platform)
 
       srcs = [src]
       sinks =[]
+
       print "Analyzing path: " + str(path)
       for hop in path:
           print "Adding hop: " + src.name + "Hop" + hop        
-            
-          sinks.append(DanglingConnection("ChainRoutingRecv", src.raw_type, -1, 
-                                          src.name + "RoutethroughFrom_" + src.platform + "_To_" + sink.platform + "_Via" + hop, 
-                                          hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure))
-          srcs.append(DanglingConnection("ChainRoutingSend", src.raw_type, -1, 
-                                          src.name + "RoutethroughFrom_" + src.platform + "_To_" + sink.platform + "_Via" + hop, 
-                                         hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure))
-          self.unique = self.unique + 1 
+          #    def __init__(self, sc_type, raw_type, module_idx, name, platform, optional, bitwidth, module_name, type_structure):
+
+          newSink = LIChannel("ChainRoutingRecv", src.raw_type, -1, 
+                              src.name + "RoutethroughFrom_" + src.platform + "_To_" + sink.platform + "_Via" + hop, 
+                              hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure)
+          
+          newSink.module_name = hop
+          newSink.module = platformGraph.modules[hop]
+          sinks.append(newSink)
+          platformGraph.modules[hop].addChannel(newSink)
+
+          newSrc = LIChannel("ChainRoutingSend", src.raw_type, -1, 
+                             src.name + "RoutethroughFrom_" + src.platform + "_To_" + sink.platform + "_Via" + hop, 
+                             hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure)
+
+          newSrc.module_name = hop
+          newSrc.module = platformGraph.modules[hop]
+          srcs.append(newSrc)
+          platformGraph.modules[hop].addChannel(newSrc)
 
       sinks.append(sink)
     
+      # We need to fix the srcs and sinks to point to one another Note
+      # that chains and send/recv route-throughs are different.
       for pair in zip(srcs,sinks):
-          self.assignIndices(pair[0],pair[1])
+          if(isinstance(pair[0],LIChannel)):
+              pair[0].partnerChannel = pair[1]
+              pair[0].partnerModule = pair[1].module
+              pair[0].matched = True
+          else: 
+              pair[0].sinkPartnerChain = pair[1]
+              pair[0].sinkPartnerModule = pair[1].module
+                       
+          if(isinstance(pair[1],LIChannel)):
+              pair[1].partnerChannel = pair[0]
+              pair[1].partnerModule = pair[0].module                    
+              pair[1].matched = True
+          else:
+              pair[1].sourcePartnerChain = pair[0]
+              pair[1].sourcePartnerModule = pair[0].module
 
-  def generateEgressMultiplexor(self, platform, targetPlatform): 
-      egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
+  def generateEgressMultiplexor(self, platform, targetPlatform, environmentGraph, platformGraph): 
+      egressVias = environmentGraph.platforms[platform].getEgress(targetPlatform).logicalVias
       if(len(egressVias) == 1):
-          return self.generateEgressMultiplexorMultiple(platform, targetPlatform, False)
+          return self.generateEgressMultiplexorMultiple(platform, targetPlatform, False, environmentGraph, platformGraph)
       else:
-          return self.generateEgressMultiplexorMultiple(platform, targetPlatform, True)
+          return self.generateEgressMultiplexorMultiple(platform, targetPlatform, True, environmentGraph, platformGraph)
     
-  def generateEgressMultiplexorMultiple(self, platform, targetPlatform, packPulseWires): 
+  def generateEgressMultiplexorMultiple(self, platform, targetPlatform, packPulseWires, environmentGraph, platformGraph): 
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
 
     multiplexor_stats = RouterStats("egressMultiplexor")
-    egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
-    hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
+    egressVias = environmentGraph.platforms[platform].getEgress(targetPlatform).logicalVias
+    hopFromTarget = environmentGraph.transitTablesIncoming[platform][targetPlatform]
     egressMethod = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
-    egressViaWidth = self.platformData[platform]['WIDTHS'][egressMethod]
+    egressViaWidth = environmentGraph.platforms[platform].getEgress(targetPlatform).width
 
     interfaceName = 'EgressMultiplexor_' + platform + '_to_' + targetPlatform
     moduleName = 'egressMultiplexor_' + platform + '_to_' + targetPlatform
@@ -486,24 +482,24 @@ class MultiFPGAConnect():
     return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
             
 
-  def generateIngressMultiplexor(self, platform, targetPlatform): 
-      ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
+  def generateIngressMultiplexor(self, platform, targetPlatform, environmentGraph, platformGraph): 
+      ingressVias = environmentGraph.platforms[platform].getIngress(targetPlatform).logicalVias
       if(len(ingressVias) == 1):
-          return self.generateIngressMultiplexorMultiple(platform, targetPlatform, False)
+          return self.generateIngressMultiplexorMultiple(platform, targetPlatform, False, environmentGraph, platformGraph)
       else:
-          return self.generateIngressMultiplexorMultiple(platform, targetPlatform, True)
+          return self.generateIngressMultiplexorMultiple(platform, targetPlatform, True, environmentGraph, platformGraph)
 
-  def generateIngressMultiplexorMultiple(self, platform, targetPlatform, packPulseWires):
+  def generateIngressMultiplexorMultiple(self, platform, targetPlatform, packPulseWires, environmentGraph, platformGraph):
     multiplexor_definition = ''
     multiplexor_instantiation = ''
     multiplexor_names = {}
 
     multiplexor_stats = RouterStats("ingressMultiplexor")
 
-    ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
-    hopToTarget = self.environment.transitTablesOutgoing[platform][targetPlatform]
+    ingressVias = environmentGraph.platforms[platform].getIngress(targetPlatform).logicalVias
+    hopToTarget = environmentGraph.transitTablesOutgoing[platform][targetPlatform]
     ingressMethod = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
-    ingressViaWidth = self.platformData[platform]['WIDTHS'][ingressMethod]
+    ingressViaWidth = environmentGraph.platforms[platform].getIngress(targetPlatform).width
 
     interfaceName = 'IngressMultiplexor_' + platform + '_to_' + targetPlatform
     moduleName = 'ingressMultiplexor_' + platform + '_to_' + targetPlatform
@@ -657,125 +653,160 @@ class MultiFPGAConnect():
     return [multiplexor_definition, multiplexor_instantiation, multiplexor_names]
 
     
-  def synthesizeRouters(self, target, source, env):    
-    self.processDanglingConnections()
-    self.analyzeNetwork()
-    self.generateCode()
+  def synthesizeRouters(self, target, source, env):  
+      # We should replace this with a call to generate it. 
+      environmentGraph = self.environment
+      self.parseWidth(environmentGraph)
+      moduleGraph = self.parseModuleGraph()
+      #self.assignActivity(moduleGraph):
+      platformGraph = self.placeModules(moduleGraph)  
+      self.routeConnections(platformGraph)
+      # Apply compression here. 
+      self.analyzeNetwork(environmentGraph, platformGraph)
+      self.generateCode(environmentGraph, platformGraph)
+      #self.constructBitfileBuilds()
+
+  def parseModuleGraph(self):
+      APM_NAME = self.moduleList.env['DEFS']['APM_NAME']
+      # Build list of logs.  It might be better if we could directly get the logfile names 
+      # from the subbordinate build. 
+
+      subordinateGraphs = []
+      for platformName in self.environment.getPlatformNames():          
+          #open up pickles
+          picklePath = makePlatformLogBuildDir(platformName,APM_NAME) + '/' + makePlatformLogName(platformName,APM_NAME) + '.li'
+          print "Examining pickle path: " + picklePath + "in " + sys.version +"\n"
+          pickleHandle = open(picklePath, 'rb')
+          subordinateGraphs.append(pickle.load(pickleHandle))
+          pickleHandle.close()
+          
+      mergedGraph = subordinateGraphs.pop()
+
+      #print 'parseModuleGraph base ' + str(mergedGraph) + 'subordinate graphs'
+      # merge remaining graphs together 
+      for graph in subordinateGraphs:
+          #print 'parseModuleGraph merging ' + str(graph) + 'subordinate graphs'
+          mergedGraph.merge(graph)
+
+      #print 'parseModuleGraph found ' + str(mergedGraph) + 'subordinate graphs'
+
+      return mergedGraph
+      
+  def placeModules(self, moduleGraph):
+      # first we need to map the platform modules to their platform
+      for platformName in self.environment.getPlatformNames():          
+          moduleGraph.modules[platformName].putAttribute('MAPPING', platformName)
+
+      # Pick a mapping algorithm here. We only have one, so we call it directly. 
+      self.placeModulesWithMapFile(moduleGraph)
+
+      # now that we have placed the modules, we can build a new view
+      # of the system, the platform graph.  In this graph we consider
+      # only platforms, and their inter-platform connections.  
+      platformConnections = []
+      for module in moduleGraph.modules.values():
+          platformMapping = module.getAttribute('MAPPING')
+          for channel in module.channels:
+              # it is possible that this channel is unassigned, if so, it is dropped.
+              if(channel.partnerChannel == 'unassigned'):
+                  continue
+
+              # we only care about inter-FPGA channels
+              if(platformMapping == channel.partnerModule.getAttribute('MAPPING')):
+                  continue
+
+              print "Placer Examining channel : " + channel.name + " mapped to: " + platformMapping + " partnerModule " + str(channel.partnerModule.name) + "\n"            
+
+
+              # We don't actually care about specific modules here. We
+              # simply re-cast the platforms as the 'modules', with
+              # one 'module' per platform.  I wish python had better
+              # inheritance support.
+              channelCopy = channel.copy()
+              channelCopy.module_name = platformMapping
+              platformConnections.append(channelCopy)
+
+          for chain in module.chains:
+              print "Placer Examining chain : " + chain.name + " mapped to: " + platformMapping + "\n"            
+              chainCopy = chain.copy()
+              chainCopy.module_name = platformMapping
+              platformConnections.append(chainCopy)
+              
+             
+      platformGraph = LIGraph(platformConnections)
+
+      print "Post placement: " + str(platformGraph) + "\n"
+      return platformGraph
+
+  def placeModulesWithMapFile(self,moduleGraph):
+      for moduleName in moduleGraph.modules:
+          # have we already mapped this module?
+          if(not moduleName in self.environment.getPlatformNames()):
+              moduleObject = moduleGraph.modules[moduleName]   
+              moduleObject.putAttribute('MAPPING', self.mapping.getSynthesisBoundaryPlatform(moduleName))
+      return moduleGraph
 
   #First we parse the files, and then attempt to make all the connections.  Lots of dictionaries.
-  def processDanglingConnections(self):
+  def routeConnections(self, platformGraph):
       APM_FILE = self.moduleList.env['DEFS']['APM_FILE']
       APM_NAME = self.moduleList.env['DEFS']['APM_NAME']
       
-      danglingGlobal = [];
-      danglingChainSources = {};
-      danglingChainSinks = {};
+      danglingChainIngresses = {};
+      danglingChainEgresses = {};
       for platformName in self.environment.getPlatformNames():
-          self.parseDangling(platformName)
           # we should now check for matches
-          for danglingNew in self.platformData[platformName]['DANGLING']:
-              print "Examining " + str(danglingNew)
-              # build up lists of chains. 
-              if(danglingNew.isChain()):
-                print "Got chain " + danglingNew.name
-                if(danglingNew.isSource()):
-                  if(danglingNew.name in danglingChainSources):
-                    danglingChainSources[danglingNew.name] += [danglingNew]
-                  else:
-                    danglingChainSources[danglingNew.name] = [danglingNew]
-                else:
-                  if(danglingNew.name in danglingChainSinks):
-                    danglingChainSinks[danglingNew.name] += [danglingNew]
-                  else:
-                    danglingChainSinks[danglingNew.name] = [danglingNew]
-                continue # don't fall down the usual code path here
-              for danglingOld in danglingGlobal:
-                  if(danglingNew.matches(danglingOld)): # a potential match
-                      # We should check to see that things are directly connected
-                      print "Got match for " + danglingOld.name
-                      if(danglingNew.isSource()):
-                          self.connectPath(danglingNew,danglingOld)         
-                      else:                                                   
-                          self.connectPath(danglingOld,danglingNew)         
+          for channel in platformGraph.modules[platformName].channels:
+              #print "Examining Channel " + str(channel.name)
+              # For now, we use a simple routing algorithm based on Djikstra.
+              if(channel.isSource()):
+                  self.connectPath(channel,channel.partnerChannel,platformGraph)         
 
- 
-                      matched = 1
-                      # need to fill in the connection
-                      danglingOld.matched = True
-                      danglingNew.matched = True
-                      #lookup indexes.  Note that the subhashes are indexed 
-               
-                      # mark the connection in the data structure
-
-                                            
-                      
-          danglingGlobal += self.platformData[platformName]['DANGLING']
-
+          for chain in platformGraph.modules[platformName].chains:
+              print "Examining Chain " + str(chain.name)
+              # build up lists of chains. Ingresses/Egresses occur on each platform.  
+              print "Got chain " + chain.name
+              if(chain.name in danglingChainIngresses):
+                  danglingChainIngresses[chain.name] += [chain]
+                  danglingChainEgresses[chain.name] += [chain]
+              else:
+                  danglingChainIngresses[chain.name] = [chain]
+                  danglingChainEgresses[chain.name] = [chain]
+                                                           
       # link up the chains.  The algorithm below is suboptimal. 
       # for more complex topologies than the ACP, we will want to 
       # solve a mapping problem 
-      # we may want to sort these or something to ensure that we don't form singelton links XXX
+      # we may want to sort these or something to ensure that we don't form singelton links
       # delete the length 1 chains immediately  -- they live on a single node
-      for chainName in danglingChainSources.keys():
-        if(len(danglingChainSources[chainName]) < 2):
-          del danglingChainSources[chainName]
-          del danglingChainSinks[chainName]
-          print "Removing single platform chain " + chainName
+      for chainName in danglingChainIngresses.keys():
+        if(len(danglingChainIngresses[chainName]) < 2):
+          platformGraph.modules[danglingChainIngresses[chainName][0].module_name].deleteChain(chainName)
+          del danglingChainIngresses[chainName]
+          del danglingChainEgresses[chainName]
+
 
       # Our algorithm here is highly suboptimal.  rotate sinks by one to get an offset list 
       # We assume that the fpga network is strongly connected and that we don't care about transport 
       # lengths.  Bad Bad Bad assumptions, but they work for the ACP
-      for chainName in danglingChainSources.keys():
-        chainSrcs = danglingChainSources[chainName]
-        chainSinks = danglingChainSinks[chainName]
+      for chainName in danglingChainIngresses.keys():
+        chainIngresses = danglingChainIngresses[chainName]
+        chainEgresses = danglingChainEgresses[chainName]
         
         # rotate sinks by one to get an offset list 
-        chainSinks.append(chainSinks.pop(0))
-        for i in range(len(chainSinks)):
-          # we need to make sure the source we pick is not on the same platform.        
-          if(chainSinks[i].platform == chainSrcs[i].platform):
-            print "Sink/Src platforms match.  Something is wrong"
+        chainEgresses.append(chainEgresses.pop(0))
+        for i in range(len(chainEgresses)):
+            # we need to make sure the source we pick is not on the same platform.        
+            if(chainEgresses[i].module_name == chainIngresses[i].module_name):
+                print "Sink/Src platforms match.  Something is wrong"
+                exit(0)
 
-          chainSinks[i].chainPartner = chainSrcs[i]
-          chainSrcs[i].chainPartner = chainSinks[i]
-          # get them indexes
-          print "Trying to pair " + chainSrcs[i].platform + " and " + chainSinks[i].platform + " on chain " + chainName
-
-          self.connectPath(chainSrcs[i],chainSinks[i])
+            print "Trying to pair " + chainIngresses[i].module_name + " and " + chainEgresses[i].module_name + " on chain " + chainName
+            self.connectPath(chainIngresses[i],chainEgresses[i], platformGraph)
  
+      #unmatched connections at this point are an error. Die.
+      if(platformGraph.unmatchedChannels):
+          print 'Unmatched channel, terminating ' 
+          sys.exit(0)
 
-      #unmatched connections are bad
-      for dangling in danglingGlobal:
-          if(not dangling.optional and not dangling.matched):
-              print 'Unmatched connection ' + dangling.name
-              sys.exit(0)
-
-  # Notice that chains will have their platform direction labelled
-  def parseStats(self):
-    # let's read in a stats file
-    statsFile = self.moduleList.getAllDependenciesWithPaths('GIVEN_STATS')    
-    stats = {}
-    print "StatsFile " + str(statsFile)
-    if(len(statsFile) > 0):
-      filename = self.moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + statsFile[0]
-      logfile = open(filename,'r')  
-      print "Processing Stats:  " + filename
-      for line in logfile:
-        if(re.match('.*ROUTER_.*_SENT.*',line)):
-          #We may have a chunked pattern.   
-          match = re.search(r'.*ROUTER_(\w+)(_chunk_\d+)_SENT,.*,(\d+)',line)
-          if(match):
-              #print "Stat Match Chunk" + match.group(1) + " got " + match.group(3) + " from " + line
-              stats[match.group(1)] = int(match.group(3))
-              stats[match.group(1)+match.group(2)] = int(match.group(3))
-              continue
-
-          match = re.search(r'.*ROUTER_(\w+)_SENT,.*,(\d+)',line)
-          if(match):
-              #print "Stat Match " + match.group(1) + " got " + match.group(2) + " from " + line
-              stats[match.group(1)] = int(match.group(2))
-
-    return stats
 
  
   # In generating router types, we want to minimize the maximum number of chunks
@@ -783,6 +814,8 @@ class MultiFPGAConnect():
   # VC layer, since the VC layer is currently conservative about the buffering and assumes each
   # packet takes the maximum number of chunks
   def generateRouterTypes(self, viaWidth, viaLinks, maxWidth):
+    print "Calling generate router types: " + str(viaWidth) + " " + str(viaLinks) + " " + str(maxWidth) +"\n"
+
     #Should we do whatever umf tells us?
     if(self.USE_DEFAULT_UMF_PARAMETERS):      
         phyReserved = self.moduleList.getAWBParam('umf', 'UMF_PHY_CHANNEL_RESERVED_BITS')
@@ -838,7 +871,9 @@ class MultiFPGAConnect():
 
   def allocateLJFWithHeaders(self, platformLinks, targetLinks, vias, headers):
     #first sort the links on both sides
-    links = sorted(platformLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending    
+    print "Calling Allocate LJF\n"
+    links = sorted(platformLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending   
+    print str(links) 
     platformConnectionsProvisional = []
     targetPlatformConnectionsProvisional = []
     #since we can recurse, we should copy our inputs
@@ -846,7 +881,7 @@ class MultiFPGAConnect():
     # do I need to rename all the links to be sorted?  Probably...
     maxLinkWidth = [-1 for via in vias]
     for danglingIdx in range(len(links)):           
-      if((links[danglingIdx].sc_type == 'Recv') or (links[danglingIdx].sc_type == 'ChainSink') or (links[danglingIdx].sc_type == 'ChainRoutingRecv')):
+      #if((links[danglingIdx].sc_type == 'Recv') or (links[danglingIdx].sc_type == 'ChainSink') or (links[danglingIdx].sc_type == 'ChainRoutingRecv')):
         # depending on the width of the vias, and the width of our type we get different loads on different processors
         # need to choose the minimum
 
@@ -875,14 +910,20 @@ class MultiFPGAConnect():
         vias[minIdx].load = minLoad
         if(links[danglingIdx].bitwidth > maxLinkWidth[minIdx]):
           maxLinkWidth[minIdx] = links[danglingIdx].bitwidth
-        # XXX what are these doing?  
+
+        # Build up a provisional mapping of channels to vias. 
         platformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].name, links[danglingIdx].sc_type, minIdx, vias[minIdx].links))
-        targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].inverse_name, links[danglingIdx].inverse_sc_type, minIdx, vias[minIdx].links))  
+
+        if(isinstance(links[danglingIdx], LIChannel)):
+            targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].partnerChannel.name, links[danglingIdx].partnerChannel.sc_type, minIdx, vias[minIdx].links))  
+        else: # Dealing with a chain...
+            targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].sourcePartnerChain.name, links[danglingIdx].sourcePartnerChain.sc_type, minIdx, vias[minIdx].links))  
+
         print "Assigning Recv " + links[danglingIdx].name   + " Via " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
         print "Vias are " +  str(vias) + "\n"
         vias[minIdx].links += 1
 
-    #do we have a legal assingment (i.e., were our header sizes okay?)
+    # check for a legal assignment by verifying that the header types chosen are feasible.
     needRecurse = False
     headersNext = []
     for via in range(len(vias)):
@@ -901,113 +942,72 @@ class MultiFPGAConnect():
         print "Recursing with header: " + str(headersNext) + "\n"
         return self.allocateLJFWithHeaders(platformLinks, targetLinks, viasRollback, headersNext)
 
+
+
+  # This code assigns physical indices to the inter-platform connections. 
   def assignLinks(self, provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections):
-    for provisional in provisionalAssignments:
-      assigned = False
-      for idx in range(len(platformConnections)): # we can probably do better than this n^2 loop. 
-        # Watch out for chain Sinks and sources
-          print "Examining: " + platformConnections[idx].name + " " + provisional.name
-          if((platformConnections[idx].name == provisional.name) and (platformConnections[idx].sc_type == provisional.sc_type)): 
-              assigned = True
-              platformConnections[idx].via_idx  = provisional.via_idx
-              platformConnections[idx].via_link = provisional.via_link
-              print "Assigning egress " + platformConnections[idx].name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
-      if(not assigned):
-          exit(0)
-    for provisional in provisionalTargetAssignments:
-      assigned = False
-      for idx in range(len(targetPlatformConnections)): # we can probably do better than this n^2 loop. 
-        # Watch out for chain Sinks and sources
-        print "Examining: " + targetPlatformConnections[idx].name + " " + provisional.name
-        if((targetPlatformConnections[idx].name == provisional.name) and (targetPlatformConnections[idx].sc_type == provisional.sc_type)):    
-            assigned = True
-            targetPlatformConnections[idx].via_idx  = provisional.via_idx
-            targetPlatformConnections[idx].via_link = provisional.via_link
+      # by definition these are sources
+      for provisional in provisionalAssignments:
+          assigned = False
+          for idx in range(len(platformConnections)): # we can probably do better than this n^2 loop. 
+              # Watch out for chain Sinks and sources
+              print "Examining: " + platformConnections[idx].name + " " + provisional.name
+              if(platformConnections[idx].name == provisional.name): 
+                  assigned = True
+                  platformConnections[idx].via_idx_egress  = provisional.via_idx
+                  platformConnections[idx].via_link_egress = provisional.via_link
+                  print "Assigning egress " + platformConnections[idx].name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
 
-            print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
-      if(not assigned):
-          exit(0)
+          if(not assigned):
+              print "failed to assign: " + platformConnections[idx].name +"\n"
+              exit(0)
 
-  # Given a stats asssignment, this function will give all dangling
-  # connections in the design a weight.  If no stat exists, then the
-  # weight will be the average of the weights that do exist.  If no
-  # stats file exists, then the weight will be set to a constant and
-  # preference give to non-chains
-  def assignActivity(self, stats):
-    # handle the connections themselves
-    recvs = 0
-    chains = 0           
+      # by definition these are sinks.
+      for provisional in provisionalTargetAssignments:
+          assigned = False
+          for idx in range(len(targetPlatformConnections)): # we can probably do better than this n^2 loop. 
+              # Watch out for chain Sinks and sources
+              print "Examining: " + targetPlatformConnections[idx].name + " " + provisional.name
+              if(targetPlatformConnections[idx].name == provisional.name):    
+                  assigned = True
+                  targetPlatformConnections[idx].via_idx_ingress  = provisional.via_idx
+                  targetPlatformConnections[idx].via_link_ingress = provisional.via_link
 
-    for platform in self.environment.getPlatformNames():
-      for targetPlatform in self.platformData[platform]['CONNECTED'].keys():
-        totalTraffic = 0;
-        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
-            recvs += 1
-            if(dangling.name in stats):
-                dangling.activity = stats[dangling.name]
-                totalTraffic += stats[dangling.name]
-                print "Assigning Load " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])
-            else:
-                #In some we may have the wrong number of chunks.  To make things more usable
-                #we will also match non-chunks 
-                match = re.search(r'(\w+)(_chunk_\d+)',dangling.name)
-                if(match and (match.group(1) in stats)):      
-                    dangling.activity = stats[match.group(1)]
-                    totalTraffic += stats[match.group(1)]
-                    print "Assigning Load (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
-          # only create a chain when we see the sink                                                                                                               
-          if(dangling.sc_type == 'ChainSink'):
-  
-            chains += 1
-            chainName = platform + "_" + targetPlatform + "_" + dangling.name
-            if(chainName in stats):
-              dangling.activity = stats[chainName]
-              totalTraffic += stats[chainName]
-              print "Assigning Load " + platform + "->" + targetPlatform + " " + chainName + " " + str(stats[chainName])
-            else:
-                match = re.search(r'(\w+)(_chunk_\d+)',chainName)
-                if(match and (match.group(1) in stats)):   
-                    dangling.activity = stats[match.group(1)]
-                    totalTraffic += stats[match.group(1)]
-                    print "Assigning Load (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
-
-        if(totalTraffic == 0):
-          totalTraffic = 2*(chains+recvs)
- 
-        print "Total traffic is: " + str(totalTraffic)
-
-        # assign some value to 
-        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
-            if(dangling.activity < 0):
-              dangling.activity = float(totalTraffic)/(chains+recvs)
-              print "Defaulting Load " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(dangling.activity)
-
-          # only create a chain when we see the source                                                                                                                                                                                       
-          if(dangling.sc_type == 'ChainSink'):         
-            chainName = platform + "_" + targetPlatform + "_" + dangling.name
-            if(dangling.activity < 0):
-              dangling.activity = (float(totalTraffic)/(2*(chains+recvs))) * 0.1  # no stat?  Make connections better than chains
-              print "Defaulting Load " + platform + "->" + targetPlatform + " " + chainName + " " + str(dangling.activity)
+                  print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+          if(not assigned):
+              print "failed to assign: " + targetPlatformConnections[idx].name +"\n"
+              exit(0)
 
 
-  def analyzeNetwork(self):
-      eval('self.' + self.ANALYZE_NETWORK + '()')
 
-  def generateViaLJF(self, platform, targetPlatform):
+  def analyzeNetwork(self, environmentGraph, platformGraph):
+      eval('self.' + self.ANALYZE_NETWORK + '(environmentGraph, platformGraph)')
+
+  def generateViaLJF(self, platform, targetPlatform, environmentGraph, platformGraph):
+      print "Allocating vias for " + platform + " -> " + targetPlatform + "\n"
       firstAllocationPass = True; # We can't terminate in the first pass 
       viaWidthsFinal = [] # at some point, we'll want to derive this. 
       viasFinal = []   
       maxLoad = 0;
       headerSize = 12 # simplifying assumption: headers have uniform size.  This isn't actually the case.
 
-      hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
+      hopFromTarget = environmentGraph.transitTablesIncoming[platform][targetPlatform]
       egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
-      hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
+      hopToTarget = environmentGraph.transitTablesOutgoing[targetPlatform][platform]
       ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
-      sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
+      moduleLinks = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
+
+      sortedLinks = sorted(moduleLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
+      
+      # Gets the partner of the given connection.
+      def getPartner(connection):
+          if(isinstance(connection, LIChannel)):
+              return connection.partnerChannel
+          else:
+              return connection.sourcePartnerChain
+
+      partnerSortedLinks = map(getPartner, sortedLinks)
 
       for numberOfVias in range(self.MIN_NUMBER_OF_VIAS,self.MAX_NUMBER_OF_VIAS+1):
           viaSizingIdx = 0          
@@ -1018,8 +1018,9 @@ class MultiFPGAConnect():
             # A singleton via doesn't require a valid bit.  This is a software optimization.
             # however, we must repair this assumption if we end up choosing 
             # multiple vias.
+              
             if(via == 0):
-              viaWidths.append(self.platformData[platform]['WIDTHS'][egressVia])
+                viaWidths.append(environmentGraph.getPlatform(platform).getEgress(targetPlatform).width)
             else: # carve off a lane for the longest running jobs
               # If we're selecting the second via, we need to subtract a bit for the first via's 
               # valid bit. We left this bit out of single via routers to optmize software decoding. 
@@ -1051,24 +1052,24 @@ class MultiFPGAConnect():
           # send/recv pairs had better be matched.
           # so let's match them up
           # need to maintain the sorted order
-          platformConnections = sorted(self.platformData[platform]['CONNECTED'][targetPlatform],key = lambda connection: connection.name)
-          targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)
+          print "sortedLinks: " + str(sortedLinks) + "\n"
+          print "partnerSortedLinks: " + str(partnerSortedLinks) + "\n"
+          platformConnections = sorted(sortedLinks, key = lambda connection: connection.name)
+          targetPlatformConnections = sorted(partnerSortedLinks, key = lambda connection: connection.name)
 
           vias = [ViaAssignment(width, 0, 0) for width in viaWidths]
           [viasProvisional, platformConnectionsProvisional, targetPlatformConnectionsProvisional] = self.allocateLJF(platformConnections, targetPlatformConnections , vias)
 
 
-          platformConnections = sorted(self.platformData[platform]['CONNECTED'][targetPlatform],key = lambda connection: connection.name)
-          targetPlatformConnections = sorted(self.platformData[targetPlatform]['CONNECTED'][platform],key = lambda connection: connection.name)          
+          platformConnections = sorted(sortedLinks, key = lambda connection: connection.name)
+          targetPlatformConnections = sorted(partnerSortedLinks, key = lambda connection: connection.name)          
      
           if(max([via.load for via in viasProvisional]) < maxLoad or firstAllocationPass):
             print "Better allocation with  " + str(len(viasProvisional)) + " vias found."
             maxLoad = max([via.load for via in viasProvisional])
             viasFinal = viasProvisional
             self.assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections)
-#          else:
-            #Quit while we're ahead
-#            break
+
           firstAllocationPass = False
 
       return viasFinal
@@ -1140,58 +1141,78 @@ class MultiFPGAConnect():
       return viasFinal
 
 
-  def analyzeNetworkNonuniform(self, allocateFunction):
+  def analyzeNetworkNonuniform(self, allocateFunction, environmentGraph, platformGraph):
 
     # set up intermediate data structures.  We need a couple of passes to resolve link allocation. 
+
+    # This analysis operates on sources. The sinks on the target
+    # platform must be the exact inverse of the sources on this paltform.
+
     egressViasInitial = {}
     ingressViasInitial = {}
-    for platform in self.environment.getPlatformNames():      
-      egressViasInitial[platform] = {}
-      ingressViasInitial[platform] = {}
-      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
-        egressViasInitial[platform][targetPlatform] = []
-        ingressViasInitial[platform][targetPlatform] = []
 
-    # let's read in a stats file
-    stats = self.parseStats()
-    self.assignActivity(stats)
+    platforms = environmentGraph.getPlatformNames()
+    egressPlatforms = {} # addressable by source platform name
 
-    for platform in self.environment.getPlatformNames():
-      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+    for sourcePlatform in platforms:
+        egressPlatforms[sourcePlatform] = []
+        egressViasInitial[sourcePlatform] = {}
+        ingressViasInitial[sourcePlatform] = {}
 
-        # for this target, we assume that we have a monolithic fifo via.  
-        # first, we must decide how to break up the via.  We will store that information
-        # and use it later
+    for sourcePlatform in platforms:
+        platformEgresses = environmentGraph.getPlatform(sourcePlatform).getEgresses()
+        for egressVia in platformEgresses.keys():  
+            egressPlatforms[sourcePlatform].append(platformEgresses[egressVia].endpointName)
+            egressViasInitial[sourcePlatform][platformEgresses[egressVia].endpointName] = []
+            ingressViasInitial[platformEgresses[egressVia].endpointName][sourcePlatform] = []
 
-        viasFinal = allocateFunction(platform, targetPlatform)
-        #end here 
-        headerSize = 7 # simplifying assumption: headers have uniform size.  This isn't actually the case.
-        hopFromTarget = self.environment.transitTablesIncoming[platform][targetPlatform]
-        egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
-        hopToTarget = self.environment.transitTablesOutgoing[targetPlatform][platform]
-        ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
+    print "Egress Platforms: " + str(egressPlatforms) + "\n"
 
-        self.platformData[platform]['EGRESS_VIAS'][targetPlatform] = []
-        self.platformData[targetPlatform]['INGRESS_VIAS'][platform] = []
+        
+    for platform in environmentGraph.getPlatformNames():
+        for targetPlatform in egressPlatforms[platform]:
 
-        # We don't yet have information about how to handle flowcontrol
-        # But we will fill in the data structure temporarily.  
-        # Once all data via assignments have been handeled, we will do flowcontrol.
-        for via in range(len(viasFinal)):
+            # for this target, we assume that we have a monolithic fifo via.  
+            # first, we must decide how to break up the via.  We will store that information
+            # and use it later
 
-          # let's find the maximum width guy so that we calculate the types correctly. 
-          viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
-          maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections))
+            viasFinal = allocateFunction(platform, targetPlatform, environmentGraph, platformGraph)
 
-          umfType = self.generateRouterTypes(viasFinal[via].width, viasFinal[via].links, maxWidth)
+            headerSize = 7 # simplifying assumption: headers have uniform size.  This isn't actually the case.
+            hopFromTarget = environmentGraph.transitTablesIncoming[platform][targetPlatform]
+            egressVia = hopFromTarget.replace(".","_").replace("[","_").replace("]","_") + '_write'
+            hopToTarget = environmentGraph.transitTablesOutgoing[targetPlatform][platform]
+            ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
+       
+            environmentGraph.getPlatform(platform).egresses[targetPlatform].logicalVias = []
+            environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias = []
 
-          egress = Via(platform,targetPlatform,"egress", umfType, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viasFinal[via].load, umfType.fillerBits)
+            logicalEgressInitial = egressViasInitial[platform][targetPlatform]
+            logicalIngressInitial = ingressViasInitial[platform][targetPlatform] 
 
-          ingress = Via(targetPlatform,platform,"ingress", umfType, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viasFinal[via].load, umfType.fillerBits)
 
-          egressViasInitial[platform][targetPlatform].append(egress)
-          ingressViasInitial[targetPlatform][platform].append(ingress) 
-          print "Via pair " + egress.via_switch + ": " + str(via) + ' width: '  + str(viasFinal[via].width) + ' links" ' + str(viasFinal[via].links)
+            # We don't yet have information about how to handle flowcontrol
+            # But we will fill in the data structure temporarily.  
+            # Once all data via assignments have been handeled, we will do flowcontrol.
+            for via in range(len(viasFinal)):
+
+                # let's find the maximum width connection so that we calculate the types correctly.
+                assignedConnections = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
+                print "Assigned Connections: " + str(assignedConnections) + "\n"
+                viaConnections = filter(lambda connection: connection.via_idx_egress == via, assignedConnections)
+                maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections))
+
+                umfType = self.generateRouterTypes(viasFinal[via].width, viasFinal[via].links, maxWidth)
+
+                egress = Via(platform,targetPlatform,"egress", umfType, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viasFinal[via].load, umfType.fillerBits)
+
+                ingress = Via(targetPlatform,platform,"ingress", umfType, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + targetPlatform + '_from_' + platform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), -1, -1, viasFinal[via].load, umfType.fillerBits)
+
+                logicalEgressInitial.append(egress)
+                logicalIngressInitial.append(ingress) 
+                print "LogicalEgress: " + str(logicalEgressInitial)
+                print "LogicalIngress: " + str(logicalIngressInitial)
+                print "Via pair " + egress.via_switch + ": " + str(via) + ' width: '  + str(viasFinal[via].width) + ' links" ' + str(viasFinal[via].links)
 
 
 
@@ -1202,95 +1223,111 @@ class MultiFPGAConnect():
     ingressFlowcontrolAssignment = {}
     egressLinks = {}
     viaLoads = {}
-    for platform in self.environment.getPlatformNames():
-      ingressFlowcontrolAssignment[platform] = {}
-      egressLinks[platform] = {}
-      viaLoads[platform] = {}
-      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
-        # We need to first consider the other platform's ingress.  It gets mapped to our egress
-        localIngress = ingressViasInitial[platform][targetPlatform]
-        localEgress = egressViasInitial[platform][targetPlatform]
+    for platform in environmentGraph.getPlatformNames():
+        ingressFlowcontrolAssignment[platform] = {}
+        egressLinks[platform] = {}
+        viaLoads[platform] = {}
+        for targetPlatform in egressPlatforms[platform]:
+
+          logicalEgress = environmentGraph.getPlatform(platform).egresses[targetPlatform].logicalVias
+          logicalIngress = environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias
+
+          # We need to first consider the other platform's ingress.
+          # It gets mapped to our egress. 
+          localIngress = ingressViasInitial[platform][targetPlatform]
+          localEgress = egressViasInitial[platform][targetPlatform]
 
 
-        egressLinks[platform][targetPlatform] = []
-        ingressFlowcontrolAssignment[platform][targetPlatform] = []
-        viaLoads[platform][targetPlatform] = []
-        viaLoadsOld = []
-        for via in range(len(localEgress)):
-          egressLinks[platform][targetPlatform].append(localEgress[via].via_links)
-          viaLoads[platform][targetPlatform].append(localEgress[via].via_load)
-          viaLoadsOld.append(localEgress[via].via_load)
-
-        for ingress in localIngress:
-          minIdx = -1 
-          minLoad = 0
+          egressLinks[platform][targetPlatform] = []
+          ingressFlowcontrolAssignment[platform][targetPlatform] = []
+          viaLoads[platform][targetPlatform] = []
+          viaLoadsOld = []
           for via in range(len(localEgress)):
-            extraChunk = 0
-            bitwidth = 8
-            if((bitwidth + headerSize)%localEgress[via].via_width != 0):
-              extraChunk = 1
+            egressLinks[platform][targetPlatform].append(localEgress[via].via_links)
+            viaLoads[platform][targetPlatform].append(localEgress[via].via_load)
+            viaLoadsOld.append(localEgress[via].via_load)
 
-            # where did this 128 come from....
-            load = viaLoadsOld[via]/128 * ((bitwidth + headerSize )/localEgress[via].via_width + extraChunk) + viaLoads[platform][targetPlatform][via]
+          for ingress in localIngress:
+            minIdx = -1 
+            minLoad = 0
+            for via in range(len(localEgress)):
+              extraChunk = 0
+              bitwidth = 8
+              if((bitwidth + headerSize)%localEgress[via].via_width != 0):
+                extraChunk = 1
+
+              # where did this 128 come from....
+              load = viaLoadsOld[via]/128 * ((bitwidth + headerSize )/localEgress[via].via_width + extraChunk) + viaLoads[platform][targetPlatform][via]
                 
-            # We don't do a great job here of evaluating opportunity
-            # cost.  Picking the longest running on the fastest
-            # processor might be a bad choice.
-            if(load < minLoad or minIdx == -1):
-              minIdx = via
-              minLoad = load
+              # We don't do a great job here of evaluating opportunity
+              # cost.  Picking the longest running on the fastest
+              # processor might be a bad choice.
+              if(load < minLoad or minIdx == -1):
+                minIdx = via
+                minLoad = load
                
-          viaLoads[platform][targetPlatform][minIdx] = minLoad
+            viaLoads[platform][targetPlatform][minIdx] = minLoad
 
-          # after this assignment we can finalize the ingress 
-          ingressFlowcontrolAssignment[platform][targetPlatform].append([minIdx, egressLinks[platform][targetPlatform][minIdx]])
-          print "Assigning Flowcontrol ingress " + ingress.via_method + " to " + egressViasInitial[platform][targetPlatform][minIdx].via_method  + " Idx " + str(minIdx) + " Link " + str(egressLinks[platform][targetPlatform][minIdx]) + "\n"
-          egressLinks[platform][targetPlatform][minIdx] += 1
+            # after this assignment we can finalize the ingress 
+            ingressFlowcontrolAssignment[platform][targetPlatform].append([minIdx, egressLinks[platform][targetPlatform][minIdx]])
+            print "Assigning Flowcontrol ingress " + ingress.via_method + " to " + egressViasInitial[platform][targetPlatform][minIdx].via_method  + " Idx " + str(minIdx) + " Link " + str(egressLinks[platform][targetPlatform][minIdx]) + "\n"
+            egressLinks[platform][targetPlatform][minIdx] += 1
 
     #And now we can finally finish the synthesized routers
-    for platform in self.environment.getPlatformNames(): 
-      for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():                                        
+    for platform in environmentGraph.getPlatformNames():
+      for targetPlatform in egressPlatforms[platform]: 
         for via in range(len(egressLinks[platform][targetPlatform])):
           egress_first_pass = egressViasInitial[platform][targetPlatform][via]
           ingress_first_pass = ingressViasInitial[targetPlatform][platform][via]
 
+          logicalEgress = environmentGraph.getPlatform(platform).egresses[targetPlatform].logicalVias
+          logicalIngress = environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias
+
           # let's find the maximum width guy so that we calculate the types correctly. 
-          viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
-          maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections)) # notice that we are not taking in to account the flow control bits here. We might well want to do that at some point. 
+          assignedConnections = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
+          print "Assigned Connections: " + str(assignedConnections) + "\n"
+          viaConnections = filter(lambda connection: connection.via_idx_egress == via, assignedConnections)
+
+          # notice that we are not taking in to account the flow
+          # control bits here. We might well want to do that at some
+          # point.
+          maxWidth = max(map(lambda connection: connection.bitwidth, viaConnections)) 
 
 
-          print "Idx " + str(via) + " links " + str(len(egressLinks[platform][targetPlatform])) + " loads " + str(len(viaLoads[platform][targetPlatform]))
+          print "Idx  " + str(via) + " links " + str(len(egressLinks[platform][targetPlatform])) + " loads " + str(len(viaLoads[platform][targetPlatform]))
           umfType = self.generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth) 
 
           egress = Via(platform,targetPlatform,"egress", umfType, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via], umfType.fillerBits)
  
           ingress = Via(targetPlatform,platform,"ingress", umfType, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via], umfType.fillerBits)
 
-          self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(egress)
-          self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(ingress) 
+          logicalEgress.append(egress)
+          logicalIngress.append(ingress) 
+
           print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
 
 
-  def analyzeNetworkComb(self):
-      self.analyzeNetworkNonuniform(self.generateViaCombinational)
+          print "LogicalEgress: " + str(logicalEgress)
+          print "LogicalIngress: " + str(logicalIngress)
 
-  def analyzeNetworkLJF(self):
-      self.analyzeNetworkNonuniform(self.generateViaLJF)
 
-  def analyzeNetworkCompletelyRandom(self):
-      self.analyzeNetworkUniform(False)
+  def analyzeNetworkComb(self, environmentGraph, platformGraph):
+      self.analyzeNetworkNonuniform(self.generateViaCombinational, environmentGraph, platformGraph)
 
-  def analyzeNetworkRandom(self):
-      self.analyzeNetworkUniform(True)
+  def analyzeNetworkLJF(self, environmentGraph, platformGraph):
+      self.analyzeNetworkNonuniform(self.generateViaLJF, environmentGraph, platformGraph)
 
-  def analyzeNetworkUniform(self, useActivity):
+  def analyzeNetworkCompletelyRandom(self, environmentGraph, platformGraph):
+      self.analyzeNetworkUniform(False, environmentGraph, platformGraph)
+
+  def analyzeNetworkRandom(self, environmentGraph, platformLIGraph):
+      self.analyzeNetworkUniform(True, environmentGraph, platformGraph)
+
+  def analyzeNetworkUniform(self, useActivity, environmentGraph, platformGraph):
 
     # let's do a simple scheme with an equal number of vias.
     numberOfVias = self.MAX_NUMBER_OF_VIAS
-    stats = self.parseStats()
-    if(useActivity):
-      self.assignActivity(stats)
-
+ 
     for platform in self.environment.getPlatformNames():
       for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
         # instantiate multiplexors - we need one per link chains
@@ -1299,7 +1336,7 @@ class MultiFPGAConnect():
         # the following code is fairly wrong.  We need to
         # aggregate all virtual channels across a link.  If we
         # don't have a strongly connected FPGA graph, this code
-        # will fail miserably XXX
+        # will fail miserably.
         
         # for this target, we assume that we have a monolithic fifo via.  
         # first, we must decide how to break up the via.  We will store that information
@@ -1354,22 +1391,22 @@ class MultiFPGAConnect():
 
         
 
-  def generateCode(self):
+  def generateCode(self, environmentGraph, platformGraph):
       # now that everything is matched we can ostensibly generate the header file
       # header must include device mapping as well
 
       # really, this is a pairwise decision, but for now we'll assume the underlying calls will 
       # interrogate the type of their counterpart.
-      for platformName in self.environment.getPlatformNames():          
-          platform = self.environment.getPlatform(platformName)
+      for platformName in environmentGraph.getPlatformNames():          
+          platform = environmentGraph.getPlatform(platformName)
           print "Generating code for " + platformName + " of type " + platform.platformType + "\n" 
           if(platform.platformType == 'CPU'):
-              self.generateCodeCPP(platformName)
+              self.generateCodeCPP(platformName, environmentGraph, platformGraph)
           if(platform.platformType == 'FPGA'  or platform.platformType == 'BLUESIM'):
-              self.generateCodeBSV(platformName)
+              self.generateCodeBSV(platformName, environmentGraph, platformGraph)
 
 
-  def generateCodeCPP(self, platform):
+  def generateCodeCPP(self, platform, environmentGraph, platformGraph):
           header = open(self.platformData[platform]['HEADER'],'w')
           header.write('// Generated by build pipeline\n\n')
           header.write('#ifndef __SW_ROUTING__\n')
@@ -1597,56 +1634,26 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
 
           header.write("\t~CHANNELIO_CLASS(){};\n")
 
-          # for some reason we seem to be unable to call the base class functions.
-          # so we utter them here.
-
-#          header.write("\ttemplate<typename T>\n")
-#          header.write("\tMARSHALLED_LI_CHANNEL_IN_CLASS<T> *getChannelInByName(std::string &name)\n")
-#          header.write("\t{\n")
-#          header.write("\treturn CHANNELIO_BASE_CLASS::getChannelInByName(name);\n")
-#          header.write("\t};\n")
-          
-
-#          header.write("\ttemplate<typename T>\n")
-#          header.write("\tMARSHALLED_LI_CHANNEL_OUT_CLASS<T> *getChannelOutByName(std::string &name)\n")
-#          header.write("\t{\n")
-#          header.write("\treturn CHANNELIO_BASE_CLASS::getChannelOutByName(name);\n")
-#          header.write("\t};\n")
-#          header.write("");
-
-          #public:
-
-          #CHANNELIO_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
-          #~CHANNELIO_CLASS();
-
-          #const class LI_CHANNEL_IN & getChannelInByName(string name);
-          #const class LI_CHANNEL_OUT & getChannelOutByName(string name);
-
           header.write("};\n\n")
           header.write('#endif\n')
 
-
-
-#class PHYSICAL_CHANNEL_CLASS: public PLATFORMS_MODULE_CLASS
-#{
-#    private:
-#        // cached links to useful physical devices            
-#        UNIX_PIPE_DEVICE unixPipeDevice;
-#        // incomplete incoming read message                                                                                
-#        UMF_MESSAGE incomingMessage;
-#        // internal methods                                                                                                 
-#        void readPipe();
-#    public:
-#        PHYSICAL_CHANNEL_CLASS(PLATFORMS_MODULE, PHYSICAL_DEVICES);
-#        ~PHYSICAL_CHANNEL_CLASS();
-#        UMF_MESSAGE Read();             // blocking read                                                                    
-#        UMF_MESSAGE TryRead();          // non-blocking read                                                                
-#        void        Write(UMF_MESSAGE); // write                                                                            
-#};
-
           header.close();
 
-  def generateCodeBSV(self, platform):
+  def generateCodeBSV(self, platform, environmentGraph, platformGraph):
+
+          # define some variables that will be referenced in the code
+
+          # targetPlatforms - a list of platforms directly connected to platform
+          targetPlatforms = set()
+          for channel in platformGraph.modules[platform].channels:
+              targetPlatforms.add(channel.partnerChannel.module_name)
+          for chain in platformGraph.modules[platform].chains:
+              targetPlatforms.add(chain.sourcePartnerChain.module_name)
+              targetPlatforms.add(chain.sinkPartnerChain.module_name)
+
+          platformModule = platformGraph.modules[platform]
+
+
           header = open(self.platformData[platform]['HEADER'],'w')
           header.write('// Generated by build pipeline\n\n')
           header.write('`include "awb/provides/common_services.bsh"\n')
@@ -1656,9 +1663,9 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
           header.write('import GetPut::*;\n')
           header.write('import Connectable::*;\n')
 
-          # With compress connections, we need other bo to be imported
+          # With compressed connections, we need other bo to be imported
           if(self.ENABLE_TYPE_COMPRESSION):
-              for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+              for targetPlatform in targetPlatforms:
                   for dep in list(set(flatten(map(lambda dangling: dangling.type_structure.dependencies, \
                                   self.platformData[platform]['CONNECTED'][targetPlatform])))):
                       header.write('`include "awb/provides/' + dep + '.bsh"\n')
@@ -1678,9 +1685,9 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
           ingress_multiplexor_names = {}
 
           # generate router code on a platform pair basis.  
-          for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
-              [egress_multiplexor_definition, egress_multiplexor_instantiation, egress_multiplexor_name] = self.generateEgressMultiplexor(platform, targetPlatform) 
-              [ingress_multiplexor_definition, ingress_multiplexor_instantiation, ingress_multiplexor_name] = self.generateIngressMultiplexor(platform, targetPlatform)
+          for targetPlatform in targetPlatforms:
+              [egress_multiplexor_definition, egress_multiplexor_instantiation, egress_multiplexor_name] = self.generateEgressMultiplexor(platform, targetPlatform, environmentGraph, platformGraph) 
+              [ingress_multiplexor_definition, ingress_multiplexor_instantiation, ingress_multiplexor_name] = self.generateIngressMultiplexor(platform, targetPlatform, environmentGraph, platformGraph)
               egress_multiplexor_definitions += egress_multiplexor_definition
               egress_multiplexor_instantiations += egress_multiplexor_instantiation 
               egress_multiplexor_names.update(egress_multiplexor_name)
@@ -1697,10 +1704,10 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
           header.write('String platformName <- getSynthesisBoundaryPlatform();\n')
           header.write('messageM("Instantiating Custom Router on " + platformName); \n')
 
-          # Dangling Connections for this platform may have some declarations.  We insert them here.
-          for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
-              for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-                  header.write(dangling.code.declaration)
+          # Dangling Channels for this platform may have some declarations.  We insert them here.
+          for targetPlatform in targetPlatforms:
+              for dangling in channelsByPartner(platformModule, targetPlatform):
+                  header.write("// Compression code has been removed.\n")#dangling.code.declaration)
      
           header.write(egress_multiplexor_instantiations + ingress_multiplexor_instantiations)
 
@@ -1710,89 +1717,90 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
           chainsStr = ''
 
           # handle the connections themselves
-          for targetPlatform in  self.platformData[platform]['CONNECTED'].keys():
+          for targetPlatform in targetPlatforms:
             print  "\n\nGenerating routing code " + platform + " -> " + targetPlatform + " in " + self.platformData[platform]['HEADER'] + "\n\n"
-    
-            egressVias = self.platformData[platform]['EGRESS_VIAS'][targetPlatform]
-            ingressVias = self.platformData[platform]['INGRESS_VIAS'][targetPlatform]
+
+            egressVias = environmentGraph.platforms[platform].getEgress(targetPlatform).logicalVias
+            ingressVias = environmentGraph.platforms[platform].getIngress(targetPlatform).logicalVias
             header.write('// Connection to ' + targetPlatform + ' \n')
             sends = 0
             recvs = 0
             chains = 0
             stats = RouterStats( "router" + platform + "_" + targetPlatform)
 
-            for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-              print "Laying down " + dangling.inverse_name + " of type " + dangling.sc_type + " on " + dangling.platform
-              if(dangling.inverse_sc_type == 'Send' or dangling.inverse_sc_type == 'ChainRoutingSend'):
+            # Handle the soft connection declarations of for each
+            # channel between platform and targetPlatform.            
+            for dangling in channelsByPartner(platformModule,targetPlatform):
+              print "Laying down " + dangling.name + " of type " + dangling.sc_type + " on " + dangling.platform
+              if(dangling.isSource()): # this channel is egress
                   if(self.ENABLE_TYPE_COMPRESSION and dangling.type_structure.compressable):
-                          header.write('\nCONNECTION_RECV#(' +  dangling.raw_type + ') recv_uncompressed_' + dangling.inverse_name + ' <- mkPhysicalConnectionRecv("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
+                          header.write('\nCONNECTION_RECV#(' +  dangling.raw_type + ') recv_uncompressed_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
                           #header.write('COMPRESSION_ENCODER#(' + dangling.raw_type + ',enc_type_'+ dangling.inverse_name +') recv_' + dangling.inverse_name + '_compressed <- mkCompressor();\n')
-                          header.write('let recv_' + dangling.inverse_name + '_compressed <- mkCompressor();\n')
-                          header.write('Put#('+ dangling.raw_type + ') put_' + dangling.inverse_name + '_compressed = toPut(recv_' + dangling.inverse_name + '_compressed);\n')
-                          header.write('mkConnection(put_' + dangling.inverse_name + '_compressed, toGet(recv_uncompressed_' + dangling.inverse_name + '));\n')
-                          header.write('let recv_' + dangling.inverse_name +' = toConnectionRecv(recv_' + dangling.inverse_name + '_compressed);\n\n')
+                          header.write('let recv_' + dangling.name + '_compressed <- mkCompressor();\n')
+                          header.write('Put#('+ dangling.raw_type + ') put_' + dangling.name + '_compressed = toPut(recv_' + dangling.name + '_compressed);\n')
+                          header.write('mkConnection(put_' + dangling.name + '_compressed, toGet(recv_uncompressed_' + dangling.name + '));\n')
+                          header.write('let recv_' + dangling.name +' = toConnectionRecv(recv_' + dangling.name + '_compressed);\n\n')
                   else:
-                      header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.inverse_name + ' <- mkPhysicalConnectionRecv("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
+                      header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
                   if(self.GENERATE_ROUTER_STATS):
-                    stats.addCounter('blocked_' + dangling.inverse_name,
-                                     'ROUTER_' + dangling.inverse_name + '_BLOCKED',
-                                     dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + 'cycles blocked')
+                    stats.addCounter('blocked_' + dangling.name,
+                                     'ROUTER_' + dangling.name + '_BLOCKED',
+                                     dangling.name + ' on egress' + str(dangling.via_idx_egress) + ' link ' + str(dangling.via_link_egress) + 'cycles blocked')
 
-                    stats.addCounter('sent_' + dangling.inverse_name,
-                                     'ROUTER_' + dangling.inverse_name + '_SENT',
-                                     dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent') 
+                    stats.addCounter('sent_' + dangling.name,
+                                     'ROUTER_' + dangling.name + '_SENT',
+                                     dangling.name + ' on egress' + str(dangling.via_idx_egress) + ' link ' + str(dangling.via_link_egress) + ' cycles sent') 
              
                   recvs += 1 
 
-
-
-              if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
+            
+            
+              else: # This channel is ingress
                   if(self.GENERATE_ROUTER_STATS > 1):
-                    stats.addCounter('received_' + dangling.inverse_name,
-                                     'ROUTER_' + dangling.inverse_name + '_RECEIVED',
-                                     dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' received cycles')
+                    stats.addCounter('received_' + dangling.name,
+                                     'ROUTER_' + dangling.name + '_RECEIVED',
+                                     dangling.name + ' on ingress' + str(dangling.via_idx_ingress) + ' link ' + str(dangling.via_link_ingress) + ' received cycles')
 
                   if(self.ENABLE_TYPE_COMPRESSION and dangling.type_structure.compressable):
-                      header.write('PHYSICAL_SEND#(' +  dangling.raw_type + ') send_uncompressed_' + dangling.inverse_name + ' <- mkPhysicalConnectionSend("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
+                      header.write('PHYSICAL_SEND#(' +  dangling.raw_type + ') send_uncompressed_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
                       
-                      header.write('let send_' + dangling.inverse_name + '_decompressed <- mkDecompressor();\n')
-                      header.write('Get#('+ dangling.raw_type + ') get_' + dangling.inverse_name + '_decompressed = toGet(send_' + dangling.inverse_name + '_decompressed);\n')
-                      header.write('mkConnection(get_' + dangling.inverse_name + '_decompressed, toPut(send_uncompressed_' + dangling.inverse_name + '));\n')
-                      header.write('let send_' + dangling.inverse_name + ' <- mkPhysicalSend(send_' + dangling.inverse_name + '_decompressed);\n\n')
+                      header.write('let send_' + dangling.name + '_decompressed <- mkDecompressor();\n')
+                      header.write('Get#('+ dangling.raw_type + ') get_' + dangling.name + '_decompressed = toGet(send_' + dangling.name + '_decompressed);\n')
+                      header.write('mkConnection(get_' + dangling.name + '_decompressed, toPut(send_uncompressed_' + dangling.name + '));\n')
+                      header.write('let send_' + dangling.name + ' <- mkPhysicalSend(send_' + dangling.name + '_decompressed);\n\n')
                   else:
-                      header.write('PHYSICAL_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.inverse_name + ' <- mkPhysicalConnectionSend("' + dangling.inverse_name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
+                      header.write('PHYSICAL_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
                   sends += 1
 
-              # only create a chain when we see the source
-              if(dangling.inverse_sc_type == 'ChainSink'):
+            # Handle Chains seperately
+            for dangling in ingressChainsByPartner(platformModule,targetPlatform):
                 chains += 1 
 
                 if(self.GENERATE_ROUTER_STATS > 1):
-                  stats.addCounter('received_' + dangling.inverse_name,
-                                   'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_RECEIVED',
-                                   dangling.inverse_name + ' on ingress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) +' received cycles')
+                  stats.addCounter('received_' + dangling.name,
+                                   'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_RECEIVED',
+                                   dangling.name + ' on ingress' + str(dangling.via_idx_ingress) + ' link ' + str(dangling.via_link_ingress) +' received cycles')
 
                 # we must create a logical chain information
-                chainsStr += 'let chain_' + dangling.inverse_name + ' = ' + \
-                             'LOGICAL_CHAIN_INFO{logicalName: "' + dangling.inverse_name + '", ' + \
+                chainsStr += 'let chain_' + dangling.name + ' = ' + \
+                             'LOGICAL_CHAIN_INFO{logicalName: "' + dangling.name + '", ' + \
                              'logicalType: "' + dangling.raw_type + '", computePlatform: "' + platform + '", ' + \
-                             'incoming: tpl_2(pack_chain_' + dangling.inverse_name + '), ' + \
-                             'outgoing: unpack_chain_' + dangling.inverse_name + ', ' + \
+                             'incoming: tpl_2(pack_chain_' + dangling.name + '), ' + \
+                             'outgoing: unpack_chain_' + dangling.name + ', ' + \
                              'moduleNameIncoming: "router", moduleNameOutgoing: "router"' + \
                              '};\n'
                       
-                chainsStr += 'registerChain(chain_' + dangling.inverse_name + ');\n'
+                chainsStr += 'registerChain(chain_' + dangling.name + ');\n'
 
-              if(dangling.inverse_sc_type == 'ChainSrc'):
-
+            for dangling in egressChainsByPartner(platformModule,targetPlatform):
                 if(self.GENERATE_ROUTER_STATS):
-                  stats.addCounter('blocked_chain_' + dangling.inverse_name,
-                                   'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_BLOCKED',
-                                   dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles blocked')
+                  stats.addCounter('blocked_chain_' + dangling.name,
+                                   'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_BLOCKED',
+                                   dangling.name + ' on egress' + str(dangling.via_idx_egress) + ' link ' + str(dangling.via_link_egress) + ' cycles blocked')
 
-                  stats.addCounter('sent_chain_' + dangling.inverse_name,
-                                   'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.inverse_name + '_SENT',
-                                   dangling.inverse_name + ' on egress' + str(dangling.via_idx) + ' link ' + str(dangling.via_link) + ' cycles sent')
+                  stats.addCounter('sent_chain_' + dangling.name,
+                                   'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_SENT',
+                                   dangling.name + ' on egress' + str(dangling.via_idx_egress) + ' link ' + str(dangling.via_link_egress) + ' cycles sent')
 
             header.write(stats.genStats())
 
@@ -1810,53 +1818,53 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
 
             # the egress links need to go first, since they are provided as an argument to the 
             # switches           
-            for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-              if(dangling.inverse_sc_type == 'Send' or dangling.inverse_sc_type == 'ChainRoutingSend'):
+            for dangling in egressChannelsByPartner(platformModule, targetPlatform):
                 packetizerType = 'Marshalled'
-	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.inverse_name +' = ?;\n')
-                egressVectors[dangling.via_idx][dangling.via_link] = 'pack_recv_' + dangling.inverse_name
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.name +' = ?;\n')
+                egressVectors[dangling.via_idx_egress][dangling.via_link_egress] = 'pack_recv_' + dangling.name
 
                 packetizerType = 'NoPack'
                 # Software only handles unmarshalled packets for now...
-                if(self.environment.getPlatform(targetPlatform).platformType == 'FPGA' or self.environment.getPlatform(targetPlatform).platformType == 'BLUESIM'):
+                if(environmentGraph.getPlatform(targetPlatform).platformType == 'FPGA' or environmentGraph.getPlatform(targetPlatform).platformType == 'BLUESIM'):
                   packetizerType = 'Marshalled'
-                  if(dangling.bitwidth <= egressVias[dangling.via_idx].via_filler_width):            
+                  if(dangling.bitwidth <= egressVias[dangling.via_idx_egress].via_filler_width):            
                     packetizerType = 'Unmarshalled'
 
-                header.write('// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
-                header.write('let pack_recv_' + dangling.inverse_name + ' <- mkPacketizeConnectionReceive' + packetizerType + '(\n')
-                header.write('\t"' + dangling.inverse_name + '",\n')
-                header.write('\t' + str(dangling.via_link) + ',\n')
-                header.write('\twidth_recv_' + dangling.inverse_name + ',\n')
+                header.write('// Via' + str(egressVias[dangling.via_idx_egress].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                header.write('let pack_recv_' + dangling.name + ' <- mkPacketizeConnectionReceive' + packetizerType + '(\n')
+                header.write('\t"' + dangling.name + '",\n')
+                header.write('\t' + str(dangling.via_link_egress) + ',\n')
+                header.write('\twidth_recv_' + dangling.name + ',\n')
                 if(self.GENERATE_ROUTER_STATS):
-                  header.write('\t' + stats.incrCounter('blocked_' + dangling.inverse_name) + ',\n')
-                  header.write('\t' + stats.incrCounter('sent_' + dangling.inverse_name) + ',\n')
+                  header.write('\t' + stats.incrCounter('blocked_' + dangling.name) + ',\n')
+                  header.write('\t' + stats.incrCounter('sent_' + dangling.name) + ',\n')
                 else:
                   header.write('\t?, ?,\n')
-                header.write('\trecv_' + dangling.inverse_name + ');\n\n')
+                header.write('\trecv_' + dangling.name + ');\n\n')
 
-              if(dangling.inverse_sc_type == 'ChainSrc' ):
-                header.write('// Via' + str(egressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
-	        #header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_chain_' + dangling.inverse_name +' = ?;\n')
-	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_chain_' + dangling.inverse_name +' = ?;\n')
-                egressVectors[dangling.via_idx][dangling.via_link] = 'tpl_1(pack_chain_' + dangling.inverse_name + ')'
+            #Handle Chains seperately
+            for dangling in egressChainsByPartner(platformModule, targetPlatform):
+                header.write('// Via' + str(egressVias[dangling.via_idx_egress].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+	        #header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_chain_' + dangling.name +' = ?;\n')
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_chain_' + dangling.name +' = ?;\n')
+                egressVectors[dangling.via_idx_egress][dangling.via_link_egress] = 'tpl_1(pack_chain_' + dangling.name + ')'
                 packetizerType = 'NoPack'
                 # Software only handles unmarshalled packets for now...
-                if(self.environment.getPlatform(targetPlatform).platformType == 'FPGA' or self.environment.getPlatform(targetPlatform).platformType == 'BLUESIM'):
+                if(environmentGraph.getPlatform(targetPlatform).platformType == 'FPGA' or environmentGraph.getPlatform(targetPlatform).platformType == 'BLUESIM'):
                   packetizerType = 'Marshalled'
-                  if(dangling.bitwidth <= egressVias[dangling.via_idx].via_filler_width):
+                  if(dangling.bitwidth <= egressVias[dangling.via_idx_egress].via_filler_width):
                     packetizerType = 'Unmarshalled'
 
-                print "Chain Sink " + dangling.inverse_name + ": Idx " + str(dangling.via_idx) + " Link: " + str(dangling.via_link) + " Length: " + str(len(egressVectors[dangling.via_idx]))  
-                print "Choosing Incoming Marshalling with " + str(egressVias[dangling.via_idx].via_filler_width) +   " + " + str(egressVias[dangling.via_idx].via_width) + "(" +  str(egressVias[dangling.via_idx].via_width + egressVias[dangling.via_idx].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
+                print "Chain Sink " + dangling.name + ": Idx " + str(dangling.via_idx_egress) + " Link: " + str(dangling.via_link_egress) + " Length: " + str(len(egressVectors[dangling.via_idx_egress]))  
+                print "Choosing Incoming Marshalling with " + str(egressVias[dangling.via_idx_egress].via_filler_width) +   " + " + str(egressVias[dangling.via_idx_egress].via_width) + "(" +  str(egressVias[dangling.via_idx_egress].via_width + egressVias[dangling.via_idx_egress].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
 
-                header.write('let pack_chain_' + dangling.inverse_name + ' <- mkPacketizeIncomingChain' + packetizerType + '(\n')
-                header.write('\t"' + dangling.inverse_name + '",\n')
-                header.write('\t' + str(dangling.via_link) + ',\n')
-                header.write('\twidth_chain_' + dangling.inverse_name + ',\n')
+                header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain' + packetizerType + '(\n')
+                header.write('\t"' + dangling.name + '",\n')
+                header.write('\t' + str(dangling.via_link_egress) + ',\n')
+                header.write('\twidth_chain_' + dangling.name + ',\n')
                 if(self.GENERATE_ROUTER_STATS):
-                  header.write('\t' + stats.incrCounter('blocked_chain_' + dangling.inverse_name) + ',\n')
-                  header.write('\t' + stats.incrCounter('sent_chain_' + dangling.inverse_name) + ');\n\n')
+                  header.write('\t' + stats.incrCounter('blocked_chain_' + dangling.name) + ',\n')
+                  header.write('\t' + stats.incrCounter('sent_chain_' + dangling.name) + ');\n\n')
                 else:
                   header.write('\t?, ?);\n\n')
 
@@ -1913,64 +1921,63 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
             # human readable format.  Therefore, we first sort the connections by assignment.            
             # and dump a link manifest.
             maximumLinks = max(ingressVias, key = lambda via: via.via_links).via_links;
-            sortedLinks = sorted(self.platformData[platform]['CONNECTED'][targetPlatform], key = lambda dangling: dangling.via_link + maximumLinks * dangling.via_idx) # sorted is ascending
+            sortedIngressLinks = sorted(ingressChainsByPartner(platformModule,targetPlatform) + ingressChannelsByPartner(platformModule,targetPlatform), key = lambda dangling: dangling.via_link_ingress + maximumLinks * dangling.via_idx_ingress) # sorted is ascending
 
-            for dangling in sortedLinks:
-              if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainSink' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
-                header.write('// ' + dangling.inverse_name + ' via_idx: ' + str(dangling.via_idx) + ' link_idx: ' +  str(dangling.via_link) + '\n')
+            for dangling in sortedIngressLinks:
+                header.write('// ' + dangling.name + ' via_idx: ' + str(dangling.via_idx_ingress) + ' link_idx: ' +  str(dangling.via_link_ingress) + '\n')
 
             # and now we actually generate the connections
-            for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-              if(dangling.inverse_sc_type == 'Recv' or dangling.inverse_sc_type == 'ChainRoutingRecv'):
-	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.inverse_name +' = ?;\n\n')
+            for dangling in ingressChannelsByPartner(platformModule, targetPlatform):
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.name +' = ?;\n\n')
                 packetizerType = 'NoPack'
                 # Software only handles unmarshalled packets for now...
-                if(self.environment.getPlatform(targetPlatform).platformType == 'FPGA' or self.environment.getPlatform(targetPlatform).platformType == 'BLUESIM'):
+                if(environmentGraph.getPlatform(targetPlatform).platformType == 'FPGA' or environmentGraph.getPlatform(targetPlatform).platformType == 'BLUESIM'):
                   packetizerType = 'Marshalled'
-                  if(dangling.bitwidth <= ingressVias[dangling.via_idx].via_width + ingressVias[dangling.via_idx].via_filler_width):            
+                  if(dangling.bitwidth <= ingressVias[dangling.via_idx_ingress].via_width + ingressVias[dangling.via_idx_ingress].via_filler_width):            
                     packetizerType = 'PartialMarshalled'
-                  if(dangling.bitwidth <= ingressVias[dangling.via_idx].via_filler_width):
+                  if(dangling.bitwidth <= ingressVias[dangling.via_idx_ingress].via_filler_width):
                     packetizerType = 'Unmarshalled'
 
-                header.write('// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
-                header.write('Empty unpack_send_' + dangling.inverse_name + ' <- mkPacketizeConnectionSend' + packetizerType  + '(\n')
-                header.write('\t"' + dangling.inverse_name + '",\n')
-                header.write('\t' + ingressVias[dangling.via_idx].via_switch + '.ingressPorts[' + str(dangling.via_link) + '],\n')
-                header.write('\t' + str(dangling.via_link) + ',\n')
-                header.write('\twidth_send_' + dangling.inverse_name + ',\n')
+                header.write('// Via' + str(ingressVias[dangling.via_idx_ingress].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                header.write('Empty unpack_send_' + dangling.name + ' <- mkPacketizeConnectionSend' + packetizerType  + '(\n')
+                header.write('\t"' + dangling.name + '",\n')
+                header.write('\t' + ingressVias[dangling.via_idx_ingress].via_switch + '.ingressPorts[' + str(dangling.via_link_ingress) + '],\n')
+                header.write('\t' + str(dangling.via_link_ingress) + ',\n')
+                header.write('\twidth_send_' + dangling.name + ',\n')
                 if(self.GENERATE_ROUTER_STATS > 1):
-                  header.write('\t' + stats.incrCounter('received_' + dangling.inverse_name) + ',\n')
+                  header.write('\t' + stats.incrCounter('received_' + dangling.name) + ',\n')
                 else:
                   header.write('\t?,\n')
-                header.write('\tsend_' + dangling.inverse_name + ');\n\n')
+                header.write('\tsend_' + dangling.name + ');\n\n')
 
-              if(dangling.inverse_sc_type == 'ChainSink' ):
+            # handle chains seperately
+            for dangling in ingressChainsByPartner(platformModule, targetPlatform):
                 print "My type: " + dangling.sc_type
                 print "My raw type: " + dangling.raw_type
                 print "My name: " + dangling.name
-	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_sink_' + dangling.inverse_name +' = ?;\n')
+	        header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_sink_' + dangling.name +' = ?;\n')
               
                 packetizerType = 'NoPack'
-                header.write('// Via' + str(ingressVias[dangling.via_idx].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
+                header.write('// Via' + str(ingressVias[dangling.via_idx_ingress].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
 
                 # Software only handles unmarshalled packets for now...
-                if(self.environment.getPlatform(targetPlatform).platformType == 'FPGA' or self.environment.getPlatform(targetPlatform).platformType == 'BLUESIM'):
+                if(environmentGraph.getPlatform(targetPlatform).platformType == 'FPGA' or environmentGraph.getPlatform(targetPlatform).platformType == 'BLUESIM'):
                   packetizerType = 'Marshalled'
-                  if(dangling.bitwidth <= (ingressVias[dangling.via_idx].via_width + ingressVias[dangling.via_idx].via_filler_width)): 
+                  if(dangling.bitwidth <= (ingressVias[dangling.via_idx_ingress].via_width + ingressVias[dangling.via_idx_ingress].via_filler_width)): 
                     print "Chain check PartialMarshalled passed"
                     packetizerType = 'PartialMarshalled'
-                  if(dangling.bitwidth <= ingressVias[dangling.via_idx].via_filler_width):            
+                  if(dangling.bitwidth <= ingressVias[dangling.via_idx_ingress].via_filler_width):            
                     packetizerType = 'Unmarshalled'
 
-                print "Choosing Marshalling with " + str(ingressVias[dangling.via_idx].via_filler_width) +   " + " + str(ingressVias[dangling.via_idx].via_width) + "(" +  str(ingressVias[dangling.via_idx].via_width + ingressVias[dangling.via_idx].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
+                print "Choosing Marshalling with " + str(ingressVias[dangling.via_idx_ingress].via_filler_width) +   " + " + str(ingressVias[dangling.via_idx_ingress].via_width) + "(" +  str(ingressVias[dangling.via_idx_ingress].via_width + ingressVias[dangling.via_idx_ingress].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
 
-                header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.inverse_name + ' <- mkPacketizeOutgoingChain' + packetizerType + '(\n')
-                header.write('\t"' + dangling.inverse_name + '",\n')
-                header.write('\t' + ingressVias[dangling.via_idx].via_switch + '.ingressPorts[' + str(dangling.via_link) + '],\n')
-                header.write('\t' + str(dangling.via_link) + ',\n')
-                header.write('\twidth_sink_' + dangling.inverse_name + ',\n')
+                header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain' + packetizerType + '(\n')
+                header.write('\t"' + dangling.name + '",\n')
+                header.write('\t' + ingressVias[dangling.via_idx_ingress].via_switch + '.ingressPorts[' + str(dangling.via_link_ingress) + '],\n')
+                header.write('\t' + str(dangling.via_link_ingress) + ',\n')
+                header.write('\twidth_sink_' + dangling.name + ',\n')
                 if(self.GENERATE_ROUTER_STATS > 1):
-                  header.write('\t' + stats.incrCounter('received_' + dangling.inverse_name) + ');\n\n')
+                  header.write('\t' + stats.incrCounter('received_' + dangling.name) + ');\n\n')
                 else:
                   header.write('\t?);\n\n')
 
@@ -2025,10 +2032,8 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
       for line in lines:
           # also pull out link widths
           if(re.match('.*SizeOfVia:.*',line)):
-            print "XXX: " + line + "\n"
             match = re.search(r'.*SizeOfVia:([^:]+):(\d+)',line)
             if(match):
-              print "XXX: " + match.group(1) + "\n"
               self.platformData[platformName]['WIDTHS'][match.group(1)] = int(match.group(2))
               
           if(re.match("Compilation message: .*: Dangling",line)):
@@ -2197,3 +2202,32 @@ cm__s_10_cm__s_6_cm__s_96_rp__cm__s_Bit_po__lp_128_rp__rp_': 'UMF_MESSAGE',
               else:
                   print "Error: Malformed connection message: " + line
                   sys.exit(-1)
+
+
+
+  def parseWidth(self, environmentGraph):
+      for platformName in environmentGraph.getPlatformNames():
+          # we may have several logfiles. Let's combine them together. 
+          lines = []
+
+          # TODO -- This code needs to be refactored to be online. Reading the logs in is a bad idea.
+          for infile in self.platformData[platformName]['LOG']:
+              logfile = open(infile,'r')
+              print "Examining file " + infile
+              for line in logfile:
+                  lines.append(line)
+              logfile.close()
+          
+          for line in lines:
+              # also pull out link widths
+              if(re.match('.*SizeOfVia:.*',line)):
+                  match = re.search(r'.*SizeOfVia:([^:]+):([^:]+):(\d+)',line)
+                  if(match):
+                      # match group 1 is a the bluespec name of the
+                      # communication device.  We must look up which
+                      # platform this device targets.         
+                      if(match.group(2) == 'ingress'):
+                          environmentGraph.getPlatform(platformName).getIngressByPhysicalName(match.group(1)).width = int(match.group(3))
+                      else:
+                          environmentGraph.getPlatform(platformName).getEgressByPhysicalName(match.group(1)).width = int(match.group(3))
+              

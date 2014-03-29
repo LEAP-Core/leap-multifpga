@@ -1,0 +1,8 @@
+service BASESTATIONRRR
+{
+   server hw (bsv, connection) <- sw (cpp, method)
+   {
+      method RunTest(in UINT32[32] count, in UINT32[32] width, out UINT64[64] cycles,  out UINT64[64] totalLatency, out UINT32[32] errors);
+   };
+}
+

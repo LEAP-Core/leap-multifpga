@@ -40,9 +40,9 @@ def p_connection_list(p):
         p[0] = []
     else:
         if(p[2] == '<-'):
-            p[0] = [Connection(Connection.sink,p[1],eval(p[3]))] + p[5]
+            p[0] = [PhysicalVia(PhysicalVia.ingress,p[1],eval(p[3]))] + p[5]
         else:
-            p[0] = [Connection(Connection.source,p[1],eval(p[3]))] + p[5]
+            p[0] = [PhysicalVia(PhysicalVia.egress,p[1],eval(p[3]))] + p[5]
 
 def p_path(p):
     """

@@ -502,6 +502,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
             return bodyFIFO.first;
         endmethod
         method bypassFlowcontrol = True; // FC responses don't need flow control. Or do they?
+        method maxPacketSize = 1; // Credit size always fits in a data word
     endinterface
 
 endmodule

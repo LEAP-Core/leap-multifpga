@@ -105,3 +105,5 @@ Packagehint=leap
 File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-vc707-fpga1.apm
 Packagehint=multifpga
 
+[VC707 FPGA 1 /Params]
+BUILD_COMMON_SERVICES=0
