@@ -5235,3 +5235,32 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 Continued refactroring of LIM compiler.  Router analysis routines have
 now been split into seperate files.  Main compilation file now less
 than 500 lines.
+
+----------
+keflemin    Date: Tue Apr  1 14:53:42 EDT 2014  CSN: CSN-multifpga-233
+                  Tue Apr  1 18:53:42 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          232 
+ analyzeNetwork.py         Locally Modified          232 
+ generateCode.py           Locally Modified          232 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          232 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ generate_logfile.py       Locally Modified          232 
+ environment.py            Locally Modified          232 
+ platform.py               Locally Modified          232 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ fpgamap.py                Locally Modified          232 
+
+
+
+Continued refactoring code.  Most prints have been elimanted or put
+under the control of the pipeline debug flag.
+
+Most code has been set to 4 space indentation. 
+

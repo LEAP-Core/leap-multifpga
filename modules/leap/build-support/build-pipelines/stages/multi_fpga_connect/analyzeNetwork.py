@@ -24,21 +24,25 @@ def getPartner(connection):
         return connection.sourcePartnerChain
 
 # This code assigns physical indices to the inter-platform connections. 
-def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections):
+def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections, moduleList):
+
+    pipeline_debug = getBuildPipelineDebug(moduleList)
     # by definition these are sources
     for provisional in provisionalAssignments:
         assigned = False
         for idx in range(len(platformConnections)): # we can probably do better than this n^2 loop. 
             # Watch out for chain Sinks and sources
-            print "Examining: " + platformConnections[idx].name + " " + provisional.name
+            if(pipeline_debug):
+                print "Examining: " + platformConnections[idx].name + " " + provisional.name
             if(platformConnections[idx].name == provisional.name): 
                 assigned = True
                 platformConnections[idx].via_idx_egress  = provisional.via_idx
                 platformConnections[idx].via_link_egress = provisional.via_link
-                print "Assigning egress " + platformConnections[idx].name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+                if(pipeline_debug):
+                    print "Assigning egress " + platformConnections[idx].name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
 
         if(not assigned):
-            print "failed to assign: " + platformConnections[idx].name +"\n"
+            print "assignLinks failed to assign: " + platformConnections[idx].name +"\n"
             exit(0)
 
     # by definition these are sinks.
@@ -46,15 +50,16 @@ def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformCo
         assigned = False
         for idx in range(len(targetPlatformConnections)): # we can probably do better than this n^2 loop. 
             # Watch out for chain Sinks and sources
-            print "Examining: " + targetPlatformConnections[idx].name + " " + provisional.name
+            if(pipeline_debug):
+                print "Examining: " + targetPlatformConnections[idx].name + " " + provisional.name
             if(targetPlatformConnections[idx].name == provisional.name):    
                 assigned = True
                 targetPlatformConnections[idx].via_idx_ingress  = provisional.via_idx
                 targetPlatformConnections[idx].via_link_ingress = provisional.via_link
-
-                print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+                if(pipeline_debug):
+                    print "Assigning ingress " + targetPlatformConnections[idx].name + ' of type ' + targetPlatformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
         if(not assigned):
-            print "failed to assign: " + targetPlatformConnections[idx].name +"\n"
+            print "assignLinks failed to assign: " + targetPlatformConnections[idx].name +"\n"
             exit(0)
 
 
@@ -65,8 +70,11 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
 
     MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
     MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MIN_NUMBER_OF_VIAS')
+    pipeline_debug = getBuildPipelineDebug(moduleList)
 
-    print "Allocating vias for " + platform + " -> " + targetPlatform + "\n"
+    if(pipeline_debug):
+        print "Allocating vias for " + platform + " -> " + targetPlatform + "\n"
+
     firstAllocationPass = True; # We can't terminate in the first pass 
     viaWidthsFinal = [] # at some point, we'll want to derive this. 
     viasFinal = []   
@@ -105,7 +113,8 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
                 while(viaWidths[0] < (sortedLinks[viaSizingIdx].bitwidth + 2*(headerSize + 1))): # Give extra for header sizing - the base via should also have space
                     if(viaSizingIdx + 1 == len(sortedLinks)):
                         noViasRemaining = 1
-                        print "No suitable vias remain"
+                        if(pipeline_debug):
+                            print "No suitable vias remain"
                         # we aren't actually going to pick a second via, 
                         # so give back the valid bit to the first via.
                         if(len(viaWidths) == 1):
@@ -128,8 +137,10 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
         # send/recv pairs had better be matched.
         # so let's match them up
         # need to maintain the sorted order
-        print "sortedLinks: " + str(sortedLinks) + "\n"
-        print "partnerSortedLinks: " + str(partnerSortedLinks) + "\n"
+        if(pipeline_debug):
+            print "sortedLinks: " + str(sortedLinks) + "\n"
+            print "partnerSortedLinks: " + str(partnerSortedLinks) + "\n"
+
         platformConnections = sorted(sortedLinks, key = lambda connection: connection.name)
         targetPlatformConnections = sorted(partnerSortedLinks, key = lambda connection: connection.name)
 
@@ -141,10 +152,12 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
         targetPlatformConnections = sorted(partnerSortedLinks, key = lambda connection: connection.name)          
    
         if(max([via.load for via in viasProvisional]) < maxLoad or firstAllocationPass):
-            print "Better allocation with  " + str(len(viasProvisional)) + " vias found."
+            if(pipeline_debug):
+                print "Better allocation with  " + str(len(viasProvisional)) + " vias found."
+
             maxLoad = max([via.load for via in viasProvisional])
             viasFinal = viasProvisional
-            assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections)
+            assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections, moduleList)
 
         firstAllocationPass = False
 
@@ -159,6 +172,9 @@ def allocateLJF(platformLinks, targetLinks, vias, moduleList):
     return allocateLJFWithHeaders(platformLinks, targetLinks, vias, [1 for via in vias], moduleList)
 
 def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList):
+
+    pipeline_debug = getBuildPipelineDebug(moduleList)
+
     #first sort the links on both sides
     links = sorted(platformLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending   
   
@@ -172,8 +188,9 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
         #if((links[danglingIdx].sc_type == 'Recv') or (links[danglingIdx].sc_type == 'ChainSink') or (links[danglingIdx].sc_type == 'ChainRoutingRecv')):
         # depending on the width of the vias, and the width of our type we get different loads on different processors
         # need to choose the minimum
-
-        print "\n\n Analyzing   " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + " raw load: " + str(links[danglingIdx].activity) + "\n"
+       
+        if(pipeline_debug):
+            print "\n\n Analyzing   " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + " raw load: " + str(links[danglingIdx].activity) + "\n"
         
         minIdx = -1 
         minLoad = 0        
@@ -207,8 +224,10 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
         else: # Dealing with a chain...
             targetPlatformConnectionsProvisional.append(LinkAssignment(links[danglingIdx].sourcePartnerChain.name, links[danglingIdx].sourcePartnerChain.sc_type, minIdx, vias[minIdx].links))  
 
-        print "Assigning Recv " + links[danglingIdx].name   + " Via " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
-        print "Vias are " +  str(vias) + "\n"
+        if(pipeline_debug):
+            print "Assigning Recv " + links[danglingIdx].name   + " Via " + str(minIdx) + " Link " + str(vias[minIdx].links) + " Load " + str(vias[minIdx].load) + "\n"
+            print "Vias are " +  str(vias) + "\n"
+
         vias[minIdx].links += 1
 
     # check for a legal assignment by verifying that the header types chosen are feasible.
@@ -224,11 +243,17 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
             needRecurse = True
               
     if(not needRecurse):
-        print "NoRecurse Assigned " + str(vias) + "\n"
+        if(pipeline_debug):
+            print "NoRecurse Assigned " + str(vias) + "\n"
+
         return [vias, platformConnectionsProvisional, targetPlatformConnectionsProvisional]
+
     else:
-        print "Recursing with header: " + str(headersNext) + "\n"
+        if(pipeline_debug):
+            print "Recursing with header: " + str(headersNext) + "\n"
+
         return allocateLJFWithHeaders(platformLinks, targetLinks, viasRollback, headersNext, moduleList)
+
 
 # The general strategy here is 
 # 1) hueristically pick lane widths
@@ -236,6 +261,9 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
 # Repeat until maximum link occupancy increases (although we might just try repeatedly and keep all the results) 
 
 def generateViaCombinational(platform, targetPlatform, moduelList, environmentGraph, platformGraph):
+
+    pipeline_debug = getBuildPipelineDebug(moduleList)
+
     firstAllocationPass = True; # We can't terminate in the first pass 
     viaWidthsFinal = [] # at some point, we'll want to derive this. 
     viasFinal = []   
@@ -293,7 +321,7 @@ def generateViaCombinational(platform, targetPlatform, moduelList, environmentGr
                 print "Better allocation with  " + str(len(viasProvisional)) + " vias found."
                 maxLoad = max([via.load for via in viasProvisional])
                 viasFinal = viasProvisional
-                assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections)
+                assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections, moduleList)
 
             firstAllocationPass = False
 
@@ -303,8 +331,9 @@ def generateViaCombinational(platform, targetPlatform, moduelList, environmentGr
 
 def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, platformGraph):
 
-    # set up intermediate data structures.  We need a couple of passes to resolve link allocation. 
+    pipeline_debug = getBuildPipelineDebug(moduleList)
 
+    # set up intermediate data structures.  We need a couple of passes to resolve link allocation. 
     # This analysis operates on sources. The sinks on the target
     # platform must be the exact inverse of the sources on this paltform.
 
@@ -326,7 +355,8 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
             egressViasInitial[sourcePlatform][platformEgresses[egressVia].endpointName] = []
             ingressViasInitial[platformEgresses[egressVia].endpointName][sourcePlatform] = []
 
-    print "Egress Platforms: " + str(egressPlatforms) + "\n"
+    if(pipeline_debug):
+        print "Egress Platforms: " + str(egressPlatforms) + "\n"
 
         
     for platform in environmentGraph.getPlatformNames():
@@ -358,7 +388,9 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
                 # let's find the maximum width connection so that we calculate the types correctly.
                 assignedConnections = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
-                print "Assigned Connections: " + str(assignedConnections) + "\n"
+                if(pipeline_debug):
+                    print "Assigned Connections: " + str(assignedConnections) + "\n"
+
                 viaConnections = filter(lambda connection: connection.via_idx_egress == via, assignedConnections)
                 maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections))
 
@@ -370,9 +402,11 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
                 logicalEgressInitial.append(egress)
                 logicalIngressInitial.append(ingress) 
-                print "LogicalEgress: " + str(logicalEgressInitial)
-                print "LogicalIngress: " + str(logicalIngressInitial)
-                print "Via pair " + egress.via_switch + ": " + str(via) + ' width: '  + str(viasFinal[via].width) + ' links" ' + str(viasFinal[via].links)
+
+                if(pipeline_debug):
+                    print "LogicalEgress: " + str(logicalEgressInitial)
+                    print "LogicalIngress: " + str(logicalIngressInitial)
+                    print "Via pair " + egress.via_switch + ": " + str(via) + ' width: '  + str(viasFinal[via].width) + ' links" ' + str(viasFinal[via].links)
 
 
 
@@ -430,7 +464,10 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
                   # after this assignment we can finalize the ingress 
                   ingressFlowcontrolAssignment[platform][targetPlatform].append([minIdx, egressLinks[platform][targetPlatform][minIdx]])
-                  print "Assigning Flowcontrol ingress " + ingress.via_method + " to " + egressViasInitial[platform][targetPlatform][minIdx].via_method  + " Idx " + str(minIdx) + " Link " + str(egressLinks[platform][targetPlatform][minIdx]) + "\n"
+
+                  if(pipeline_debug):
+                      print "Assigning Flowcontrol ingress " + ingress.via_method + " to " + egressViasInitial[platform][targetPlatform][minIdx].via_method  + " Idx " + str(minIdx) + " Link " + str(egressLinks[platform][targetPlatform][minIdx]) + "\n"
+
                   egressLinks[platform][targetPlatform][minIdx] += 1
                     
     #And now we can finally finish the synthesized routers
@@ -445,7 +482,9 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
                 # let's find the maximum width guy so that we calculate the types correctly. 
                 assignedConnections = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
-                print "Assigned Connections: " + str(assignedConnections) + "\n"
+                if(pipeline_debug):
+                    print "Assigned Connections: " + str(assignedConnections) + "\n"
+
                 viaConnections = filter(lambda connection: connection.via_idx_egress == via, assignedConnections)
 
                 # notice that we are not taking in to account the flow
@@ -453,8 +492,9 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
                 # point.
                 maxWidth = max(map(lambda connection: connection.bitwidth, viaConnections)) 
 
+                if(pipeline_debug):
+                    print "Idx  " + str(via) + " links " + str(len(egressLinks[platform][targetPlatform])) + " loads " + str(len(viaLoads[platform][targetPlatform]))
 
-                print "Idx  " + str(via) + " links " + str(len(egressLinks[platform][targetPlatform])) + " loads " + str(len(viaLoads[platform][targetPlatform]))
                 umfType = generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth, moduleList) 
 
                 egress = Via(platform,targetPlatform,"egress", umfType, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via], umfType.fillerBits)
@@ -464,11 +504,11 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
                 logicalEgress.append(egress)
                 logicalIngress.append(ingress) 
 
-                print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
 
-
-                print "LogicalEgress: " + str(logicalEgress)
-                print "LogicalIngress: " + str(logicalIngress)
+                if(pipeline_debug):
+                    print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
+                    print "LogicalEgress: " + str(logicalEgress)
+                    print "LogicalIngress: " + str(logicalIngress)
 
 
 def analyzeNetworkComb(moduleList, environmentGraph, platformGraph):
@@ -528,7 +568,7 @@ def analyzeNetworkUniform(useActivity, moduleList, environmentGraph, platformGra
             #via assignment to have one link already gone
             vias = [ViaAssignment(viaWidth, 0, 1) for via in range(numberOfVias)]
             [viasProvisional, platformConnectionsProvisional, targetPlatformConnectionsProvisional] = allocateLJF(platformConnections, targetPlatformConnections , vias, moduleList)
-            assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections)
+            assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections, moduleList)
             # Now that we have an assignment of links, we can calculate the via types. 
             # We're dropping some bits here
             # this loop should be refactored to split ingress and egress
@@ -536,7 +576,10 @@ def analyzeNetworkUniform(useActivity, moduleList, environmentGraph, platformGra
             for via in range(numberOfVias):
                 # need to set the via widths here...
                 viaLinks = viasProvisional[via].links
-                print "Uniform Via " + str(via) + " links " + str(viasProvisional[via].links)
+
+                if(pipeline_debug):
+                    print "Uniform Via " + str(via) + " links " + str(viasProvisional[via].links)
+
                 # let's find the maximum width guy so that we calculate the types correctly. 
                 viaConnections = filter(lambda connection: connection.via_idx == via,self.platformData[platform]['CONNECTED'][targetPlatform])
                 maxWidth = viaWidth
@@ -545,8 +588,11 @@ def analyzeNetworkUniform(useActivity, moduleList, environmentGraph, platformGra
                     maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections))
 
                 umfType = generateRouterTypes(viaWidth, viaLinks, maxWidth, moduleList)
-                
-                print "Creating Via " + 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  +str(via) + " : links " + str(viaLinks)
+
+
+                if(pipeline_debug):                
+                    print "Creating Via " + 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  +str(via) + " : links " + str(viaLinks)
+
                 self.platformData[platform]['EGRESS_VIAS'][targetPlatform].append(Via(platform,targetPlatform,"egress", umfType, viaWidth, viaLinks, viaLinks - 1, 1, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), 0, via, 0, umfType.fillerBits))
                 self.platformData[targetPlatform]['INGRESS_VIAS'][platform].append(Via(targetPlatform,platform,"ingress", umfType, viaWidth, viaLinks, viaLinks - 1, 1, hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via) + '_read', 'switch_ingress_' + platform + '_from_' + targetPlatform + '_' + hopToTarget.replace(".","_").replace("[","_").replace("]","_") + str(via), 0, via, 0, umfType.fillerBits)) 
           

@@ -22,6 +22,8 @@ def getTargetPlatforms(platformGraph, platform):
 
 def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
 
+    pipeline_debug = getBuildPipelineDebug(moduleList)
+
     ENABLE_TYPE_COMPRESSION = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_TYPE_COMPRESSION')
     GENERATE_ROUTER_DEBUG = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_DEBUG')
     GENERATE_ROUTER_STATS = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_STATS')
@@ -110,7 +112,9 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
         # Handle the soft connection declarations of for each
         # channel between platform and targetPlatform.            
         for dangling in channelsByPartner(platformObject,targetPlatform):
-            print "Laying down " + dangling.name + " of type " + dangling.sc_type + " on " + dangling.platform
+            if(pipeline_debug):
+                print "Laying down " + dangling.name + " of type " + dangling.sc_type + " on " + dangling.platform
+
             if(dangling.isSource()): # this channel is egress
                 if(ENABLE_TYPE_COMPRESSION and dangling.type_structure.compressable):
                         header.write('\nCONNECTION_RECV#(' +  dangling.raw_type + ') recv_uncompressed_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
@@ -193,7 +197,9 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
         # that can be manipulated like fifos.  
         egressVectors = []
         for via_idx in range(len(egressVias)):
-            print "Working on " + egressVias[via_idx].via_switch + ' with Links: ' + str(egressVias[via_idx].via_links)
+            if(pipeline_debug):
+                print "Working on " + egressVias[via_idx].via_switch + ' with Links: ' + str(egressVias[via_idx].via_links)
+
             egressVectors.append(["?" for x in range(egressVias[via_idx].via_links)]) # we could also do a double list comprehension.
 
         # the egress links need to go first, since they are provided as an argument to the 
@@ -237,8 +243,9 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
                 if(dangling.bitwidth <= egressVias[dangling.via_idx_egress].via_filler_width):
                     packetizerType = 'Unmarshalled'
 
-            print "Chain Sink " + dangling.name + ": Idx " + str(dangling.via_idx_egress) + " Link: " + str(dangling.via_link_egress) + " Length: " + str(len(egressVectors[dangling.via_idx_egress]))  
-            print "Choosing Incoming Marshalling with " + str(egressVias[dangling.via_idx_egress].via_filler_width) +   " + " + str(egressVias[dangling.via_idx_egress].via_width) + "(" +  str(egressVias[dangling.via_idx_egress].via_width + egressVias[dangling.via_idx_egress].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
+            if(pipeline_debug):
+                print "Chain Sink " + dangling.name + ": Idx " + str(dangling.via_idx_egress) + " Link: " + str(dangling.via_link_egress) + " Length: " + str(len(egressVectors[dangling.via_idx_egress]))  
+                print "Choosing Incoming Marshalling with " + str(egressVias[dangling.via_idx_egress].via_filler_width) +   " + " + str(egressVias[dangling.via_idx_egress].via_width) + "(" +  str(egressVias[dangling.via_idx_egress].via_width + egressVias[dangling.via_idx_egress].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
 
             header.write('let pack_chain_' + dangling.name + ' <- mkPacketizeIncomingChain' + packetizerType + '(\n')
             header.write('\t"' + dangling.name + '",\n')
@@ -282,7 +289,9 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
                     firstPass = False
                   
                 linkArray += "}// link idx: " + str(egressVias[via_idx].via_links - 1)  + '\n'
-                print "Idx: " + str(via_idx) + " eg vias len" + str(len(egressVias)) + " in vias len" + str(len(ingressVias))
+
+                if(pipeline_debug):
+                    print "Idx: " + str(via_idx) + " eg vias len" + str(len(egressVias)) + " in vias len" + str(len(ingressVias))
 
                 header.write('EGRESS_PACKET_GENERATOR#(' + egressVias[via_idx].umfType.headerTypeBSV() + ', ' +  egressVias[via_idx].umfType.bodyTypeBSV() + ') links_' + egressVias[via_idx].via_switch + '[' + str(egressVias[via_idx].via_links) + '] = ' + linkArray + ';\n') 
 
@@ -338,9 +347,11 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
 
         # handle chains seperately
         for dangling in ingressChainsByPartner(platformObject, targetPlatform):
-            print "My type: " + dangling.sc_type
-            print "My raw type: " + dangling.raw_type
-            print "My name: " + dangling.name
+            if(pipeline_debug):
+                print "My type: " + dangling.sc_type
+                print "My raw type: " + dangling.raw_type
+                print "My name: " + dangling.name
+
             header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_sink_' + dangling.name +' = ?;\n')
           
             packetizerType = 'NoPack'
@@ -356,7 +367,8 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
                 if(dangling.bitwidth <= ingressVias[dangling.via_idx_ingress].via_filler_width):            
                     packetizerType = 'Unmarshalled'
 
-            print "Choosing Marshalling with " + str(ingressVias[dangling.via_idx_ingress].via_filler_width) +   " + " + str(ingressVias[dangling.via_idx_ingress].via_width) + "(" +  str(ingressVias[dangling.via_idx_ingress].via_width + ingressVias[dangling.via_idx_ingress].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
+            if(pipeline_debug):
+                print "Choosing Marshalling with " + str(ingressVias[dangling.via_idx_ingress].via_filler_width) +   " + " + str(ingressVias[dangling.via_idx_ingress].via_width) + "(" +  str(ingressVias[dangling.via_idx_ingress].via_width + ingressVias[dangling.via_idx_ingress].via_filler_width) + ") < " + str(dangling.bitwidth) + " = " + packetizerType
 
             header.write('PHYSICAL_CHAIN_OUT unpack_chain_' + dangling.name + ' <- mkPacketizeOutgoingChain' + packetizerType + '(\n')
             header.write('\t"' + dangling.name + '",\n')
@@ -434,8 +446,9 @@ def generateCodeCPP(moduleList, platformName, environmentGraph, platformGraph):
         egressVias = environmentGraph.platforms[platform].getEgress(targetPlatform).logicalVias
         ingressVias = environmentGraph.platforms[platform].getIngress(targetPlatform).logicalVias
 
-        print "EGRESS: " + str(egressVias.keys()) + " : " + str(egressVias)
-        print "INGRESS: " + str(ingressVias.keys()) + " : " + str(ingressVias)
+        if(pipeline_debug):
+            print "EGRESS: " + str(egressVias.keys()) + " : " + str(egressVias)
+            print "INGRESS: " + str(ingressVias.keys()) + " : " + str(ingressVias)
 
         # To do - if we have more have more than one via, this code ought to be in a loop.
 
@@ -544,13 +557,17 @@ def generateCodeCPP(moduleList, platformName, environmentGraph, platformGraph):
             # For now, we use the vanilla MARSHALLED_LI_CHANNEL_IN_CLASS for chain route-throughs
             # However, route-throughs in general are likely to deadlock, and require special handling. 
             if(dangling.inverse_sc_type == 'Recv'):
-                print " CPU lays down (inverse Recv)" + str(dangling) 
+                if(pipeline_debug):
+                    print " CPU lays down (inverse Recv)" + str(dangling) 
+
                 #these need to be ordered so that the index operator in the read thread will do the right thing.  
                 incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new MARSHALLED_LI_CHANNEL_IN_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.name + '", (UMF_FACTORY) new ' + egressFactoryNames[ingressVias[0].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link) +'\n\n')
             elif(dangling.inverse_sc_type == 'ChainRoutingRecv'):
                 incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new ROUTE_THROUGH_LI_CHANNEL_IN_CLASS(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.inverse_name + '", (UMF_FACTORY) new ' + egressFactoryNames[ingressVias[0].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link) +'\n\n')
             elif(dangling.inverse_sc_type == 'Send'):
-                print " CPU lays down (inverse Send) " + str(dangling) 
+                if(pipeline_debug):
+                    print " CPU lays down (inverse Send) " + str(dangling) 
+
                 outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new MARSHALLED_LI_CHANNEL_OUT_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[connections[0]] + '(),\n\t\t"'+ dangling.name + '",' + str(dangling.via_link) + ');\n\n')
             elif(dangling.inverse_sc_type == 'ChainRoutingSend'):
                 outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link) + ') = new ROUTE_THROUGH_LI_CHANNEL_OUT_CLASS(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[connections[0]] + '(),\n\t\t"'+ dangling.inverse_name + '",' + str(dangling.via_link) + ');\n\n')

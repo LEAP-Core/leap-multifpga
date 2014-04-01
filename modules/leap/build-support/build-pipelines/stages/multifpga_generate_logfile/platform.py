@@ -1,5 +1,10 @@
 from connection import *
 
+##
+##  This class represents a platform, a computational entity capable
+##  of executing latency-insensitive modules.
+##
+
 class Platform(object):
 
     def getEgresses(self):
@@ -64,11 +69,9 @@ class Platform(object):
        return tokens[-1]
 
 
-    def putAttribute(self, key, value):
-        print "XXX setting " + key + " to " + str(value)
+    def putAttribute(self, key, value):       
         self.attributes[key] = value
         
 
     def getAttribute(self, key):
-        print "XXX looking up " + key
         return self.attributes[key]

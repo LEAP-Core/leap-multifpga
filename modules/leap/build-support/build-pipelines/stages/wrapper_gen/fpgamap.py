@@ -6,7 +6,6 @@ class FPGAMap(object):
         self.mapping = {}
         for entry in mappings:
             self.mapping[entry[0]] = entry[1]
-            print "Mapping: " + entry[1] + " -> " + entry[0] + "\n"
 
     def addSynthesisBoundaryMapping(self,boundary,platform):
         self.mapping[boundary] = platform

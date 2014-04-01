@@ -32,7 +32,6 @@ class FPGAEnvironment(object):
         return self.platforms.keys()
 
     def getSynthesisBoundaryPlatformID(self,boundary):
-        print 'Looking up: ' + boundary
         # Master platform/some FPGA must be assinged the 0 id
         # for backwards compatibility.  We achieve this by using
         # a sort function that orders by master and thence by platform 
@@ -124,7 +123,7 @@ class FPGAEnvironment(object):
         while paths[0][hop] != ingress:
             hop = paths[0][hop]
             path.append(hop)           
-        print "getPath: " + str(path)
+
         path.reverse()
         return path 
 
@@ -176,14 +175,12 @@ class FPGAEnvironment(object):
                     hop = self.getPathHopFirst(platformName, target)
                     # pygraph returns something odd for paths of length one
                     
-                    print platformName + ' -> ' + target + ' : ' + self.getPhysicalEgress(platformName,hop)
                     transitTablesOutgoing[platformName][target] = self.getPhysicalEgress(platformName,hop)
 
                 if(self.getPathLength(target, platformName) > 0):
                     hop = self.getPathHopLast(target, platformName)
 
                     # also fill in our egress at the same time
-                    print platformName + ' <- ' + target + ' : ' + self.getPhysicalIngress(platformName,hop)
                     transitTablesIncoming[platformName][target] = self.getPhysicalIngress(platformName,hop)
                     
         self.transitTablesOutgoing = transitTablesOutgoing
