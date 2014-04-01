@@ -5199,3 +5199,23 @@ This change will break several of the LIM build modes.  However,
 baseline multifpga builds should continue to function.
  
 
+
+----------
+keflemin    Date: Mon Mar 31 21:38:53 EDT 2014  CSN: CSN-multifpga-231
+                  Tue Apr  1 01:38:53 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ routerStats.py            Locally Added               0 
+ compression.py            Locally Added               0 
+ multiFPGAConnect.py       Locally Modified          230 
+ multi-fpga-connect.awb    Locally Modified          230 
+ generateMultiplexors.py   Locally Added               0 
+ generateCode.py           Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ platform.py               Locally Modified          230 
+
+
+Continued refactoring and splitting up multiFPGAConnect. File size is
+now less than 1000 lines.

@@ -31,6 +31,9 @@ class Platform(object):
         self.platformType = platformType
         self.path = path
         self.master = isMaster
+
+        self.attributes = {}
+
         self.ingresses = {}
         self.egresses = {}
         # a view of the platform useful in parsing via widths.
@@ -59,3 +62,13 @@ class Platform(object):
     def getAPMName(self):
        tokens = (self.path).split("/")
        return tokens[-1]
+
+
+    def putAttribute(self, key, value):
+        print "XXX setting " + key + " to " + str(value)
+        self.attributes[key] = value
+        
+
+    def getAttribute(self, key):
+        print "XXX looking up " + key
+        return self.attributes[key]
