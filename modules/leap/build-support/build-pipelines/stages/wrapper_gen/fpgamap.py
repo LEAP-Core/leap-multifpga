@@ -21,7 +21,7 @@ class FPGAMap(object):
         result = []
         for boundary in keys:
             if(self.mapping[boundary] == platform):
-              result.append(boundary)
+                result.append(boundary)
         return result
 
     # build a graph. This will make life easier

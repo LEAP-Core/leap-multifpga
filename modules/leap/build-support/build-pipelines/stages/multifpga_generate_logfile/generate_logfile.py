@@ -181,7 +181,8 @@ class MultiFPGAGenerateLogfile():
           if((not platform.platformType in platformBindings) or (platformBindings[platform.platformType] == platformName)):
               platformBindings[platform.platformType] = platformName
               execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
-              print "Platform binging for " + platform.platformType + " is " + platformName
+              if(self.pipeline_debug):
+                  print "Platform binding for " + platform.platformType + " is " + platformName
 
           execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
           execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)

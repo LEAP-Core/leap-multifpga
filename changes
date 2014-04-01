@@ -5264,3 +5264,21 @@ under the control of the pipeline debug flag.
 
 Most code has been set to 4 space indentation. 
 
+
+----------
+keflemin    Date: Tue Apr  1 16:13:37 EDT 2014  CSN: CSN-multifpga-234
+                  Tue Apr  1 20:13:37 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ umfType.py                Locally Modified          233 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ generate_logfile.py       Locally Modified          233 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ fpgamap.py                Locally Modified          233 
+
+
+
+More code cleanup/print removal.  No spurious prints remain.

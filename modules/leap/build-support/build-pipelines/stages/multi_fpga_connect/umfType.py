@@ -16,7 +16,6 @@ class UMFType():
             exit(1)
 
     def headerTypeBSV(self):
-        print "TYPEBSV: " + str(self.channelIDBits) + '\n'
         return "GENERIC_UMF_PACKET_HEADER#(\n" + \
                "             " + str(self.channelIDBits) + ", " + str(self.serviceIDBits) + ",//Log links\n" + \
                "             " + str(self.methodIDBits)  + ", " + str(self.msgLengthBits) + ",//Log chunks\n" + \
@@ -30,7 +29,6 @@ class UMFType():
 
 
     def typeCPP(self):
-        print "TYPECPP: " + str(self.channelIDBits) + '\n'
         return "UMF_MESSAGE_TEMPLATE_CLASS<" + str(self.channelIDBits) + "," + \
                str(self.serviceIDBits) + "," + str(self.methodIDBits) + "," + \
                str(self.msgLengthBits) + ">"
@@ -61,7 +59,7 @@ def generateRouterTypes(viaWidth, viaLinks, maxWidth, moduleList):
 
     ENABLE_AGRESSIVE_UMF_PARAMETERS = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_AGRESSIVE_UMF_PARAMETERS')
     USE_DEFAULT_UMF_PARAMETERS = moduleList.getAWBParam('multi_fpga_connect', 'USE_DEFAULT_UMF_PARAMETERS')
-
+    pipeline_debug = getBuildPipelineDebug(moduleList)
 
     #Should we do whatever umf tells us?
     if(USE_DEFAULT_UMF_PARAMETERS):      
@@ -104,7 +102,9 @@ def generateRouterTypes(viaWidth, viaLinks, maxWidth, moduleList):
         fillerWidthNext = viaWidth - links - chunks - methodDummy
 
     fillerWidth = fillerWidthNext
-    print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " calc" + str(1.0+math.ceil(float(max([0.0, maxWidth - fillerWidth]))/viaWidth)) +") max link " + str(maxWidth) + " via links " + str(viaLinks) + " method dummy " + str(methodDummy)
+
+    if(pipeline_debug):
+        print "Generating " + str(links) + " links " + str(chunks) + " chunks " + str(fillerWidth) + " filler from width " + str(viaWidth) + " calc" + str(1.0+math.ceil(float(max([0.0, maxWidth - fillerWidth]))/viaWidth)) +") max link " + str(maxWidth) + " via links " + str(viaLinks) + " method dummy " + str(methodDummy)
   
     return UMFType(0, links, methodDummy, chunks, 0, fillerWidth, viaWidth)
 
