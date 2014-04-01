@@ -5219,3 +5219,19 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_l
 
 Continued refactoring and splitting up multiFPGAConnect. File size is
 now less than 1000 lines.
+
+----------
+keflemin    Date: Tue Apr  1 11:55:21 EDT 2014  CSN: CSN-multifpga-232
+                  Tue Apr  1 15:55:21 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ umfType.py                Locally Modified          231 
+ multiFPGAConnect.py       Locally Modified          231 
+ multi-fpga-connect.awb    Locally Modified          231 
+ analyzeNetwork.py         Locally Added               0 
+
+
+Continued refactroring of LIM compiler.  Router analysis routines have
+now been split into seperate files.  Main compilation file now less
+than 500 lines.
