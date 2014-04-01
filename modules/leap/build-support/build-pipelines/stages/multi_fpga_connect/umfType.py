@@ -1,6 +1,8 @@
 import sys
 import math
 
+from model import  *
+
 class UMFType():
   #GENERIC_UMF_PACKET_HEADER#(`UMF_CHANNEL_ID_BITS,`UMF_SERVICE_ID_BITS,`UMF_METHOD_ID_BITS,`UMF_MSG_LENGTH_BITS,`UMF_PHY_CHANNEL_RESERVED_BITS,UMF_PACKET_HEADER_FILLER_BITS)
     def __init__(self, channelIDBits, serviceIDBits, methodIDBits, msgLengthBits, phyChannelReservedBits, fillerBits, totalBits):

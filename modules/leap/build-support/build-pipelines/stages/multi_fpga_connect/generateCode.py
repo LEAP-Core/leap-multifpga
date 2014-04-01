@@ -171,6 +171,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
                          'logicalType: "' + dangling.raw_type + '", computePlatform: "' + platform + '", ' + \
                          'incoming: tpl_2(pack_chain_' + dangling.name + '), ' + \
                          'outgoing: unpack_chain_' + dangling.name + ', ' + \
+                         'bitWidth: ' + str(dangling.bitwidth) + ', ' + \
                          'moduleNameIncoming: "router", moduleNameOutgoing: "router"' + \
                          '};\n'
                   

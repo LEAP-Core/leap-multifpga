@@ -5282,3 +5282,17 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
 
 
 More code cleanup/print removal.  No spurious prints remain.
+
+----------
+keflemin    Date: Tue Apr  1 17:20:37 EDT 2014  CSN: CSN-multifpga-235
+                  Tue Apr  1 21:20:37 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ umfType.py                Locally Modified          234 
+ multiFPGAConnect.py       Locally Modified          234 
+ generateCode.py           Locally Modified          234 
+
+
+
+Fixed some compile time warnings in LIM code gen. 

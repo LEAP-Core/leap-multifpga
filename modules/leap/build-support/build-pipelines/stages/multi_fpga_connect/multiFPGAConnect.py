@@ -37,7 +37,7 @@ class MultiFPGAConnect():
             if not os.path.exists(config_dir): os.makedirs(config_dir)
             return config_dir + name
 
-        self.pipeline_debug = getBuildPipelineDebug(moduleList)
+        self.pipeline_debug = getBuildPipelineDebug(moduleList) 
 
         self.unique = 0;
         self.moduleList = moduleList
