@@ -148,7 +148,7 @@ File=modules/hasim/timing-models/memory/base-types/memory-base-types.awb
 Packagehint=hasim-models
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [ML605 Dual FPGA Environment (SMA)]

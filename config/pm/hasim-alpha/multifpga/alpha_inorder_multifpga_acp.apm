@@ -166,7 +166,7 @@ MAX_NUM_CONTEXTS=64
 MAX_NUM_CPUS=64
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [Standard Topology Manager]

@@ -108,7 +108,7 @@ Packagehint=multifpga
 fpga_environment_parser=FPGA Environment Datatype
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [Little-Endian Unified Message Format]

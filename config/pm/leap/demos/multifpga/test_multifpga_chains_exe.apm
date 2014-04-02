@@ -70,7 +70,7 @@ GENERATE_ROUTER_STATS=1
 SOFT_CONN_CWIDTH=300
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [Single Repeater Mapping]

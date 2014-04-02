@@ -87,7 +87,7 @@ mem_perf_tester=Scratchpad Memory Performance Test System
 mem_perf_common=Mem perf common types
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [Mem perf common types]

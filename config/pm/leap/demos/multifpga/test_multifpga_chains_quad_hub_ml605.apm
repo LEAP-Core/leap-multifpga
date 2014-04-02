@@ -103,7 +103,7 @@ Packagehint=multifpga
 GENERATE_ROUTER_STATS=1
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [Test Sim Mapping]

@@ -65,7 +65,7 @@ File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgae
 Packagehint=multifpga
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [Simulation HW/SW Environment]

@@ -152,7 +152,7 @@ File=modules/multifpga/alpha_inorder/sim_mapping.awb
 Packagehint=multifpga
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [Simulation Dual Aurora FPGA Environment]

@@ -84,7 +84,7 @@ File=modules/multifpga/throughputTest/connected_application/connected-applicatio
 Packagehint=multifpga
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [ML605 Dual FPGA Environment (SMA)]

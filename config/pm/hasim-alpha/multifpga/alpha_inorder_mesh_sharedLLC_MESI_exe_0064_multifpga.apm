@@ -68,7 +68,7 @@ multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation/Params]
