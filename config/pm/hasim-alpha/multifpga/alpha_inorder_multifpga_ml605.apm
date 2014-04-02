@@ -36,16 +36,18 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
+umf=Little-Endian Unified Message Format
+li_module=LEAP LI Module Handler
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -56,7 +58,7 @@ File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfil
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
@@ -117,7 +119,6 @@ Packagehint=hasim-models
 File=config/pm/hasim/submodels/common/hasim-model-services.apm
 Packagehint=hasim
 
-
 [HAsim Performance Model/Requires]
 hasim_common=HAsim Common Default Configuration
 hasim_timep=Single Chip Timing Partition
@@ -147,7 +148,7 @@ File=modules/hasim/timing-models/memory/base-types/memory-base-types.awb
 Packagehint=hasim-models
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
 Packagehint=multifpga
 
 [ML605 Dual FPGA Environment (SMA)]
@@ -168,3 +169,11 @@ Packagehint=hasim-models
 [Null Private caches]
 File=config/pm/hasim-models/private-caches/null-private-caches.apm
 Packagehint=hasim-models
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

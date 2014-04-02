@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=MultiFPGA Simulation FPGA0 Environment
-File=multifpgaenv-hybrid-exe-fpga0
+File=multifpgaenv-hwsw-exe-fpga0
 Version=2.2
 Type=Leap
 Name=MultiFPGA Simulation FPGA0 Environment
@@ -24,7 +24,7 @@ Packagehint=leap
 virtual_platform=Standard Virtual Platform
 fpga_components=Software FPGA Components
 librl_bsv=RL Bluespec Library Submodel
-build_pipeline=MultiFPGA BlueSim Platform Build Pipeline
+build_pipeline=MultiFPGA BlueSim Platform Build Pipeline (Legacy)
 soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
@@ -33,7 +33,7 @@ Packagehint=leap
 
 [Standard Virtual Platform/Requires]
 virtual_devices=Standard Virtual Devices Submodel
-low_level_platform_interface=Low Level Platform LI
+low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
 platform_services=MultiFPGA Master Platform Services
 
@@ -126,19 +126,7 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
 
-[MultiFPGA BlueSim Platform Build Pipeline/Requires]
-software_tool=Software build tool
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-bluesim_tool=BSV Bluesim Build Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpgamap_parser=FPGAMap
-fpga_environment_parser=FPGA Environment Datatype
-li_module=LEAP LI Module Handler
 
-[MultiFPGA BlueSim Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
-Packagehint=multifpga
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
@@ -157,11 +145,11 @@ File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_bou
 Packagehint=leap
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [Simlutation Communication Device with raw UNIX Communication]
@@ -179,14 +167,30 @@ Packagehint=multifpga
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
 
-[Low Level Platform LI/Requires]
+
+
+[Low Level Platform Interface Hybrid]
+File=modules/leap/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
+Packagehint=leap
+
+[Low Level Platform Interface Hybrid/Requires]
 physical_platform=FPGA0 Simulation Physical Platform
-rrr=RRR Clients and Servers
 remote_memory=Null Remote Memory
 channelio=Basic Virtual Channel Multiplexer
+rrr=RRR Clients and Servers
 physical_platform_debugger=Null Physical Platform Debugger
 local_mem=Local Memory Interface using BRAM
 
-[Low Level Platform LI]
-File=modules/leap/virtual-platform/low-level-platform-interface/hybrid-llpi.awb
+[MultiFPGA BlueSim Platform Build Pipeline (Legacy)]
+File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
 Packagehint=multifpga
+
+[MultiFPGA BlueSim Platform Build Pipeline (Legacy)/Requires]
+li_module=LEAP LI Module Handler
+iface_tool=Interface builder
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Software build tool
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+bluesim_tool=BSV Bluesim Build Tool

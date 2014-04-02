@@ -26,52 +26,23 @@ fpgaenv=Hybrid Simulation FPGA Environment
 application_env=Soft Services Hybrid Application Environment
 
 [Soft Services Hybrid Application Environment/Requires]
-platform_services=Platform Services
 connected_application=Inter FPGA Communications Test
-soft_services=Soft Services Submodel
 
 [Soft Services Hybrid Application Environment]
 File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
 Packagehint=leap
 
-[Common Services/Requires]
-stats_service=Stats Service
-assertions_service=Assertions Service
-debug_scan_service=Debug Scan Services
-streams_service=Streams Service
-dynamic_parameters_service=Dynamic Parameter Service
 
-[Streams Service]
-File=modules/leap/libraries/platform-services/common-services/streams-service/streams-service.awb
-Packagehint=leap
 
-[Stats Service]
-File=modules/leap/libraries/platform-services/common-services/stats-service/stats-service.awb
-Packagehint=leap
 
-[Common Services]
-File=modules/leap/libraries/platform-services/common-services/common-services-standard.awb
-Packagehint=leap
 
-[Assertions Service]
-File=modules/leap/libraries/platform-services/common-services/assertions-service/assertions-service.awb
-Packagehint=leap
 
-[Debug Scan Services]
-File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service.awb
-Packagehint=leap
 
-[Dynamic Parameter Service]
-File=modules/leap/libraries/platform-services/common-services/dynamic-parameters-service/dynamic-parameters-service.awb
-Packagehint=leap
 
 [Default Hybrid Project Common Utilities]
 File=config/pm/leap/submodels/common/project-common-default.apm
 Packagehint=leap
 
-[Soft Services Submodel]
-File=config/pm/leap/submodels/common/soft-services.apm
-Packagehint=leap
 
 [Inter FPGA Communications Test]
 File=modules/multifpga/inter-fpga-test/inter-fpga-test.awb
@@ -81,41 +52,11 @@ Packagehint=multifpga
 File=config/pm/leap/submodels/fpgaenv/fpgaenv-hybrid-exe.apm
 Packagehint=leap
 
-[Null Shared Memory Services]
-File=modules/leap/libraries/platform-services/mem-services/shared-memory-service/shared-memory-service-null.awb
-Packagehint=leap
 
-[Null Scratchpad Memory Service]
-File=modules/leap/libraries/platform-services/mem-services/scratchpad-memory-service/scratchpad-memory-service-null.awb
-Packagehint=leap
 
-[Null Standard Mem Services]
-File=modules/leap/libraries/platform-services/mem-services/mem-services-standard-null.awb
-Packagehint=leap
 
-[Platform Services]
-File=modules/leap/libraries/platform-services/platform-services-standard.awb
-Packagehint=leap
 
-[Null Standard Mem Services/Requires]
-shared_memory_service=Null Shared Memory Services
-scratchpad_memory_service=Null Scratchpad Memory Service
-central_cache_service=Null Central Cache Service
 
-[Front Panel Service]
-File=modules/leap/libraries/platform-services/front-panel-service/front-panel-service.awb
-Packagehint=leap
 
-[Null Central Cache Service]
-File=modules/leap/libraries/platform-services/mem-services/central-cache-service/central-cache-service-null.awb
-Packagehint=leap
 
-[Starter Service]
-File=modules/leap/libraries/platform-services/starter-service/starter-service.awb
-Packagehint=leap
 
-[Platform Services/Requires]
-common_services=Common Services
-mem_services=Null Standard Mem Services
-front_panel_service=Front Panel Service
-starter_service=Starter Service

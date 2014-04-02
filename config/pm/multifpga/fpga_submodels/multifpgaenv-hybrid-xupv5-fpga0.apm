@@ -20,7 +20,7 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for Virtex 5
 librl_bsv=RL Bluespec Library Submodel
-build_pipeline=FPGA Platform Build Pipeline
+build_pipeline=FPGA Platform Build Pipeline (Legacy)
 soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
@@ -148,23 +148,7 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-[FPGA Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
-Packagehint=multifpga
 
-[FPGA Platform Build Pipeline/Requires]
-fpga_program_tool=FPGA Programming Tool
-post_synthesis_tool=Xilinx Post-synthesis Toolchain
-software_tool=Software build tool
-mcd_tool=MCD Tool for Xilinx
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-synthesis_tool=Synplify/XST Synthesis Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpgamap_parser=FPGAMap
-fpga_environment_parser=FPGA Environment Datatype
-li_module=LEAP LI Module Handler
-parameter_substitution=AWB Parameter Substitution Parser
 
 [Software build tool]
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb
@@ -209,11 +193,11 @@ File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_bou
 Packagehint=leap
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [Old-Style Bluespec PCIe Physical Channel]
@@ -238,3 +222,21 @@ Packagehint=leap
 
 [Synplify/XST Synthesis Tool/Requires]
 synthesis_library=Synthesis library
+
+[FPGA Platform Build Pipeline (Legacy)]
+File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
+Packagehint=multifpga
+
+[FPGA Platform Build Pipeline (Legacy)/Requires]
+fpga_program_tool=FPGA Programming Tool
+li_module=LEAP LI Module Handler
+mcd_tool=MCD Tool for Xilinx
+iface_tool=Interface builder
+parameter_substitution=AWB Parameter Substitution Parser
+synthesis_tool=Synplify/XST Synthesis Tool
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Software build tool
+post_synthesis_tool=Xilinx Post-synthesis Toolchain
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool

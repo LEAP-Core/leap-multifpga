@@ -40,23 +40,25 @@ File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfil
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype
 
 [MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
+umf=Little-Endian Unified Message Format
+li_module=LEAP LI Module Handler
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -67,11 +69,11 @@ GENERATE_ROUTER_DEBUG=1
 GENERATE_ROUTER_STATS=1
 
 [MultiFPGA Throughput Test (D)]
-File=modules/multifpga/throughputTest/test_d_throughput.awb
+File=modules/multifpga/throughputTest/basestation.awb
 Packagehint=multifpga
 
 [MultiFPGA Throughput Test (C)]
-File=modules/multifpga/throughputTest/test_c_throughput.awb
+File=modules/multifpga/throughputTest/repeater-1.awb
 Packagehint=multifpga
 
 [MultiFPGA Throughput Test Connected Application/Requires]
@@ -82,7 +84,7 @@ File=modules/multifpga/throughputTest/connected_application/connected-applicatio
 Packagehint=multifpga
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
 Packagehint=multifpga
 
 [ML605 Dual Hub FPGA Environment (SMA)]
@@ -105,3 +107,11 @@ Packagehint=multifpga
 basestation=MultiFPGA Throughput Test (D)
 throughput_repeater=MultiFPGA Throughput Repeater
 repeater1=MultiFPGA Throughput Test (C)
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

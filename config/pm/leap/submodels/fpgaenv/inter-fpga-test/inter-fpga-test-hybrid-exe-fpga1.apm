@@ -35,7 +35,7 @@ Packagehint=leap
 virtual_devices=Standard Virtual Devices Submodel
 low_level_platform_interface=Low Level Platform Interface Hybrid
 umf=Little-Endian Unified Message Format
-platform_services=Standard Platform Services
+platform_services=Standard Platform Services Submodel
 
 [RRR Clients and Servers]
 File=modules/leap/virtual-platform/rrr/basic/basic-rrr.awb
@@ -116,9 +116,6 @@ Packagehint=leap
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
-[UNIX Communication Physical Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
-Packagehint=multifpga
 
 [FPGA0 Simulation Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0/sim-physical-platform-fpga0.awb
@@ -126,7 +123,6 @@ Packagehint=multifpga
 
 [FPGA0 Simulation Physical Platform/Requires]
 clocks_device=Simulation Clocks Device
-unix_comm_device=UNIX Communication Physical Device
 physical_platform_utils=Common Physical Platform Utilities
 unix_pipe_device=UNIX Pipe Physical Device
 
@@ -134,14 +130,12 @@ unix_pipe_device=UNIX Pipe Physical Device
 File=config/pm/leap/submodels/pipelines/build-pipeline-bluesim.apm
 Packagehint=leap
 
-[FPGA0 Simulation Physical Platform/Params]
-SIM_WRITE_PORT="/tmp/FPGA1ToFPGA0"
-SIM_READ_PORT="/tmp/FPGA0ToFPGA1"
 
 [Soft Services Submodel]
 File=config/pm/leap/submodels/common/soft-services.apm
 Packagehint=leap
 
-[Standard Platform Services]
+
+[Standard Platform Services Submodel]
 File=config/pm/leap/submodels/platform-services/standard-platform-services.apm
 Packagehint=leap

@@ -36,17 +36,18 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
 umf=Little-Endian Unified Message Format
+li_module=LEAP LI Module Handler
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
@@ -57,7 +58,7 @@ File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfil
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
@@ -90,14 +91,12 @@ mem_perf_tester=Scratchpad Memory Performance Test System
 mem_perf_common=Mem perf common types
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
 Packagehint=multifpga
-
 
 [Mem perf common types]
 File=modules/apps/tests/mem_perf/mem-perf-common.awb
 Packagehint=leap-debug
-
 
 [Mem Perf Alternate Mapping]
 File=modules/multifpga/mem_perf/mem_perf_mapping_alt.awb
@@ -106,3 +105,7 @@ Packagehint=multifpga
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=leap-platforms
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

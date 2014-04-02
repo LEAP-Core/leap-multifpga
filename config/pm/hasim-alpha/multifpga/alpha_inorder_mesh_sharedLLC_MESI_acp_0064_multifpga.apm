@@ -20,6 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
 umf=Little-Endian Unified Message Format
+li_module=LEAP LI Module Handler
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -41,7 +42,7 @@ File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-bu
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
@@ -54,11 +55,11 @@ fpga_mapping=Alpha Inorder Mapping Timing/Functional partition with Cache
 SYNTH_BOUNDARY=mkModel
 
 [MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [multiFPGA Build Pipeline/Requires]
@@ -66,13 +67,12 @@ multi_fpga_generate_bitfile=multiFPGA Generate bitfle
 multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
-
 [ACP Dual FPGA Env with Dual SRAM]
 File=modules/leap-platforms/fpga-environments/acp/acp_fpga_env_dual_sram.awb
 Packagehint=multifpga
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
 Packagehint=multifpga
 
 [Little-Endian Unified Message Format]
@@ -86,3 +86,7 @@ Packagehint=multifpga
 [Inorder Alpha Mesh with shared LLC and MESI Coherence (0064 cores)]
 File=config/pm/hasim-alpha/alpha-inorder/cache-models/submodels/app_alpha_inorder_mesh_sharedLLC_MESI_0064.apm
 Packagehint=hasim-alpha
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

@@ -20,7 +20,7 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for Virtex 6 (Generic)
 librl_bsv=RL Bluespec Library Submodel
-build_pipeline=FPGA Platform Build Pipeline
+build_pipeline=FPGA Platform Build Pipeline (Legacy)
 soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
@@ -123,26 +123,8 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-[FPGA Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
-Packagehint=multifpga
 
-[FPGA Platform Build Pipeline/Requires]
-fpga_program_tool=FPGA Programming Tool
-post_synthesis_tool=Xilinx Post-synthesis Toolchain
-software_tool=Null software build tool
-mcd_tool=MCD Tool for Xilinx
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-synthesis_tool=XST Synthesis Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpgamap_parser=FPGAMap
-fpga_environment_parser=FPGA Environment Datatype
-li_module=LEAP LI Module Handler
-parameter_substitution=AWB Parameter Substitution Parser
 
-[Null Channel IO Module/Requires]
-physical_channel=BlueNoC PCIe Tunnel
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -173,11 +155,11 @@ File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_bou
 Packagehint=leap
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [ML605 DDR3 SDRAM]
@@ -268,7 +250,7 @@ model=FPGA Environment
 virtual_platform=Standard Virtual Platform
 fpga_components=Hardware FPGA Components for Virtex 6 (Generic)
 librl_bsv=RL Bluespec Library Submodel
-build_pipeline=FPGA Platform Build Pipeline
+build_pipeline=FPGA Platform Build Pipeline (Legacy)
 soft_services=Soft Services for MultiFPGA Submodel
 
 [Standard Virtual Platform]
@@ -372,25 +354,10 @@ File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
 [FPGA Platform Build Pipeline]
-File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
-Packagehint=multifpga
 
 [FPGA Platform Build Pipeline/Requires]
-fpga_program_tool=FPGA Programming Tool
-post_synthesis_tool=Xilinx Post-synthesis Toolchain
-software_tool=Null software build tool
-mcd_tool=MCD Tool for Xilinx
-iface_tool=Interface builder
-wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
-synthesis_tool=XST Synthesis Tool
-bsv_tool=BSV Build Tool (First Phase)
-fpgamap_parser=FPGAMap
-fpga_environment_parser=FPGA Environment Datatype
-li_module=LEAP LI Module Handler
-parameter_substitution=AWB Parameter Substitution Parser
 
 [Null Channel IO Module/Requires]
-physical_channel=BlueNoC PCIe Tunnel
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -424,11 +391,11 @@ File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_bou
 Packagehint=leap
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [ML605 DDR3 SDRAM]
@@ -502,9 +469,6 @@ Packagehint=leap
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/aurora-device.awb
 Packagehint=leap-platforms
 
-[BlueNoC PCIe Tunnel]
-File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
-Packagehint=leap
 
 [Aurora Device Wrapper ML605/Requires]
 aurora_flowcontrol=Aurora Device Flowcontrol
@@ -544,3 +508,21 @@ aurora_flowcontrol_debugger=Aurora Device Flowcontrol Debugger
 [Aurora Device Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/debugger/aurora-debugger.awb
 Packagehint=leap-platforms
+
+[FPGA Platform Build Pipeline (Legacy)]
+File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
+Packagehint=multifpga
+
+[FPGA Platform Build Pipeline (Legacy)/Requires]
+fpga_program_tool=FPGA Programming Tool
+li_module=LEAP LI Module Handler
+mcd_tool=MCD Tool for Xilinx
+iface_tool=Interface builder
+parameter_substitution=AWB Parameter Substitution Parser
+synthesis_tool=XST Synthesis Tool
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Null software build tool
+post_synthesis_tool=Xilinx Post-synthesis Toolchain
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool

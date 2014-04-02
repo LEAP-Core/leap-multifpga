@@ -116,9 +116,6 @@ Packagehint=leap
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
-[UNIX Communication Physical Device]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
-Packagehint=multifpga
 
 [FPGA0 Simulation Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0/sim-physical-platform-fpga0.awb
@@ -126,7 +123,6 @@ Packagehint=multifpga
 
 [FPGA0 Simulation Physical Platform/Requires]
 clocks_device=Simulation Clocks Device
-unix_comm_device=UNIX Communication Physical Device
 physical_platform_utils=Common Physical Platform Utilities
 unix_pipe_device=UNIX Pipe Physical Device
 
@@ -137,7 +133,6 @@ Packagehint=leap
 [Soft Services Submodel]
 File=config/pm/leap/submodels/common/soft-services.apm
 Packagehint=leap
-
 
 [Standard Platform Services Submodel]
 File=config/pm/leap/submodels/platform-services/standard-platform-services.apm

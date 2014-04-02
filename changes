@@ -5428,3 +5428,163 @@ Directory modules/leap/build-support/build-pipelines/stages
 
 
 More file renaming.
+
+----------
+keflemin    Date: Wed Apr  2 12:58:00 EDT 2014  CSN: CSN-multifpga-239
+                  Wed Apr  2 16:58:00 UTC 2014
+
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_exe.apm Locally Modified          238 
+ mem_perf_multifpga_single_mem_acp.apm Locally Modified          238 
+ mem_perf_multifpga_acp.apm Locally Modified          238 
+ mem_perf_multifpga_alt_acp.apm Locally Modified          238 
+ mem_perf_multifpga_ml605.apm Locally Modified          238 
+ mem_perf_multifpga_vc707.apm Locally Modified          238 
+
+Directory config/pm/leap/demos/hello
+ hello_hybrid_dual_exe.apm Locally Modified          238 
+ hello_hybrid_dual_acp.apm Locally Modified          238 
+ hello_hybrid_dual_vc707.apm Locally Modified          238 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_ml605.apm Locally Modified          238 
+ test_multifpga_throughput_vexe.apm Locally Modified          238 
+ test_multifpga_perf_xupv5.apm Locally Modified          238 
+ test_multifpga_loop.apm   Locally Modified          238 
+ test_multifpga_chains_dual_hub_exe.apm Locally Modified          238 
+ test_multifpga_throughput_exe.apm Locally Modified          238 
+ test_multifpga_chains_xupv5.apm Locally Modified          238 
+ test_multifpga_compress_acp.apm Locally Modified          238 
+ traffic_light_acp_synth_multifpga.apm Locally Modified          238 
+ test_multifpga_perf_ml605.apm Locally Modified          238 
+ test_multifpga_alternative_exe.apm Locally Modified          238 
+ test_multifpga_perf_acp_single.apm Locally Modified          238 
+ test_multifpga.apm        Locally Modified          238 
+
+Directory config/pm/leap/demos/multifpga/li
+ li_test_dual_sim_vc707_hub.apm Locally Modified          238 
+ li_test_dual_sim_vc707.apm Locally Modified          238 
+ hasim_test_sim.apm        Locally Modified          238 
+ li_test_sim.apm           Locally Modified          238 
+ hasim_test_dual_sim_hub.apm Locally Modified          238 
+ rrr_test_li_vc707.apm     Locally Modified          238 
+ li_test_dual_sim_hub.apm  Locally Modified          238 
+ li_test_dual_sim.apm      Locally Modified          238 
+ test_multifpga_throughput_dual_sim_vc707_hub.apm Locally Modified          238 
+ traffic_light_acp_synth_multifpga.apm Locally Modified          238 
+ hasim_test_vc707.apm      Locally Modified          238 
+ rrr_test_li.apm           Locally Modified          238 
+ li_test_vc707.apm         Locally Modified          238 
+ test_multifpga_throughput_hwsw_exe.apm Locally Modified          238 
+ traffic_light_li.apm      Locally Modified          238 
+ test_multifpga_throughput_dual_sim_hub.apm Locally Modified          238 
+ li_test_dual_vc707.apm    Locally Modified          238 
+ hasim_test_dual_sim_vc707_hub.apm Locally Modified          238 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_exe.apm    Locally Modified          238 
+ test_multifpga_scratch.apm Locally Modified          238 
+ test_multifpga_chains_ml605.apm Locally Modified          238 
+ test_multifpga_spiral_exe.apm Locally Modified          238 
+ test_multifpga_throughput_acp.apm Locally Modified          238 
+ test_multifpga_loop_acp.apm Locally Modified          238 
+ test_multifpga_throughput_dual_hub_ml605.apm Locally Modified          238 
+ test_multifpga_throughput_vc707.apm Locally Modified          238 
+ test_multifpga_chains_quad_hub_ml605.apm Locally Modified          238 
+ test_multifpga_rrr_exe.apm Locally Modified          238 
+ test_multifpga_chains_exe.apm Locally Modified          238 
+ test_multifpga_throughput_tri_hub_ml605.apm Locally Modified          238 
+ test_multifpga_scratch_acp.apm Locally Modified          238 
+ test_multifpga_chains_xupv5_sma.apm Locally Modified          238 
+ test_multifpga_chains_quad_hub_exe.apm Locally Modified          238 
+ test_multifpga_perf_acp.apm Locally Modified          238 
+ test_multifpga_throughput_xupv5.apm Locally Modified          238 
+ test_multifpga_throughput_aurora_exe.apm Locally Modified          238 
+ test_multifpga_chains_xupv5_sata.apm Locally Modified          238 
+ test_multifpga_rrr_acp.apm Locally Modified          238 
+ test_multifpga_chains_acp.apm Locally Modified          238 
+ test_multifpga_chains_dual_hub_ml605.apm Locally Modified          238 
+ test_multifpga_compress.apm Locally Modified          238 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN.apm Locally Modified          238 
+ multifpgaenv-hybrid-exe-airblue-fpga0.apm Locally Modified          238 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hwsw-exe-fpga0-aurora.apm Locally Modified          238 
+ multifpgaenv-hwsw-exe-fpga0.apm Locally Modified          238 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpga1.apm Locally Modified          238 
+ multifpgaenv-hybrid-vexe-fpgaN.apm Locally Modified          238 
+ multifpgaenv-hybrid-vexe-fpga0.apm Locally Modified          238 
+ multifpgaenv-hybrid-exe-fpga0-aurora.apm Locally Modified          238 
+ multifpgaenv-hybrid-exe-fpga0-quad.apm Locally Modified          238 
+ multifpgaenv-hybrid-exe-fpga0.apm Locally Modified          238 
+ multifpgaenv-hybrid-exe-fpga1.apm Locally Modified          238 
+ multifpgaenv-hybrid-exe-fpga0-dist-cache.apm Locally Modified          238 
+
+Directory config/pm/leap/submodels/fpgaenv/inter-fpga-test
+ inter-fpga-test-hybrid-exe-fpga1.apm Locally Modified          238 
+ inter-fpga-test-hybrid-exe-fpga0.apm Locally Modified          238 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga1-dist-cache.apm Locally Modified          238 
+ multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm Locally Modified          238 
+
+Directory config/pm/airblue/library_tests
+ softphy_SOVA_acp.apm      Locally Modified          238 
+
+Directory config/pm/h264
+ softphy_SOVA_acp.apm      Locally Modified          238 
+ h264_multifpga_decoder_split_synth.apm Locally Modified          238 
+ h264_multifpga_decoder_split_synth_exe.apm Locally Modified          238 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_mesh_sharedLLC_MESI_exe_0064_multifpga.apm Locally Modified          238 
+ alpha_inorder_multifpga_vc707.apm Locally Modified          238 
+ alpha_inorder_multifpga_time_func_exe.apm Locally Modified          238 
+ alpha_inorder_multifpga_time_func_acp_sram.apm Locally Modified          238 
+ alpha_inorder_multifpga_time_func_xupv5.apm Locally Modified          238 
+ alpha_inorder_multifpga_time_func_dist_cache_exe.apm Locally Modified          238 
+ alpha_inorder_multifpga_exe.apm Locally Modified          238 
+ alpha_inorder_multifpga_time_func_16_acp_sram.apm Locally Modified          238 
+ alpha_inorder_mesh_sharedLLC_MESI_acp_0064_multifpga.apm Locally Modified          238 
+ alpha_inorder_mesh_sharedLLC_MESI_vc707_0064_multifpga.apm Locally Modified          238 
+ alpha_inorder_multifpga_aurora_exe.apm Locally Modified          238 
+ alpha_inorder_multifpga_time_func_acp.apm Locally Modified          238 
+ alpha_inorder_mesh_sharedLLC_MESI_vc707_0256_multifpga.apm Locally Modified          238 
+ alpha_inorder_multifpga_time_func_acp_sram_2.apm Locally Modified          238 
+ alpha_inorder_multifpga_acp.apm Locally Modified          238 
+ alpha_inorder_multifpga_ml605.apm Locally Modified          238 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-vc707-fpga0.apm Locally Modified          238 
+ multifpgaenv-hybrid-vc707-fpga1.apm Locally Modified          238 
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified          238 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified          238 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified          238 
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          238 
+
+Directory config/pm/multifpga/fpga_submodels/hwsw
+ multifpgaenv-hwsw-vc707-fpga0.apm Locally Modified          238 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          238 
+ multifpgaenv-hybrid-xupv5-fpga0-sata.apm Locally Modified          238 
+
+Directory config/pm/multifpga/inter_fpga_test/simulation
+ inter_test_0_simulation.apm Locally Modified          238 
+ inter_test_1_simulation.apm Locally Modified          238 
+
+Directory config/pm/multifpga/inter_fpga_test/xupv5
+ inter_test_0_xupv5.apm    Locally Modified          238 
+ inter_test_1_xupv5.apm    Locally Modified          238 
+ inter_test_0_xupv5_sma_3.125gbps.apm Locally Modified          238 
+ inter_test_1_xupv5_sma_3.125gbps.apm Locally Modified          238 
+ inter_test_0_xupv5_sata_3gbps.apm Locally Modified          238 
+ inter_test_1_xupv5_sata_3gbps.apm Locally Modified          238 
+
+
+Fixed broken/stale apms. 

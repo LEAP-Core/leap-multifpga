@@ -17,7 +17,6 @@ DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid
 model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
-connected_application=Bluespec RRR Test and Benchmarking Program
 environment_description=Simulation HW/SW Environment
 build_pipeline=multiFPGA Build Pipeline
 fpga_mapping=LI Test Single FPGA Mapping
@@ -36,13 +35,14 @@ multi_fpga_connect=MultiFPGA Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Requires]
 fpgamap_parser=FPGAMap
 type_parser=Bluespec Type parser
 umf=Little-Endian Unified Message Format
+li_module=LEAP LI Module Handler
 
 [multiFPGA Log Generation]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
@@ -53,18 +53,18 @@ File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfil
 Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/multi-fpga-connect.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
 fpga_environment_parser=FPGA Environment Datatype
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/multi_fpga_connect/typeparser.awb
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/typeparser.awb
 Packagehint=multifpga
 
 [Simulation HW/SW Environment]
@@ -73,10 +73,6 @@ Packagehint=multifpga
 
 [MultiFPGA Communication Complex Generator/Params]
 MAX_NUMBER_OF_VIAS=1
-
-[Bluespec RRR Test and Benchmarking Program]
-File=modules/apps/examples/rrrtest/rrrtest.awb
-Packagehint=leap-examples
 
 [multiFPGA Log Generation/Params]
 SOFT_CONN_CWIDTH=512
@@ -88,3 +84,7 @@ Packagehint=leap-examples
 [Little-Endian Unified Message Format]
 File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
 Packagehint=leap-platforms
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap

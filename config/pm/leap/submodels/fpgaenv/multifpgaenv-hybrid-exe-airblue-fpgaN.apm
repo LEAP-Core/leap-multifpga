@@ -113,8 +113,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
 Packagehint=leap
 
-
-
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=multifpga
@@ -127,8 +125,6 @@ Packagehint=multifpga
 clocks_device=Simulation Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
-
-
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -147,11 +143,11 @@ File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_bou
 Packagehint=leap
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/fpgamap_parser.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/fpgaenvironment.awb
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [Simlutation Communication Device with raw UNIX Communication]
