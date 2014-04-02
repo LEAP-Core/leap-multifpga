@@ -1,6 +1,6 @@
 import sys
 import ply.yacc as yacc
-from connection import *
+from physical_via import *
 from environment import *
 from platform import *
 

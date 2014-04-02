@@ -5314,3 +5314,72 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
 
 1) Fixed warnings during ply lex/yacc compilation.  
 2) Cache generated parser/lexer to reduce compile time.
+
+----------
+keflemin    Date: Wed Apr  2 11:33:16 EDT 2014  CSN: CSN-multifpga-237
+                  Wed Apr  2 15:33:16 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_exe.apm Locally Modified          236 
+
+Directory modules/leap/build-support/build-pipelines/stages
+ parsers/                  Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers
+ fpgamap_parser.awb        Locally Removed           236 
+ fpgamap.py                Locally Removed           236 
+ environment/              Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers/environment
+ multitest.py              Locally Added               - 
+ physical_via.py           Locally Added               - 
+ environment_lex.py        Locally Added               - 
+ environment_parse.py      Locally Added               - 
+ environment_parser.py     Locally Added               - 
+ fpgaenvironment.awb       Locally Added               - 
+ environment.py            Locally Added               - 
+ platform.py               Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers
+ fpgamaplex.py             Locally Removed           236 
+ fpgamapparse.py           Locally Removed           236 
+ map/                      Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers/map
+ fpgamap_parser.awb        Locally Added               - 
+ fpgamap.py                Locally Added               - 
+ fpgamaplex.py             Locally Added               - 
+ fpgamapparse.py           Locally Added               - 
+ fpgamap_parser.py         Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers
+ fpgamap_parser.py         Locally Removed           236 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ multiFPGAConnect.py       Locally Modified          236 
+ taggedUnionCompress.py    Locally Modified          236 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ multitest.py              Locally Removed           236 
+ environment_lex.py        Locally Removed           236 
+ environment_parse.py      Locally Removed           236 
+ connection.py             Locally Removed           236 
+ environment_parser.py     Locally Removed           236 
+ fpgaenvironment.awb       Locally Removed           236 
+ environment.py            Locally Removed           236 
+ platform.py               Locally Removed           236 
+
+Directory modules/leap/build-support/build-pipelines/stages
+ wrapper_gen/              Locally Removed           236 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ fpgamap_parser.awb        Locally Removed           236 
+ fpgamap.py                Locally Removed           236 
+ fpgamaplex.py             Locally Removed           236 
+ fpgamapparse.py           Locally Removed           236 
+ fpgamap_parser.py         Locally Removed           236 
+
+
+More code reorganization.  Moved ply parsers and associated AST data
+structures to their own directory.

@@ -1,12 +1,15 @@
+# Python libraries
 import re
 import sys
 import SCons.Script
 import math
 import itertools
+
+# AWB module dependencies
 from type_parser import *
-# we write to bitfile 
-# we read from logfile
-from danglingConnection import *
+from li_module import *
+
+# Local dependencies
 from linkType import *
 from code import *
 

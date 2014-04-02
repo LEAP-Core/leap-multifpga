@@ -1,4 +1,4 @@
-from connection import *
+from physical_via import *
 
 ##
 ##  This class represents a platform, a computational entity capable

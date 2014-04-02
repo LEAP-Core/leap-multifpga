@@ -1,4 +1,4 @@
-from connection import *
+from physical_via import *
 from platform import *
 
 # Import pygraph We'll need it at some point
