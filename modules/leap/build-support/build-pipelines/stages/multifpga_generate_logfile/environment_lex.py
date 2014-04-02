@@ -9,18 +9,15 @@ reserved = {
     'master': 'MASTER',
     'endmaster': 'ENDMASTER',
     'endplatform': 'ENDPLATFORM',
-    'unknown': 'UNKOWN',
     }
 
 tokens = [ 'RARROW', 'LARROW', 'SEMICOLON',
-           'ID', 'NAME', 'STRING', 'PERIOD', 'FSLASH'
+           'NAME', 'STRING'
          ] + list(reserved.values())
 
 
 t_RARROW = r'->'
 t_LARROW = r'<-'
-t_PERIOD = r'\.'
-t_FSLASH = r'/'
 t_SEMICOLON = r';'
 t_PLATFORM = r'platform'
 t_ENDPLATFORM = r'endplatform'

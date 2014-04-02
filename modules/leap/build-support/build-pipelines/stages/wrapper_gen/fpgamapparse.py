@@ -19,3 +19,6 @@ def p_mapping_list(p):
     else:
         p[0] = [[p[1],p[3]]] + p[5]
 
+def p_error(p):
+    print "FPGA MAPPING: Syntax error at token", p.type
+    

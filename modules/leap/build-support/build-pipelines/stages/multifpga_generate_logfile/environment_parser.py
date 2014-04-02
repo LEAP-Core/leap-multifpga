@@ -4,10 +4,21 @@ from environment_lex import *
 from environment_parse import *
 from environment import *
 
+envParserCompiled = False
+envParser = None 
+envLexer = None
+
 def parseFPGAEnvironment (environmentFile):
     # build the compiler
-    lex.lex()
-    yacc.yacc()
+    global envParser
+    global envParserCompiled
+    global envLexer
+
+    if(not envParserCompiled):
+        envLexer = lex.lex()
+        envParser = yacc.yacc()
+        envParserCompiled = True
+
     environmentDescription = (open(environmentFile, 'r')).read()
-    environment = yacc.parse(environmentDescription)
+    environment = envParser.parse(environmentDescription, lexer=envLexer)
     return environment

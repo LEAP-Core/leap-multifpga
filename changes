@@ -5296,3 +5296,21 @@ Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
 
 
 Fixed some compile time warnings in LIM code gen. 
+
+----------
+keflemin    Date: Wed Apr  2 10:10:16 EDT 2014  CSN: CSN-multifpga-236
+                  Wed Apr  2 14:10:16 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ environment_lex.py        Locally Modified          235 
+ environment_parse.py      Locally Modified          235 
+ environment_parser.py     Locally Modified          235 
+
+Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
+ fpgamapparse.py           Locally Modified          235 
+ fpgamap_parser.py         Locally Modified          235 
+
+
+1) Fixed warnings during ply lex/yacc compilation.  
+2) Cache generated parser/lexer to reduce compile time.

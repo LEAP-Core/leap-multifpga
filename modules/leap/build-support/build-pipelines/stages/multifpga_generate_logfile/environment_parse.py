@@ -6,14 +6,9 @@ from platform import *
 
 def p_environment(p):
     """
-    environment :
     environment : platform_list
     """
-   
-    if len(p) == 1:
-        p[0] = FPGAEnvironment([])
-    else:
-        p[0] = FPGAEnvironment(p[1])    
+    p[0] = FPGAEnvironment(p[1])    
 
 def p_platform_list(p):
     """
@@ -44,22 +39,5 @@ def p_connection_list(p):
         else:
             p[0] = [PhysicalVia(PhysicalVia.egress,p[1],eval(p[3]))] + p[5]
 
-def p_path(p):
-    """
-    path : NAME
-    path : NAME PERIOD path
-    """     
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = p[1] + '.' + p[3]
-
-def p_file(p):
-    """
-    file : path
-    file : NAME FSLASH file
-    """     
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
-        p[0] = p[1] + '/' + p[3]
+def p_error(p):
+    print "LIM ENVIRONMENT: Syntax error at token", p.type
