@@ -5383,3 +5383,48 @@ Directory modules/leap/build-support/build-pipelines/stages/wrapper_gen
 
 More code reorganization.  Moved ply parsers and associated AST data
 structures to their own directory.
+
+----------
+keflemin    Date: Wed Apr  2 11:51:05 EDT 2014  CSN: CSN-multifpga-238
+                  Wed Apr  2 15:51:05 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages
+ multi_fpga_connect/       Locally Removed           237 
+
+Directory modules/leap/build-support/build-pipelines/stages/multi_fpga_connect
+ umfType.py                Locally Removed           237 
+ typelex.py                Locally Removed           237 
+ softConnection.py         Locally Removed           237 
+ activity.py               Locally Removed           237 
+ type_parser.py            Locally Removed           237 
+ linkType.py               Locally Removed           237 
+ routerStats.py            Locally Removed           237 
+ compression.py            Locally Removed           237 
+ multiFPGAConnect.py       Locally Removed           237 
+ danglingConnection.py     Locally Removed           237 
+ dumpStructures.tcl        Locally Removed           237 
+ taggedUnion.py            Locally Removed           237 
+ member.py                 Locally Removed           237 
+ typeclass.py              Locally Removed           237 
+ viaAssignment.py          Locally Removed           237 
+ code.py                   Locally Removed           237 
+ parse_type.py             Locally Removed           237 
+ typeparse.py              Locally Removed           237 
+ multi-fpga-connect.awb    Locally Removed           237 
+ analyzeNetwork.py         Locally Removed           237 
+ typeparser.awb            Locally Removed           237 
+ via.py                    Locally Removed           237 
+ taggedUnionCompress.py    Locally Removed           237 
+ type.py                   Locally Removed           237 
+ viaType.py                Locally Removed           237 
+ generateMultiplexors.py   Locally Removed           237 
+ struct.py                 Locally Removed           237 
+ generateCode.py           Locally Removed           237 
+ linkAssignment.py         Locally Removed           237 
+
+Directory modules/leap/build-support/build-pipelines/stages
+ multifpga_connect/        Locally Added               - 
+
+
+More file renaming.
