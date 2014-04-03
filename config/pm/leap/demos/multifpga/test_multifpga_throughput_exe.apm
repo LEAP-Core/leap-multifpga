@@ -137,5 +137,3 @@ Packagehint=multifpga
 File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/type-compression/lim-compression.awb
 Packagehint=multifpga
 
-[Latency-insensitive Module Network Analysis/Params]
-MAX_NUMBER_OF_VIAS=1

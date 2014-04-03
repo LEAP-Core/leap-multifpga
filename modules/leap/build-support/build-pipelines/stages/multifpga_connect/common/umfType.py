@@ -77,7 +77,10 @@ def generateRouterTypes(viaWidth, viaLinks, maxWidth, moduleList):
 
     # At some point, we can reduce the number of header bits based on 
     # what we actually assign.  This would permit us to allocate smalled link
-    links = max([1,int(math.ceil(math.log(viaLinks,2)))])  
+    if(viaLinks > 0):
+        links = max([1,int(math.ceil(math.log(viaLinks,2)))])  
+    else:
+        links = 1
 
     extraChunks = 1
     if(ENABLE_AGRESSIVE_UMF_PARAMETERS):

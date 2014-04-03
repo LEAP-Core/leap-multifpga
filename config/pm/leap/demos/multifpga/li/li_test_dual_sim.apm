@@ -32,18 +32,12 @@ Packagehint=multifpga
 
 [multiFPGA Build Pipeline/Requires]
 multi_fpga_generate_bitfile=multiFPGA Generate bitfle
-multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_connect=Latency-insensitive Module Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [FPGAMap]
 File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
 Packagehint=multifpga
-
-[MultiFPGA Communication Complex Generator/Requires]
-fpgamap_parser=FPGAMap
-type_parser=Bluespec Type parser
-umf=Little-Endian Unified Message Format
-li_module=LEAP LI Module Handler
 
 [multiFPGA Log Generation]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
@@ -51,10 +45,6 @@ Packagehint=multifpga
 
 [multiFPGA Generate bitfle]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
-Packagehint=multifpga
-
-[MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
 Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
@@ -67,12 +57,6 @@ Packagehint=multifpga
 [Bluespec Type parser]
 File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
 Packagehint=multifpga
-
-[MultiFPGA Communication Complex Generator/Params]
-MAX_NUMBER_OF_VIAS=1
-ANALYZE_NETWORK="analyzeNetworkRandom"
-USE_DEFAULT_UMF_PARAMETERS=1
-ENABLE_AGRESSIVE_UMF_PARAMETERS=0
 
 [multiFPGA Log Generation/Params]
 SOFT_CONN_CWIDTH=512
@@ -96,3 +80,33 @@ Packagehint=leap-examples
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
+
+[Latency-insensitive Module Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Type Compression]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/type-compression/lim-compression.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Communication Complex Generator/Requires]
+type_parser=Bluespec Type parser
+fpgamap_parser=FPGAMap
+li_module=LEAP LI Module Handler
+umf=Little-Endian Unified Message Format
+lim_compression=Latency-insensitive Module Type Compression
+lim_common=Latency-insensitive Module Common Files
+lim_generate_code=Latency-insensitive Module Code Generation
+lim_analyze_network=Latency-insensitive Module Network Analysis
+
+[Latency-insensitive Module Common Files]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/common/lim-common.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Code Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/generate-code/generate-code.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Network Analysis]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network/analyze-network.awb
+Packagehint=multifpga

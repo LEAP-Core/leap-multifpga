@@ -16,12 +16,6 @@ RootProvides=model
 DefaultAttributes=hasim inorder alpha acp
 model=HW/SW Hybrid Multifpga Project Foundation
 
-[MultiFPGA Communication Complex Generator/Requires]
-fpgamap_parser=FPGAMap
-type_parser=Bluespec Type parser
-umf=Little-Endian Unified Message Format
-li_module=LEAP LI Module Handler
-
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
 Packagehint=multifpga
@@ -54,17 +48,13 @@ fpga_mapping=Alpha Inorder Mapping Timing/Functional partition with Cache
 [HW/SW Hybrid Multifpga Project Foundation/Params]
 SYNTH_BOUNDARY=mkModel
 
-[MultiFPGA Communication Complex Generator]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
-Packagehint=multifpga
-
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=multifpga
 
 [multiFPGA Build Pipeline/Requires]
 multi_fpga_generate_bitfile=multiFPGA Generate bitfle
-multi_fpga_connect=MultiFPGA Communication Complex Generator
+multi_fpga_connect=Latency-insensitive Module Communication Complex Generator
 multi_fpga_log_generator=multiFPGA Log Generation
 
 [Bluespec Type parser]
@@ -97,3 +87,33 @@ Packagehint=hasim-alpha
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
+
+[Latency-insensitive Module Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Type Compression]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/type-compression/lim-compression.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Communication Complex Generator/Requires]
+type_parser=Bluespec Type parser
+fpgamap_parser=FPGAMap
+li_module=LEAP LI Module Handler
+umf=Little-Endian Unified Message Format
+lim_compression=Latency-insensitive Module Type Compression
+lim_common=Latency-insensitive Module Common Files
+lim_generate_code=Latency-insensitive Module Code Generation
+lim_analyze_network=Latency-insensitive Module Network Analysis
+
+[Latency-insensitive Module Common Files]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/common/lim-common.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Code Generation]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/generate-code/generate-code.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Network Analysis]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network/analyze-network.awb
+Packagehint=multifpga
