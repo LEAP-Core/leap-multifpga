@@ -5694,3 +5694,71 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
 1) Moved bsv type parser to its own directory. 
 
 2) Fixed resulting stale apms. 
+
+----------
+keflemin    Date: Thu Apr  3 14:21:09 EDT 2014  CSN: CSN-multifpga-241
+                  Thu Apr  3 18:21:09 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_exe.apm Locally Modified          240 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ type-compression/         Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/type-compression
+ taggedUnionCompress.py    Locally Added               - 
+ compression.py            Locally Added               - 
+ lim-compression.awb       Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ umfType.py                Locally Removed           240 
+ softConnection.py         Locally Removed           240 
+ routerStats.py            Locally Removed           240 
+ linkType.py               Locally Removed           240 
+ common/                   Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/common
+ viaAssignment.py          Locally Added               - 
+ lim-common.awb            Locally Added               0 
+ umfType.py                Locally Added               - 
+ code.py                   Locally Added               - 
+ linkType.py               Locally Added               - 
+ via.py                    Locally Added               - 
+ viaType.py                Locally Added               - 
+ linkAssignment.py         Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ compression.py            Locally Removed           240 
+ multiFPGAConnect.py       Locally Modified          240 
+ danglingConnection.py     Locally Removed           240 
+ analyze-network/          Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network
+ analyze-network.awb       Locally Added               0 
+ analyzeNetwork.py         Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ viaAssignment.py          Locally Removed           240 
+ code.py                   Locally Removed           240 
+ generate-code/            Locally Added               0 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/generate-code
+ routerStats.py            Locally Added               - 
+ generateMultiplexors.py   Locally Added               - 
+ generate-code.awb         Locally Added               0 
+ generateCode.py           Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ multi-fpga-connect.awb    Locally Modified          240 
+ analyzeNetwork.py         Locally Removed           240 
+ via.py                    Locally Removed           240 
+ taggedUnionCompress.py    Locally Removed           240 
+ viaType.py                Locally Removed           240 
+ generateMultiplexors.py   Locally Removed           240 
+ generateCode.py           Locally Removed           240 
+ linkAssignment.py         Locally Removed           240 
+
+
+Reorganized main compiler body passes into seperate awb directories.
+This should improve code readability.

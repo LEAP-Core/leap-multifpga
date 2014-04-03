@@ -14,19 +14,14 @@ from fpgamap_parser import *
 from multi_fpga_generate_bitfile import *
 from multi_fpga_log_generator import *
 from li_module import *
+from lim_generate_code import *
+from lim_common import *
+from lim_compression import *
+from lim_analyze_network import *
 
 # dependencies from our package 
-from via import *
-from viaAssignment import *
-from linkAssignment import *
-from linkType import *
-from umfType import *
-from umf import *
-from taggedUnionCompress import *
-from generateCode import *
 from activity import *
-from routerStats import *
-from analyzeNetwork import *
+
 
 class MultiFPGAConnect():
 
@@ -42,13 +37,9 @@ class MultiFPGAConnect():
         self.unique = 0;
         self.moduleList = moduleList
        
-        self.MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
-        self.MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MIN_NUMBER_OF_VIAS')
-
-
+       
         self.ENABLE_TYPE_COMPRESSION = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_TYPE_COMPRESSION')
-        self.GENERATE_ROUTER_DEBUG = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_DEBUG')
-        self.GENERATE_ROUTER_STATS = moduleList.getAWBParam('multi_fpga_log_generator', 'GENERATE_ROUTER_STATS')
+
         APM_FILE = moduleList.env['DEFS']['APM_FILE']
         APM_NAME = moduleList.env['DEFS']['APM_NAME']
         # Need the FPGA configuration 

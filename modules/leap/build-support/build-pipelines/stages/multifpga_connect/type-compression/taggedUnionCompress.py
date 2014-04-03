@@ -8,10 +8,7 @@ import itertools
 # AWB module dependencies
 from type_parser import *
 from li_module import *
-
-# Local dependencies
-from linkType import *
-from code import *
+from lim_common import *
 
 injectDebug = False
 

@@ -7,14 +7,7 @@ import math
 # AWB dependencies
 from model import  *
 from li_module import *
-
-# dependencies from our package 
-from via import *
-from viaAssignment import *
-from linkAssignment import *
-from linkType import *
-from umfType import *
-from umf import *
+from lim_common import *
 
 # Gets the partner of the given connection.
 def getPartner(connection):
@@ -68,8 +61,8 @@ def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformCo
 
 def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platformGraph):
 
-    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
-    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MIN_NUMBER_OF_VIAS')
+    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MAX_NUMBER_OF_VIAS')
+    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MIN_NUMBER_OF_VIAS')
     pipeline_debug = getBuildPipelineDebug(moduleList)
 
     if(pipeline_debug):
@@ -281,8 +274,8 @@ def generateViaCombinational(platform, targetPlatform, moduelList, environmentGr
 
     partnerSortedLinks = map(getPartner, sortedLinks)
 
-    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
-    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MIN_NUMBER_OF_VIAS')      
+    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MAX_NUMBER_OF_VIAS')
+    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MIN_NUMBER_OF_VIAS')      
 
     for numberOfVias in range(MIN_NUMBER_OF_VIAS, MAX_NUMBER_OF_VIAS + 1):
         viaSizingIdx = 0          
@@ -525,8 +518,8 @@ def analyzeNetworkRandom(moduleList, environmentGraph, platformLIGraph):
 
 def analyzeNetworkUniform(useActivity, moduleList, environmentGraph, platformGraph):
 
-    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MAX_NUMBER_OF_VIAS')
-    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('multi_fpga_connect', 'MIN_NUMBER_OF_VIAS')      
+    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MAX_NUMBER_OF_VIAS')
+    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MIN_NUMBER_OF_VIAS')      
 
     numberOfVias = MAX_NUMBER_OF_VIAS
  
@@ -598,5 +591,5 @@ def analyzeNetworkUniform(useActivity, moduleList, environmentGraph, platformGra
           
 
 def analyzeNetwork(moduleList, environmentGraph, platformGraph):
-    ANALYZE_NETWORK = moduleList.getAWBParam('multi_fpga_connect', 'ANALYZE_NETWORK')
+    ANALYZE_NETWORK = moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK')
     eval(ANALYZE_NETWORK + '(moduleList, environmentGraph, platformGraph)')

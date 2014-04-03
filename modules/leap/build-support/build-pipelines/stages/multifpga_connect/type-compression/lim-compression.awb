@@ -1,0 +1,9 @@
+%name Latency-insensitive Module Type Compression
+%desc Compresses inter-FPGA channels for bandwidth savings
+
+%attributes tool
+ 
+%provides lim_compression
+
+%scons %library taggedUnionCompress.py
+

@@ -59,8 +59,8 @@ class UMFType():
 # packet takes the maximum number of chunks
 def generateRouterTypes(viaWidth, viaLinks, maxWidth, moduleList):
 
-    ENABLE_AGRESSIVE_UMF_PARAMETERS = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_AGRESSIVE_UMF_PARAMETERS')
-    USE_DEFAULT_UMF_PARAMETERS = moduleList.getAWBParam('multi_fpga_connect', 'USE_DEFAULT_UMF_PARAMETERS')
+    ENABLE_AGRESSIVE_UMF_PARAMETERS = moduleList.getAWBParam('lim_common', 'ENABLE_AGRESSIVE_UMF_PARAMETERS')
+    USE_DEFAULT_UMF_PARAMETERS = moduleList.getAWBParam('lim_common', 'USE_DEFAULT_UMF_PARAMETERS')
     pipeline_debug = getBuildPipelineDebug(moduleList)
 
     #Should we do whatever umf tells us?

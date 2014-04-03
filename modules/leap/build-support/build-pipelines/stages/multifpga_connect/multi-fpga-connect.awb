@@ -1,32 +1,23 @@
-%name MultiFPGA Communication Complex Generator
+%name Latency-insensitive Module Communication Complex Generator
 %desc Generates a connection complex between FPGAs
 
 %attributes tool
-
+ 
 %provides multi_fpga_connect
 %requires fpgamap_parser
 %requires type_parser
 %requires umf
 %requires li_module
+%requires lim_generate_code
+%requires lim_common
+%requires lim_compression
+%requires lim_analyze_network
+
+
 
 %scons %library multiFPGAConnect.py
-%scons %library taggedUnionCompress.py
-%scons %library viaAssignment.py
-%scons %library linkAssignment.py
-%scons %library linkType.py
-%scons %library via.py
-%scons %library umfType.py
-%scons %library code.py
 %scons %library activity.py
-%scons %library generateCode.py
-%scons %library generateMultiplexors.py
-%scons %library routerStats.py
-%scons %library analyzeNetwork.py
 
-
-%param --global MIN_NUMBER_OF_VIAS         1      "Minumum number of vias (lanes)"
-%param --global MAX_NUMBER_OF_VIAS         3      "Maximum number of vias (lanes)"
 %param --global ENABLE_TYPE_COMPRESSION    0      "Should we enable experimental type compression?"
-%param --global ENABLE_AGRESSIVE_UMF_PARAMETERS 1 "Vary UMF header sizes depending on channels assigned to a via?"
-%param --global USE_DEFAULT_UMF_PARAMETERS 0      "Static (default) UMF parameters?"
-%param --global ANALYZE_NETWORK "analyzeNetworkLJF" "Which analysis function should we be calling."
+
+
