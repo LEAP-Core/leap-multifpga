@@ -135,6 +135,7 @@ def generateEgressMultiplexorMultiple(platform, targetPlatform, packPulseWires, 
 
 def generateEgressMultiplexor(platform, targetPlatform, moduleList, environmentGraph, platformGraph): 
       egressVias = environmentGraph.platforms[platform].getEgress(targetPlatform).logicalVias
+
       if(len(egressVias) == 1):
           return generateEgressMultiplexorMultiple(platform, targetPlatform, False, moduleList, environmentGraph, platformGraph)
       else:
@@ -247,6 +248,7 @@ def generateIngressMultiplexorMultiple(platform, targetPlatform, packPulseWires,
 
 def generateIngressMultiplexor(platform, targetPlatform, moduleList, environmentGraph, platformGraph): 
     ingressVias = environmentGraph.platforms[platform].getIngress(targetPlatform).logicalVias
+
     if(len(ingressVias) == 1):
         return generateIngressMultiplexorMultiple(platform, targetPlatform, False, moduleList, environmentGraph, platformGraph)
     else:

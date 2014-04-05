@@ -71,7 +71,7 @@ class MultiFPGAConnect():
             platformBitfileBuildDir = 'multi_fpga/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
 
             logs = []
-
+   
             # We can now have externally generated log files.  find them here.
             if(platform.platformType == 'CPU'):
                 if(self.pipeline_debug):
@@ -79,7 +79,7 @@ class MultiFPGAConnect():
                 logs += map(lambda path: platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + path, moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_LOGS'))
                 # we also need to look at the program log files. 
                 logs += map(lambda path: platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + path, moduleList.getAllDependenciesWithPaths('GIVEN_LOGS'))
-   
+      
 
             moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += logs
 
@@ -112,7 +112,7 @@ class MultiFPGAConnect():
 
 
             moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
-   
+    
         subbuild = moduleList.env.Command( 
             moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
             moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] + ['./site_scons/multi_fpga_connect/multiFPGAConnect.py'],
@@ -187,10 +187,10 @@ class MultiFPGAConnect():
         moduleGraph = self.parseModuleGraph(environmentGraph)
 
         # Assign activity factors to all communications channels.
-        statsFile = self.moduleList.getAllDependenciesWithPaths('GIVEN_STATS')    
-        if(len(statsFile) > 0):
-            filename = self.moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + statsFile[0]
-            #assignActivity(filename, moduleGraph)
+
+        print "Module Graph: " + str(moduleGraph) + "\n"
+  
+        assignActivity(self.moduleList, moduleGraph)
 
         # Assign modules to platforms.  This yields the platformGraph, a
         # view in which all LIMs have been assigned a platform.
@@ -306,7 +306,7 @@ class MultiFPGAConnect():
                 moduleObject = moduleGraph.modules[moduleName]   
                 moduleObject.putAttribute('MAPPING', self.mapping.getSynthesisBoundaryPlatform(moduleName))
         return moduleGraph
-
+ 
     #First we parse the files, and then attempt to make all the connections.  Lots of dictionaries.
     def routeConnections(self, platformGraph):
         APM_FILE = self.moduleList.env['DEFS']['APM_FILE']
@@ -338,7 +338,7 @@ class MultiFPGAConnect():
         # link up the chains.  The algorithm below is suboptimal. 
         # for more complex topologies than the ACP, we will want to 
         # solve a mapping problem 
-        # we may want to sort these or something to ensure that we don't form singelton links XXX
+        # we may want to sort these or something to ensure that we don't form singelton links
         # delete the length 1 chains immediately  -- they live on a single node
         for chainName in danglingChainIngresses.keys():
             if(len(danglingChainIngresses[chainName]) < 2):

@@ -5878,3 +5878,37 @@ types.
 2) Fixed broken apms.
 
 
+
+----------
+keflemin    Date: Sat Apr  5 17:36:07 EDT 2014  CSN: CSN-multifpga-243
+                  Sat Apr  5 21:36:07 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers/environment
+ physical_via.py           Locally Modified          242 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/generate-code
+ generateMultiplexors.py   Locally Modified          242 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ activity.py               Locally Modified          242 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/common
+ viaAssignment.py          Locally Modified          242 
+ via.py                    Locally Modified          242 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ multiFPGAConnect.py       Locally Modified          242 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network
+ analyze-network.awb       Locally Modified          242 
+ analyzeNetwork.py         Locally Modified          242 
+
+
+1) Fixed bug in analyzeNetwork that was causing multi-via routers to
+fail.
+
+2) Improved/Added string representations of various data structures.
+
+3) Revived activity tagging. 
+

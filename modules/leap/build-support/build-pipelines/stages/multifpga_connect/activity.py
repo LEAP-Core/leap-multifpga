@@ -16,6 +16,7 @@ def parseStats(statsFile):
     logfile = open(statsFile,'r')  
     print "Processing Stats:  " + filename
     for line in logfile:
+        # There are several ways that we can get stats. One way is instrumenting the router. 
         if(re.match('.*ROUTER_.*_SENT.*',line)):
             #We may have a chunked pattern.   
             match = re.search(r'.*ROUTER_(\w+)(_chunk_\d+)_SENT,.*,(\d+)',line)
@@ -30,6 +31,8 @@ def parseStats(statsFile):
                 #print "Stat Match " + match.group(1) + " got " + match.group(2) + " from " + line
                 stats[match.group(1)] = int(match.group(2))
 
+        # TODO: a second way is instrumenting the LI channels directly. 
+
     return stats
 
 
@@ -39,14 +42,24 @@ def parseStats(statsFile):
 # stats file exists, then the weight will be set to a constant and
 # preference give to non-chains
 # We seem to match only out bound channels. 
-def assignActivity(stats, moduleGraph):
-    # let's read in a stats file
-    stats = parseStats(statFile)
+def assignActivity(moduleList, moduleGraph):
+
+    statsFile = moduleList.getAllDependenciesWithPaths('GIVEN_STATS')    
+    filename = ""
+    if(len(statsFile) > 0):
+        filename = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + statsFile[0]
+        # let's read in a stats file
+    stats = parseStats(filename)
 
     # handle the connections themselves
     channels = 0
     chains = 0           
     totalTraffic = 0;
+
+
+    def printActivity(classStr, channel):
+        print "ACTIVITY: " + classStr + " " + channel.module.name + "->" + channel.partnerChannel.module.name + " " + channel.name + " " + str(channel.activity) + "\n"
+        
 
     # In some cases, due to pre-existing partitioning, there may be a
     # mismatch between the stats file and the partitioning. .  To make
@@ -56,33 +69,36 @@ def assignActivity(stats, moduleGraph):
         if(match and (match.group(1) in stats)):      
             connection.activity = stats[match.group(1)]
             totalTraffic += stats[match.group(1)]
-            print "Assigning Load (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
+            printActivity("Assigning Loads(chunk)", connection)                    
 
-    for module in moduleGraph.modules:
-        for channel in module.channels:
+
+    for moduleName in moduleGraph.modules.keys():
+        print "examining: " + moduleName + "\n"         
+        for channel in moduleGraph.modules[moduleName].channels:
             if(channel.sc_type == 'Recv'):
-                  recvs += 1
+                  channels += 1
                   if(channel.name in stats):
                       channel.activity = stats[channel.name]
-                      channel.channelPartner.activity = stats[channel.name]
+                      channel.partnerChannel.activity = channel.activity
                       totalTraffic += stats[channel.name]
-                      print "Assigning Load " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[dangling.name])  
+                      printActivity("Assigning Load ", channel)                    
                   else:
                       chunkMatch(channel)
 
     # Give a sensical default for channel traffic, if undefined.
     if(totalTraffic == 0):
-        totalTraffic = 2*(recvs)
+        totalTraffic = 2*(channels)
 
-    for module in moduleGraph.modules:
-        for channel in module.channels:
+    for moduleName in moduleGraph.modules.keys():
+        for channel in moduleGraph.modules[moduleName].channels:
             # An activity less than 0 means that we have not seen this
             # channel before.
-            if(channelActivity < 0):
-                dangling.activity = (float(totalTraffic)/(2*(chains+recvs))) * 0.1  # no stat?  Make connections better than chains
-                print "Defaulting Load " + platform + "->" + targetPlatform + " " + chainName + " " + str(dangling.activity)
+            if(channel.activity < 0):
+                channel.activity = (float(totalTraffic)/(2*(channels)))  # no stat?  Make connections better than chains
                 
-
+        for chain in moduleGraph.modules[moduleName].chains:
+            if(chain.activity < 0):
+                chain.activity = (float(totalTraffic)/(2*(channels))) * 0.1  # no stat?  Make connections better than chains
 
           # only create a chain when we see the sink                                                                                                               
 #          if(dangling.sc_type == 'ChainSink'):

@@ -19,7 +19,7 @@ def getPartner(connection):
 # This code assigns physical indices to the inter-platform connections. 
 def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections, moduleList):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
     # by definition these are sources
     for provisional in provisionalAssignments:
         assigned = False
@@ -63,7 +63,7 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
 
     MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MAX_NUMBER_OF_VIAS')
     MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MIN_NUMBER_OF_VIAS')
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
 
     if(pipeline_debug):
         print "Allocating vias for " + platform + " -> " + targetPlatform + "\n"
@@ -166,7 +166,7 @@ def allocateLJF(platformLinks, targetLinks, vias, moduleList):
 
 def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
 
     #first sort the links on both sides
     links = sorted(platformLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending   
@@ -255,7 +255,7 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
 
 def generateViaCombinational(platform, targetPlatform, moduelList, environmentGraph, platformGraph):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
 
     firstAllocationPass = True; # We can't terminate in the first pass 
     viaWidthsFinal = [] # at some point, we'll want to derive this. 
@@ -318,13 +318,12 @@ def generateViaCombinational(platform, targetPlatform, moduelList, environmentGr
 
             firstAllocationPass = False
 
-    print "Combinational returns " + str(viasFinal) + "\n"
     return viasFinal
 
 
 def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, platformGraph):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
 
     # set up intermediate data structures.  We need a couple of passes to resolve link allocation. 
     # This analysis operates on sources. The sinks on the target
@@ -344,9 +343,10 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
     for sourcePlatform in platforms:
         platformEgresses = environmentGraph.getPlatform(sourcePlatform).getEgresses()
         for egressVia in platformEgresses.keys():  
-            egressPlatforms[sourcePlatform].append(platformEgresses[egressVia].endpointName)
-            egressViasInitial[sourcePlatform][platformEgresses[egressVia].endpointName] = []
-            ingressViasInitial[platformEgresses[egressVia].endpointName][sourcePlatform] = []
+            destinationPlatform = platformEgresses[egressVia].endpointName
+            egressPlatforms[sourcePlatform].append(destinationPlatform)
+            egressViasInitial[sourcePlatform][destinationPlatform] = []
+            ingressViasInitial[destinationPlatform][sourcePlatform] = []
 
     if(pipeline_debug):
         print "Egress Platforms: " + str(egressPlatforms) + "\n"
@@ -371,7 +371,7 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
             environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias = []
 
             logicalEgressInitial = egressViasInitial[platform][targetPlatform]
-            logicalIngressInitial = ingressViasInitial[platform][targetPlatform] 
+            logicalIngressInitial = ingressViasInitial[targetPlatform][platform] 
 
 
             # We don't yet have information about how to handle flowcontrol
@@ -420,10 +420,9 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
               logicalIngress = environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias
 
               # We need to first consider the other platform's ingress.
-              # It gets mapped to our egress. XXX This seems buggy? Should local ingress be reversed?
-              localIngress = ingressViasInitial[platform][targetPlatform]
+              # It gets mapped to our egress. 
               localEgress = egressViasInitial[platform][targetPlatform]
-
+              localIngress = ingressViasInitial[targetPlatform][platform]
 
               egressLinks[platform][targetPlatform] = []
               ingressFlowcontrolAssignment[platform][targetPlatform] = []
@@ -470,6 +469,11 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
                 egress_first_pass = egressViasInitial[platform][targetPlatform][via]
                 ingress_first_pass = ingressViasInitial[targetPlatform][platform][via]
 
+                if(pipeline_debug):
+                    print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
+                    print "Initial LogicalEgress: " + str(logicalEgress)
+                    print "Initial LogicalIngress: " + str(logicalIngress)
+
                 logicalEgress = environmentGraph.getPlatform(platform).egresses[targetPlatform].logicalVias
                 logicalIngress = environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias
 
@@ -492,6 +496,7 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
                 egress = Via(platform,targetPlatform,"egress", umfType, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via], umfType.fillerBits)
        
+                # why are we using egress here?
                 ingress = Via(targetPlatform,platform,"ingress", umfType, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via], umfType.fillerBits)
 
                 logicalEgress.append(egress)
@@ -502,7 +507,6 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
                     print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
                     print "LogicalEgress: " + str(logicalEgress)
                     print "LogicalIngress: " + str(logicalIngress)
-
 
 def analyzeNetworkComb(moduleList, environmentGraph, platformGraph):
     analyzeNetworkNonuniform(generateViaCombinational, moduleList, environmentGraph, platformGraph)
