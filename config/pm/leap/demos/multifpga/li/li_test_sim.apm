@@ -113,3 +113,10 @@ Packagehint=multifpga
 [Latency-insensitive Module Network Analysis]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network/analyze-network.awb
 Packagehint=multifpga
+
+[Latency-insensitive Module Network Analysis/Params]
+MAX_NUMBER_OF_VIAS=1
+
+[Latency-insensitive Module Common Files/Params]
+USE_DEFAULT_UMF_PARAMETERS=1
+ENABLE_AGRESSIVE_UMF_PARAMETERS=0

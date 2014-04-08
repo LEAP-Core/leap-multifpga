@@ -36,10 +36,7 @@ class MultiFPGAConnect():
 
         self.unique = 0;
         self.moduleList = moduleList
-       
-       
-        self.ENABLE_TYPE_COMPRESSION = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_TYPE_COMPRESSION')
-
+           
         APM_FILE = moduleList.env['DEFS']['APM_FILE']
         APM_NAME = moduleList.env['DEFS']['APM_NAME']
         # Need the FPGA configuration 
@@ -108,14 +105,14 @@ class MultiFPGAConnect():
             
             platform.putAttribute('HEADER', parameterFile)
 
-            self.platformData[platform.name] = {'LOG': logs, 'HEADER': parameterFile, 'BLUETCL': bluetclPaths, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'INGRESS_VIAS': {}, 'EGRESS_VIAS': {}, 'INGRESS_VIAS_PASS_ONE': {}, 'EGRESS_VIAS_PASS_ONE': {}, 'TYPES':{}}
+            self.platformData[platform.name] = {'LOG': logs, 'BLUETCL': bluetclPaths, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'TYPES':{}}
 
 
             moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
     
         subbuild = moduleList.env.Command( 
-            moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
-            moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] + ['./site_scons/multi_fpga_connect/multiFPGAConnect.py'],
+            moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],        
+            moduleList.topModule.moduleDependency['PLATFORM_LI'] + moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] + ['./site_scons/multi_fpga_connect/multiFPGAConnect.py'],
             self.synthesizeRouters
             )                   
 
@@ -187,8 +184,8 @@ class MultiFPGAConnect():
         moduleGraph = self.parseModuleGraph(environmentGraph)
 
         # Assign activity factors to all communications channels.
-
-        print "Module Graph: " + str(moduleGraph) + "\n"
+        if(self.pipeline_debug):
+            print "Module Graph: " + str(moduleGraph) + "\n"
   
         assignActivity(self.moduleList, moduleGraph)
 
@@ -202,6 +199,10 @@ class MultiFPGAConnect():
         # Apply compression here. 
 
         analyzeNetwork(self.moduleList, environmentGraph, platformGraph)
+ 
+        if(self.pipeline_debug):
+            print "Platform Graph: " + str(platformGraph) + "\n"
+
         generateCode(self.moduleList,environmentGraph, platformGraph)
 
         # Build backend flow using object code created during the first
@@ -217,6 +218,7 @@ class MultiFPGAConnect():
         # from the subbordinate build. 
 
         subordinateGraphs = []
+        # I could also just use the PLATFORM_LIs
         for platformName in environmentGraph.getPlatformNames():          
             #open up pickles
             picklePath = makePlatformLogBuildDir(platformName,APM_NAME) + '/' + makePlatformLogName(platformName,APM_NAME) + '.li'
@@ -225,15 +227,16 @@ class MultiFPGAConnect():
             pickleHandle.close()
             
         mergedGraph = subordinateGraphs.pop()
-
+ 
         if(self.pipeline_debug):
             print 'parseModuleGraph base ' + str(mergedGraph) + 'subordinate graphs'
 
         # merge remaining graphs together 
-        for graph in subordinateGraphs:
-            if(self.pipeline_debug):
+        if(self.pipeline_debug):
+            for graph in subordinateGraphs:
                 print 'parseModuleGraph merging ' + str(graph) + 'subordinate graphs'
-            mergedGraph.merge(graph)
+           
+        mergedGraph.merge(subordinateGraphs)
 
         if(self.pipeline_debug):
             print 'parseModuleGraph found ' + str(mergedGraph) + 'subordinate graphs'
@@ -298,7 +301,7 @@ class MultiFPGAConnect():
             print "Post placement platform graph: " + str(platformGraph) + "\n"
 
         return platformGraph
-
+ 
     def placeModulesWithMapFile(self,moduleGraph):
         for moduleName in moduleGraph.modules:
             # have we already mapped this module?
@@ -347,10 +350,10 @@ class MultiFPGAConnect():
                 del danglingChainEgresses[chainName]
                 if(self.pipeline_debug):
                     print "Removing single platform chain " + chainName
-          
+           
         # Our algorithm here is highly suboptimal.  rotate sinks by one to get an offset list 
         # We assume that the fpga network is strongly connected and that we don't care about transport 
-        # lengths.  Bad Bad Bad assumptions, but they work for the ACP
+        # lengths.  
         for chainName in danglingChainIngresses.keys():
             chainIngresses = danglingChainIngresses[chainName]
             chainEgresses = danglingChainEgresses[chainName]
@@ -379,16 +382,27 @@ class MultiFPGAConnect():
                 logfile = open(infile,'r')
                 for line in logfile:
                     # also pull out link widths
-                    if(re.match('.*SizeOfVia:.*',line)):
-                        match = re.search(r'.*SizeOfVia:([^:]+):([^:]+):(\d+)',line)
+                    matchSize = re.match('.*SizeOfVia:(.*)$',line)
+                    if(matchSize):
+                        match = re.search(r'([^:]+):([^:]+):(\d+)', matchSize.group(1))
                         if(match):
                             # match group 1 is a the bluespec name of the
                             # communication device.  We must look up which
                             # platform this device targets.         
                             if(match.group(2) == 'ingress'):
-                                environmentGraph.getPlatform(platformName).getIngressByPhysicalName(match.group(1)).width = int(match.group(3))
+                                # sometimes, we encounter a
+                                # specification for a physical link
+                                # that was not specified in the
+                                # environment.  We'll warn on that.
+                                if(environmentGraph.getPlatform(platformName).getIngressByPhysicalName(match.group(1)) is None):
+                                    print "Warning Unused Physical Link: " + match.group(1)
+                                else:
+                                    environmentGraph.getPlatform(platformName).getIngressByPhysicalName(match.group(1)).width = int(match.group(3))
                             else:
-                                environmentGraph.getPlatform(platformName).getEgressByPhysicalName(match.group(1)).width = int(match.group(3))
+                                if(environmentGraph.getPlatform(platformName).getEgressByPhysicalName(match.group(1)) is None):
+                                    print "Warning Unused Physical Link: " + match.group(1)
+                                else:
+                                    environmentGraph.getPlatform(platformName).getEgressByPhysicalName(match.group(1)).width = int(match.group(3))
                 logfile.close()
    
     

@@ -52,6 +52,7 @@ Packagehint=multifpga
 
 [MultiFPGA Simulation FPGAN Environment Aurora/Params]
 NUM_FPGA=2
+BUILD_COMMON_SERVICES=0
 
 [MultiFPGA Simulation FPGAN Environment Aurora]
 File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm

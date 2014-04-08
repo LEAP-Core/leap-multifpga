@@ -1,12 +1,13 @@
 import os
+
 from li_module import *
+from model import *
 
 # Notice that chains will have their platform direction labelled
 def parseStats(statsFile):
     # let's read in a stats file
 
     stats = {}
-    print "StatsFile " + str(statsFile)
 
     # need to check for file existance. returning an empty stats
     # dictionary is acceptable.
@@ -14,7 +15,6 @@ def parseStats(statsFile):
         return stats
 
     logfile = open(statsFile,'r')  
-    print "Processing Stats:  " + filename
     for line in logfile:
         # There are several ways that we can get stats. One way is instrumenting the router. 
         if(re.match('.*ROUTER_.*_SENT.*',line)):
@@ -44,6 +44,8 @@ def parseStats(statsFile):
 # We seem to match only out bound channels. 
 def assignActivity(moduleList, moduleGraph):
 
+    pipeline_debug = getBuildPipelineDebug(moduleList)
+
     statsFile = moduleList.getAllDependenciesWithPaths('GIVEN_STATS')    
     filename = ""
     if(len(statsFile) > 0):
@@ -58,7 +60,8 @@ def assignActivity(moduleList, moduleGraph):
 
 
     def printActivity(classStr, channel):
-        print "ACTIVITY: " + classStr + " " + channel.module.name + "->" + channel.partnerChannel.module.name + " " + channel.name + " " + str(channel.activity) + "\n"
+        if(pipeline_debug):
+            print "ACTIVITY: " + classStr + " " + channel.module.name + "->" + channel.partnerChannel.module.name + " " + channel.name + " " + str(channel.activity) + "\n"
         
 
     # In some cases, due to pre-existing partitioning, there may be a
@@ -73,7 +76,9 @@ def assignActivity(moduleList, moduleGraph):
 
 
     for moduleName in moduleGraph.modules.keys():
-        print "examining: " + moduleName + "\n"         
+        if(pipeline_debug):
+            print "examining: " + moduleName + "\n"
+         
         for channel in moduleGraph.modules[moduleName].channels:
             if(channel.sc_type == 'Recv'):
                   channels += 1

@@ -90,6 +90,10 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
         noViasRemaining = 0
         # pick our via links deterministically
         viaWidths = []
+
+        if(pipeline_debug):
+            print "Looking at " + str(numberOfVias) + ":" + str(range(numberOfVias)) +" Vias\n" 
+
         for via in range(numberOfVias):
             # A singleton via doesn't require a valid bit.  This is a software optimization.
             # however, we must repair this assumption if we end up choosing 
@@ -122,6 +126,9 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
                     viaWidths.append(sortedLinks[viaSizingIdx].bitwidth + headerSize) # need one bit for the header
                     viaSizingIdx += 1
       
+        if(pipeline_debug):
+            print "ViaWidths " + str(viaWidths) + " \n" 
+
         # We've exhausted the supply of feasible vias.
         if(noViasRemaining):
             print "There are no suitable mapping candidates"
@@ -184,7 +191,10 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
        
         if(pipeline_debug):
             print "\n\n Analyzing   " + links[danglingIdx].name + " of width " + str(links[danglingIdx].bitwidth)  + " raw load: " + str(links[danglingIdx].activity) + "\n"
-        
+            print "Vias are: " + str(vias)
+            if(isinstance(links[danglingIdx].bitwidth, str)):
+                print "Bit width is a string????\n"
+
         minIdx = -1 
         minLoad = 0        
         
@@ -193,6 +203,7 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
             viaWidth = vias[via].width
             viaLoad = vias[via].load
             headerSize = headers[via] # reserve some space for the header.  we may actually find that this sizing is wrong.
+
             if(((links[danglingIdx].bitwidth + headerSize )%viaWidth) > 0):
                 extraChunk = 1
             chunks = (links[danglingIdx].bitwidth + headerSize )/viaWidth + extraChunk       
@@ -494,9 +505,19 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
                 umfType = generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth, moduleList) 
 
+                if(egress_first_pass.via_width !=  ingress_first_pass.via_width):
+                    print "Via widths unequal, bailing out" 
+                    exit(0);
+
+                if(egress_first_pass.via_links !=  ingress_first_pass.via_links):
+                    print "Via widths unequal, bailing out"
+                    exit(0);
+
+
+                # egressLinks and viaLoads are shared by the ingress and egress. They must be symmetric.
+
                 egress = Via(platform,targetPlatform,"egress", umfType, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via], umfType.fillerBits)
        
-                # why are we using egress here?
                 ingress = Via(targetPlatform,platform,"ingress", umfType, ingress_first_pass.via_width, egressLinks[platform][targetPlatform][via], ingress_first_pass.via_links,  egressLinks[platform][targetPlatform][via] - ingress_first_pass.via_links, ingress_first_pass.via_method, ingress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1],  ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via], umfType.fillerBits)
 
                 logicalEgress.append(egress)

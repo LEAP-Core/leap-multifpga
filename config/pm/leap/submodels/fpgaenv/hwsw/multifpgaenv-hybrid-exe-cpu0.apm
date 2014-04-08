@@ -221,3 +221,6 @@ unix_pipe_device=UNIX Pipe Physical Device
 [CPU0 Hybrid Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/li/cpu0/physical-platform-cpu0.awb
 Packagehint=multifpga
+
+[Software build tool/Params]
+DUMP_LIM_GRAPH=1

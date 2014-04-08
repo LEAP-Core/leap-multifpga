@@ -26,11 +26,17 @@ class Platform(object):
         self.ingresses[target] = via
 
     def getEgressByPhysicalName(self, physicalName):
-        return self.egressesByPhysicalName[physicalName]
+        if(physicalName in  self.egressesByPhysicalName):
+            return self.egressesByPhysicalName[physicalName]
+        else:
+            return None
 
     def getIngressByPhysicalName(self, physicalName):
-        return self.ingressesByPhysicalName[physicalName]
-    
+        if(physicalName in  self.ingressesByPhysicalName):
+            return self.ingressesByPhysicalName[physicalName]
+        else:
+            return None    
+
     def __init__(self, platformType, name, isMaster, path, physicalViaList):
         self.name = name
         self.platformType = platformType

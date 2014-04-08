@@ -14,7 +14,7 @@ class PhysicalVia(object):
 
     def __repr__(self):
         strRepr = ''
-        if(self.direction == PhysicalVia.source):
+        if(self.direction == PhysicalVia.ingress):
             strRepr += 'CONNECTION\n' + self.endpointName + ' input from '  + self.physicalName + "\n"
         else:
             strRepr += 'CONNECTION\n' + self.endpointName + ' output to '  + self.physicalName +"\n"

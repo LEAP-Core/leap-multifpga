@@ -5912,3 +5912,51 @@ fail.
 
 3) Revived activity tagging. 
 
+
+----------
+keflemin    Date: Tue Apr  8 19:16:21 EDT 2014  CSN: CSN-multifpga-244
+                  Tue Apr  8 23:16:21 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga/li
+ li_test_sim.apm           Locally Modified          243 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hybrid-exe-cpu0.apm Locally Modified          243 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_mesh_sharedLLC_MESI_exe_0064_multifpga.apm Locally Modified          243 
+
+Directory config/pm/multifpga/fpga_submodels
+ fpga1-aurora.apm          Locally Modified          243 
+
+Directory modules/leap/virtual-platform/virtual-devices/devices/multifpga_router_service/flowcontrol
+ flowcontrol-egress.bsv    Locally Modified          243 
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers/environment
+ physical_via.py           Locally Modified          243 
+ platform.py               Locally Modified          243 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/generate-code
+ generateCode.py           Locally Modified          243 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ activity.py               Locally Modified          243 
+ multiFPGAConnect.py       Locally Modified          243 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network
+ analyzeNetwork.py         Locally Modified          243 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ generate_logfile.py       Locally Modified          243 
+
+
+
+1) Upgraded new compiler organization to support hardware-software LI
+channels.  Software compilation now follows the same path as hardware
+compilation.
+
+2) Incumbent in 1) was doing a true first pass for CPP.  This now
+occurs.
+
+

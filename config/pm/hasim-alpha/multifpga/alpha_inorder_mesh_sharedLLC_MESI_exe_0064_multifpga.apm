@@ -117,3 +117,6 @@ Packagehint=multifpga
 [Latency-insensitive Module Network Analysis]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network/analyze-network.awb
 Packagehint=multifpga
+
+[Latency-insensitive Module Network Analysis/Params]
+ANALYZE_NETWORK_DEBUG=1

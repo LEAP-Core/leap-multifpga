@@ -483,10 +483,10 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                 portCreditsReg[fromInteger(s)] <= newCount;            
                 $display("Setting portCredits for port %d to %d", s, newCount);
             end
-
-            if (oldCredits < zeroExtendNP(requestChunks) && (s != 0))
+                                               
+            if (oldCredits < zeroExtendNP(requestChunks) && (!requestQueues[s].bypassFlowcontrol))
             begin
-                $display("Bizzarre Credit Underflow oldCredit %d messageSize %d newCount %d max %d", oldCredits, requestChunks, newCount, maximumPacketSize);
+                $display("Credit Underflow on channel %d oldCredit %d messageSize %d newCount %d max %d s bypasses flowcontrol %d", s, oldCredits, requestChunks, newCount, maximumPacketSize, requestQueues[s].bypassFlowcontrol);
                 $finish;               
             end
         endrule
