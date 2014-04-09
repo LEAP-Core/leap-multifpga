@@ -9,3 +9,12 @@ experiments = throughput li_test
 # A simple configuration
 #
 config/bm/leap/demos.cfx/benchmarks/null.cfg
+
+experiments = alpha_test
+#
+config/bm/alpha/6_375.cfx/benchmarks/median_001t.cfg
+config/bm/alpha/6_375.cfx/benchmarks/multiply_001t.cfg
+config/bm/alpha/6_375.cfx/benchmarks/qsort_001t.cfg
+config/bm/alpha/6_375.cfx/benchmarks/towers_001t.cfg
+config/bm/alpha/6_375.cfx/benchmarks/vvadd_001t.cfg
+

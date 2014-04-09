@@ -127,6 +127,7 @@ class MultiFPGAConnect():
 
         srcs = [src]
         sinks =[]
+
         if(self.pipeline_debug):
             print "Analyzing path: " + str(path)
 
@@ -340,7 +341,9 @@ class MultiFPGAConnect():
             print "Post placement platform graph: " + str(platformGraph) + "\n"
 
         return platformGraph
- 
+
+    # Places modules onto platforms using a programmer-supplied
+    # mapping file.
     def placeModulesWithMapFile(self,moduleGraph):
         for moduleName in moduleGraph.modules:
             # have we already mapped this module?
@@ -349,7 +352,12 @@ class MultiFPGAConnect():
                 moduleObject.putAttribute('MAPPING', self.mapping.getSynthesisBoundaryPlatform(moduleName))
         return moduleGraph
  
-    #First we parse the files, and then attempt to make all the connections.  Lots of dictionaries.
+    # Routes channels between physical platforms.  Uses different
+    # strategies depending on the communication class.  LIChannels are
+    # routed using a channel-load oblivious Djiskstra's algorithm.
+    # LIChains are routed using a by creating a logical chain.
+    # Really, we should try to solve a Travelling Salesman Problem for
+    # the chains.
     def routeConnections(self, platformGraph):
         APM_FILE = self.moduleList.env['DEFS']['APM_FILE']
         APM_NAME = self.moduleList.env['DEFS']['APM_NAME']
@@ -414,9 +422,12 @@ class MultiFPGAConnect():
             print 'Unmatched channel, terminating ' 
             sys.exit(0)
    
+
+    # A routine for gathering information about the physical platform
+    # widths.  These widths are dumped during compilation by the
+    # various platforms.  This function doesn't really belong here.
     def parseWidth(self, environmentGraph):
         for platformName in environmentGraph.getPlatformNames():
-            #This code needs to be refactored to be online. Reading the logs in is a bad idea.
             for infile in self.platformData[platformName]['LOG']:          
                 logfile = open(infile,'r')
                 for line in logfile:

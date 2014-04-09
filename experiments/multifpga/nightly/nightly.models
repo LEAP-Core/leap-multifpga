@@ -1,2 +1,3 @@
 throughput                    config/pm/leap/demos/multifpga/test_multifpga_throughput_exe.apm
 li_test                       config/pm/leap/demos/multifpga/li/li_test_sim.apm
+alpha_test                    config/pm/hasim-alpha/multifpga/alpha_inorder_multifpga_exe.apm

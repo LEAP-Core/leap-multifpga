@@ -5984,3 +5984,19 @@ asymmetric router allocations to fail.  Complex HAsim builds are now
 operation with router optimizations turned on. 
 
 2) Added more commments. 
+
+----------
+keflemin    Date: Wed Apr  9 14:45:34 EDT 2014  CSN: CSN-multifpga-246
+                  Wed Apr  9 18:45:34 UTC 2014
+
+
+Directory experiments/multifpga/nightly
+ nightly.models            Locally Modified          245 
+ nightly.benchmarks        Locally Modified          245 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ multiFPGAConnect.py       Locally Modified          245 
+
+
+1) More comments
+2) Extended nightly regressions to include HAsim multifpga targets.
