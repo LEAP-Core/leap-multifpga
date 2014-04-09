@@ -119,7 +119,8 @@ class MultiFPGAConnect():
         moduleList.topDependency += [subbuild]
 
     
-    # Expands logical paths to physical paths using Djikstras algorithm.
+    # Expands logical paths to physical paths using Djikstras
+    # algorithm to introduce hops across platforms.
     def connectPath(self, src, sink, platformGraph):
 
         path = self.environment.getPath(src.platform, sink.platform)
@@ -176,7 +177,35 @@ class MultiFPGAConnect():
                 pair[1].sourcePartnerModule = pair[0].module
 
    
-      
+    # Main compiler routine.  
+
+    # 1) Reads in LI graph dumps from
+    # subordinate builds.  Merges these graphs to form a
+    # representation of the LI program
+
+    # 2) Decorates graph with feedback about program properties.  This
+    # includes channel traffic information and module area usages.
+
+    # 3) Assigns modules to platforms based on physical
+    # properties. Alternatively, programmer can provide a direct
+    # mapping.
+    
+    # 4) Routes connections.  Communicating modules may be placed on
+    # platforms that are physically distant.  In this phase, we
+    # introduce new logical channels that bridge platforms.
+
+    # 5) Construct optimized routers (called analyzeNetwork).  Uses
+    # physical information about the platform to build
+    # program-specific routers.  Generally tries to do static load
+    # balancing.
+               
+    # 6) Generate Code.  Produces platform-specific routing code
+    # source. 
+
+    # 7) Construct bitfiles (unimplemented).  Uses object code
+    # produced during the first compilation pass to orchestrate the
+    # construction of bitfiles for each FPGA target.
+
     def synthesizeRouters(self, target, source, env):  
         # We should replace this with a call to generate it. 
         environmentGraph = self.environment
@@ -212,6 +241,9 @@ class MultiFPGAConnect():
 
 
 
+    # Constructs a graph representation of the complete LI program.
+    # Reads in LI Graphs from each language build/object code, merging
+    # these together to produce a single LI graph.
     def parseModuleGraph(self, environmentGraph):
         APM_NAME = self.moduleList.env['DEFS']['APM_NAME']
         # Build list of logs.  It might be better if we could directly get the logfile names 
@@ -243,6 +275,13 @@ class MultiFPGAConnect():
 
         return mergedGraph
         
+
+    # Assigns LI modules to platforms.  Currently, this is done using
+    # a mapping file, in which the programmer assigns specific modules
+    # to specific platforms.  This function produces the
+    # "platformGraph", a representation which views each platform a
+    # module with LI channels.  The "platformGraph" is progressively
+    # elaborated in subsequent compilation passes.
     def placeModules(self, environmentGraph, moduleGraph):
         # first we need to map the platform modules to their platform
         for platformName in environmentGraph.getPlatformNames():          

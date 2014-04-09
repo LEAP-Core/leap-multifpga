@@ -20,5 +20,5 @@ class Via():
 
 
     def __repr__(self):
-        return "Via width: " + str(self.via_width) + " load: " + str(self.via_load) + " links: " + str(self.via_links) + " type: " + str(self.umfType)
+        return "Via direction:" + self.via_direction +  "width: " + str(self.via_width) + " load: " + str(self.via_load) + " links: " + str(self.via_links) + " type: " + str(self.umfType) + " flowcontrol_link: " + str(self.via_outgoing_flowcontrol_link) +  " flowcontrol_via: " + str(self.via_outgoing_flowcontrol_via) 
     

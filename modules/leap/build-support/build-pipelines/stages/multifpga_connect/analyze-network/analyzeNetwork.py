@@ -418,22 +418,38 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
     # Now we need to assign flow control and build the final metadata structures. 
     # We can't do this in the previous loop because the algorithm will select
     # potentially assymetric links for each target.
+
+    # Note that when we examine flow control, we are looking at
+    # egresses and ingresses on the SAME platform. This is because the
+    # ingress needs the local egress to transmit its data
+
     ingressFlowcontrolAssignment = {}
+
+    for platform in environmentGraph.getPlatformNames():         
+          for targetPlatform in egressPlatforms[platform]:
+              if(not targetPlatform in ingressFlowcontrolAssignment): 
+                  ingressFlowcontrolAssignment[targetPlatform] = {}               
+
     egressLinks = {}
     viaLoads = {}
-    for platform in environmentGraph.getPlatformNames():
-          ingressFlowcontrolAssignment[platform] = {}
+    for platform in environmentGraph.getPlatformNames(): 
+
+          # We are assigning flowcontrol links for "platform" This
+          # means tying platform's ingress and egress together.
+          # Unlike other code in this function which is considering
+          # ingress/egress pairs on different platforms, this code is
+          # operating locally on platform, and so generally uses
+          # [platform][targetPlatform] addressing.
+
           egressLinks[platform] = {}
           viaLoads[platform] = {}
           for targetPlatform in egressPlatforms[platform]:
-
-              logicalEgress = environmentGraph.getPlatform(platform).egresses[targetPlatform].logicalVias
-              logicalIngress = environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias
-
+             
+              # Local ingresses use local egresses for flowcontrol.
               # We need to first consider the other platform's ingress.
               # It gets mapped to our egress. 
               localEgress = egressViasInitial[platform][targetPlatform]
-              localIngress = ingressViasInitial[targetPlatform][platform]
+              localIngress = ingressViasInitial[platform][targetPlatform]
 
               egressLinks[platform][targetPlatform] = []
               ingressFlowcontrolAssignment[platform][targetPlatform] = []
@@ -480,13 +496,14 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
                 egress_first_pass = egressViasInitial[platform][targetPlatform][via]
                 ingress_first_pass = ingressViasInitial[targetPlatform][platform][via]
 
+                logicalEgress = environmentGraph.getPlatform(platform).egresses[targetPlatform].logicalVias
+                logicalIngress = environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias
+
                 if(pipeline_debug):
                     print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
                     print "Initial LogicalEgress: " + str(logicalEgress)
                     print "Initial LogicalIngress: " + str(logicalIngress)
 
-                logicalEgress = environmentGraph.getPlatform(platform).egresses[targetPlatform].logicalVias
-                logicalIngress = environmentGraph.getPlatform(targetPlatform).ingresses[platform].logicalVias
 
                 # let's find the maximum width guy so that we calculate the types correctly. 
                 assignedConnections = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
@@ -505,6 +522,8 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
                 umfType = generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth, moduleList) 
 
+
+                # egressLinks and viaLoads are shared by the ingress and egress. They must be symmetric.
                 if(egress_first_pass.via_width !=  ingress_first_pass.via_width):
                     print "Via widths unequal, bailing out" 
                     exit(0);
@@ -512,9 +531,6 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
                 if(egress_first_pass.via_links !=  ingress_first_pass.via_links):
                     print "Via widths unequal, bailing out"
                     exit(0);
-
-
-                # egressLinks and viaLoads are shared by the ingress and egress. They must be symmetric.
 
                 egress = Via(platform,targetPlatform,"egress", umfType, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], egress_first_pass.via_links, egressLinks[platform][targetPlatform][via] - egress_first_pass.via_links, egress_first_pass.via_method, egress_first_pass.via_switch, ingressFlowcontrolAssignment[targetPlatform][platform][via][1], ingressFlowcontrolAssignment[targetPlatform][platform][via][0], viaLoads[platform][targetPlatform][via], umfType.fillerBits)
        
@@ -526,8 +542,8 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
                 if(pipeline_debug):
                     print "Via pair " + egress_first_pass.via_switch + ": " + str(via) + ' width: '  + str(ingress_first_pass.via_width) + ' links" ' + str(egressLinks[platform][targetPlatform][via])
-                    print "LogicalEgress: " + str(logicalEgress)
-                    print "LogicalIngress: " + str(logicalIngress)
+                    print "Final LogicalEgress: " + str(logicalEgress)
+                    print "Final LogicalIngress: " + str(logicalIngress)
 
 def analyzeNetworkComb(moduleList, environmentGraph, platformGraph):
     analyzeNetworkNonuniform(generateViaCombinational, moduleList, environmentGraph, platformGraph)

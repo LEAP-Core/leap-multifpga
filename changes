@@ -5960,3 +5960,27 @@ compilation.
 occurs.
 
 
+
+----------
+keflemin    Date: Wed Apr  9 13:24:14 EDT 2014  CSN: CSN-multifpga-245
+                  Wed Apr  9 17:24:14 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/generate-code
+ generateCode.py           Locally Modified          244 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/common
+ via.py                    Locally Modified          244 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ multiFPGAConnect.py       Locally Modified          244 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network
+ analyzeNetwork.py         Locally Modified          244 
+
+
+1) Ferreted out a bug in analyze network that was causing builds with
+asymmetric router allocations to fail.  Complex HAsim builds are now
+operation with router optimizations turned on. 
+
+2) Added more commments. 

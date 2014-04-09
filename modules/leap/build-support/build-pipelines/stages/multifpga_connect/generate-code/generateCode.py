@@ -21,7 +21,7 @@ def getTargetPlatforms(platformGraph, platform):
     return targetPlatforms
 
 def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
-
+    
     pipeline_debug = getBuildPipelineDebug(moduleList)
 
     ENABLE_TYPE_COMPRESSION = moduleList.getAWBParam('multi_fpga_connect', 'ENABLE_TYPE_COMPRESSION')
@@ -269,6 +269,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
         if (GENERATE_ROUTER_DEBUG):      
             header.write('\nDEBUG_SCAN_FIELD_LIST ' + via_dbg + ' = List::nil;\n')
 
+
         for via_idx in range(len(egressVias)):
             if(egressVias[via_idx].via_links > 0):                
                 # create array of links for constructor
@@ -276,7 +277,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
                 # these no longer necessarily occur at the head of the list
                 for ingressVia in ingressVias:
                     if(ingressVia.via_outgoing_flowcontrol_via == via_idx):
-                      egressVectors[via_idx][ingressVia.via_outgoing_flowcontrol_link] = ingressVia.via_switch + ".flowcontrol_response"
+                        egressVectors[via_idx][ingressVia.via_outgoing_flowcontrol_link] = ingressVia.via_switch + ".flowcontrol_response"
 
                 linkArray = "{"  
                 
@@ -649,11 +650,22 @@ def generateCode(moduleList, environmentGraph, platformGraph):
 
     # really, this is a pairwise decision, but for now we'll assume the underlying calls will 
     # interrogate the type of their counterpart.
+
+    pipeline_debug = getBuildPipelineDebug(moduleList)
+    if(pipeline_debug):
+        for platformName in environmentGraph.getPlatformNames(): 
+            platform = environmentGraph.getPlatform(platformName)         
+            targetPlatforms = getTargetPlatforms(platformGraph, platformName)
+            for targetPlatform in targetPlatforms:
+                egressVias = environmentGraph.platforms[platformName].getEgress(targetPlatform).logicalVias
+                ingressVias = environmentGraph.platforms[targetPlatform].getIngress(platformName).logicalVias
+                print "For Egress " + platformName + ' -> ' + targetPlatform + ": " + str(egressVias)
+                print "For Ingress " + platformName + ' <- ' + targetPlatform + ": " + str(ingressVias)
+        
     for platformName in environmentGraph.getPlatformNames():          
-        platform = environmentGraph.getPlatform(platformName)
- 
-        if(platform.platformType == 'CPU'):
+        platformObject = environmentGraph.getPlatform(platformName)
+        if(platformObject.platformType == 'CPU'):
             generateCodeCPP(moduleList, platformName, environmentGraph, platformGraph)
-        if(platform.platformType == 'FPGA'  or platform.platformType == 'BLUESIM'):
+        if(platformObject.platformType == 'FPGA'  or platformObject.platformType == 'BLUESIM'):
             generateCodeBSV(moduleList, platformName, environmentGraph, platformGraph)
 
