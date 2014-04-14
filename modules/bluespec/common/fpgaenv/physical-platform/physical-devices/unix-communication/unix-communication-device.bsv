@@ -34,6 +34,7 @@ import Vector::*;
 import GetPut::*;
 import Connectable::*;
 import Clocks::*;
+import LFSR::*;
 
 `include "awb/provides/umf.bsh"
 `include "awb/provides/physical_platform_utils.bsh"
@@ -127,11 +128,18 @@ module mkUNIXCommDevice#(String outgoing, String incoming) (UNIX_COMM_DEVICE);
 
 endmodule
 
+typedef enum {
+  FLIP_ALL,
+  FLIP_ONE
+} ERROR_CASE deriving (Bits, Eq);
+
 module mkUNIXCommDeviceShift#(String outgoing, String incoming)
     // interface
                   (UNIX_COMM_DEVICE);
     
-    
+    // error correction test harness
+    LFSR#(Bit#(16)) lfsr <- mkLFSR_16();
+    Reg#(ERROR_CASE) errorCase <- mkReg(FLIP_ONE);
 
     // state
     Reg#(Bit#(8))  handle      <- mkReg(0);
@@ -202,7 +210,7 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
           end
     endrule
 
-   Reg#(Bit#(13)) count <- mkReg(0); 
+   Reg#(Bit#(`UNIX_COMM_ERRORS_FREQ)) count <- mkReg(0); 
 
     // ==============================================================
     //                          Methods
@@ -228,16 +236,14 @@ module mkUNIXCommDeviceShift#(String outgoing, String incoming)
                 // occasionally damage a message
                 if(count + 1 == 0)
                 begin 
-                    flip = ~0;
+                    Bit#(TLog#(TMul#(`UNIX_COMM_NUM_WORDS,`UNIX_COMM_WORD_WIDTH))) flipIdx = truncate(lfsr.value);
+                    flip[flipIdx] = 1;
+                    lfsr.next();
                 end
   
                 count <= count + 1;
  
-                // occasionally drop a message.
-                if(count != {1'b0,~0})
-                begin
-                    marshaller.enq(unpack(chunk^flip));
-                end
+                marshaller.enq(unpack(chunk^flip));
             end
             else
             begin

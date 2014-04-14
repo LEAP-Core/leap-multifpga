@@ -101,6 +101,7 @@ lim_compression=Latency-insensitive Module Type Compression
 lim_common=Latency-insensitive Module Common Files
 lim_generate_code=Latency-insensitive Module Code Generation
 lim_analyze_network=Latency-insensitive Module Network Analysis
+lim_place_modules=Latency-insensitive Module Places
 
 [Latency-insensitive Module Common Files]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/common/lim-common.awb
@@ -120,3 +121,7 @@ MAX_NUMBER_OF_VIAS=1
 [Latency-insensitive Module Common Files/Params]
 USE_DEFAULT_UMF_PARAMETERS=1
 ENABLE_AGRESSIVE_UMF_PARAMETERS=0
+
+[Latency-insensitive Module Places]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/map/place-modules-multifpga.awb
+Packagehint=multifpga

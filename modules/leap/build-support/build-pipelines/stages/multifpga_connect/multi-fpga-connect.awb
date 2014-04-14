@@ -12,6 +12,7 @@
 %requires lim_common
 %requires lim_compression
 %requires lim_analyze_network
+%requires lim_place_modules
 
 
 

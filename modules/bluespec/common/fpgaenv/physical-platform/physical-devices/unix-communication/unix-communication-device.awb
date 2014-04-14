@@ -25,5 +25,8 @@
 
 %param UNIX_COMM_DEBUG 0 "Unix communication device"
 %param UNIX_COMM_ERRORS 0 "Turns on occasional bit errors"
+%param UNIX_COMM_ERRORS_FREQ 14 "Sets frequency of damaged packets.  Damage occurs with 1/2^(UNIX_COMM_ERRORS_FREQ + 1) probability."
+
+
 
 

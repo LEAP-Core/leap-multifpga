@@ -10,7 +10,6 @@ import cPickle as pickle
 from model import  *
 from fpga_environment_parser import *
 from type_parser import *
-from fpgamap_parser import *
 from multi_fpga_generate_bitfile import *
 from multi_fpga_log_generator import *
 from li_module import *
@@ -18,6 +17,7 @@ from lim_generate_code import *
 from lim_common import *
 from lim_compression import *
 from lim_analyze_network import *
+from lim_place_modules import *
 
 # dependencies from our package 
 from activity import *
@@ -45,13 +45,6 @@ class MultiFPGAConnect():
             print "Found more than one environment file: " + str(envFile) + ", exiting\n"
     
         self.environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
-
-        mappingFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
-
-        if(len(mappingFile) != 1):
-            print "Found more than one mapping file: " + str(envFile) + ", exiting\n"
-
-        self.mapping = parseFPGAMap(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0])
 
         # we produce some bsh in each platform
         self.platformData = {}
@@ -110,9 +103,13 @@ class MultiFPGAConnect():
 
             moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
     
+        mappingFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
+
+        subbuildDeps = moduleList.topModule.moduleDependency['PLATFORM_LI'] + moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] + ['./site_scons/multi_fpga_connect/multiFPGAConnect.py'] 
+
         subbuild = moduleList.env.Command( 
             moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],        
-            moduleList.topModule.moduleDependency['PLATFORM_LI'] + moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] + ['./site_scons/multi_fpga_connect/multiFPGAConnect.py'],
+            subbuildDeps,
             self.synthesizeRouters
             )                   
 
@@ -221,7 +218,7 @@ class MultiFPGAConnect():
 
         # Assign modules to platforms.  This yields the platformGraph, a
         # view in which all LIMs have been assigned a platform.
-        platformGraph = self.placeModules(environmentGraph, moduleGraph)
+        platformGraph = placeModules(self.moduleList, environmentGraph, moduleGraph)
 
         # Route LI channels between platforms.      
         self.routeConnections(platformGraph)
@@ -277,81 +274,6 @@ class MultiFPGAConnect():
         return mergedGraph
         
 
-    # Assigns LI modules to platforms.  Currently, this is done using
-    # a mapping file, in which the programmer assigns specific modules
-    # to specific platforms.  This function produces the
-    # "platformGraph", a representation which views each platform a
-    # module with LI channels.  The "platformGraph" is progressively
-    # elaborated in subsequent compilation passes.
-    def placeModules(self, environmentGraph, moduleGraph):
-        # first we need to map the platform modules to their platform
-        for platformName in environmentGraph.getPlatformNames():          
-            moduleGraph.modules[platformName].putAttribute('MAPPING', platformName)
-
-        # Pick a mapping algorithm here. We only have one, so we call it directly. 
-        self.placeModulesWithMapFile(moduleGraph)
-
-        # now that we have placed the modules, we can build a new view
-        # of the system, the platform graph.  In this graph we consider
-        # only platforms, and their inter-platform connections.  
-        platformConnections = []
-        for module in moduleGraph.modules.values():
-            platformMapping = module.getAttribute('MAPPING')
-            for channel in module.channels:
-                if(self.pipeline_debug):
-                    print "Mapper Examining Channel: " + channel.name + "\n"
-
-                # it is possible that this channel is unassigned, if so, it is dropped.
-                if(channel.partnerChannel == 'unassigned'):
-                    continue
-
-                if(self.pipeline_debug):
-                    print "Partner channel: " + channel.partnerChannel.name + "\n"
-                    print "Partner module: " + channel.partnerModule.name + "\n"
-
-                # we only care about inter-FPGA channels
-                if(platformMapping == channel.partnerModule.getAttribute('MAPPING')):
-                    continue
-
-                if(self.pipeline_debug):
-                    print "Placer Examining channel : " + channel.name + " mapped to: " + platformMapping + " partnerModule " + str(channel.partnerModule.name) + "\n"            
-
-
-                # We don't actually care about specific modules here. We
-                # simply re-cast the platforms as the 'modules', with
-                # one 'module' per platform.  I wish python had better
-                # inheritance support.
-                channelCopy = channel.copy()
-                channelCopy.module_name = platformMapping
-                platformConnections.append(channelCopy)
-
-            for chain in module.chains:
-
-                if(self.pipeline_debug):
-                    print "Placer Examining chain : " + chain.name + " mapped to: " + platformMapping + "\n"            
-
-                chainCopy = chain.copy()
-                chainCopy.module_name = platformMapping
-                platformConnections.append(chainCopy)
-                
-               
-        platformGraph = LIGraph(platformConnections)
-
-        if(self.pipeline_debug):
-            print "Post placement platform graph: " + str(platformGraph) + "\n"
-
-        return platformGraph
-
-    # Places modules onto platforms using a programmer-supplied
-    # mapping file.
-    def placeModulesWithMapFile(self,moduleGraph):
-        for moduleName in moduleGraph.modules:
-            # have we already mapped this module?
-            if(not moduleName in self.environment.getPlatformNames()):
-                moduleObject = moduleGraph.modules[moduleName]   
-                moduleObject.putAttribute('MAPPING', self.mapping.getSynthesisBoundaryPlatform(moduleName))
-        return moduleGraph
- 
     # Routes channels between physical platforms.  Uses different
     # strategies depending on the communication class.  LIChannels are
     # routed using a channel-load oblivious Djiskstra's algorithm.

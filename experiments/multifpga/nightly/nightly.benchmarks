@@ -4,7 +4,7 @@
 #
 # ***************
 
-experiments = throughput li_test
+experiments = throughput throughput_reliable li_test
 #
 # A simple configuration
 #
