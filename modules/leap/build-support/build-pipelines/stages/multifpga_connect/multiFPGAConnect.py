@@ -1,4 +1,5 @@
 # python libraries
+
 import re
 import sys
 import SCons.Script
@@ -212,7 +213,7 @@ class MultiFPGAConnect():
 
         # Assign activity factors to all communications channels.
         if(self.pipeline_debug):
-            print "Module Graph: " + str(moduleGraph) + "\n"
+            print "Module Graph:  " + str(moduleGraph) + "\n"
   
         assignActivity(self.moduleList, moduleGraph)
 
@@ -270,6 +271,13 @@ class MultiFPGAConnect():
 
         if(self.pipeline_debug):
             print 'parseModuleGraph found ' + str(mergedGraph) + 'subordinate graphs'
+
+        # now that we've completely merged the graph, we can check for
+        # errors and trim optional links.
+        mergedGraph.trimOptionalChannels()
+        if(mergedGraph.checkUnmatchedChannels()):
+            print "Unmatched Channels in : " + str(mergedGraph)
+            exit(0)
 
         return mergedGraph
         

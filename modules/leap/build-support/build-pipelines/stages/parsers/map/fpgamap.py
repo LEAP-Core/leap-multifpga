@@ -11,7 +11,10 @@ class FPGAMap(object):
         self.mapping[boundary] = platform
 
     def getSynthesisBoundaryPlatform(self,boundary):
-        return self.mapping[boundary]
+        if(boundary in self.mapping):
+            return self.mapping[boundary]
+        else:
+            return None
 
     def getPlatformNames(self):
         return self.mapping.keys()

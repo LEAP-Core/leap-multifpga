@@ -6133,3 +6133,24 @@ using pyglpk (a new dependency).
 
 2) Refactored crc test code to periodically flip single (randomly
 chosen) bit.  Added test case to nightly.
+
+----------
+keflemin    Date: Thu Apr 17 17:18:09 EDT 2014  CSN: CSN-multifpga-248
+                  Thu Apr 17 21:18:09 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers/map
+ fpgamap.py                Locally Modified          247 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ activity.py               Locally Modified          247 
+ multiFPGAConnect.py       Locally Modified          247 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/map
+ placeModules.py           Locally Modified          247 
+
+
+Added communication-minimization algorithm for automatic placement of
+LI Modules onto arbitrary LI graph. The algorithm takes the form of a
+linear program, which is fed into glpk. 
+

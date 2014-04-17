@@ -96,14 +96,16 @@ def assignActivity(moduleList, moduleGraph):
 
     for moduleName in moduleGraph.modules.keys():
         for channel in moduleGraph.modules[moduleName].channels:
-            # An activity less than 0 means that we have not seen this
-            # channel before.
-            if(channel.activity < 0):
+            # This use of 1 as a default is somewhat kludgy.
+            if(channel.activity <= 1):
                 channel.activity = (float(totalTraffic)/(2*(channels)))  # no stat?  Make connections better than chains
+                printActivity("Assigning Load (default) ", channel)                    
                 
         for chain in moduleGraph.modules[moduleName].chains:
             if(chain.activity < 0):
                 chain.activity = (float(totalTraffic)/(2*(channels))) * 0.1  # no stat?  Make connections better than chains
+
+
 
           # only create a chain when we see the sink                                                                                                               
 #          if(dangling.sc_type == 'ChainSink'):
