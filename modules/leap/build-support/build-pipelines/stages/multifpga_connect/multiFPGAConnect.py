@@ -19,6 +19,7 @@ from lim_common import *
 from lim_compression import *
 from lim_analyze_network import *
 from lim_place_modules import *
+from lim_backend_builds import *
 
 # dependencies from our package 
 from activity import *
@@ -235,8 +236,7 @@ class MultiFPGAConnect():
 
         # Build backend flow using object code created during the first
         # pass. currenlty not implemented.
-   
-        # self.constructBitfileBuilds()
+        constructBackendBuilds(self.moduleList, environmentGraph, platformGraph)
 
 
 

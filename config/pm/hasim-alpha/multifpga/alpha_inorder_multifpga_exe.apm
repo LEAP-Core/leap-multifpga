@@ -198,7 +198,12 @@ lim_compression=Latency-insensitive Module Type Compression
 lim_common=Latency-insensitive Module Common Files
 lim_generate_code=Latency-insensitive Module Code Generation
 lim_place_modules=Latency-insensitive Module Places
+lim_backend_builds=Latency-insensitive Backend Build Construction
 
 [Latency-insensitive Module Places]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/map/place-modules-multifpga.awb
+Packagehint=multifpga
+
+[Latency-insensitive Backend Build Construction]
+File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/construct-backend-builds/construct-backend-builds.awb
 Packagehint=multifpga

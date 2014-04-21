@@ -13,7 +13,7 @@
 %requires lim_compression
 %requires lim_analyze_network
 %requires lim_place_modules
-
+%requires lim_backend_builds
 
 
 %scons %library multiFPGAConnect.py
