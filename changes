@@ -6273,3 +6273,116 @@ Added scaffolding for constructing backend build flows as a by-product
 of LIM compilation.  This enables LIM backend flows to largely operate
 on object codes (as opposed to needing to recompile original source.)
 
+
+----------
+keflemin    Date: Tue May 13 08:18:31 EDT 2014  CSN: CSN-multifpga-250
+                  Tue May 13 12:18:31 UTC 2014
+
+
+Directory config/pm/leap/tests/aurora_driver
+ fpgaenv-aurora-debug.apm  Locally Modified          249 
+
+Directory config/pm/leap/demos/multifpga
+ test_throughput_exe.apm   Locally Added               0 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-airblue-fpgaN.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-airblue-fpga0.apm Locally Modified          249 
+ fpgaenv-hybrid-ml605-pcie-aurora.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-airblue-fpga1.apm Locally Modified          249 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hybrid-pcie-cpu0.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-cpu0.apm Locally Modified          249 
+ multifpgaenv-hwsw-exe-fpga0-aurora.apm Locally Modified          249 
+ multifpgaenv-hwsw-exe-fpga0.apm Locally Modified          249 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-vexe-fpgaN.apm Locally Modified          249 
+ fpgaenv-hybrid-vc707-pcie-aurora.apm Locally Modified          249 
+ multifpgaenv-hybrid-vexe-fpga0.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-fpga0-aurora.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-fpga0-quad.apm Locally Modified          249 
+ multifpgaenv-hybrid-dual-pcie-cpu0.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-fpga0.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-fpga1.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-fpga0-dist-cache.apm Locally Modified          249 
+
+Directory config/pm/leap/submodels/fpgaenv/inter-fpga-test
+ inter-fpga-test-hybrid-exe-fpga1.apm Locally Modified          249 
+ inter-fpga-test-hybrid-exe-fpga0.apm Locally Modified          249 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga1-dist-cache.apm Locally Modified          249 
+ multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm Locally Modified          249 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_exe.apm Locally Modified          249 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-vc707-fpga0.apm Locally Modified          249 
+ multifpgaenv-hybrid-vc707-fpga1.apm Locally Modified          249 
+ multifpgaenv-hybrid-xupv5-fpga1-sata.apm Locally Modified          249 
+ multifpgaenv-hybrid-xupv5-fpga0.apm Locally Modified          249 
+ multifpgaenv-hybrid-xupv5-fpga1.apm Locally Modified          249 
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          249 
+
+Directory config/pm/multifpga/fpga_submodels/hwsw
+ multifpgaenv-hwsw-vc707-fpga0.apm Locally Modified          249 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          249 
+ multifpgaenv-hybrid-xupv5-fpga0-sata.apm Locally Modified          249 
+
+Directory config/pm/multifpga/inter_fpga_test/submodels
+ fpgaenv-hybrid-xup-v5-pcie-sma.apm Locally Modified          249 
+ fpgaenv-hybrid-xup-v5-pcie-sata.apm Locally Modified          249 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          249 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ multiFPGAConnect.py       Locally Modified          249 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/construct-backend-builds
+ constructBackendBuilds.py Locally Modified          249 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/map
+ placeModules.py           Locally Modified          249 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ generate_logfile.py       Locally Modified          249 
+
+Directory modules/leap/build-support/build-pipelines/stages/null_software
+ null_software.awb         Locally Modified          249 
+
+Directory modules/leap/build-support/build-pipelines/pipelines/multifpga
+ multiFPGAPipeline.py      Locally Modified          249 
+
+Directory modules/leap/build-support/project
+ platform-multifpga.awb    Locally Modified          249 
+ project-multifpga.awb     Locally Modified          249 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform_verilog
+ VerilogSimulationPipelineMultiFPGA.py Locally Modified          249 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform_sim
+ SimulationPipelineMultiFPGA.py Locally Modified          249 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform
+ FPGAPlatformPipeline.py   Locally Modified          249 
+
+
+Major reorganization of LIM compilation flow. LIM compiler now passes
+objects obtained from the first pass compilation through to the second
+pass.  The second pass does not directly observe user code.
+
+The major exception to object code passing (and the headache in
+implementing it) is that front and backend must share context.
+Previously, context needed to be shared, but only the backend builds,
+and only some of the context.  Strings, for example were correctly
+generated.  Since we now compile user code only once, this user
+context must be propagated to the second pass. Particularly angering
+was that rrr generates IDs based on the ordering of its command line
+(as opposed to something more reproducible like lexical ordering.)
+

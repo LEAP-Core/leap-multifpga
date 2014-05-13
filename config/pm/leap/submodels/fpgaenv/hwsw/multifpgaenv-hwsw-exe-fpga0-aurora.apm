@@ -210,3 +210,10 @@ bluesim_tool=BSV Bluesim Build Tool
 [MultiFPGA BlueSim Platform Build Pipeline (HW/SW)]
 File=modules/leap/build-support/pipelines/hwsw/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
 Packagehint=multifpga
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

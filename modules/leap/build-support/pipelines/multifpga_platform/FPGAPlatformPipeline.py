@@ -13,16 +13,17 @@ from mcd_tool import *
 
 
 class Build(ProjectDependency):
-  def __init__(self, moduleList):
-    WrapperGen(moduleList)
-    Iface(moduleList)
-    BSV(moduleList)
-    if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
-      FPGAProgram(moduleList)
-      Software(moduleList)
-      MCD(moduleList)
-      Synthesize(moduleList)
-      PostSynthesize(moduleList)
+    def __init__(self, moduleList):
+        WrapperGen(moduleList)
+        Iface(moduleList)
+        BSV(moduleList)
+        if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
+            FPGAProgram(moduleList)
+            MCD(moduleList)
+            Synthesize(moduleList)
+            PostSynthesize(moduleList)
 
-
-
+        if (moduleList.getAWBParam('software_tool', 'BUILD_FIRST_PASS_SOFTWARE')):
+            Software(moduleList)
+        
+  

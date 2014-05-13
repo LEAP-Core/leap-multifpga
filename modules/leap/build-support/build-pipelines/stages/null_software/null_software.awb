@@ -12,3 +12,5 @@
 
 %scons %library software_null.py
 
+%param --global BUILD_FIRST_PASS_SOFTWARE 0 "Should we build software during first pass build? (For legacy compilation only)."
+

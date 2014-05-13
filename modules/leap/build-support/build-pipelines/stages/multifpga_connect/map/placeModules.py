@@ -185,8 +185,9 @@ def placeModules(moduleList, environmentGraph, moduleGraph):
 
     # first we need to map the platform modules (those physically tied
     # to the platform) to their platform
-    for platformName in environmentGraph.getPlatformNames():          
-        moduleGraph.modules[platformName].putAttribute('MAPPING', platformName)
+    for platformName in environmentGraph.getPlatformNames():
+        if(platformName in moduleGraph.modules):
+            moduleGraph.modules[platformName].putAttribute('MAPPING', platformName)
 
     PLACER_ALGORITHM = moduleList.getAWBParam('lim_place_modules', 'PLACER_ALGORITHM')
     eval(PLACER_ALGORITHM + '(moduleList, environmentGraph, moduleGraph)')
@@ -236,6 +237,11 @@ def placeModules(moduleList, environmentGraph, moduleGraph):
             
            
     platformGraph = LIGraph(platformConnections)
+
+    # For routing purposes, platform modules must be assigned mappings. 
+    # For now, these are trivial. 
+    for module in platformGraph.modules.values():
+        module.putAttribute('MAPPING', module.name)
 
     if(pipeline_debug):
         print "Post placement platform graph: " + str(platformGraph) + "\n"

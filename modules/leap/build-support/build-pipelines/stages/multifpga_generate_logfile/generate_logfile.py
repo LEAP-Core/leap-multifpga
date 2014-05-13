@@ -9,22 +9,49 @@ from subprocess import Popen
 from subprocess import PIPE
 from subprocess import STDOUT
 
+# Dynamic parameters are global, and each platform may have a few
+# dynamic parameters.  First we read in the dynamic parameters of
+# each platform, which are produced at configuration time (above)
+# Then, we build a representation of all dynamic parameters, and
+# then overwrite the dynamic parameters of each subordinate build.
+def canonicalizeDynamicParameters(environmentGraph, buildDirFunction):        
+    dynamicParamsSet = set() # Use set properties to eliminate duplicates
+    for platformName in environmentGraph.getPlatformNames():
+        platform = environmentGraph.getPlatform(platformName)
+        platformBuildDir = buildDirFunction(platform.name)
+        paramsFile = os.getcwd() + '/' + platformBuildDir + '/iface/src/dict/dynamic_params.dic'
+        paramsHandle = open(paramsFile, 'r')
+        for line in paramsHandle.readlines():
+            dynamicParamsSet.add(line)
+    return dynamicParamsSet    
+
+def writeDynamicParameters(environmentGraph, buildDirFunction, dynamicParamsSet):        
+    # now we overwrite the old files. 
+    for platformName in environmentGraph.getPlatformNames():
+        platform = environmentGraph.getPlatform(platformName)
+        platformBuildDir = buildDirFunction(platform.name)
+        paramsFile = os.getcwd() + '/' + platformBuildDir + '/iface/src/dict/dynamic_params.dic'
+        paramsHandle = open(paramsFile, 'w')
+        for line in dynamicParamsSet:
+            paramsHandle.write(line)
+    
 def makePlatformLogName(name, apm):
     return name +'_'+ apm + '_multifpga_logs'
 
 def makePlatformLogBuildDir(name, apm):
     return 'multi_fpga/' + makePlatformLogName(name,apm) + '/pm'
 
+def makePlatformConfigPath(name):
+    config_dir = 'multi_fpga/apm-local/'
+    if not os.path.exists(config_dir): os.makedirs(config_dir)
+    return config_dir + name
+
+
 class MultiFPGAGenerateLogfile():
 
     def __init__(self, moduleList):
 
         self.pipeline_debug = getBuildPipelineDebug(moduleList)
-
-        def makePlatformConfigPath(name):
-            config_dir = 'multi_fpga/apm-local/'
-            if not os.path.exists(config_dir): os.makedirs(config_dir)
-            return config_dir + name
 
         APM_FILE = moduleList.env['DEFS']['APM_FILE']
         APM_NAME = moduleList.env['DEFS']['APM_NAME']
@@ -44,7 +71,9 @@ class MultiFPGAGenerateLogfile():
         def makePlatformRRRDir(name):
             return makePlatformLogBuildDir(name, APM_NAME) + '/iface/src/rrr'
 
-      
+        def makePlatformBuildDir(name):
+            return makePlatformLogBuildDir(name,APM_NAME)
+
         envFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENVS')
         if(len(envFile) != 1):
             print "Found more than one environment file: " + str(envFile) + ", exiting\n"
@@ -62,7 +91,7 @@ class MultiFPGAGenerateLogfile():
         call(['asim-shell','--batch','create', 'submodel', APM_FILE , 'environment_description', environmentPath])    
         call(['asim-shell','--batch','rename', 'submodel', mappingPath, mappingRootName]) 
 
-        def compile_closure(platform):
+        def compile_closure(platform, enableCache):
              
              def compile_platform_log(target, source, env):
                 
@@ -85,6 +114,11 @@ class MultiFPGAGenerateLogfile():
 
                  if(self.pipeline_debug):
                      print "Compile command is: " + compile_cmd + "\n"
+
+                 # set environment for scons caching     
+                 # Turned off for now.    
+                 #if(enableCache):
+                 #    compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('cache')) + ' '
 
                  sts = execute(compile_cmd)
 
@@ -112,7 +146,6 @@ class MultiFPGAGenerateLogfile():
                 print "leap-configure --pythonize " +  platform.path
 
             rawDump = Popen(["leap-configure", "--pythonize", "--silent", platform.path], stdout=PIPE ).communicate()[0]
-            # fix the warning crap sometimes
             moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName] = ModuleList(moduleList.env, eval(rawDump), moduleList.arguments, "")
             
         # check that all same named file are the same.  Then we can blindly copy all files to all directories and life will be good. 
@@ -124,23 +157,41 @@ class MultiFPGAGenerateLogfile():
         # second compilation pass.
         moduleList.topModule.moduleDependency['MISSING_DICTS'] = {}
         moduleList.topModule.moduleDependency['MISSING_RRRS'] = {}
+        
+        # the assignment here should really be a path assignment. Platform name is a bit non-sensical.
 
         for platformName in environment.getPlatformNames():
             platform = environment.getPlatform(platformName)
-            for dict in moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependencies('GIVEN_DICTS'):
-                if(not dict in moduleList.topModule.moduleDependency['MISSING_DICTS']):                                                     
-                    moduleList.topModule.moduleDependency['MISSING_DICTS'][dict] = platform.name
+            for dictionary in moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependencies('GIVEN_DICTS'):
+                if(not dictionary in moduleList.topModule.moduleDependency['MISSING_DICTS']):                                                     
+                    moduleList.topModule.moduleDependency['MISSING_DICTS'][dictionary] = makePlatformDictDir(platform.name) + '/' + dictionary
 
             # RRR calls can appear in services which can differ across environments. 
             # This code can probably be deprecated at some point once RRR goes away.
             for rrr in moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'] [platformName].getAllDependenciesWithPaths('GIVEN_RRRS'):
                 if(not rrr in moduleList.topModule.moduleDependency['MISSING_RRRS']):                                                     
-                    moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr] = platform.name
+                    moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr] = makePlatformRRRDir(platform.name) + '/' + rrr
+
+        # Add in user code dictionaries and rrrs.
+                    
+        for dictionary in moduleList.getAllDependencies('GIVEN_DICTS'):
+            if(not dictionary in moduleList.topModule.moduleDependency['MISSING_DICTS']):                                                     
+                moduleList.topModule.moduleDependency['MISSING_DICTS'][dictionary] = 'iface/src/dict/' + dictionary
+
+        # RRR calls can appear in services which can differ across environments. 
+        # This code can probably be deprecated at some point once RRR goes away.
+        for rrr in moduleList.getAllDependenciesWithPaths('GIVEN_RRRS'):
+            if(not rrr in moduleList.topModule.moduleDependency['MISSING_RRRS']):                                                     
+                moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr] = 'iface/src/rrr/' + rrr
         
         # We can now set up each platform for the first stage of
         # compilation.  this chiefly involves distributing rrr and dict
         # files around to ensure global agreement on their values.
         
+        # Every module in the system must be given a unique
+        # ID. Ideally this would be a server of some kind, but for
+        # now, we use a parameter...
+        moduleList.topModule.moduleDependency['MODULE_UID_OFFSET'] = 0
 
         # This data structure maintains a hash of all the platforms types
         # to which we have bound the user program.  We only bind the user
@@ -179,28 +230,43 @@ class MultiFPGAGenerateLogfile():
           
           execute('asim-shell --batch cp ' + platform.path +" "+ platformPath) 
           # We only need to build the application once for each platform type.
-          # The second leg of the or statement deals with legacy platforms which have a master.  
+          # The second leg of the or statement deals with legacy platforms which have a master.
+          doCache = False
           if((not platform.platformType in platformBindings) or (platformBindings[platform.platformType] == platformName)):
+              doCache = True
               platformBindings[platform.platformType] = platformName
               execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
+
               if(self.pipeline_debug):
                   print "Platform binding for " + platform.platformType + " is " + platformName
+
+
 
           execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
           execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)
 
-         
+          # For legacy builds, we create software during the first pass. 
+          if(platform.master):
+              execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_FIRST_PASS_SOFTWARE 1')       
+  
           execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_ID ' + str((environment.getSynthesisBoundaryPlatformID(platform.name))))
           execute('asim-shell --batch set parameter ' + platformPath + ' CON_CWIDTH ' +  str(moduleList.getAWBParam('multi_fpga_log_generator', 'SOFT_CONN_CWIDTH')))
           execute('asim-shell --batch set parameter ' + platformPath + ' CON_CHAIN_CWIDTH ' +  str(moduleList.getAWBParam('multi_fpga_log_generator', 'SOFT_CONN_CWIDTH')))
           execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_NAME \\"' + platform.name + '\\"')
           execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_NUM_PLATFORMS ' + str(len(environment.getPlatformNames())))
-          execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 1 ')
+          #execute('asim-shell --batch set parameter ' + platformPath + ' IGNORE_PLATFORM_MISMATCH 1 ')
           execute('asim-shell --batch set parameter ' + platformPath + ' EXPOSE_ALL_CONNECTIONS 1 ')
           execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 1 ')
+          execute('asim-shell --batch set parameter ' + platformPath + ' MODULE_UID_OFFSET ' + str(moduleList.topModule.moduleDependency['MODULE_UID_OFFSET']))
           execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 0 ')
 
-          execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 0 ')
+          #execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 0 ')
+
+          # update uid
+          moduleList.topModule.moduleDependency['MODULE_UID_OFFSET'] += len(moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].synthBoundaries())
+          # for one platform, we must also include the user code.
+          if(doCache):
+              moduleList.topModule.moduleDependency['MODULE_UID_OFFSET'] += len(moduleList.synthBoundaries())
 
           # Dictionaries are global.  Therefore, all builds must see the same context or bad things 
           # will happen.   
@@ -209,12 +275,12 @@ class MultiFPGAGenerateLogfile():
 
           ### TODO: replace with something more pythonic.
           platformDicts = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependencies('GIVEN_DICTS')     
-          for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
-              if(not dict in platformDicts):
+          for dictionary in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
+              if(not dictionary in platformDicts):
                 seperator = ':'
                 if(firstPass):
                     seperator = ''
-                missingDicts += seperator+dict
+                missingDicts += seperator+dictionary
                 firstPass = False
         
           if(self.pipeline_debug):
@@ -238,6 +304,12 @@ class MultiFPGAGenerateLogfile():
           if(self.pipeline_debug):
               print "missingRRRs: " + missingRRRs
 
+          # Compiling IFACE requires extra context. 
+          incPaths = moduleList.env['DEFS']['ROOT_DIR_SW_INC'].split(" ") + moduleList.env['DEFS']['SW_INC_DIRS'].split(" ")    
+          absIncPaths = map(os.path.abspath, incPaths)
+          ROOT_DIR_SW_INC = ":".join(absIncPaths)
+
+          execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_INC_DIRS \\"' + ROOT_DIR_SW_INC  + '\\"')
           execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_DICTS \\"' + missingDicts  + '\\"')
           execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"')
 
@@ -247,13 +319,14 @@ class MultiFPGAGenerateLogfile():
           
           execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
 
+          # TODO: Refactor me!
           # set up the symlinks to missing dictionaries- they aree broken
           # at first, but as we fill in the platforms, they'll come up
           for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
               if(not dict in platformDicts):
                   # lexists works on broken symlinks...
                   path = os.getcwd()
-                  dictPath = os.path.realpath(makePlatformDictDir(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict]) + '/' + dict)
+                  dictPath = os.path.realpath(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict])
                   linkDir  = makePlatformDictDir(platform.name)  
                   linkPath = linkDir  + '/' + dict
                   relDictPath = relpath(dictPath, linkDir)
@@ -261,25 +334,29 @@ class MultiFPGAGenerateLogfile():
                       print "missing link: " + linkPath + ' -> ' + relDictPath
 
                   if(os.path.lexists(linkPath)):
-                      print("This symlink already exists: " + makePlatformDictDir(platform.name)  + '/' + dict)
-                  else:
-                      os.symlink(relDictPath, linkPath)
+                      os.remove(linkPath)
+
+                  os.symlink(relDictPath, linkPath)
             
           # do the same for missing RRRs - this code is similar to that above and should be refactored. 
           for rrr in moduleList.topModule.moduleDependency['MISSING_RRRS'].keys():
               if(not rrr in platformRRRs):
                   # lexists works on broken symlinks...
                   path = os.getcwd()
-                  if(os.path.lexists(makePlatformRRRDir(platform.name)  + '/' + rrr)):
-                      print("This symlink already exists: " + makePlatformRRRDir(platform.name)  + '/' + rrr)
-                  else:
-                      rrrpath = os.path.realpath( makePlatformRRRDir(moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr]) + '/' + rrr)
-                      #the rrr values have some hierarchical information in them...
-                      linkPath  = makePlatformRRRDir(platform.name)  + '/' + rrr
-                      linkDir = os.path.dirname(linkPath)
-                      if(self.pipeline_debug):
-                          print ('Link dir is ' + linkDir)
-                      os.symlink(relpath(rrrpath, linkDir), linkPath)
+                  linkPath  = makePlatformRRRDir(platform.name)  + '/' + rrr
+                  if(os.path.lexists(linkPath)):
+                      os.remove(linkPath)
+                      
+                  rrrpath = os.path.realpath(moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr])
+                  #the rrr values have some hierarchical information in them...
+                  linkDir = os.path.dirname(linkPath)
+                  if(self.pipeline_debug):
+                      print ('Link dir is ' + linkDir)
+                  # create directory structure first. 
+                  if(not os.path.exists(linkDir)):
+                      os.makedirs(linkDir)
+
+                  os.symlink(relpath(rrrpath, linkDir), linkPath)
               
 
           platformLI = platformBuildDir + '/' + platformAPM +  '.li'
@@ -300,7 +377,7 @@ class MultiFPGAGenerateLogfile():
               subbuild = moduleList.env.Command(
                   [wrapperLogTgt, platformLI],
                   [routerBSH],
-                  [ compile_closure(platform),
+                  [ compile_closure(platform, doCache),
                     SCons.Script.Copy(wrapperLogTgt, wrapperLogBld) ]
                   )                         
 
@@ -397,13 +474,17 @@ class MultiFPGAGenerateLogfile():
               subbuild = moduleList.env.Command( 
                   [platformLI],
                   [routerH],
-                  [compile_closure(platform)]
+                  [compile_closure(platform, False)]
                   )
 
               #force build remove me later....          
               moduleList.topDependency += [subbuild]
               moduleList.env.AlwaysBuild(subbuild)
-        
+
+        paramsSet = canonicalizeDynamicParameters(environment, makePlatformBuildDir) 
+        writeDynamicParameters(environment, makePlatformBuildDir, paramsSet) 
+        moduleList.topModule.moduleDependency['CANONICAL_PARAMS'] = [paramsSet] 
+
         # now that we configured things, let's check that the dicts and rrrs are sane
         # we use os.stat to check file equality. It follows symlinks,
         # and it would be an _enormous_ coincidence if non-equal files 
@@ -412,7 +493,7 @@ class MultiFPGAGenerateLogfile():
             platformDicts = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependencies('GIVEN_DICTS')
             for dict in platformDicts:
                 platStat = os.stat(os.path.abspath(makePlatformDictDir(platformName)  + '/' + dict))
-                globalStat = os.stat(os.path.abspath(makePlatformDictDir(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict]) + '/' + dict))
+                globalStat = os.stat(os.path.abspath(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict]))
 
                 if(platStat != globalStat):
                     print "Warning, mismatched dicts: " + str(dict) + " on " + platformName
@@ -421,7 +502,7 @@ class MultiFPGAGenerateLogfile():
             platformRRRs = moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_RRRS')
             for rrr in platformRRRs:
                 platStat = os.stat(os.path.abspath(makePlatformRRRDir(platformName)  + '/' + rrr))
-                globalStat = os.stat(os.path.abspath(makePlatformRRRDir(moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr]) + '/' + rrr))
+                globalStat = os.stat(os.path.abspath(moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr]))
 
                 if(platStat != globalStat):
                     print "Warning, mismatched dicts: " + str(rrr) + " on " + platformName

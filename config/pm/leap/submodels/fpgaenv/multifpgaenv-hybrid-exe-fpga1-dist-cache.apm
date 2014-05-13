@@ -109,8 +109,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
 Packagehint=leap
 
-
-
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
 Packagehint=leap
@@ -127,8 +125,6 @@ LOCAL_MEM_READ_LATENCY=8
 [Local Memory Interface using BRAM]
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-bram.awb
 Packagehint=leap
-
-
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
@@ -182,3 +178,10 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Null software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

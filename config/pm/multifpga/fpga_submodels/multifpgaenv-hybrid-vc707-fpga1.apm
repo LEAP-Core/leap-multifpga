@@ -489,3 +489,10 @@ Packagehint=leap
 [Null Channel IO Module with Dummy Physical]
 File=modules/leap/virtual-platform/channelio/null/null-channelio-with-dummy-physical.awb
 Packagehint=leap
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

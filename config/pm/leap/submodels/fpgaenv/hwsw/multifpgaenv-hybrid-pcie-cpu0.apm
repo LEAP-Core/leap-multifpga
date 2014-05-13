@@ -173,3 +173,10 @@ Packagehint=multifpga
 pcie_device=BlueNoC PCIe Bridge
 physical_platform_config=VC707 Virtex-7 Platform with PCIe
 physical_platform_utils=Common Physical Platform Utilities
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

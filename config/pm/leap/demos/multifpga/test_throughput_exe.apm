@@ -1,0 +1,69 @@
+
+[Global]
+SaveParameters=0
+Description=has strange module alingments
+File=test_throughput_exe
+Version=2.2
+Name=Multifpga synthesis test 
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Pipeline Build
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Pipeline Build
+
+[MultiFPGA Throughput Test (D)]
+File=modules/multifpga/throughputTest/basestation.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Test (C)]
+File=modules/multifpga/throughputTest/repeater-1.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Test Connected Application/Requires]
+hardware_system=MultiFPGA Throughput Single Repeater
+
+[MultiFPGA Throughput Test Connected Application]
+File=modules/multifpga/throughputTest/connected_application/connected-application-throughput.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Repeater]
+File=modules/multifpga/throughputTest/throughput_repeater.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Single Repeater]
+File=modules/multifpga/throughputTest/singleRepeater/singleRepeater.awb
+Packagehint=multifpga
+
+[MultiFPGA Throughput Single Repeater/Requires]
+basestation=MultiFPGA Throughput Test (D)
+throughput_repeater=MultiFPGA Throughput Repeater
+repeater1=MultiFPGA Throughput Test (C)
+
+[HW/SW Hybrid Pipeline Build]
+File=modules/leap/build-support/project/project-pipeline.awb
+Packagehint=leap
+
+[Hybrid Simulation FPGA Environment]
+File=config/pm/leap/submodels/fpgaenv/fpgaenv-hybrid-exe.apm
+Packagehint=leap
+
+[HW/SW Hybrid Pipeline Build/Requires]
+fpgaenv=Hybrid Simulation FPGA Environment
+application_env=Soft Services Hybrid Application Environment
+project_common=Default Hybrid Project Common Utilities
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment/Requires]
+connected_application=MultiFPGA Throughput Test Connected Application
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/leap/submodels/common/project-common-default.apm
+Packagehint=leap

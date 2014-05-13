@@ -190,3 +190,10 @@ fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

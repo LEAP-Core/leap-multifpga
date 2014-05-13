@@ -207,3 +207,6 @@ Packagehint=multifpga
 [Latency-insensitive Backend Build Construction]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/construct-backend-builds/construct-backend-builds.awb
 Packagehint=multifpga
+
+[Latency-insensitive Module Network Analysis/Params]
+MAX_NUMBER_OF_VIAS=1
