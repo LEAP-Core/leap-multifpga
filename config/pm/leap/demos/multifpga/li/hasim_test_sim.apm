@@ -207,3 +207,10 @@ Packagehint=multifpga
 [Latency-insensitive Backend Build Construction]
 File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/construct-backend-builds/construct-backend-builds.awb
 Packagehint=multifpga
+
+[Latency-insensitive Module Common Files/Params]
+USE_DEFAULT_UMF_PARAMETERS=1
+ENABLE_AGRESSIVE_UMF_PARAMETERS=0
+
+[Latency-insensitive Module Network Analysis/Params]
+MAX_NUMBER_OF_VIAS=1

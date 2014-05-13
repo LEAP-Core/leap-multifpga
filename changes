@@ -6386,3 +6386,18 @@ context must be propagated to the second pass. Particularly angering
 was that rrr generates IDs based on the ordering of its command line
 (as opposed to something more reproducible like lexical ordering.)
 
+
+----------
+keflemin    Date: Tue May 13 17:22:15 EDT 2014  CSN: CSN-multifpga-251
+                  Tue May 13 21:22:15 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga/li
+ hasim_test_sim.apm        Locally Modified          250 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          250 
+
+
+C++ targets do not use the new object code build, so they still need
+code to be copied through.

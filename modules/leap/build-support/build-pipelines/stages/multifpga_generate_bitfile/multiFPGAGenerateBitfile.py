@@ -126,7 +126,14 @@ class MultiFPGAGenerateBitfile():
 
             execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
             
+            # For software builds, we don't bother with the object
+            # code flow -- software compiles quickly, so the flow is
+            # not necessary at this time.
+            if(platform.platformType == 'CPU'):
+                execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
+
             # The mapping file isn't needed either...  Actually, none of these are needed anymore...
+
             execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
             execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)
 
