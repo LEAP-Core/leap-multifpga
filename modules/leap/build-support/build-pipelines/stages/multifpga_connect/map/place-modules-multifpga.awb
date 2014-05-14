@@ -7,6 +7,6 @@
 
 %scons %library placeModules.py
 
-%param --global PLACER_ALGORITHM "placeModulesWithMapFile" "Which placement function should we be calling."
+%param --global PLACER_ALGORITHM "placeModulesILP" "Which placement function should we be calling."
 
 

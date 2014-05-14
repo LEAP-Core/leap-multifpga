@@ -1,15 +1,3 @@
 model -> FPGA0;
-common_services -> FPGA0;
-connected_application -> FPGA0;
-hasim_funcp -> FPGA0;
-hasim_isa_datapath -> FPGA0;
-funcp_memstate -> FPGA0;
-funcp_memstate_tlb -> FPGA0;
-commands_service -> FPGA0;
-hasim_timep -> FPGA1;
-hasim_private_caches -> FPGA1;
-inorder_pipeline_front_end -> FPGA1;
-decode_stage -> FPGA1;
-inorder_pipeline_back_end -> FPGA1;
-hasim_l1_caches-> FPGA1;
+
 

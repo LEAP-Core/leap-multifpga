@@ -6413,3 +6413,56 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/ge
 
 computePlatform has been removed as a member of LI_CHAIN_INFO. Remove
 it here also.
+
+----------
+keflemin    Date: Wed May 14 16:33:48 EDT 2014  CSN: CSN-multifpga-253
+                  Wed May 14 20:33:48 UTC 2014
+
+
+Directory config/pm/leap/demos/multifpga/li
+ hasim_test_vc707.apm      Locally Modified          252 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hybrid-pcie-cpu0.apm Locally Modified          252 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-dual-pcie-cpu0.apm Locally Modified          252 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_multifpga_vc707.apm Locally Modified          252 
+ alpha_inorder_multifpga_exe.apm Locally Modified          252 
+
+Directory config/pm/multifpga/fpga_submodels
+ acp1-sram.apm             Locally Modified          252 
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers/environment
+ environment.py            Locally Modified          252 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect
+ activity.py               Locally Modified          252 
+ multiFPGAConnect.py       Locally Modified          252 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/map
+ placeModules.py           Locally Modified          252 
+ place-modules-multifpga.awb Locally Modified          252 
+
+Directory modules/bluespec/common/fpgaenv/physical-platform/pcie/dualPCIE
+ dual-pcie-physical-platform.h Locally Modified          252 
+
+Directory modules/multifpga/alpha_inorder
+ sim-mapping.resources     Locally Added               0 
+ sim-mapping.map           Locally Modified          252 
+ sim_mapping.awb           Locally Modified          252 
+ sim-mapping.stats         Locally Added               0 
+
+
+Partial support for automatic mapping of LI modules onto FPGAs. ILP
+placer now optionally uses a resource report to frame constraints for
+module placement.  The new placement is incorporated into the backend
+build flow automatically.
+
+Eventually, the .resources file will be subsumed by an area estimation
+structure from the frontend.  It will be interesting to condsider how
+an unbounded problem like mapping to simulator can be counched in ILP.
+
+

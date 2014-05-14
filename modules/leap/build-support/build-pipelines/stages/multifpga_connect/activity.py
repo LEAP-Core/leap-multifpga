@@ -17,18 +17,10 @@ def parseStats(statsFile):
     logfile = open(statsFile,'r')  
     for line in logfile:
         # There are several ways that we can get stats. One way is instrumenting the router. 
-        if(re.match('.*ROUTER_.*_SENT.*',line)):
+        if(re.match('^TRAFFIC_',line)):
             #We may have a chunked pattern.   
-            match = re.search(r'.*ROUTER_(\w+)(_chunk_\d+)_SENT,.*,(\d+)',line)
+            match = re.match('^TRAFFIC_(\w+),.*,(\d+)',line)
             if(match):
-                #print "Stat Match Chunk" + match.group(1) + " got " + match.group(3) + " from " + line
-                stats[match.group(1)] = int(match.group(3))
-                stats[match.group(1)+match.group(2)] = int(match.group(3))
-                continue
-
-            match = re.search(r'.*ROUTER_(\w+)_SENT,.*,(\d+)',line)
-            if(match):
-                #print "Stat Match " + match.group(1) + " got " + match.group(2) + " from " + line
                 stats[match.group(1)] = int(match.group(2))
 
         # TODO: a second way is instrumenting the LI channels directly. 
@@ -106,38 +98,3 @@ def assignActivity(moduleList, moduleGraph):
                 chain.activity = (float(totalTraffic)/(2*(channels))) * 0.1  # no stat?  Make connections better than chains
 
 
-
-          # only create a chain when we see the sink                                                                                                               
-#          if(dangling.sc_type == 'ChainSink'):
-#  
-#            chains += 1
-#            chainName = platform + "_" + targetPlatform + "_" + dangling.name
-#            if(chainName in stats):
-#              dangling.activity = stats[chainName]
-#              totalTraffic += stats[chainName]
-#              print "Assigning Load " + platform + "->" + targetPlatform + " " + chainName + " " + str(stats[chainName])
-#            else:
-#               match = re.search(r'(\w+)(_chunk_\d+)',chainName)
-#                if(match and (match.group(1) in stats)):   
-#                    dangling.activity = stats[match.group(1)]
-#                    totalTraffic += stats[match.group(1)]
-#                    print "Assigning Load (Chunk match) " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(stats[match.group(1)])                    
-#
-#        if(totalTraffic == 0):
-#          totalTraffic = 2*(chains+recvs)
-# 
-#        print "Total traffic is: " + str(totalTraffic)
-#
-#        # assign some value to 
-#        for dangling in self.platformData[platform]['CONNECTED'][targetPlatform]:
-#          if(dangling.sc_type == 'Recv' or dangling.sc_type == 'ChainRoutingRecv'):
-#            if(dangling.activity < 0):
-#              dangling.activity = float(totalTraffic)/(chains+recvs)
-#              print "Defaulting Load " + platform + "->" + targetPlatform + " " + dangling.name + " " + str(dangling.activity)
-
-          # only create a chain when we see the source                                                                                                                                                                                       
-#          if(dangling.sc_type == 'ChainSink'):         
-#            chainName = platform + "_" + targetPlatform + "_" + dangling.name
-#            if(dangling.activity < 0):
-#              dangling.activity = (float(totalTraffic)/(2*(chains+recvs))) * 0.1  # no stat?  Make connections better than chains
-#              print "Defaulting Load " + platform + "->" + targetPlatform + " " + chainName + " " + str(dangling.activity)

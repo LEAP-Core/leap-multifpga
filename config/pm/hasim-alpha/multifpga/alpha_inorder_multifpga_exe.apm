@@ -163,6 +163,7 @@ Packagehint=leap-platforms
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
+SOFT_CONN_CWIDTH=700
 
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb

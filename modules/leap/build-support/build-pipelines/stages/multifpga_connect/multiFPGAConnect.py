@@ -124,7 +124,7 @@ class MultiFPGAConnect():
     # Expands logical paths to physical paths using Djikstras
     # algorithm to introduce hops across platforms.
     def connectPath(self, src, sink, platformGraph):
-
+       
         path = self.environment.getPath(src.platform(), sink.platform())
 
         srcs = [src]
@@ -260,8 +260,9 @@ class MultiFPGAConnect():
             subordinateGraphs.append(pickle.load(pickleHandle))
             pickleHandle.close()
             
+
         mergedGraph = subordinateGraphs.pop()
- 
+        
         if(self.pipeline_debug):
             print 'parseModuleGraph base ' + str(mergedGraph) + 'subordinate graphs'
 

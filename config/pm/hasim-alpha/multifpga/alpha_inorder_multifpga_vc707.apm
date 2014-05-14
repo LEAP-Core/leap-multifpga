@@ -159,6 +159,7 @@ Packagehint=leap-platforms
 
 [multiFPGA Log Generation/Params]
 GENERATE_ROUTER_STATS=1
+SOFT_CONN_CWIDTH=700
 
 [Alpha Inorder Sim Mapping]
 File=modules/multifpga/alpha_inorder/sim_mapping.awb
