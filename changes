@@ -6401,3 +6401,15 @@ Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_b
 
 C++ targets do not use the new object code build, so they still need
 code to be copied through.
+
+----------
+keflemin    Date: Wed May 14 16:04:40 EDT 2014  CSN: CSN-multifpga-252
+                  Wed May 14 20:04:40 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/generate-code
+ generateCode.py           Locally Modified          251 
+
+
+computePlatform has been removed as a member of LI_CHAIN_INFO. Remove
+it here also.
