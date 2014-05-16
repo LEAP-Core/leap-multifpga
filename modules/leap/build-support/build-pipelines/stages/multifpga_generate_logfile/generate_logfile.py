@@ -240,11 +240,6 @@ class MultiFPGAGenerateLogfile():
               if(self.pipeline_debug):
                   print "Platform binding for " + platform.platformType + " is " + platformName
 
-
-
-          execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
-          execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)
-
           # For legacy builds, we create software during the first pass. 
           if(platform.master):
               execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_FIRST_PASS_SOFTWARE 1')       

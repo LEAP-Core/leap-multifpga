@@ -132,12 +132,6 @@ class MultiFPGAGenerateBitfile():
             if(platform.platformType == 'CPU'):
                 execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
 
-            # The mapping file isn't needed either...  Actually, none of these are needed anymore...
-
-            execute('asim-shell --batch replace module ' + platformPath + ' ' + mappingPath)
-            execute('asim-shell --batch replace module ' + platformPath + ' ' + environmentPath)
-
-
             # and now we can build them
             # what we want to gather here is dangling top level connections
             # so we should depend on the model log

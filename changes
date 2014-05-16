@@ -6466,3 +6466,21 @@ structure from the frontend.  It will be interesting to condsider how
 an unbounded problem like mapping to simulator can be counched in ILP.
 
 
+
+----------
+keflemin    Date: Thu May 15 21:44:29 EDT 2014  CSN: CSN-multifpga-254
+                  Fri May 16 01:44:29 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          253 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ generate_logfile.py       Locally Modified          253 
+
+Directory modules/leap/build-support/project
+ platform-multifpga.awb    Locally Modified          253 
+
+
+Removed map/environment file propagation to subordinate builds.  The
+new LIM flow has subsumed this information.
