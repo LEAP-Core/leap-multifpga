@@ -13,6 +13,15 @@ from fpgamap_parser import parseFPGAMap
 from li_module import *
 from lim_common import *
 
+
+def isModuleCompatibleWithPlatform(module, platform):
+    if(platform.platformType == 'CPU'):
+        return module.getAttribute('EXECUTION_TYPE') == 'SOFTWARE'
+    elif(platform.platformType == 'FPGA'):
+        return module.getAttribute('EXECUTION_TYPE') == 'RTL'
+    elif(platform.platformType == 'BLUESIM'):
+        return module.getAttribute('EXECUTION_TYPE') == 'RTL'
+
 def placeModulesWithMapFile(moduleList, environmentGraph, moduleGraph):
 
     decorateModulesWithMapFile(moduleList, environmentGraph, moduleGraph)
@@ -116,8 +125,10 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
         moduleColors[moduleName] = []
         if(mapping is None):        
             for platformName in environmentGraph.getPlatformNames():
-                modHandle.write('var ' + getColorModule(moduleName, platformName) + ' binary;\n')
-                moduleColors[moduleName].append(platformName)
+                # Not all platforms can be mapped to all modules.
+                if(isModuleCompatibleWithPlatform(moduleObject, environmentGraph.platforms[platformName])):
+                    modHandle.write('var ' + getColorModule(moduleName, platformName) + ' binary;\n')
+                    moduleColors[moduleName].append(platformName)
         else:
             modHandle.write('var ' + getColorModule(moduleName, mapping) + ' = 1;\n') # Already mapped
             moduleColors[moduleName].append(mapping)

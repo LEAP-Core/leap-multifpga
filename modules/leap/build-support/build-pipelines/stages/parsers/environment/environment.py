@@ -21,6 +21,7 @@ class FPGAEnvironment(object):
             self.addPlatform(platform)
         self.graphize()
         self.buildTransitTables()
+        
 
     def addPlatform(self,platform):
         self.platforms[platform.name] = platform;

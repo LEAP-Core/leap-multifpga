@@ -16,7 +16,6 @@
 # We should pick these up on union dir
 %makefile Makefile.top.template
 %scons %top   SCons.top.pipeline.template
-%scons %hw    SCons.hw.pipeline.template
 %scons %sw    SCons.sw.pipeline.template
 %scons %iface SCons.iface.template
 %scons %library ModuleList.py
@@ -29,5 +28,6 @@
 %param LEAP_BUILD_CACHE_DIR ""                 "Where scons should put the build cache"
 %param LEAP_LIVE_DEBUG_PATH "leap_debug/live"  "Live files (e.g. FIFOs) debugging output directory"
 
+%param INSTANTIATE_ROUTERS 1        "use smart synthesis boundaries"
 %param SMART_SYNTH_BOUNDARY 0        "use smart synthesis boundaries"
 %param SYNTH_BOUNDARY       mkError  "name of synthesis boundary"

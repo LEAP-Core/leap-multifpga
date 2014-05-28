@@ -6484,3 +6484,96 @@ Directory modules/leap/build-support/project
 
 Removed map/environment file propagation to subordinate builds.  The
 new LIM flow has subsumed this information.
+
+----------
+keflemin    Date: Wed May 28 10:22:45 EDT 2014  CSN: CSN-multifpga-255
+                  Wed May 28 14:22:45 UTC 2014
+
+
+Directory config/pm/leap/submodels/platform-services
+ multifpga-platform-services-master.apm Locally Modified          254 
+ multifpga-platform-services-master-li.apm Locally Modified          254 
+
+Directory config/pm/leap/submodels/fpgaenv/hwsw
+ multifpgaenv-hybrid-exe-cpu0.apm Locally Modified          254 
+ multifpgaenv-hwsw-exe-fpga0-aurora.apm Locally Modified          254 
+
+Directory config/pm/leap/submodels/fpgaenv
+ multifpgaenv-hybrid-exe-fpga0-aurora.apm Locally Modified          254 
+ multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm Locally Modified          254 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-vc707-fpga0.apm Locally Modified          254 
+ multifpgaenv-hybrid-vc707-fpga1.apm Locally Modified          254 
+ multifpgaenv-hybrid-ml605-fpga0.apm Locally Modified          254 
+
+Directory config/pm/multifpga/fpga_submodels/hwsw
+ fpga0-hwsw.apm            Locally Modified          254 
+
+Directory config/pm/multifpga/fpga_submodels
+ multifpgaenv-hybrid-ml605-fpga1.apm Locally Modified          254 
+ vc707_0.apm               Locally Modified          254 
+ vc707_1.apm               Locally Modified          254 
+
+Directory modules/leap/virtual-platform/physical-channel/pcie/bluenoc
+ pcie-bluenoc-physical-channel-software.awb Locally Modified          254 
+
+Directory modules/leap/virtual-platform
+ virtual-platform-li.bsv   Locally Modified          254 
+
+Directory modules/leap/virtual-platform/low-level-platform-interface
+ llpi-li.bsv               Locally Modified          254 
+
+Directory modules/leap/virtual-platform/virtual-devices/platform-services
+ platform-services-master.awb Locally Modified          254 
+ platform-services-slave.bsv Locally Modified          254 
+ platform-services-master.bsv Locally Modified          254 
+
+Directory modules/leap/build-support/build-pipelines/stages/parsers/environment
+ environment.py            Locally Modified          254 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile
+ multiFPGAGenerateBitfile.py Locally Modified          254 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/map
+ placeModules.py           Locally Modified          254 
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile
+ generate_logfile.py       Locally Modified          254 
+
+Directory modules/leap/build-support/project
+ platform-multifpga.awb    Locally Modified          254 
+ project-multifpga.awb     Locally Modified          254 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform_sim
+ SimulationPipelineMultiFPGA.py Locally Modified          254 
+
+Directory modules/leap-platforms/fpga-environments/vc707
+ vc707-dual.env            Locally Modified          254 
+
+Directory modules/leap-platforms/fpga-environments/sim
+ sim-dual-aurora.env       Locally Modified          254 
+ sim-dual.env              Locally Modified          254 
+ sim-hwsw.env              Locally Modified          254 
+
+Directory modules/multifpga/alpha_inorder
+ sim-mapping-hwsw.map      Locally Modified          254 
+ sim-mapping.map           Locally Modified          254 
+
+Directory modules/multifpga/throughputTest/connected_application
+ connected-application-throughput.cpp Locally Modified          254 
+
+Directory modules/multifpga/throughputTest/singleRepeater
+ mapping.map               Locally Modified          254 
+
+
+Fixed a few bugs in multiple FPGA builds that resulted from last
+week's platform build reorganization.
+
+Mostly, a few apms needed new files, and the the mapping/environment
+files needed to be switched to use lower case declarations. 
+
+A few physical channel instances needed to change also.  Physical
+channels are fairly close to being deprecated.  Most of them are now
+just thin wrappers on the physical driver layer, existing solely to
+maintain backwards compatibility.

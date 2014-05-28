@@ -36,23 +36,13 @@ File=modules/leap/build-support/project/platform-multifpga.awb
 Packagehint=multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
 fpgaenv=HWSW MultiFPGA Simulation Aurora FPGA0 Environment
 application_env=Soft Services Hybrid Application Environment
-environment_description=Null FPGA Environment
-
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
-
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
 
 [HWSW MultiFPGA Simulation Aurora FPGA0 Environment/Params]
 NUM_FPGA=2
-PLATFORM_ID="FPGA0"
+PLATFORM_ID="fpga0"
 
 [HWSW MultiFPGA Simulation Aurora FPGA0 Environment]
 File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hwsw-exe-fpga0-aurora.apm

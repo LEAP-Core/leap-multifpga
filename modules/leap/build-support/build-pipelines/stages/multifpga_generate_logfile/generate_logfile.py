@@ -107,7 +107,8 @@ class MultiFPGAGenerateLogfile():
                  # ignore mismatched platforms
 
                  # Compute command line arguments in case they affect topology
-                 compile_cmd = 'scons '
+                 #compile_cmd = 'scons '
+                 compile_cmd = 'scons --cache-show --debug=explain  --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name)) + ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_frontend_'+platform.name)) + ' ' 
                  compile_cmd += ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
 
                  compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
@@ -116,9 +117,9 @@ class MultiFPGAGenerateLogfile():
                      print "Compile command is: " + compile_cmd + "\n"
 
                  # set environment for scons caching     
-                 # Turned off for now.    
-                 #if(enableCache):
-                 #    compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('cache')) + ' '
+                 enableCache = True
+                 if(enableCache):
+                     compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name)) + ' '
 
                  sts = execute(compile_cmd)
 

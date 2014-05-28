@@ -72,10 +72,14 @@ class MultiFPGAGenerateBitfile():
                  compile_cmd = moduleList.arguments.get('MULTIFPGA_BITFILE_COMPILE_CMD', None)
                  if (compile_cmd == None):
                      # Compute the build options
-                     compile_cmd = 'scons '
+                     compile_cmd = 'scons --cache-show --debug=explain  --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_'+platform.name)) + ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_backend_'+platform.name)) + ' ' 
                      compile_cmd += ' DEBUG=1' if getDebug(moduleList) else ' OPT=1'
                      compile_cmd += ' TRACE=' + str(getTrace(moduleList))
                      compile_cmd += ' EVENTS=' + str(getEvents(moduleList))
+
+                 enableCache =True
+                 if(enableCache):
+                     compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name)) + ' '
 
                  compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
 

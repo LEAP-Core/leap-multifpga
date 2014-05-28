@@ -352,8 +352,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-
-
 [Software build tool]
 File=modules/leap/build-support/build-pipelines/stages/software/software.awb
 Packagehint=leap
