@@ -1,0 +1,12 @@
+%name Latency-insensitive Module Places
+%desc Maps modules to platforms 
+
+%attributes tool
+ 
+%provides lim_place_modules
+
+%scons %library placeModules.py
+
+%param --global PLACER_ALGORITHM "placeModulesILP" "Which placement function should we be calling."
+
+

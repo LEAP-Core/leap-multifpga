@@ -6577,3 +6577,150 @@ A few physical channel instances needed to change also.  Physical
 channels are fairly close to being deprecated.  Most of them are now
 just thin wrappers on the physical driver layer, existing solely to
 maintain backwards compatibility.
+
+----------
+keflemin    Date: Wed May 28 14:59:09 EDT 2014  CSN: CSN-multifpga-256
+                  Wed May 28 18:59:09 UTC 2014
+
+
+Directory config/pm/leap/tests/mem_perf
+ mem_perf_multifpga_exe.apm Locally Modified          255 
+ mem_perf_multifpga_single_mem_acp.apm Locally Modified          255 
+ mem_perf_multifpga_acp.apm Locally Modified          255 
+ mem_perf_multifpga_alt_acp.apm Locally Modified          255 
+ mem_perf_multifpga_ml605.apm Locally Modified          255 
+ mem_perf_multifpga_vc707.apm Locally Modified          255 
+
+Directory config/pm/leap/demos/hello
+ hello_hybrid_dual_exe.apm Locally Modified          255 
+ hello_hybrid_dual_acp.apm Locally Modified          255 
+ hello_hybrid_dual_vc707.apm Locally Modified          255 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_throughput_ml605.apm Locally Modified          255 
+ test_multifpga_throughput_vexe.apm Locally Modified          255 
+ test_multifpga_perf_xupv5.apm Locally Modified          255 
+ test_multifpga_loop.apm   Locally Modified          255 
+ test_multifpga_chains_dual_hub_exe.apm Locally Modified          255 
+ test_multifpga_throughput_exe.apm Locally Modified          255 
+ test_multifpga_chains_xupv5.apm Locally Modified          255 
+ test_multifpga_compress_acp.apm Locally Modified          255 
+ traffic_light_acp_synth_multifpga.apm Locally Modified          255 
+ test_multifpga_perf_ml605.apm Locally Modified          255 
+ test_multifpga_alternative_exe.apm Locally Modified          255 
+ test_multifpga_perf_acp_single.apm Locally Modified          255 
+ test_multifpga.apm        Locally Modified          255 
+
+Directory config/pm/leap/demos/multifpga/li
+ li_test_dual_sim_vc707_hub.apm Locally Modified          255 
+ li_test_dual_sim_vc707.apm Locally Modified          255 
+ hasim_test_sim.apm        Locally Modified          255 
+ li_test_sim.apm           Locally Modified          255 
+ hasim_test_dual_sim_hub.apm Locally Modified          255 
+ rrr_test_li_vc707.apm     Locally Modified          255 
+ li_test_dual_sim_hub.apm  Locally Modified          255 
+ li_test_dual_sim.apm      Locally Modified          255 
+ test_multifpga_throughput_dual_sim_vc707_hub.apm Locally Modified          255 
+ traffic_light_acp_synth_multifpga.apm Locally Modified          255 
+ hasim_test_vc707.apm      Locally Modified          255 
+ rrr_test_li.apm           Locally Modified          255 
+ li_test_vc707.apm         Locally Modified          255 
+ test_multifpga_throughput_hwsw_exe.apm Locally Modified          255 
+ traffic_light_li.apm      Locally Modified          255 
+ test_multifpga_throughput_dual_sim_hub.apm Locally Modified          255 
+ li_test_dual_vc707.apm    Locally Modified          255 
+ hasim_test_dual_sim_vc707_hub.apm Locally Modified          255 
+
+Directory config/pm/leap/demos/multifpga
+ test_multifpga_exe.apm    Locally Modified          255 
+ test_multifpga_scratch.apm Locally Modified          255 
+ test_multifpga_chains_ml605.apm Locally Modified          255 
+ test_multifpga_spiral_exe.apm Locally Modified          255 
+ test_multifpga_loop_acp.apm Locally Modified          255 
+ test_multifpga_throughput_acp.apm Locally Modified          255 
+ test_multifpga_throughput_vc707.apm Locally Modified          255 
+ test_multifpga_throughput_dual_hub_ml605.apm Locally Modified          255 
+ test_multifpga_chains_quad_hub_ml605.apm Locally Modified          255 
+ test_multifpga_chains_exe.apm Locally Modified          255 
+ test_multifpga_rrr_exe.apm Locally Modified          255 
+ test_multifpga_throughput_tri_hub_ml605.apm Locally Modified          255 
+ test_multifpga_scratch_acp.apm Locally Modified          255 
+ test_multifpga_chains_xupv5_sma.apm Locally Modified          255 
+ test_multifpga_chains_quad_hub_exe.apm Locally Modified          255 
+ test_multifpga_perf_acp.apm Locally Modified          255 
+ test_multifpga_throughput_xupv5.apm Locally Modified          255 
+ test_multifpga_throughput_aurora_exe.apm Locally Modified          255 
+ test_multifpga_chains_xupv5_sata.apm Locally Modified          255 
+ test_multifpga_rrr_acp.apm Locally Modified          255 
+ test_multifpga_chains_acp.apm Locally Modified          255 
+ test_multifpga_chains_dual_hub_ml605.apm Locally Modified          255 
+ test_multifpga_compress.apm Locally Modified          255 
+
+Directory config/pm/leap/submodels/pipelines
+ build-pipeline-lim.apm    Locally Added               0 
+
+Directory config/pm/airblue/library_tests
+ softphy_SOVA_acp.apm      Locally Modified          255 
+
+Directory config/pm/h264
+ softphy_SOVA_acp.apm      Locally Modified          255 
+ h264_multifpga_decoder_split_synth.apm Locally Modified          255 
+ h264_multifpga_decoder_split_synth_exe.apm Locally Modified          255 
+
+Directory config/pm/hasim-alpha/multifpga
+ alpha_inorder_mesh_sharedLLC_MESI_exe_0064_multifpga.apm Locally Modified          255 
+ alpha_inorder_multifpga_vc707.apm Locally Modified          255 
+ alpha_inorder_multifpga_time_func_exe.apm Locally Modified          255 
+ alpha_inorder_multifpga_time_func_acp_sram.apm Locally Modified          255 
+ alpha_inorder_multifpga_time_func_dist_cache_exe.apm Locally Modified          255 
+ alpha_inorder_multifpga_time_func_xupv5.apm Locally Modified          255 
+ alpha_inorder_multifpga_exe.apm Locally Modified          255 
+ alpha_inorder_multifpga_time_func_16_acp_sram.apm Locally Modified          255 
+ alpha_inorder_mesh_sharedLLC_MESI_acp_0064_multifpga.apm Locally Modified          255 
+ alpha_inorder_mesh_sharedLLC_MESI_vc707_0064_multifpga.apm Locally Modified          255 
+ alpha_inorder_multifpga_aurora_exe.apm Locally Modified          255 
+ alpha_inorder_mesh_sharedLLC_MESI_vc707_0256_multifpga.apm Locally Modified          255 
+ alpha_inorder_multifpga_time_func_acp.apm Locally Modified          255 
+ alpha_inorder_multifpga_time_func_acp_sram_2.apm Locally Modified          255 
+ alpha_inorder_multifpga_acp.apm Locally Modified          255 
+ alpha_inorder_multifpga_ml605.apm Locally Modified          255 
+
+Directory modules/leap/build-support/build-pipelines/stages
+ lim_connect/              Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/lim_connect
+ lim-connect.awb           Locally Added               - 
+ LIMConnect.py             Locally Added               - 
+ multi-fpga-connect.awb    Locally Removed           255 
+ multiFPGAConnect.py       Locally Removed           255 
+
+Directory modules/leap/build-support/build-pipelines/stages/lim_connect/map
+ lim-place-modules.awb     Locally Added               - 
+ place-modules-multifpga.awb Locally Removed           255 
+
+Directory modules/leap/build-support/build-pipelines/stages
+ generate_lim_graph/       Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/generate_lim_graph
+ generate-lim-graph.awb    Locally Added               - 
+ generateLIMGraph.py       Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages
+ generate_lim_executable/  Locally Added               - 
+
+Directory modules/leap/build-support/build-pipelines/stages/generate_lim_executable
+ generate-lim-executable.awb Locally Added               - 
+ multifpga-generate-bitfile.awb Locally Removed           255 
+ generateLIMExecutable.py  Locally Added               - 
+ multiFPGAGenerateBitfile.py Locally Removed           255 
+
+Directory modules/leap/build-support/build-pipelines/pipelines/multifpga
+ multifpga-build-pipeline.awb Locally Modified          255 
+ multiFPGAPipeline.py      Locally Removed           255 
+ LIMPipeline.py            Locally Added               - 
+
+
+1) Added submodel for LIM compiler build pipeline
+
+2) Reorganized and renamed portions of the build pipeline to reflect
+generality of LIM compiler.

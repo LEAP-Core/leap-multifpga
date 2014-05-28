@@ -1,0 +1,11 @@
+%name Latency-insensitive Module Code Generation
+%desc Generates router code for each platform. 
+
+%attributes tool
+
+%provides lim_generate_code
+
+%scons %library generateCode.py
+%scons %library generateMultiplexors.py
+%scons %library routerStats.py
+

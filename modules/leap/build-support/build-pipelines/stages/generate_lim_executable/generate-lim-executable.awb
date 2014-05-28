@@ -1,0 +1,8 @@
+%name LIM Compiler Executable Generator
+%desc Constructs platform executables after the LIM compiler builds the generated network. 
+%attributes tool
+
+%provides lim_executable_generator
+
+%scons %library generateLIMExecutable.py
+

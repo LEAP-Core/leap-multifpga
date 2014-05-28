@@ -2,9 +2,9 @@ import os
 import re
 import SCons.Script  
 from model import  *
-from multi_fpga_log_generator import  *
-from multi_fpga_connect import  *
-from multi_fpga_generate_bitfile import  *
+from lim_graph_generator import  *
+from lim_connect import  *
+from lim_executable_generator import  *
 
 class Build(ProjectDependency):
     def __init__(self, moduleList):

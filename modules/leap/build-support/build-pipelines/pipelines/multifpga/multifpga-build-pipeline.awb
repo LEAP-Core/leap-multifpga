@@ -2,15 +2,15 @@
 #* Generic FPGA build pipeline
 #********************************************************************/
 
-%name multiFPGA Build Pipeline
-%desc FPGA Build Pipeline
+%name LIM Build Pipeline
+%desc LIM Build Pipeline
 %attributes tool
 
 %provides build_pipeline
-%requires multi_fpga_log_generator
-%requires multi_fpga_connect
-%requires multi_fpga_generate_bitfile
+%requires lim_graph_generator
+%requires lim_connect
+%requires lim_executable_generator
 
-%scons %library multiFPGAPipeline.py
+%scons %library LIMPipeline.py
 
 %param BUILD_PIPELINE_DEBUG 0 "Enable build pipeline debug"

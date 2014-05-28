@@ -1,0 +1,22 @@
+%name Latency-insensitive Module Communication Complex Generator
+%desc Generates a connection complex between FPGAs
+ 
+%provides lim_connect
+%requires fpgamap_parser
+%requires type_parser
+%requires umf
+%requires li_module
+%requires lim_generate_code
+%requires lim_common
+%requires lim_compression
+%requires lim_analyze_network
+%requires lim_place_modules
+%requires lim_backend_builds
+
+
+%scons %library LIMConnect.py
+%scons %library activity.py
+
+%param --global ENABLE_TYPE_COMPRESSION    0      "Should we enable experimental type compression?"
+
+

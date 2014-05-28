@@ -1,0 +1,14 @@
+%name Latency-insensitive Module Network Analysis
+%desc Generates Optimized inter-FPGA routers
+
+%attributes tool
+ 
+%provides lim_analyze_network
+
+%scons %library analyzeNetwork.py
+
+%param --global ANALYZE_NETWORK "analyzeNetworkLJF" "Which analysis function should we be calling."
+%param --global MIN_NUMBER_OF_VIAS         1      "Minumum number of vias (lanes)"
+%param --global MAX_NUMBER_OF_VIAS         3      "Maximum number of vias (lanes)"
+%param          ANALYZE_NETWORK_DEBUG      0      "Turn on pass-specific debug"
+

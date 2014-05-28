@@ -1,0 +1,97 @@
+
+[Global]
+SaveParameters=0
+Description=LIM Compiler Pipeline
+File=build-pipeline-lim
+Version=2.2
+Type=HAsim
+Name=LIM Compiler Pipeline
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+RootName=LIM Build Pipeline
+RootProvides=build_pipeline
+
+[Model]
+DefaultAttributes=
+model=LIM Build Pipeline
+
+[LIM Graph Generation/Requires]
+fpga_environment_parser=FPGA Environment Datatype
+
+[LIM Build Pipeline/Requires]
+lim_graph_generator=LIM Graph Generation
+lim_connect=Latency-insensitive Module Communication Complex Generator
+lim_executable_generator=LIM Compiler Executable Generator
+
+[LIM Graph Generation]
+File=modules/leap/build-support/build-pipelines/stages/generate_lim_graph/generate-lim-graph.awb
+Packagehint=multifpga
+
+[LIM Build Pipeline]
+File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
+Packagehint=multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
+Packagehint=multifpga
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Communication Complex Generator/Requires]
+fpgamap_parser=FPGAMap
+lim_backend_builds=Latency-insensitive Backend Build Construction
+lim_place_modules=Latency-insensitive Module Places
+li_module=LEAP LI Module Handler
+lim_compression=Latency-insensitive Module Type Compression
+lim_generate_code=Latency-insensitive Module Code Generation
+lim_analyze_network=Latency-insensitive Module Network Analysis
+type_parser=Bluespec Type parser
+umf=Little-Endian Unified Message Format
+lim_common=Latency-insensitive Module Common Files
+
+[Latency-insensitive Module Communication Complex Generator]
+File=modules/leap/build-support/build-pipelines/stages/lim_connect/lim-connect.awb
+Packagehint=multifpga
+
+[Bluespec Type parser]
+File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
+Packagehint=multifpga
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap
+
+[Latency-insensitive Module Places]
+File=modules/leap/build-support/build-pipelines/stages/lim_connect/map/lim-place-modules.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Network Analysis]
+File=modules/leap/build-support/build-pipelines/stages/lim_connect/analyze-network/analyze-network.awb
+Packagehint=multifpga
+
+[Latency-insensitive Backend Build Construction]
+File=modules/leap/build-support/build-pipelines/stages/lim_connect/construct-backend-builds/construct-backend-builds.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Common Files]
+File=modules/leap/build-support/build-pipelines/stages/lim_connect/common/lim-common.awb
+Packagehint=multifpga
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[Latency-insensitive Module Code Generation]
+File=modules/leap/build-support/build-pipelines/stages/lim_connect/generate-code/generate-code.awb
+Packagehint=multifpga
+
+[Latency-insensitive Module Type Compression]
+File=modules/leap/build-support/build-pipelines/stages/lim_connect/type-compression/lim-compression.awb
+Packagehint=multifpga
+
+[LIM Compiler Executable Generator]
+File=modules/leap/build-support/build-pipelines/stages/generate_lim_executable/generate-lim-executable.awb
+Packagehint=multifpga

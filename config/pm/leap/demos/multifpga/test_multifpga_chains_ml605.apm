@@ -19,21 +19,14 @@ model=HW/SW Hybrid Multifpga Project Foundation
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=MultiFPGA Test Connected Application
 environment_description=ML605 Dual FPGA Environment (SMA)
-build_pipeline=multiFPGA Build Pipeline
+build_pipeline=LIM Compiler Pipeline
 fpga_mapping=Test ACP Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
 Packagehint=multifpga
 
-[multiFPGA Build Pipeline]
-File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
-Packagehint=multifpga
 
-[multiFPGA Build Pipeline/Requires]
-multi_fpga_connect=Latency-insensitive Module Communication Complex Generator
-multi_fpga_generate_bitfile=multiFPGA Generate bitfle
-multi_fpga_log_generator=multiFPGA Log Generation
 
 [MultiFPGA Synthesis test module a]
 File=modules/multifpga/synthTest/test_a.awb
@@ -55,24 +48,10 @@ Packagehint=multifpga
 File=modules/multifpga/synthTest/top.awb
 Packagehint=multifpga
 
-[FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
-Packagehint=multifpga
 
-[multiFPGA Generate bitfle]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
-Packagehint=multifpga
 
-[multiFPGA Log Generation]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
-Packagehint=multifpga
 
-[FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
-Packagehint=multifpga
 
-[multiFPGA Log Generation/Requires]
-fpga_environment_parser=FPGA Environment Datatype
 
 [MultiFPGA Test Connected Application/Requires]
 hardware_system=MultiFPGA Synthesis test module top
@@ -89,9 +68,6 @@ Packagehint=multifpga
 File=modules/multifpga/synthTest/test_c_chains.awb
 Packagehint=multifpga
 
-[Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
-Packagehint=multifpga
 
 [ML605 Dual FPGA Environment (SMA)]
 File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_env.awb
@@ -121,7 +97,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
 connected_application=MultiFPGA Test Connected Application
 environment_description=ML605 Dual FPGA Environment (SMA)
-build_pipeline=multiFPGA Build Pipeline
+build_pipeline=LIM Compiler Pipeline
 fpga_mapping=Test ACP Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
@@ -129,13 +105,8 @@ File=modules/leap/build-support/project/project-multifpga.awb
 Packagehint=multifpga
 
 [multiFPGA Build Pipeline]
-File=modules/leap/build-support/build-pipelines/pipelines/multifpga/multifpga-build-pipeline.awb
-Packagehint=multifpga
 
 [multiFPGA Build Pipeline/Requires]
-multi_fpga_connect=Latency-insensitive Module Communication Complex Generator
-multi_fpga_generate_bitfile=multiFPGA Generate bitfle
-multi_fpga_log_generator=multiFPGA Log Generation
 
 [MultiFPGA Synthesis test module a]
 File=modules/multifpga/synthTest/test_a.awb
@@ -158,23 +129,14 @@ File=modules/multifpga/synthTest/top.awb
 Packagehint=multifpga
 
 [FPGAMap]
-File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
-Packagehint=multifpga
 
 [multiFPGA Generate bitfle]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_bitfile/multifpga-generate-bitfile.awb
-Packagehint=multifpga
 
 [multiFPGA Log Generation]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_generate_logfile/multi_fpga_parse.awb
-Packagehint=multifpga
 
 [FPGA Environment Datatype]
-File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
-Packagehint=multifpga
 
 [multiFPGA Log Generation/Requires]
-fpga_environment_parser=FPGA Environment Datatype
 
 [MultiFPGA Test Connected Application/Requires]
 hardware_system=MultiFPGA Synthesis test module top
@@ -192,8 +154,6 @@ File=modules/multifpga/synthTest/test_c_chains.awb
 Packagehint=multifpga
 
 [Bluespec Type parser]
-File=modules/leap/build-support/build-pipelines/stages/parsers/bsv-types/typeparser.awb
-Packagehint=multifpga
 
 [ML605 Dual FPGA Environment (SMA)]
 File=modules/leap-platforms/fpga-environments/ml605/ml605_fpga_env.awb
@@ -203,50 +163,16 @@ Packagehint=multifpga
 File=modules/multifpga/synthTest/acp_mapping.awb
 Packagehint=multifpga
 
-[Little-Endian Unified Message Format]
-File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
-Packagehint=leap-platforms
 
-[LEAP LI Module Handler]
-File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
-Packagehint=leap
 
-[Latency-insensitive Module Communication Complex Generator]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/multi-fpga-connect.awb
-Packagehint=multifpga
 
-[Latency-insensitive Module Type Compression]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/type-compression/lim-compression.awb
-Packagehint=multifpga
 
-[Latency-insensitive Module Communication Complex Generator/Requires]
-type_parser=Bluespec Type parser
-fpgamap_parser=FPGAMap
-li_module=LEAP LI Module Handler
-umf=Little-Endian Unified Message Format
-lim_compression=Latency-insensitive Module Type Compression
-lim_common=Latency-insensitive Module Common Files
-lim_generate_code=Latency-insensitive Module Code Generation
-lim_analyze_network=Latency-insensitive Module Network Analysis
-lim_place_modules=Latency-insensitive Module Places
-lim_backend_builds=Latency-insensitive Backend Build Construction
 
-[Latency-insensitive Module Common Files]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/common/lim-common.awb
-Packagehint=multifpga
 
-[Latency-insensitive Module Code Generation]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/generate-code/generate-code.awb
-Packagehint=multifpga
 
-[Latency-insensitive Module Network Analysis]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/analyze-network/analyze-network.awb
-Packagehint=multifpga
 
-[Latency-insensitive Module Places]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/map/place-modules-multifpga.awb
-Packagehint=multifpga
 
-[Latency-insensitive Backend Build Construction]
-File=modules/leap/build-support/build-pipelines/stages/multifpga_connect/construct-backend-builds/construct-backend-builds.awb
+
+[LIM Compiler Pipeline]
+File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
 Packagehint=multifpga
