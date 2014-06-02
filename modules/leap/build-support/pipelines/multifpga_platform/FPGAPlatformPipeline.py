@@ -17,10 +17,11 @@ class Build(ProjectDependency):
         WrapperGen(moduleList)
         Iface(moduleList)
         BSV(moduleList)
+        FPGAProgram(moduleList)
+        MCD(moduleList)
+        Synthesize(moduleList)
+
         if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
-            FPGAProgram(moduleList)
-            MCD(moduleList)
-            Synthesize(moduleList)
             PostSynthesize(moduleList)
 
         if (moduleList.getAWBParam('software_tool', 'BUILD_FIRST_PASS_SOFTWARE')):

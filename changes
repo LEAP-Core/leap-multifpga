@@ -6724,3 +6724,24 @@ Directory modules/leap/build-support/build-pipelines/pipelines/multifpga
 
 2) Reorganized and renamed portions of the build pipeline to reflect
 generality of LIM compiler.
+
+----------
+keflemin    Date: Mon Jun  2 10:53:39 EDT 2014  CSN: CSN-multifpga-257
+                  Mon Jun  2 14:53:39 UTC 2014
+
+
+Directory modules/leap/build-support/build-pipelines/stages/multifpga_connect/map
+ placeModules.py           Locally Modified          256 
+
+Directory modules/leap/build-support/pipelines/multifpga_platform
+ FPGAPlatformPipeline.py   Locally Modified          256 
+
+Directory modules/multifpga/alpha_inorder
+ sim_mapping.awb           Locally Modified          256 
+
+
+Automated resource extraction from first-pass lim builds.
+
+The first pass LIM build will now dump .resources files per LI module.
+These files will be picked up during LIM compilation and used in
+module placement.

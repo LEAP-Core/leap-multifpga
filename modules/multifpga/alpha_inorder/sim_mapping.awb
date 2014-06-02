@@ -11,7 +11,7 @@
 
 %sources -t FPGAENV_MAPPING -v PUBLIC sim-mapping.map
 %sources -t STAT -v PUBLIC sim-mapping.stats
-%sources -t RESOURCES -v PUBLIC sim-mapping.resources
+
 
 
 

@@ -66,6 +66,8 @@ def decorateModulesWithMapFile(moduleList, environmentGraph, moduleGraph):
 # different modules.
 def assignResources(moduleList, environmentGraph, moduleGraph):
 
+    # Resource utilization could be given by a file associated 
+
     # We require this extra 'S', but maybe this should not be the case.
     resourceFile = moduleList.getAllDependenciesWithPaths('GIVEN_RESOURCESS')    
     filename = ""
@@ -73,22 +75,32 @@ def assignResources(moduleList, environmentGraph, moduleGraph):
         filename = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + resourceFile[0]
         # let's read in a resource file
 
+    filenames = [filename]
+
+    # gather other resources from moduleGraph object code cache.
+    for module in moduleGraph.modules:
+        moduleObject = moduleGraph.modules[module]   
+        filenames.append(moduleObject.getObjectCode('RESOURCES'))
 
     resources = {}
 
     # need to check for file existance. returning an empty resource
     # dictionary is acceptable.
-    if( not os.path.exists(filename)):
-        return resources
+    for filename in convertDependencies(filenames):
+        if( not os.path.exists(filename)):
+            print "Warning, resource file " + str(filename) + "not found"
+            continue
 
-    logfile = open(filename,'r')  
-    for line in logfile:
-        # There are several ways that we can get resource. One way is instrumenting the router. 
-        params = line.split(':')
-        moduleName = params.pop(0)
-        resources[moduleName] = {}
-        for index in range(len(params)/2):
-            resources[moduleName][params[2*index]] = float(params[2*index+1])
+        logfile = open(filename,'r')  
+        for line in logfile:
+            # There are several ways that we can get resource. One way is instrumenting the router. 
+            params = line.split(':')
+            moduleName = params.pop(0)
+            resources[moduleName] = {}
+            for index in range(len(params)/2):
+                resources[moduleName][params[2*index]] = float(params[2*index+1])
+
+        logfile.close()
 
     return resources
 
@@ -235,7 +247,7 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
                     #if there are no constraints, do nothing.
                     if(len(constraints) > 0):
                         modHandle.write('subject to resource_' + resourceClass + '_platform_' + platformName +':\n')
-                        modHandle.write(' + '.join(constraints) + ' <= ' + str(.6*resources[platformName][resourceCandidate]) + ';\n')
+                        modHandle.write(' + '.join(constraints) + ' <= ' + str(.7*resources[platformName][resourceCandidate]) + ';\n')
         
     modHandle.write('\n\nend;\n')
     modHandle.close()
