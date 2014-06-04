@@ -1,0 +1,11 @@
+%name Latency-insensitive Backend Build Construction
+%desc Constructs backend builds using analysis from compiler frontend. 
+
+%attributes tool
+ 
+%provides lim_backend_builds
+
+%scons %library constructBackendBuilds.py
+
+
+

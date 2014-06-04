@@ -1,0 +1,12 @@
+%name LIM Graph Generation
+%desc Sets up first-pass compilation to extract LIM graphs from various source languages. 
+
+%provides lim_graph_generator
+%requires fpga_environment_parser
+
+%scons %library generateLIMGraph.py
+
+%param GENERATE_ROUTER_STATS  0  "Should we generate per link statistics?"
+%param GENERATE_ROUTER_DEBUG  0  "Should we generate per link dealock debug?"
+%param --global SOFT_CONN_CWIDTH 700 "Phyisical Connection Bit Width after splitting."
+

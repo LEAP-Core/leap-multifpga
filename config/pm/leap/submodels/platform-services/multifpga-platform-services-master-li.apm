@@ -20,9 +20,6 @@ model=MultiFPGA Master Platform Services
 File=modules/leap/libraries/platform-services/common-services/common-services-standard.awb
 Packagehint=leap
 
-[Front Panel Service]
-File=modules/leap/libraries/platform-services/front-panel-service/front-panel-service.awb
-Packagehint=leap
 
 [Starter Service]
 File=modules/leap/libraries/platform-services/starter-service/starter-service.awb
@@ -115,7 +112,6 @@ Packagehint=multifpga
 common_services=Common Services
 mem_services=Standard Mem Services
 multifpga_router_service=MultiFPGA Router Service
-front_panel_service=Front Panel Service
 starter_service=Starter Service
 
 [Standard I/O Services]

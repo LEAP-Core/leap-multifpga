@@ -1,0 +1,17 @@
+%name Latency-insensitive Module Common Files
+%desc A collection of base types used in the LIM compiler ASTs
+
+%attributes tool
+ 
+%provides lim_common
+
+%scons %library viaAssignment.py
+%scons %library linkAssignment.py
+%scons %library linkType.py
+%scons %library via.py
+%scons %library umfType.py
+%scons %library code.py
+
+%param --global ENABLE_AGRESSIVE_UMF_PARAMETERS 1 "Vary UMF header sizes depending on channels assigned to a via?"
+%param --global USE_DEFAULT_UMF_PARAMETERS 0      "Static (default) UMF parameters?"
+

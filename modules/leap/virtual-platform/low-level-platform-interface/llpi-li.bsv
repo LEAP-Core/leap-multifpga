@@ -34,7 +34,6 @@ import Vector::*;
 `include "awb/provides/local_mem.bsh"
 `include "awb/provides/remote_memory.bsh"
 `include "awb/provides/physical_platform.bsh"
-`include "awb/provides/physical_channel.bsh"
 `include "awb/provides/physical_platform_debugger.bsh"
 `include "awb/provides/clocks_device.bsh"
 `include "awb/provides/umf.bsh"
@@ -50,7 +49,6 @@ interface LowLevelPlatformInterface;
     interface REMOTE_MEMORY             remoteMemory;
     interface PHYSICAL_DRIVERS          physicalDrivers;
     interface TOP_LEVEL_WIRES           topLevelWires;
-    interface PHYSICAL_CHANNEL          physicalChannel;
 
 endinterface
 
@@ -59,21 +57,13 @@ endinterface
 //
 // Instantiate the subcomponents in one module.
 //
-`ifdef N_TOP_LEVEL_CLOCKS
-module mkLowLevelPlatformInterface#(Vector#(`N_TOP_LEVEL_CLOCKS, Clock) topClocks, Reset topReset)
-`else
 module mkLowLevelPlatformInterface
-`endif
     // Interface:
     (LowLevelPlatformInterface);
 
-    // instantiate physical platform
-    
-`ifdef N_TOP_LEVEL_CLOCKS
-    PHYSICAL_PLATFORM phys_plat <- mkPhysicalPlatform(topClocks, topReset);
-`else
+    // instantiate physical platform    
     PHYSICAL_PLATFORM phys_plat <- mkPhysicalPlatform();
-`endif 
+
     
     // LLPI is instantiated in a NULL clock domain, so first get some clocks
     // from the physical platform, which we'll pass down into the debugger
@@ -89,13 +79,11 @@ module mkLowLevelPlatformInterface
     LOCAL_MEM     locMem <- mkLocalMem(drivers, clocked_by clk, reset_by rst);
     REMOTE_MEMORY remMem <- mkRemoteMemory(drivers, clocked_by clk, reset_by rst);
   
-    PHYSICAL_CHANNEL physicalChannelInst <- mkPhysicalChannel(drivers, clocked_by clk, reset_by rst);
-
     // plumb interfaces
 
     interface localMem         = locMem;
     interface remoteMemory     = remMem;
     interface physicalDrivers  = drivers;
     interface topLevelWires    = phys_plat.topLevelWires;
-    interface physicalChannel  = physicalChannelInst;
+
 endmodule

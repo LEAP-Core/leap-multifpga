@@ -1,0 +1,532 @@
+FUNCP_ISA_DATAPATH_ALPHA_REGOP_EMULATED_INSTRS,"FUNCP: Emulated Register-Only Instructions",0
+FUNCP_MEMORY_PVT_CACHE_LOAD_HIT,"FUNCP Mem: Private cache load hits",74724
+FUNCP_MEMORY_PVT_CACHE_LOAD_MISS,"FUNCP Mem: Private cache load misses",4431
+FUNCP_REGMGR_GETRESULTS_EMULATED_INSTRS,"FUNCP: Emulated Instructions",27
+FUNCP_TLB_CENTRAL_CACHE_MISS,"FUNCP TLB: Central cache misses",32
+FUNCP_TLB_PVT_CACHE_HIT,"FUNCP TLB: Private cache hits",80503
+FUNCP_TLB_PVT_CACHE_MISS,"FUNCP TLB: Private cache misses",144
+LEAP_CENTRAL_CACHE_DIRTY_LINE_FLUSH_Unknown,"Central Cache: Dirty lines flushed to memory",26
+LEAP_CENTRAL_CACHE_FORCE_INVAL_LINE_Unknown,"Central Cache: Lines forcibly invalidated (not due to capacity)",7
+LEAP_CENTRAL_CACHE_INVAL_LINE_Unknown,"Central Cache: Lines invalidated due to capacity",698
+LEAP_CENTRAL_CACHE_LOAD_HIT_Unknown,"Central Cache: Load hits",30
+LEAP_CENTRAL_CACHE_LOAD_MISS_Unknown,"Central Cache: Load misses",1398
+LEAP_CENTRAL_CACHE_LOAD_NEW_MRU_Unknown,"Central Cache: Reference changed MRU way for valid entry (hit)",23
+LEAP_CENTRAL_CACHE_LOAD_RECENT_LINE_HIT_Unknown,"Central Cache: Load recent line cache hits",3147
+LEAP_CENTRAL_CACHE_STORE_HIT_Unknown,"Central Cache: Store hits",150
+LEAP_CENTRAL_CACHE_STORE_MISS_Unknown,"Central Cache: Store misses",58
+LEAP_SCRATCHPAD_LOCAL_REQUESTS,"Requests from the local scratchpads",0
+LEAP_SCRATCHPAD_LOCAL_RESPONSES,"Responses from the local scratchpads",0
+MODEL_COMMIT_INSTS_COMMITTED,"Instructions Committed",34741,15970,0,0,0,0,0,0
+MODEL_EXECUTE_BPRED_MISPREDS,"Branch Mispredicts",1449,363,0,0,0,0,0,0
+MODEL_FETCH_INSTS_FETCHED,"Instructions Fetched",50384,19926,0,0,0,0,0,0
+MODEL_FETCH_TOTAL_CYCLES,"Total Cycles",52342,52342,0,0,0,0,0,0
+MODEL_L1_DCACHE_READ_HIT,"L1 DCache Read Hits",6222,1232,0,0,0,0,0,0
+MODEL_L1_DCACHE_READ_MISS,"L1 DCache Read Misses",0,0,0,0,0,0,0,0
+MODEL_L1_DCACHE_READ_RETRY,"L1 DCache Read Retries",0,0,0,0,0,0,0,0
+MODEL_L1_DCACHE_WRITE_HIT,"L1 DCache Write Hits",2146,735,0,0,0,0,0,0
+MODEL_L1_DCACHE_WRITE_MISS,"L1 DCache Write Misses",0,0,0,0,0,0,0,0
+MODEL_L1_DCACHE_WRITE_RETRY,"L1 DCache Write Retries",0,0,0,0,0,0,0,0
+MODEL_L1_ICACHE_HIT,"L1 ICache Controller Read Hits",50381,19923,0,0,0,0,0,0
+MODEL_L1_ICACHE_MISS,"L1 ICache Controller Read Misses",0,0,0,0,0,0,0,0
+MODEL_L1_ICACHE_RETRY,"L1 ICache Controller Read Retries",0,0,0,0,0,0,0,0
+MODEL_L2_FILL_RETRY,"L2 Fill Retries",0,0,0,0,0,0,0,0
+MODEL_L2_READ_HIT,"L2 Read Hits",0,0,0,0,0,0,0,0
+MODEL_L2_READ_MISS,"L2 Read Misses",0,0,0,0,0,0,0,0
+MODEL_L2_READ_RETRY,"L2 Read Retries",0,0,0,0,0,0,0,0
+MODEL_L2_WRITE_HIT,"L2 Write Hits",0,0,0,0,0,0,0,0
+MODEL_L2_WRITE_RETRY,"L2 Write Retries",0,0,0,0,0,0,0,0
+MODEL_PCCALC_LP_BP_MISMATCHES,"Line Prediction/Branch Prediction Mismatches",0,0,0,0,0,0,0,0
+Module_application_env,"provides application_env (Soft Services Hybrid Application Environment)",1
+Module_assertions_service,"provides assertions_service (Wrap assertions device in Soft Connections)",1
+Module_bluesim_tool,"provides bluesim_tool (Builds a bluesim executable)",1
+Module_branch_predictor,"provides branch_predictor (Branch Predictor with Target Buffer)",1
+Module_bsv_tool,"provides bsv_tool (This tool builds Bluespec modules in sub directories)",1
+Module_build_pipeline,"provides build_pipeline (BlueSim Build Pipeline)",1
+Module_central_cache,"provides central_cache (Local Memory Central Cache)",1
+Module_central_cache_common,"provides central_cache_common (Central Cache Common Definitions)",1
+Module_central_cache_service,"provides central_cache_service (Central Cache Service)",1
+Module_channelio,"provides channelio (Basic Virtual Channel Multiplexer)",1
+Module_chip_base_types,"provides chip_base_types (Chip Base Types)",1
+Module_clocks_device,"provides clocks_device (Simulation Clocks Device)",1
+Module_coherent_scratchpad_memory_service,"provides coherent_scratchpad_memory_service (Coherent Scratchpad Memory Service)",1
+Module_command_switches,"provides command_switches (Standard Command Switches)",1
+Module_commands_local,"provides commands_local (Relays global controller messages to local controllers)",1
+Module_commands_service,"provides commands_service (Relays SW commands to HW modules.)",1
+Module_commit_stage,"provides commit_stage (Inorder Commit Stage)",1
+Module_commitq_stage,"provides commitq_stage (Inorder Commit Queue Stage)",1
+Module_common_services,"provides common_services (Wrap Base Devices in Soft Connections)",1
+Module_common_utility_devices,"provides common_utility_devices (A collection of useful utilities, mostly dealing with I/O)",1
+Module_connected_application,"provides connected_application (Partitioned Performance Model using FPGAs)",1
+Module_ddr_sdram_device,"provides ddr_sdram_device (DDR SDRAM Emulator in BRAM)",1
+Module_debug_scan_service,"provides debug_scan_service (Wrap debug scan device in Soft Connections)",1
+Module_decode_stage,"provides decode_stage (Inorder Decode/Issue Stage)",1
+Module_dmem_stage,"provides dmem_stage (Inorder DMem Stage)",1
+Module_dynamic_parameters_service,"provides dynamic_parameters_service (Wrap dynamic parameter device in Soft Connections)",1
+Module_events_service,"provides events_service (Allows tme model to report cycle-by-cycle simulation results.)",1
+Module_execute_stage,"provides execute_stage (Inorder Execute Stage)",1
+Module_fetch_stage,"provides fetch_stage (Inorder Fetch Stage)",1
+Module_fpga_components,"provides fpga_components (Software FPGA Components)",1
+Module_fpgaenv,"provides fpgaenv (FPGA Environment)",1
+Module_front_panel,"provides front_panel (Hybrid Front Panel)",1
+Module_front_panel_service,"provides front_panel_service (Wrap the Front Panel Device in Soft Connections)",1
+Module_funcp_base_types,"provides funcp_base_types (Functional Partition Base Types)",1
+Module_funcp_interface,"provides funcp_interface (Functional Partition Interface)",1
+Module_funcp_memory,"provides funcp_memory (Hybrid Memory for Functional Partition)",1
+Module_funcp_memstate,"provides funcp_memstate (Memory State for Functional Partition)",1
+Module_funcp_memstate_base_types,"provides funcp_memstate_base_types (Functional Partition Memory State Base Types)",1
+Module_funcp_memstate_manager,"provides funcp_memstate_manager (Manager using Macro Ops for Mem State)",1
+Module_funcp_memstate_storebuffer,"provides funcp_memstate_storebuffer (Hashed Store Buffer)",1
+Module_funcp_memstate_tlb,"provides funcp_memstate_tlb (Standard Hybrid TLB)",1
+Module_funcp_regstate,"provides funcp_regstate (Register State for Functional Partition)",1
+Module_funcp_regstate_base_types,"provides funcp_regstate_base_types (Functional Partition Register State Base Types)",1
+Module_funcp_regstate_connections,"provides funcp_regstate_connections (Connections from register state to other functional components)",1
+Module_funcp_regstate_data,"provides funcp_regstate_data (Register State Data)",1
+Module_funcp_regstate_manager,"provides funcp_regstate_manager (Register State Manager using Macro Ops)",1
+Module_funcp_simulated_memory,"provides funcp_simulated_memory (m5 Hybrid Memory)",1
+Module_hasim_branch_pred_alg,"provides hasim_branch_pred_alg (n-Bit Branch Predictor Algorithm)",1
+Module_hasim_branch_target_buffer,"provides hasim_branch_target_buffer (Multi Entry Target Buffer)",1
+Module_hasim_cache_algorithms,"provides hasim_cache_algorithms (Collection of Cache Modeling Algorithms)",1
+Module_hasim_chip,"provides hasim_chip (Single Core Chip)",1
+Module_hasim_chip_topology,"provides hasim_chip_topology (Top level of the topology manager)",1
+Module_hasim_common,"provides hasim_common (Utilities common to all HAsim performance models)",1
+Module_hasim_core,"provides hasim_core (Pipeline and Caches Core)",1
+Module_hasim_dtlb,"provides hasim_dtlb (Null DTLB)",1
+Module_hasim_funcp,"provides hasim_funcp (Functional Partition Version 3)",1
+Module_hasim_isa,"provides hasim_isa (Alpha ISA Definition)",1
+Module_hasim_isa_datapath,"provides hasim_isa_datapath (Alpha ISA Datapath)",1
+Module_hasim_isa_semantics,"provides hasim_isa_semantics (Hybrid ISA Semantics)",1
+Module_hasim_itlb,"provides hasim_itlb (Null ITLB)",1
+Module_hasim_l1_arbiter,"provides hasim_l1_arbiter (L1 Cache Arbiter - Always Favor One Stream Statically)",1
+Module_hasim_l1_dcache,"provides hasim_l1_dcache (Unpipelined L1 DCache (No victim buffer))",1
+Module_hasim_l1_dcache_alg,"provides hasim_l1_dcache_alg (Always Hit, Never Evict L1 DCache Alg)",1
+Module_hasim_l1_icache,"provides hasim_l1_icache (L1 ICache (No victim buffer))",1
+Module_hasim_l1_icache_alg,"provides hasim_l1_icache_alg (Always Hit, Never Evict L1 ICache Alg)",1
+Module_hasim_l2_cache,"provides hasim_l2_cache (Unpipelined L2 Cache)",1
+Module_hasim_l2_cache_alg,"provides hasim_l2_cache_alg (Always Hit, Never Evict L2 Cache Alg)",1
+Module_hasim_memory,"provides hasim_memory (Null Memory)",1
+Module_hasim_miss_tracker,"provides hasim_miss_tracker (Cache Miss Tracker with Unified Load/Store Namespace)",1
+Module_hasim_model_services,"provides hasim_model_services (Services useful for all HAsim models.)",1
+Module_hasim_modellib,"provides hasim_modellib (HAsim Modeling Library)",1
+Module_hasim_pipeline,"provides hasim_pipeline (Inorder Pipeline)",1
+Module_hasim_private_caches,"provides hasim_private_caches (Split L1 caches (Instruction and Data))",1
+Module_hasim_timep,"provides hasim_timep (Simulate 1 chip, no inter-chip interconnect)",1
+Module_iface_tool,"provides iface_tool (Build tool for LEAP interfaces)",1
+Module_imem_stage,"provides imem_stage (Inorder IMem Stage)",1
+Module_inorder_pipeline_back_end,"provides inorder_pipeline_back_end (Inorder Pipeline Back End)",1
+Module_inorder_pipeline_front_end,"provides inorder_pipeline_front_end (Inorder Pipeline Front End)",1
+Module_instq_stage,"provides instq_stage (Inorder Instruction Queue Stage)",1
+Module_isa_emulator,"provides isa_emulator (Hybrid ISA Emulator)",1
+Module_isa_emulator_impl,"provides isa_emulator_impl (m5 ISA Emulator Implementation)",1
+Module_l1_cache_base_types,"provides l1_cache_base_types (L1 Cache Base Types)",1
+Module_li_module,"provides li_module (Various routines for constructing and manipulating LI Modules)",1
+Module_librl_bsv,"provides librl_bsv (Reconfigurable Logic Bluespec Library)",1
+Module_librl_bsv_base,"provides librl_bsv_base (Reconfigurable Logic Bluespec Base Library)",1
+Module_librl_bsv_cache,"provides librl_bsv_cache (Manage an RL-side cache of arbitrary objects)",1
+Module_librl_bsv_storage,"provides librl_bsv_storage (Reconfigurable logic Bluespec modules that manage storage)",1
+Module_local_mem,"provides local_mem (Local Memory using DDR DRAM (burst holds at least one line))",1
+Module_local_memory_device,"provides local_memory_device (Soft Connection Local Memory Device)",1
+Module_lock_sync_service,"provides lock_sync_service (Lock Synchronization Service)",1
+Module_low_level_platform_interface,"provides low_level_platform_interface (Low Level Platform Interface for Hybrid Models)",1
+Module_m5_hasim_base,"provides m5_hasim_base (m5 HAsim Base Class)",1
+Module_m5_simulator,"provides m5_simulator (m5 Alpha Simulator)",1
+Module_mem_services,"provides mem_services (A Set of Standard Mem Services)",1
+Module_memory_base_types,"provides memory_base_types (Memory Base Types)",1
+Module_model,"provides model (HW/SW Hybrid Pipeline Build)",1
+Module_model_structures_base_types,"provides model_structures_base_types (Model Structures Base Types)",1
+Module_pccalc_stage,"provides pccalc_stage (Inorder PCCalc Stage)",1
+Module_physical_channel,"provides physical_channel (Simulation Physical Channel)",1
+Module_physical_interconnect,"provides physical_interconnect (NULL Physical Interconnect)",1
+Module_physical_platform,"provides physical_platform (Simulation Physical Platform)",1
+Module_physical_platform_debugger,"provides physical_platform_debugger (Null Physical Platform Debugger)",1
+Module_physical_platform_utils,"provides physical_platform_utils (Common Utilities shared by multiple Platforms)",1
+Module_pipeline_base_types,"provides pipeline_base_types (Inorder Pipeline Base Types)",1
+Module_platform_services,"provides platform_services (Translates Virtual Devices into Soft Connections)",1
+Module_project_common,"provides project_common (A set of utilities useful for all hybrid projects.)",1
+Module_remote_memory,"provides remote_memory (Null Remote Memory)",1
+Module_rrr,"provides rrr (RRR Clients and Servers)",1
+Module_rrr_common,"provides rrr_common (RRR Common Module)",1
+Module_scratchpad_memory,"provides scratchpad_memory (Hybrid Scratchpad Memory Device)",1
+Module_scratchpad_memory_common,"provides scratchpad_memory_common (Scratchpad Memory Common Definitions)",1
+Module_scratchpad_memory_service,"provides scratchpad_memory_service (Wrap the Scratchpad Memory in Soft Connections)",1
+Module_shared_memory_service,"provides shared_memory_service (Null Shared Memory Services)",1
+Module_smart_synth_boundaries,"provides smart_synth_boundaries (Some BSH magic to maintain backwards compatibility.  There are massive hacks here.)",1
+Module_soft_clocks,"provides soft_clocks (Simply stamps out a new clock for each requested clock)",1
+Module_soft_clocks_lib,"provides soft_clocks_lib (Simply stamps out a new clock for each requested clock)",1
+Module_soft_connections,"provides soft_connections (SoftService Soft Connections)",1
+Module_soft_connections_alg,"provides soft_connections_alg (Soft Service Soft Connections Algorithm)",1
+Module_soft_connections_common,"provides soft_connections_common (Soft Service Soft Connections Common)",1
+Module_soft_connections_debug,"provides soft_connections_debug (Soft Connections Debugging)",1
+Module_soft_connections_latency,"provides soft_connections_latency (Soft Connections Latency Test Fixture)",1
+Module_soft_services,"provides soft_services (Everything needed for the various soft services)",1
+Module_soft_services_deps,"provides soft_services_deps (A means for dependent modules to include all soft service implementation files)",1
+Module_soft_services_lib,"provides soft_services_lib (Toplevel for connected module alone)",1
+Module_soft_strings,"provides soft_strings (Integer UID-based global string database)",1
+Module_software_tool,"provides software_tool (Build for software side of hybrid system)",1
+Module_starter_device,"provides starter_device (Starter Virtual Device)",1
+Module_starter_service,"provides starter_service (Wrap Starter Device in Soft Connections)",1
+Module_stats_service,"provides stats_service (Wrap Stats Device cin Soft Connections)",1
+Module_stdio_service,"provides stdio_service (Standard I/O Services)",1
+Module_store_buffer,"provides store_buffer (Multi-Entry Store Buffer)",1
+Module_umf,"provides umf (Little-Endian Unified Message Format)",1
+Module_unix_pipe_device,"provides unix_pipe_device (UNIX Pipe Physical Device)",1
+Module_verilog_tool,"provides verilog_tool (Builds an iverilog model)",1
+Module_virtual_devices,"provides virtual_devices (Standard Virtual Devices)",1
+Module_virtual_platform,"provides virtual_platform (Standard Virtual Platform)",1
+Module_wrapper_gen_tool,"provides wrapper_gen_tool (Build wrappper files for multifpga synthesis)",1
+Module_write_buffer,"provides write_buffer (Write Buffer, Block on Miss)",1
+Param_ADDR_RING_DEBUG_ENABLE,"Enable addressable ring debug",0
+Param_ADDR_RING_MSG_MODE,"Addressable ring message priority: 0 always choose local message, 1 always forward, 2 use arbiter",0
+Param_APORT_COMPRESS_ENABLE,"Enable A-Port compression",0
+Param_APORT_COMPRESS_TIMEOUT,"Maximum cycles to wait between messages when merging A-Port NoMessages (dynamic)",31
+Param_ASSERTIONS_PER_NODE,"Max number of assertions connected to an assertion node (ring stop).",16
+Param_BP_COUNTER_SIZE,"Branch table prediction counter (log) size",2
+Param_BP_TABLE_IDX_SIZE,"Branch table (log) size",11
+Param_BSC_FLAGS,"Bluespec compiler options",-steps 10000000 +RTS -K1000M -RTS -suppress-warnings G0043 -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -licenseWarning 7 -elab -show-schedule -show-range-conflict -verilog -remove-dollar
+Param_BTB_NUM_WAYS,"Number of ways per branch target buffer set.",4
+Param_BTB_OFFSET_BITS,"To save space, BTB entries are relative offsets.",11
+Param_BTB_SET_IDX_BITS,"Number of bits for branch target buffer set index.",7
+Param_BTB_TAG_BITS,"Tag bits in each way.  Since this is a predictor, the tag may cover a subset of the full address.",6
+Param_BUILD_COMMON_SERVICES,"Actually instantiate common services",1
+Param_BUILD_LOGS_ONLY,"True if we should build only logfiles",0
+Param_BUILD_PIPELINE_DEBUG,"Enable build pipeline debug",0
+Param_BUILD_VERILOG,"Direct BSC to build verilog",0
+Param_CENTRAL_CACHE_DEBUG_ENABLE,"Enables the central cache debug",1
+Param_CENTRAL_CACHE_LINE_ADDR_BITS,"Address size of entries in the central cache.  Must be at least as large as the largest client.",64
+Param_CENTRAL_CACHE_LINE_RESP_CACHE_IDX_BITS,"Index bits for a BRAM-based cache of recently accessed lines",10
+Param_CENTRAL_CACHE_MODE,"Bits 0-1: 0 write-back, 1 write-through, 3 disabled / Bit 2 disables recent line cache (dynamic)",0
+Param_CENTRAL_CACHE_READ_META_BITS,"Metadata size for tagging read requests.  Must be large enough for the largest client's metadata.",18
+Param_CIO_NUM_CHANNELS,"Number of virtual duplex channels",2
+Param_CLEAN_BSV,"Clean BSV intermediate files on rebuild",1
+Param_COHERENT_SCRATCHPAD_CLIENT_META_BITS,"Bits available to coherent scratchpad clients to tag out-of-order responses",6
+Param_COHERENT_SCRATCHPAD_CONTROLLER_META_BITS,"Bits available to coherent scratchpad controller to tag write back data",8
+Param_COHERENT_SCRATCHPAD_DEBUG_ENABLE,"Enables the coherent scratchpad debug",1
+Param_COHERENT_SCRATCHPAD_MEMORY_ADDR_BITS,"Word-level address bits per coherent scratchpad domain",40
+Param_COHERENT_SCRATCHPAD_MULTI_CONTROLLER_ENABLE,"0 Use single/centralized controller and central cache, 1 use multiple controllers and central caches",0
+Param_COHERENT_SCRATCHPAD_PVT_CACHE_ENTRIES,"Coherent scratchpad client private cache entries (must be a power of 2)",1024
+Param_COHERENT_SCRATCHPAD_PVT_CACHE_MODE,"Bit 1: 0 disabled, 1 enabled prefetcher / Bit 0: 0 disabled, 1 enabled cache clean write-back (dynamic)",1
+Param_COHERENT_SCRATCHPAD_PVT_CACHE_PREFETCH_ENABLE,"Enable scratchpad private cache prefetcher",0
+Param_COHERENT_SCRATCHPAD_PVT_CACHE_PREFETCH_LEARNER_NUM,"Number of prefetch learners in scratchpad private cache (must be a power of 2)",32
+Param_COHERENT_SCRATCHPAD_REQ_RESP_LINK_TYPE,"0 Use non-token ring, 1 use token ring",0
+Param_CONNECTION_IDX_SIZE,"Number of bits to index multicast connections (8=256 connections).",8
+Param_CONTEXT_ID_BITS,"Number of bits in context ID (2 = 4 contexts).",3
+Param_CONTEXT_ID_BITS_RRR,"RRR-friendly size that holds a context ID.",8
+Param_CON_BUFFERING,"Amount of Buffering Slots per Connection.",2
+Param_CON_CHAIN_CWIDTH,"Phyisical Chain Connection Bit Width, which is not split.",512
+Param_CON_CWIDTH,"Phyisical Connection Bit Width after splitting.",512
+Param_CON_DEBUG_ENABLE,"Add soft-connection state to the debug scan chain (0/1)",1
+Param_CON_LATENCY_ENABLE,"Add soft-connection latency test fixture",0
+Param_CON_NUMCHAINS,"Number of Connection Chains.",9
+Param_CON_STATS_ENABLE,"Add statistics collection to all soft connections (0/1)",1
+Param_CPU_TO_ITLB_LATENCY,"Address generator latency (either line predictor or branch predictor/BTB latency)",2
+Param_CQ_NUM_SLOTS,"Number of slots for the commit queue.",4
+Param_CRYSTAL_CLOCK_FREQ,"Input (Crystal) Clock Frequency",50
+Param_DCACHE_LOAD_MISS_ID_SIZE,"Number of bits to identify DCache Load Misses. (4 = 8 outstanding misses, 1 bit epoch..)",4
+Param_DEBUG_ISA_DP,"Emit ISA datapath debug log? (Bool) (dynamic)",0
+Param_DEBUG_REVBUF,"Turn on debugging for reversal buffer",0
+Param_DEBUG_REWIND_FIFO,"Turn on debugging for rewind fifo",0
+Param_DEBUG_SCAN_DEADLINK_TIMEOUT,"Cycles between forced dumps (for debugging when host->FPGA channel blocks) (dynamic)",0
+Param_DEBUG_SCAN_ENABLED,"Enable debug scan?",1
+Param_DEBUG_STREAM_CAPTURE_FIFO,"Turn on debugging for stream capture fifos",0
+Param_DRAM_ADDR_BITS,"Address bits per bank",12
+Param_DRAM_BEAT_WIDTH,"Bit width of one beat in a burst",128
+Param_DRAM_DEBUG,"Non-zero enables debugging methods",1
+Param_DRAM_MAX_OUTSTANDING_READS,"Maximum in-flight read requests",8
+Param_DRAM_MIN_BURST,"Minimum burst size",2
+Param_DRAM_NUM_BANKS,"DDR banks",1
+Param_DRAM_READ_LATENCY,"Add latency to read responses (useful for simulating real memory)",10
+Param_DRAM_WORD_WIDTH,"Addressable object size",64
+Param_DUMP_CHANNEL_TRAFFIC_ENABLE,"Dump all li channel traffic at runtime (simulation only)",0
+Param_DUMP_LIM_GRAPH,"Should we dump a LIM graph.",0
+Param_ENABLE_EVENTS,"Starting state of events (0 disable / 1 enable). (dynamic)",0
+Param_EXPOSE_ALL_CONNECTIONS,"True if we should expose all soft connections",0
+Param_EXTRA_DICTS,"A set of extra dictionary files", 
+Param_EXTRA_RRRS,"A set of extra rrr files", 
+Param_FIFO_MEM_MIN_ENTRIES_FOR_BRAM,"Heuristic for BRAM/LUT-based FIFOs: Min. FIFO depth for choosing BRAM.",256
+Param_FIFO_MEM_MIN_TOTAL_BITS_FOR_BRAM,"Heuristic for BRAM/LUT-based FIFOs: Min. total storage bits for choosing BRAM.",14000
+Param_FPGA_DEV_PATH,"FPGA device(s) allocated (comma separated) (dynamic)",
+Param_FPGA_HEARTBEAT_TRIGGER_BIT,"Transisions of this FPGA cycle counter triggers an FPGA heartbeat message",26
+Param_FPGA_NUM_PLATFORMS,"Number of FPGA targets",1
+Param_FPGA_PLATFORM_ID,"ID of multi-FPGA target",0
+Param_FPGA_PLATFORM_NAME,"Name of multi-FPGA target",Unknown
+Param_FUNCP_CACHELINE_BITS,"Cache line size in bits",256
+Param_FUNCP_ISA_INT_REG_SIZE,"Bits in an integer register",64
+Param_FUNCP_ISA_PAGE_SHIFT,"Low 0 bits in a physical page",13
+Param_FUNCP_ISA_PC_MIN_ALIGN,"Minimum bit alignment of PC addresses (2 == 4 bytes)",2
+Param_FUNCP_ISA_P_ADDR_SIZE,"Number of bits to address physical memory",34
+Param_FUNCP_ISA_V_ADDR_SIZE,"Number of bits to address virtual memory",64
+Param_FUNCP_MEMSTATE_LOGFILE_NAME,"Name of logfile for functional memory state manager",hasim_funcp_memstate.out
+Param_FUNCP_MEM_PVT_CACHE_MODE,"Bits 1-0: 0 write-back, 1 write-through, 2 write-no-allocate, 3 disabled (dynamic)",0
+Param_FUNCP_MEM_PVT_PREFETCH_MODE,"Bit 2: fill from host disable (1), Bit 1: prefetch all (1) / only instructions (0), Bit 0: prefetcher enable (1) (dynamic)",0
+Param_FUNCP_PHYSICAL_REG_INDEX_BITS,"Bits indexing functional physical registers",10
+Param_FUNCP_PVT_CACHE_ENTRIES,"Number of entries in functional private cache",16384
+Param_FUNCP_TLB_ENFORCE_ORDER,"Enforce global order of ITLB/DTLB requests if non-zero",1
+Param_FUNCP_TLB_LOGFILE_NAME,"Name of logfile for functional TLB cache",hasim_funcp_tlb.out
+Param_FUNCP_TLB_PREFETCHER_LEARNER_SIZE_LOG,"Number of prefetch learners (in log) (dynamic)",3
+Param_FUNCP_TLB_PREFETCHER_MECHANISM,"Bits 5-4: 0 basic-tagged, 1 stride-learn-on-miss, 2 stride-learn-on-both, 3 stride-hybrid / Bits 3: 0 look ahead prefetch distance (laDist) learn automatically / Bit 2-0: laDist upper bound in log (dynamic)",51
+Param_FUNCP_TLB_PVT_CACHE_MODE,"Bit 2: 0 disabled, 1 enabled prefetcher / Bits 1-0: 0 write-back, 1 write-through, 2 write-no-allocate, 3 disabled (dynamic)",0
+Param_FUNCP_TLB_PVT_CACHE_PREFETCH_LEARNER_NUM,"Number of prefetch learners in TLB cache (must be a power of 2)",8
+Param_FUNCP_TLB_PVT_ENTRIES,"Number of entries in functional private TLB cache",4096
+Param_FUNCP_TLB_PVT_PREFETCH_ENABLE,"Enable functional private TLB cache prefetcher",0
+Param_GENERATE_VICO,"True if we are building a vico target",0
+Param_GLOBAL_STRING_LOCAL_UID_SZ,"Number of bits for storing the local UID",16
+Param_GLOBAL_STRING_PLATFORM_UID_SZ,"Number of bits for storing the platform UID",6
+Param_GLOBAL_STRING_SYNTH_UID_SZ,"Number of bits for storing the synthesis boundary UID",10
+Param_HASIM_EVENTS_SIZE,"Number of bits for Event parameter.",32
+Param_HASIM_ISA_DP_LOGFILE,"Name of ISA Datapath logfile",hasim_isa_dp.out
+Param_HEARTBEAT_TRIGGER_BIT,"Transitions of this bit in the model cycle counter trigger heartbeat messages",13
+Param_ICACHE_MISS_ID_SIZE,"Number of bits to identify ICache Misses. (4 = 8 outstanding misses, 1 bit epoch.)",4
+Param_IQ_NUM_SLOTS,"Number of slots in the instruction queue.",4
+Param_ISA_NATIVE_FPGA_FP,"Enable FPGA native floating point",1
+Param_L1_WRITE_THROUGH,"0 for write back dirty lines on eviction. 1 for write through to memory immediately. (dynamic)",0
+Param_L2_MISS_ID_SIZE,"Number of bits to identify L2 misses. (4 = 16 outstanding misses)",4
+Param_LATENCY_DELTA_DELAY,"Which soft connection should get extra latency? (dynamic)",0
+Param_LATENCY_DELTA_DEPTH,"Which soft connection should get extra latency? (dynamic)",0
+Param_LATENCY_DELTA_ID,"Which soft connection should get extra latency? (dynamic)",0
+Param_LATENCY_DELTA_INVERSE_TEST,"Should we modify all fifos, except this one? (dynamic)",0
+Param_LEAP_DEBUG_PATH,"Debugging output directory",leap_debug
+Param_LEAP_LIVE_DEBUG_PATH,"Live files (e.g. FIFOs) debugging output directory",leap_debug/live
+Param_LOCAL_MEM_WORDS_PER_LINE,"Local memory words per line (must be power of 2)",4
+Param_LOCAL_MEM_WORD_BITS,"Local memory word size",64
+Param_M5_BUILD_DIR,"m5 Build directory",platform/m5/build/ALPHA
+Param_MAGIC_SIMULATION_CLOCK_FACTOR,"Used to determine periods for ratioed clocks - making it larger may increase clock resolution",10000
+Param_MAX_NUM_CONTEXTS,"Maximum number of hardware threads simulated.",8
+Param_MAX_NUM_CPUS,"Maximum number of CPUs on the chip.",8
+Param_MAX_NUM_MEM_CTRLS,"Maximum number of on-chip memory controllers.",1
+Param_MEMSTATE_SBUFFER_OOO_MEM,"0=Return youngest match, 1=Search history for best match",0
+Param_MODEL_CLOCK_FREQ,"Desired model clock frequency (integer).",50
+Param_MODEL_COOLDOWN,"Number of FPGA cycles to run after simulation has finished to facilitate IO draining.",2
+Param_MULTIPLEXED_MEM_USE_SCRATCHPAD,"0: use BRAM, otherwise use a scratchpad",1
+Param_NEXT_ADDR_PRED_MIN_RSP_BUFFER_SLOTS,"Minimum buffer slots in the request/response path of a next address predictor.",8
+Param_NUM_CORES,"Number of cores per chip (0 means use the number of software contexts) (dynamic)",2
+Param_PLATFORM_ID,"PlatformID, used in setting up i/o",Legacy
+Param_PLATFORM_SCRATCHPAD_DEBUG_ENABLE,"Enable Platform Scratchpad Debug Log",1
+Param_PLATFORM_SERVICES_AVAILABLE,"1 = Platform services are available.",1
+Param_PORT_MAX_LATENCY,"Maximum latency, used for computing buffer sizes",4
+Param_PROGRAM_START_ADDR,"Address where model should start fetching",0
+Param_REGSTATE_CONN_LOGFILE_PREFIX,"Prefix of logfile names for register state connections.",hasim_funcp_regstate_conn
+Param_REGSTATE_DATA_LOGFILE_PREFIX,"Prefix of logfile names for register state data.",hasim_funcp_regstate_data
+Param_REGSTATE_LOGFILE_PREFIX,"Prefix of logfile names for register state.",hasim_funcp_regstate
+Param_SB_NUM_ENTRIES,"Number of store buffer entries.",8
+Param_SCRATCHPAD_CLIENT_READ_UID_BITS,"Bits available to clients to tag and reorder read responses.",10
+Param_SCRATCHPAD_MEMORY_ADDR_BITS,"Word-level address bits per private scratchpad region",36
+Param_SCRATCHPAD_MEMORY_DEBUG_ENABLE,"Enables the scratchpad memory debug",1
+Param_SCRATCHPAD_PLATFORM,"Where should my scratchpad requests go?",Unknown
+Param_SCRATCHPAD_PREFETCHER_LEARNER_SIZE_LOG,"0-6: # prefetch learners (in log) (dynamic)",5
+Param_SCRATCHPAD_PREFETCHER_MECHANISM,"Bits 5-4: 0 basic-tagged, 1 stride-learn-on-miss, 2 stride-learn-on-original-miss, 3 stride-hybrid / Bits 3: 0 look ahead prefetch distance (laDist) learn automatically / Bit 2-0: laDist upper bound in log (dynamic)",36
+Param_SCRATCHPAD_PVT_CACHE_MODE,"Bit 2: 0 disabled, 1 enabled prefetcher / Bits 1-0: 0 write-back, 1 write-through, 2 write-no-allocate, 3 disabled (dynamic)",0
+Param_SCRATCHPAD_STD_PVT_CACHE_ENTRIES,"Scratchpad private cache entries (must be a power of 2)",1024
+Param_SCRATCHPAD_STD_PVT_CACHE_PREFETCH_ENABLE,"Enable scratchpad private cache prefetcher",0
+Param_SCRATCHPAD_STD_PVT_CACHE_PREFETCH_LEARNER_NUM,"Number of prefetch learners in scratchpad private cache (must be a power of 2)",32
+Param_SCRATCHPAD_STD_PVT_SKEW,"Skew cache indices",0
+Param_SCRATCHPAD_SUPPORTS_INIT,"0 or 1: Does scratchpad memory directly supports initialization from a file?",1
+Param_SIMULATED_ISA,"Modeled ISA",ALPHA
+Param_SIMULATOR_ARGS,"Simulator Args",-w
+Param_SKEW_CONTEXTS,"Skew start times of each context to avoid running identical instructions on all contexts.  Max. skew is 127. (dynamic)",8
+Param_SLEEP_INTERVAL,"Number of instructions to execute before a sleeping thread polls. (32-bit number) (dynamic)",1000
+Param_SMART_SYNTH_BOUNDARY,"use smart synthesis boundaries",0
+Param_STAGE_CONTROLLER_BUF_MAX,"Maximum entries in a buffered stage controller",32
+Param_STATS_MAX_VECTOR_LEN,"Maximum number of counters on a single statistics node.",4096
+Param_STATS_SIZE,"Number of bits per Stat counter.",28
+Param_STDIO_ENABLE_DEBUG,"Enable debugging nodes",1
+Param_SYNTH,"Synthesize it to FPGAs",0
+Param_TOKEN_BRANCH_EPOCH_BITS,"Number of bits in epoch (2 = 4 in-flight branches).",2
+Param_TOKEN_EVENTS_LOGFILE,"Name of Event logfile.",hasim_events.out
+Param_TOKEN_ID_BITS,"Number of bits in a single context's token ID (8 = 256 in-flight instructions).",6
+Param_TOKEN_TIMEP_SCRATCHPAD_BITS,"Number of bits in timing model token scratchpad.",3
+Param_UMF_CHANNEL_ID_BITS,"Bits in UMF ChannelID",4
+Param_UMF_CHUNK_BYTES,"Bytes in UMF Chunk",4
+Param_UMF_DEBUG,"Enable UMF Debug",0
+Param_UMF_MAX_MSG_BYTES,"Maximum message length",1024
+Param_UMF_METHOD_ID_BITS,"Bits in UMF MethodID",4
+Param_UMF_MSG_LENGTH_BITS,"Bits in UMF MsgLength",10
+Param_UMF_PHY_CHANNEL_RESERVED_BITS,"Bits reserved for use by the physical channel",6
+Param_UMF_SERVICE_ID_BITS,"Bits in UMF ServiceID",8
+Param_UNIX_DEVICE_DEBUG,"Should we print debug messages?",0
+Param_USE_BUILD_TREE,"Should we use a flat or hierarchical representation of the program latency-insensitive module graph",1
+Param_WAIT_FOR_HARDWARE,"1 = SW application waits for done signal from hardware.",1
+Param_WB_NUM_ENTRIES,"Number of write buffer entries.",4
+SIM_FMR,"Simulator: FPGA frequency to model frequency ratio (FMR)",15.43486328
+SIM_FPGA_CYCLES,"Simulator: FPGA cycles",632212
+SIM_IPS,"Simulator: Instructions per second",137.950038
+SIM_MODEL_CYCLES,"Simulator: Model cycles",40960
+SIM_MODEL_SPEED,"Simulator: Model speed (kHz)",0.140324175
+SIM_WALL_TIME_SEC,"Simulator: Wall time (sec.)",291.895534
+TRAFFIC_BP_to_Fet_newpc,"Traffic through BP_to_Fet_newpc",104684
+TRAFFIC_CC_to_L2_req__cred,"Traffic through CC_to_L2_req__cred",104689
+TRAFFIC_CC_to_L2_req__portDataEnq,"Traffic through CC_to_L2_req__portDataEnq",104688
+TRAFFIC_CC_to_L2_rsp__cred,"Traffic through CC_to_L2_rsp__cred",104689
+TRAFFIC_CC_to_L2_rsp__portDataEnq,"Traffic through CC_to_L2_rsp__portDataEnq",104688
+TRAFFIC_CPU_to_DCache_load,"Traffic through CPU_to_DCache_load",104688
+TRAFFIC_CPU_to_DCache_store,"Traffic through CPU_to_DCache_store",104688
+TRAFFIC_CPU_to_ICache_load,"Traffic through CPU_to_ICache_load",104684
+TRAFFIC_CPU_to_ITLB_req,"Traffic through CPU_to_ITLB_req",104684
+TRAFFIC_Com_to_Dec_fault,"Traffic through Com_to_Dec_fault",104688
+TRAFFIC_Com_to_Dec_writeback,"Traffic through Com_to_Dec_writeback",104688
+TRAFFIC_Com_to_Fet_fault,"Traffic through Com_to_Fet_fault",104688
+TRAFFIC_Com_to_SB_dealloc,"Traffic through Com_to_SB_dealloc",104688
+TRAFFIC_CorePvtCache_to_UncoreQ__cred,"Traffic through CorePvtCache_to_UncoreQ__cred",104690
+TRAFFIC_CorePvtCache_to_UncoreQ__portDataEnq,"Traffic through CorePvtCache_to_UncoreQ__portDataEnq",104688
+TRAFFIC_DCache_to_CPU_load_delayed,"Traffic through DCache_to_CPU_load_delayed",104688
+TRAFFIC_DCache_to_CPU_load_immediate,"Traffic through DCache_to_CPU_load_immediate",104687
+TRAFFIC_DCache_to_CPU_store_delayed,"Traffic through DCache_to_CPU_store_delayed",104688
+TRAFFIC_DCache_to_CPU_store_immediate,"Traffic through DCache_to_CPU_store_immediate",104688
+TRAFFIC_DMemQ__cred,"Traffic through DMemQ__cred",104688
+TRAFFIC_DMemQ__portDataEnq,"Traffic through DMemQ__portDataEnq",104688
+TRAFFIC_DMem_to_Dec_hit_writeback,"Traffic through DMem_to_Dec_hit_writeback",104686
+TRAFFIC_DMem_to_Dec_miss_writeback,"Traffic through DMem_to_Dec_miss_writeback",104688
+TRAFFIC_DMem_to_SB_req,"Traffic through DMem_to_SB_req",104688
+TRAFFIC_DMem_to_WB_search,"Traffic through DMem_to_WB_search",104688
+TRAFFIC_DTLBQ__cred,"Traffic through DTLBQ__cred",104688
+TRAFFIC_DTLBQ__portDataEnq,"Traffic through DTLBQ__portDataEnq",104686
+TRAFFIC_Dec_to_InstQ_deq,"Traffic through Dec_to_InstQ_deq",104684
+TRAFFIC_Dec_to_SB_alloc,"Traffic through Dec_to_SB_alloc",104684
+TRAFFIC_Exe_to_BP_training,"Traffic through Exe_to_BP_training",104686
+TRAFFIC_Exe_to_Dec_mispredict,"Traffic through Exe_to_Dec_mispredict",104686
+TRAFFIC_Exe_to_Dec_writeback,"Traffic through Exe_to_Dec_writeback",104686
+TRAFFIC_Exe_to_Fet_rewind,"Traffic through Exe_to_Fet_rewind",104686
+TRAFFIC_Fet_to_BP_pc,"Traffic through Fet_to_BP_pc",104684
+TRAFFIC_Fet_to_InstQ_clear,"Traffic through Fet_to_InstQ_clear",104683
+TRAFFIC_Fet_to_InstQ_enq,"Traffic through Fet_to_InstQ_enq",104683
+TRAFFIC_Fet_to_PCCALC_attr,"Traffic through Fet_to_PCCALC_attr",104684
+TRAFFIC_ICache_to_CPU_load_delayed,"Traffic through ICache_to_CPU_load_delayed",104684
+TRAFFIC_ICache_to_CPU_load_immediate,"Traffic through ICache_to_CPU_load_immediate",104684
+TRAFFIC_IMem_to_Fet_response,"Traffic through IMem_to_Fet_response",104684
+TRAFFIC_ITLB_to_CPU_rsp,"Traffic through ITLB_to_CPU_rsp",104688
+TRAFFIC_InstQ_to_Dec_first,"Traffic through InstQ_to_Dec_first",104684
+TRAFFIC_InstQ_to_Fet_credit,"Traffic through InstQ_to_Fet_credit",104683
+TRAFFIC_IssueQ__cred,"Traffic through IssueQ__cred",104686
+TRAFFIC_IssueQ__portDataEnq,"Traffic through IssueQ__portDataEnq",104684
+TRAFFIC_L1_DCache_InQ__cred,"Traffic through L1_DCache_InQ__cred",104688
+TRAFFIC_L1_DCache_InQ__portDataEnq,"Traffic through L1_DCache_InQ__portDataEnq",104686
+TRAFFIC_L1_DCache_OutQ__cred,"Traffic through L1_DCache_OutQ__cred",104688
+TRAFFIC_L1_DCache_OutQ__portDataEnq,"Traffic through L1_DCache_OutQ__portDataEnq",104688
+TRAFFIC_L1_ICache_InQ__cred,"Traffic through L1_ICache_InQ__cred",104686
+TRAFFIC_L1_ICache_InQ__portDataEnq,"Traffic through L1_ICache_InQ__portDataEnq",104686
+TRAFFIC_L1_ICache_OutQ__cred,"Traffic through L1_ICache_OutQ__cred",104686
+TRAFFIC_L1_ICache_OutQ__portDataEnq,"Traffic through L1_ICache_OutQ__portDataEnq",104684
+TRAFFIC_L1toL2_ReqQ__cred,"Traffic through L1toL2_ReqQ__cred",104688
+TRAFFIC_L1toL2_ReqQ__portDataEnq,"Traffic through L1toL2_ReqQ__portDataEnq",104686
+TRAFFIC_L2_to_CC_req__cred,"Traffic through L2_to_CC_req__cred",104689
+TRAFFIC_L2_to_CC_req__portDataEnq,"Traffic through L2_to_CC_req__portDataEnq",104687
+TRAFFIC_L2_to_CC_rsp__cred,"Traffic through L2_to_CC_rsp__cred",104689
+TRAFFIC_L2_to_CC_rsp__portDataEnq,"Traffic through L2_to_CC_rsp__portDataEnq",104687
+TRAFFIC_L2toL1_RspQ__cred,"Traffic through L2toL1_RspQ__cred",104688
+TRAFFIC_L2toL1_RspQ__portDataEnq,"Traffic through L2toL1_RspQ__portDataEnq",104687
+TRAFFIC_MemWriteBuf_to_Dec_writeback,"Traffic through MemWriteBuf_to_Dec_writeback",104688
+TRAFFIC_PCCalc_to_Fet_newpc,"Traffic through PCCalc_to_Fet_newpc",104683
+TRAFFIC_SB_to_DMem_rsp,"Traffic through SB_to_DMem_rsp",104686
+TRAFFIC_SB_to_Dec_credit,"Traffic through SB_to_Dec_credit",104686
+TRAFFIC_SB_to_Dec_writeback,"Traffic through SB_to_Dec_writeback",104686
+TRAFFIC_SB_to_WB_enq,"Traffic through SB_to_WB_enq",104686
+TRAFFIC_Uncore_to_CorePvtCacheQ__cred,"Traffic through Uncore_to_CorePvtCacheQ__cred",104690
+TRAFFIC_Uncore_to_CorePvtCacheQ__portDataEnq,"Traffic through Uncore_to_CorePvtCacheQ__portDataEnq",104690
+TRAFFIC_WB_to_DMem_rsp,"Traffic through WB_to_DMem_rsp",104687
+TRAFFIC_WB_to_SB_credit,"Traffic through WB_to_SB_credit",104688
+TRAFFIC_commitQ_alloc,"Traffic through commitQ_alloc",104686
+TRAFFIC_commitQ_credit,"Traffic through commitQ_credit",104686
+TRAFFIC_commitQ_deq,"Traffic through commitQ_deq",104688
+TRAFFIC_commitQ_first,"Traffic through commitQ_first",104688
+TRAFFIC_fpga_buttons,"Traffic through fpga_buttons",0
+TRAFFIC_fpga_switches,"Traffic through fpga_switches",0
+TRAFFIC_funcp_commitResults__req,"Traffic through funcp_commitResults__req",50711
+TRAFFIC_funcp_commitResults__rsp,"Traffic through funcp_commitResults__rsp",50711
+TRAFFIC_funcp_commitStores__req,"Traffic through funcp_commitStores__req",2881
+TRAFFIC_funcp_commitStores__rsp,"Traffic through funcp_commitStores__rsp",2881
+TRAFFIC_funcp_doDTranslate__req,"Traffic through funcp_doDTranslate__req",104688
+TRAFFIC_funcp_doDTranslate__rsp,"Traffic through funcp_doDTranslate__rsp",10337
+TRAFFIC_funcp_doITranslate__req,"Traffic through funcp_doITranslate__req",104688
+TRAFFIC_funcp_doITranslate__rsp,"Traffic through funcp_doITranslate__rsp",70310
+TRAFFIC_funcp_doLoads__req,"Traffic through funcp_doLoads__req",7454
+TRAFFIC_funcp_doLoads__rsp,"Traffic through funcp_doLoads__rsp",7454
+TRAFFIC_funcp_doSpeculativeStores__req,"Traffic through funcp_doSpeculativeStores__req",2881
+TRAFFIC_funcp_doSpeculativeStores__rsp,"Traffic through funcp_doSpeculativeStores__rsp",2881
+TRAFFIC_funcp_dtlb_pagefault,"Traffic through funcp_dtlb_pagefault",2
+TRAFFIC_funcp_dtlb_translate__req,"Traffic through funcp_dtlb_translate__req",104688
+TRAFFIC_funcp_dtlb_translate__rsp,"Traffic through funcp_dtlb_translate__rsp",10337
+TRAFFIC_funcp_getDependencies__req,"Traffic through funcp_getDependencies__req",52526
+TRAFFIC_funcp_getDependencies__rsp,"Traffic through funcp_getDependencies__rsp",52526
+TRAFFIC_funcp_getInstruction__req,"Traffic through funcp_getInstruction__req",70304
+TRAFFIC_funcp_getInstruction__rsp,"Traffic through funcp_getInstruction__rsp",70304
+TRAFFIC_funcp_getResults__req,"Traffic through funcp_getResults__req",50715
+TRAFFIC_funcp_getResults__rsp,"Traffic through funcp_getResults__rsp",50715
+TRAFFIC_funcp_handleFault__req,"Traffic through funcp_handleFault__req",2
+TRAFFIC_funcp_handleFault__rsp,"Traffic through funcp_handleFault__rsp",2
+TRAFFIC_funcp_itlb_pagefault,"Traffic through funcp_itlb_pagefault",0
+TRAFFIC_funcp_itlb_translate__req,"Traffic through funcp_itlb_translate__req",104688
+TRAFFIC_funcp_itlb_translate__rsp,"Traffic through funcp_itlb_translate__rsp",70310
+TRAFFIC_funcp_memory__req,"Traffic through funcp_memory__req",82036
+TRAFFIC_funcp_memory__rsp,"Traffic through funcp_memory__rsp",79155
+TRAFFIC_funcp_memstate__req,"Traffic through funcp_memstate__req",89680
+TRAFFIC_funcp_memstate__rsp,"Traffic through funcp_memstate__rsp",79221
+TRAFFIC_funcp_memstate_commit_store_rsp,"Traffic through funcp_memstate_commit_store_rsp",2881
+TRAFFIC_funcp_rewindToToken__req,"Traffic through funcp_rewindToToken__req",1814
+TRAFFIC_funcp_rewindToToken__rsp,"Traffic through funcp_rewindToToken__rsp",1814
+TRAFFIC_isa_datapath__req,"Traffic through isa_datapath__req",42688
+TRAFFIC_isa_datapath__rsp,"Traffic through isa_datapath__rsp",42688
+TRAFFIC_isa_datapath_srcvals,"Traffic through isa_datapath_srcvals",42688
+TRAFFIC_isa_datapath_writeback,"Traffic through isa_datapath_writeback",42688
+TRAFFIC_local_memory_device__req,"Traffic through local_memory_device__req",9897
+TRAFFIC_local_memory_device__rsp,"Traffic through local_memory_device__rsp",6680
+TRAFFIC_local_memory_device_wdata,"Traffic through local_memory_device_wdata",3217
+TRAFFIC_model_commits,"Traffic through model_commits",50711
+TRAFFIC_model_cycle,"Traffic through model_cycle",104684
+TRAFFIC_rrr_client_ASSERTIONS_req,"Traffic through rrr_client_ASSERTIONS_req",0
+TRAFFIC_rrr_client_ASSERTIONS_resp,"Traffic through rrr_client_ASSERTIONS_resp",0
+TRAFFIC_rrr_client_COMMANDS_req,"Traffic through rrr_client_COMMANDS_req",710
+TRAFFIC_rrr_client_COMMANDS_resp,"Traffic through rrr_client_COMMANDS_resp",0
+TRAFFIC_rrr_client_DEBUG_SCAN_req,"Traffic through rrr_client_DEBUG_SCAN_req",0
+TRAFFIC_rrr_client_DEBUG_SCAN_resp,"Traffic through rrr_client_DEBUG_SCAN_resp",0
+TRAFFIC_rrr_client_EVENTS_req,"Traffic through rrr_client_EVENTS_req",0
+TRAFFIC_rrr_client_EVENTS_resp,"Traffic through rrr_client_EVENTS_resp",0
+TRAFFIC_rrr_client_FRONT_PANEL_req,"Traffic through rrr_client_FRONT_PANEL_req",0
+TRAFFIC_rrr_client_FRONT_PANEL_resp,"Traffic through rrr_client_FRONT_PANEL_resp",0
+TRAFFIC_rrr_client_FUNCP_MEMORY_req,"Traffic through rrr_client_FUNCP_MEMORY_req",5776
+TRAFFIC_rrr_client_FUNCP_MEMORY_resp,"Traffic through rrr_client_FUNCP_MEMORY_resp",13660
+TRAFFIC_rrr_client_FUNCP_TLB_req,"Traffic through rrr_client_FUNCP_TLB_req",136
+TRAFFIC_rrr_client_FUNCP_TLB_resp,"Traffic through rrr_client_FUNCP_TLB_resp",288
+TRAFFIC_rrr_client_ISA_DP_DEBUG_req,"Traffic through rrr_client_ISA_DP_DEBUG_req",0
+TRAFFIC_rrr_client_ISA_DP_DEBUG_resp,"Traffic through rrr_client_ISA_DP_DEBUG_resp",0
+TRAFFIC_rrr_client_ISA_EMULATOR_req,"Traffic through rrr_client_ISA_EMULATOR_req",7263
+TRAFFIC_rrr_client_ISA_EMULATOR_resp,"Traffic through rrr_client_ISA_EMULATOR_resp",81
+TRAFFIC_rrr_client_ISA_REGOP_EMULATOR_req,"Traffic through rrr_client_ISA_REGOP_EMULATOR_req",0
+TRAFFIC_rrr_client_ISA_REGOP_EMULATOR_resp,"Traffic through rrr_client_ISA_REGOP_EMULATOR_resp",0
+TRAFFIC_rrr_client_SCRATCHPAD_MEMORY_req,"Traffic through rrr_client_SCRATCHPAD_MEMORY_req",0
+TRAFFIC_rrr_client_SCRATCHPAD_MEMORY_resp,"Traffic through rrr_client_SCRATCHPAD_MEMORY_resp",0
+TRAFFIC_rrr_client_STARTER_DEVICE_req,"Traffic through rrr_client_STARTER_DEVICE_req",0
+TRAFFIC_rrr_client_STARTER_DEVICE_resp,"Traffic through rrr_client_STARTER_DEVICE_resp",0
+TRAFFIC_rrr_client_STATS_req,"Traffic through rrr_client_STATS_req",1916
+TRAFFIC_rrr_client_STATS_resp,"Traffic through rrr_client_STATS_resp",0
+TRAFFIC_rrr_client_STDIO_req,"Traffic through rrr_client_STDIO_req",20
+TRAFFIC_rrr_client_STDIO_resp,"Traffic through rrr_client_STDIO_resp",0
+TRAFFIC_rrr_server_COMMANDS_req,"Traffic through rrr_server_COMMANDS_req",14
+TRAFFIC_rrr_server_COMMANDS_resp,"Traffic through rrr_server_COMMANDS_resp",8
+TRAFFIC_rrr_server_DEBUG_SCAN_req,"Traffic through rrr_server_DEBUG_SCAN_req",0
+TRAFFIC_rrr_server_DEBUG_SCAN_resp,"Traffic through rrr_server_DEBUG_SCAN_resp",0
+TRAFFIC_rrr_server_EVENTS_req,"Traffic through rrr_server_EVENTS_req",0
+TRAFFIC_rrr_server_EVENTS_resp,"Traffic through rrr_server_EVENTS_resp",0
+TRAFFIC_rrr_server_FRONT_PANEL_req,"Traffic through rrr_server_FRONT_PANEL_req",0
+TRAFFIC_rrr_server_FRONT_PANEL_resp,"Traffic through rrr_server_FRONT_PANEL_resp",0
+TRAFFIC_rrr_server_FUNCP_MEMORY_req,"Traffic through rrr_server_FUNCP_MEMORY_req",184
+TRAFFIC_rrr_server_FUNCP_MEMORY_resp,"Traffic through rrr_server_FUNCP_MEMORY_resp",40
+TRAFFIC_rrr_server_ISA_EMULATOR_req,"Traffic through rrr_server_ISA_EMULATOR_req",640
+TRAFFIC_rrr_server_ISA_EMULATOR_resp,"Traffic through rrr_server_ISA_EMULATOR_resp",0
+TRAFFIC_rrr_server_PARAMS_req,"Traffic through rrr_server_PARAMS_req",0
+TRAFFIC_rrr_server_PARAMS_resp,"Traffic through rrr_server_PARAMS_resp",0
+TRAFFIC_rrr_server_STARTER_DEVICE_req,"Traffic through rrr_server_STARTER_DEVICE_req",2
+TRAFFIC_rrr_server_STARTER_DEVICE_resp,"Traffic through rrr_server_STARTER_DEVICE_resp",0
+TRAFFIC_rrr_server_STATS_req,"Traffic through rrr_server_STATS_req",4
+TRAFFIC_rrr_server_STATS_resp,"Traffic through rrr_server_STATS_resp",0
+TRAFFIC_rrr_server_STDIO_req,"Traffic through rrr_server_STDIO_req",5
+TRAFFIC_rrr_server_STDIO_resp,"Traffic through rrr_server_STDIO_resp",2
+TRAFFIC_rrr_server_TOPOLOGY_req,"Traffic through rrr_server_TOPOLOGY_req",4
+TRAFFIC_rrr_server_TOPOLOGY_resp,"Traffic through rrr_server_TOPOLOGY_resp",0
+TRAFFIC_storeBufferAllocate,"Traffic through storeBufferAllocate",3024
+TRAFFIC_vdev_cache_0__req,"Traffic through vdev_cache_0__req",4671
+TRAFFIC_vdev_cache_0__rsp,"Traffic through vdev_cache_0__rsp",4463
+TRAFFIC_vdev_cache_1__req,"Traffic through vdev_cache_1__req",146
+TRAFFIC_vdev_cache_1__rsp,"Traffic through vdev_cache_1__rsp",146
+TRAFFIC_vdev_cache_backing_0__req,"Traffic through vdev_cache_backing_0__req",1496
+TRAFFIC_vdev_cache_backing_0__rsp,"Traffic through vdev_cache_backing_0__rsp",5472
+TRAFFIC_vdev_cache_backing_1__req,"Traffic through vdev_cache_backing_1__req",32
+TRAFFIC_vdev_cache_backing_1__rsp,"Traffic through vdev_cache_backing_1__rsp",128
+TRAFFIC_vdev_starter_start_run,"Traffic through vdev_starter_start_run",0

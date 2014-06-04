@@ -1,0 +1,14 @@
+common_services:LUT:2133:Reg:2160:BRAM:0
+hasim_funcp:LUT:41449:Reg:20084:BRAM:78
+hasim_isa_datapath:LUT:10502:Reg:5587:BRAM:0
+funcp_memstate:LUT:11908:Reg:7483:BRAM:95
+funcp_memstate_tlb:LUT:5303:Reg:3295:BRAM:18
+commands_service:LUT:1917:Reg:1264:BRAM:0
+hasim_timep:LUT:1947:Reg:851:BRAM:0
+hasim_private_caches:LUT:31766:Reg:15488:BRAM:6
+inorder_pipeline_front_end:LUT:15175:Reg:8115:BRAM:34
+decode_stage:LUT:12891:Reg:4140:BRAM:0
+inorder_pipeline_back_end:LUT:33030:Reg:14398:BRAM:4
+hasim_l1_caches:LUT:15175:Reg:8115:BRAM:34
+FPGA0:LUT:91420:Reg:75147:BRAM:82:TotalLUT:303600:TotalReg:607200:TotalBRAM:1030
+FPGA1:LUT:50821:Reg:41303:BRAM:67:TotalLUT:303600:TotalReg:607200:TotalBRAM:1030

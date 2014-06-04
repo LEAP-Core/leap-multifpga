@@ -125,6 +125,7 @@ Packagehint=multifpga
 [Simlutation Communication Device with Aurora Stack/Requires]
 aurora_flowcontrol=Aurora Device Reliable Flowcontrol
 aurora_driver=Aurora Driver, Simulation
+aurora_common=Aurora Common Definitions
 
 [Simlutation Communication Device with Aurora Stack]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation/aurora-device-simulation.awb
@@ -210,3 +211,14 @@ bluesim_tool=BSV Bluesim Build Tool
 [MultiFPGA BlueSim Platform Build Pipeline (HW/SW)]
 File=modules/leap/build-support/pipelines/hwsw/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
 Packagehint=multifpga
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms
+
+[Aurora Common Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
+Packagehint=leap-platforms

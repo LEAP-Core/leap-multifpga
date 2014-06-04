@@ -7,5 +7,5 @@
 
 %public platform-services-master.bsv
 
-%requires  starter_service front_panel_service mem_services common_services 
+%requires  starter_service mem_services common_services 
 %requires  multifpga_router_service

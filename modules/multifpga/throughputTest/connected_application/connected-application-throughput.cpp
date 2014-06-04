@@ -49,7 +49,7 @@ CONNECTED_APPLICATION_CLASS::Main()
 
     STATS_SERVER_CLASS::GetInstance()->DumpStats();
     STATS_SERVER_CLASS::GetInstance()->EmitFile();
-    STARTER_DEVICE_SERVER_CLASS::GetInstance()->End(0);
+    STARTER_SERVICE_SERVER_CLASS::GetInstance()->End(0);
   
     return 0;
 }

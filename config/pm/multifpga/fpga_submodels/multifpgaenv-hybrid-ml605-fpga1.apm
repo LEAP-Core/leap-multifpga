@@ -123,9 +123,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-
-
-
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
 Packagehint=leap
@@ -353,12 +350,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
 Packagehint=leap
 
-[FPGA Platform Build Pipeline]
-
-[FPGA Platform Build Pipeline/Requires]
-
-[Null Channel IO Module/Requires]
-
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
 Packagehint=leap
@@ -469,7 +460,6 @@ Packagehint=leap
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/aurora-device.awb
 Packagehint=leap-platforms
 
-
 [Aurora Device Wrapper ML605/Requires]
 aurora_flowcontrol=Aurora Device Flowcontrol
 aurora_driver=ML605 Aurora Device, Single Lane, 32-bit, 5 gbps
@@ -526,3 +516,10 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Null software build tool
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

@@ -4,12 +4,23 @@ import sys
 import copy
 import math
 import itertools
+import time
+import os
 
 # AWB dependencies
 from model import  *
 from fpgamap_parser import parseFPGAMap
 from li_module import *
 from lim_common import *
+
+
+def isModuleCompatibleWithPlatform(module, platform):
+    if(platform.platformType == 'CPU'):
+        return module.getAttribute('EXECUTION_TYPE') == 'SOFTWARE'
+    elif(platform.platformType == 'FPGA'):
+        return module.getAttribute('EXECUTION_TYPE') == 'RTL'
+    elif(platform.platformType == 'BLUESIM'):
+        return module.getAttribute('EXECUTION_TYPE') == 'RTL'
 
 def placeModulesWithMapFile(moduleList, environmentGraph, moduleGraph):
 
@@ -51,14 +62,61 @@ def decorateModulesWithMapFile(moduleList, environmentGraph, moduleGraph):
                 moduleObject = moduleGraph.modules[moduleName]   
                 moduleObject.putAttribute('MAPPING', platform)
 
+# this function allows us to supply resource utilizations for
+# different modules.
+def assignResources(moduleList, environmentGraph, moduleGraph):
+
+    # Resource utilization could be given by a file associated 
+
+    # We require this extra 'S', but maybe this should not be the case.
+    resourceFile = moduleList.getAllDependenciesWithPaths('GIVEN_RESOURCESS')    
+    filename = ""
+    if(len(resourceFile) > 0):
+        filename = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + resourceFile[0]
+        # let's read in a resource file
+
+    filenames = [filename]
+
+    # gather other resources from moduleGraph object code cache.
+    for module in moduleGraph.modules:
+        moduleObject = moduleGraph.modules[module]   
+        filenames.append(moduleObject.getObjectCode('RESOURCES'))
+
+    resources = {}
+
+    # need to check for file existance. returning an empty resource
+    # dictionary is acceptable.
+    for filename in convertDependencies(filenames):
+        if( not os.path.exists(filename)):
+            print "Warning, resource file " + str(filename) + "not found"
+            continue
+
+        logfile = open(filename,'r')  
+        for line in logfile:
+            # There are several ways that we can get resource. One way is instrumenting the router. 
+            params = line.split(':')
+            moduleName = params.pop(0)
+            resources[moduleName] = {}
+            for index in range(len(params)/2):
+                resources[moduleName][params[2*index]] = float(params[2*index+1])
+
+        logfile.close()
+
+    return resources
+
 # Places modules onto platforms using a programmer-supplied
 # mapping file.                                                                                             
 def placeModulesILP(moduleList, environmentGraph, moduleGraph):
+
+    pipeline_debug = getBuildPipelineDebug(moduleList)
 
     # As a prepass, tag modules according to map file.
     decorateModulesWithMapFile(moduleList, environmentGraph, moduleGraph)
     modFile = 'placer.mod'
     modHandle = open(modFile,'w')
+
+    # Obtain information about resource usage
+    resources = assignResources(moduleList, environmentGraph, moduleGraph)
     
     # Set up variables
     
@@ -79,8 +137,10 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
         moduleColors[moduleName] = []
         if(mapping is None):        
             for platformName in environmentGraph.getPlatformNames():
-                modHandle.write('var ' + getColorModule(moduleName, platformName) + ' binary;\n')
-                moduleColors[moduleName].append(platformName)
+                # Not all platforms can be mapped to all modules.
+                if(isModuleCompatibleWithPlatform(moduleObject, environmentGraph.platforms[platformName])):
+                    modHandle.write('var ' + getColorModule(moduleName, platformName) + ' binary;\n')
+                    moduleColors[moduleName].append(platformName)
         else:
             modHandle.write('var ' + getColorModule(moduleName, mapping) + ' = 1;\n') # Already mapped
             moduleColors[moduleName].append(mapping)
@@ -162,7 +222,33 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
                     def defineSrcVal(srcColor):
                         return getColorEdge(channel.name, srcColor, color)
                     modHandle.write('\t' + " + ".join(map(defineSrcVal,edgeColorPairs[channel.name][0])) + ' = ' + getColorModule(moduleName, color) + ';\n')
-    
+
+    # Now we emit resource constraints. This is somewhat tied to the resource matrix :/
+    for platformName in environmentGraph.getPlatformNames():
+        # For each resource that the plaform has, we need to emit a constraint. 
+        if(platformName in resources):
+            for resourceCandidate in resources[platformName]:
+                #The following line is a kind of hack. 
+                match = re.match('^Total(.*)',resourceCandidate)
+                if(match):
+                    # we found a resource class that this platform cares about.
+                    resourceClass = match.group(1)
+                    constraints = []
+
+                    for moduleName in moduleGraph.modules:
+                        moduleObject = moduleGraph.modules[moduleName]   
+                        # Can this module be on this platform (some
+                        # modules are tied to specific platforms)
+                        if(platformName in moduleColors[moduleName]):
+                            # emit constraint if the module has a resource constraint.  
+                            if(moduleName in resources):
+                                if(resourceClass in resources[moduleName]):
+                                    constraints.append(str(resources[moduleName][resourceClass]) + ' * ' + getColorModule(moduleName,platformName))
+                    #if there are no constraints, do nothing.
+                    if(len(constraints) > 0):
+                        modHandle.write('subject to resource_' + resourceClass + '_platform_' + platformName +':\n')
+                        modHandle.write(' + '.join(constraints) + ' <= ' + str(.7*resources[platformName][resourceCandidate]) + ';\n')
+        
     modHandle.write('\n\nend;\n')
     modHandle.close()
 
@@ -172,6 +258,17 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
     example = glpk.glpk(modFile)
     example.update()
     example.solve()
+
+    # print module names
+    for moduleName in moduleColors:
+        for platformName in moduleColors[moduleName]:
+            colorAssignment = eval('example.' + getColorModule(moduleName,platformName))
+            if(colorAssignment.value() > 0):
+                moduleGraph.modules[moduleName].putAttribute('MAPPING', platformName)
+                moduleGraph.modules[moduleName].id() 
+                if(pipeline_debug):
+                    print 'Mapping touches ' + str(id(moduleGraph.modules[moduleName])) + 'and ' + str(id(moduleGraph.modules[moduleName].attributes)) + ': ' + moduleName + " platform is  " + platformName + ' : ' + str(colorAssignment) + ' ' + str(type(colorAssignment))
+
 
 # Assigns LI modules to platforms.  Currently, this is done using
 # a mapping file, in which the programmer assigns specific modules
@@ -185,8 +282,9 @@ def placeModules(moduleList, environmentGraph, moduleGraph):
 
     # first we need to map the platform modules (those physically tied
     # to the platform) to their platform
-    for platformName in environmentGraph.getPlatformNames():          
-        moduleGraph.modules[platformName].putAttribute('MAPPING', platformName)
+    for platformName in environmentGraph.getPlatformNames():
+        if(platformName in moduleGraph.modules):
+            moduleGraph.modules[platformName].putAttribute('MAPPING', platformName)
 
     PLACER_ALGORITHM = moduleList.getAWBParam('lim_place_modules', 'PLACER_ALGORITHM')
     eval(PLACER_ALGORITHM + '(moduleList, environmentGraph, moduleGraph)')
@@ -195,6 +293,7 @@ def placeModules(moduleList, environmentGraph, moduleGraph):
     # of the system, the platform graph.  In this graph we consider
     # only platforms, and their inter-platform connections.  
     platformConnections = []
+ 
     for module in moduleGraph.modules.values():
         platformMapping = module.getAttribute('MAPPING')
         for channel in module.channels:
@@ -207,7 +306,10 @@ def placeModules(moduleList, environmentGraph, moduleGraph):
 
             if(pipeline_debug):
                 print "Partner channel: " + channel.partnerChannel.name + "\n"
-                print "Partner module: " + channel.partnerModule.name + "\n"
+                print "Partner module id: " + str(id(channel.partnerModule.name)) + ": " + channel.partnerModule.name + "\n"
+                channel.partnerModule.id()
+                print "Partner channel mapping: " + channel.partnerChannel.module.getAttribute('MAPPING') + "\n"
+                print "Partner module mapping: " + channel.partnerModule.getAttribute('MAPPING') + "\n"
 
             # we only care about inter-FPGA channels
             if(platformMapping == channel.partnerModule.getAttribute('MAPPING')):
@@ -236,6 +338,19 @@ def placeModules(moduleList, environmentGraph, moduleGraph):
             
            
     platformGraph = LIGraph(platformConnections)
+
+    # the platform graph doesn't have mappings yet.  trivially insert
+    # them here.
+    for module in platformGraph.modules.values():
+        module.putAttribute('MAPPING', module.name)
+
+    # For routing purposes, platform modules must be assigned mappings. 
+    # For now, these are trivial. 
+    for module in platformGraph.modules.values():
+        module.putAttribute('MAPPING', module.name)
+
+    platformGraph.healthCheck()
+    moduleGraph.healthCheck()
 
     if(pipeline_debug):
         print "Post placement platform graph: " + str(platformGraph) + "\n"

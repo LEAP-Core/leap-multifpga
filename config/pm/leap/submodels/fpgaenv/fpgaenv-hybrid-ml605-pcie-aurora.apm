@@ -196,3 +196,10 @@ aurora_flowcontrol_debugger=Aurora Device Flowcontrol Debugger
 [Aurora Device Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-flowcontrol/debugger/aurora-debugger.awb
 Packagehint=leap-platforms
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

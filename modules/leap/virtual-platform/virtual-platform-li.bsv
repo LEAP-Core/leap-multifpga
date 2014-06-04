@@ -41,24 +41,44 @@
 `include "awb/provides/virtual_devices.bsh"
 `include "awb/provides/physical_platform.bsh"
 `include "awb/provides/clocks_device.bsh"
+`include "awb/provides/platform_services.bsh"
 
 `include "awb/rrr/server_connections.bsh"
 `include "awb/rrr/client_connections.bsh"
 
 interface VIRTUAL_PLATFORM;
 
-    interface LowLevelPlatformInterface llpint;
-    interface VIRTUAL_DEVICES virtualDevices;
+    interface PHYSICAL_DRIVERS          physicalDrivers;
+    interface TOP_LEVEL_WIRES           topLevelWires;
 
 endinterface
 
-module [CONNECTED_MODULE] mkVirtualPlatform#(LowLevelPlatformInterface llpi)
+// Helper function used to extract clock and reset from virtual platform.
+// Ultimately this function will not be needed, since it should be possible
+// to derive clock and reset from those interfaces which use them. 
+function Tuple2#(Clock, Reset) extractClocks(VIRTUAL_PLATFORM vp);
+    return tuple2(vp.physicalDrivers.clocksDriver.clock, vp.physicalDrivers.clocksDriver.reset);
+endfunction
+
+module [CONNECTED_MODULE] mkVirtualPlatform
     // interface:
         (VIRTUAL_PLATFORM);
 
-    let vdevs  <- mkVirtualDevices(llpi);
+    let llpi <- mkLowLevelPlatformInterface();
+
+    Clock clk = llpi.physicalDrivers.clocksDriver.clock;
+    Reset rst = llpi.physicalDrivers.clocksDriver.reset;
+
+    let vdevs  <- mkVirtualDevices(llpi, clocked_by clk, reset_by rst);
     
-    interface llpint = llpi;
-    interface virtualDevices = vdevs;
+    //
+    // Platform services are layered on the virtual platform.  These services
+    // are typically device independent and must expose their interfaces as
+    // soft connections.
+    //
+    let spi <- mkPlatformServices(clocked_by clk, reset_by rst);
+
+    interface physicalDrivers = llpi.physicalDrivers;
+    interface topLevelWires = llpi.topLevelWires;
 
 endmodule

@@ -116,7 +116,6 @@ Packagehint=leap
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
-
 [FPGA0 Simulation Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0/sim-physical-platform-fpga0.awb
 Packagehint=multifpga
@@ -130,12 +129,17 @@ unix_pipe_device=UNIX Pipe Physical Device
 File=config/pm/leap/submodels/pipelines/build-pipeline-bluesim.apm
 Packagehint=leap
 
-
 [Soft Services Submodel]
 File=config/pm/leap/submodels/common/soft-services.apm
 Packagehint=leap
 
-
 [Standard Platform Services Submodel]
 File=config/pm/leap/submodels/platform-services/standard-platform-services.apm
 Packagehint=leap
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

@@ -82,6 +82,9 @@ class MultiFPGAConnect():
 
 
             parameterFile = '?'
+            
+            liFile = platformBitfileBuildDir + '/lim.li'
+
             if(platform.platformType == 'FPGA' or platform.platformType == 'BLUESIM'):
                  parameterFile =  platformBitfileBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
             elif(platform.platformType == 'CPU'):
@@ -103,7 +106,7 @@ class MultiFPGAConnect():
             self.platformData[platform.name] = {'LOG': logs, 'BLUETCL': bluetclPaths, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'TYPES':{}}
 
 
-            moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile] 
+            moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile, liFile] 
     
         mappingFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
 
@@ -121,8 +124,8 @@ class MultiFPGAConnect():
     # Expands logical paths to physical paths using Djikstras
     # algorithm to introduce hops across platforms.
     def connectPath(self, src, sink, platformGraph):
-
-        path = self.environment.getPath(src.platform, sink.platform)
+       
+        path = self.environment.getPath(src.platform(), sink.platform())
 
         srcs = [src]
         sinks =[]
@@ -214,7 +217,7 @@ class MultiFPGAConnect():
 
         # Assign activity factors to all communications channels.
         if(self.pipeline_debug):
-            print "Module Graph:  " + str(moduleGraph) + "\n"
+            print "Module Graph: " + str(moduleGraph) + "\n"
   
         assignActivity(self.moduleList, moduleGraph)
 
@@ -234,10 +237,10 @@ class MultiFPGAConnect():
 
         generateCode(self.moduleList,environmentGraph, platformGraph)
 
-        # Build backend flow using object code created during the first
-        # pass. currenlty not implemented.
-        constructBackendBuilds(self.moduleList, environmentGraph, platformGraph)
-
+        # Build backend flow using object code created during the
+        # first pass. The module graph is needed here because it
+        # contains the object code from the first pass. 
+        constructBackendBuilds(self.moduleList, environmentGraph, platformGraph, moduleGraph)
 
 
     # Constructs a graph representation of the complete LI program.
@@ -257,8 +260,9 @@ class MultiFPGAConnect():
             subordinateGraphs.append(pickle.load(pickleHandle))
             pickleHandle.close()
             
+
         mergedGraph = subordinateGraphs.pop()
- 
+        
         if(self.pipeline_debug):
             print 'parseModuleGraph base ' + str(mergedGraph) + 'subordinate graphs'
 
@@ -277,7 +281,10 @@ class MultiFPGAConnect():
         mergedGraph.trimOptionalChannels()
         if(mergedGraph.checkUnmatchedChannels()):
             print "Unmatched Channels in : " + str(mergedGraph)
-            exit(0)
+
+            mergedGraph.dumpUnmatchedChannels()
+
+            exit(1)
 
         return mergedGraph
         

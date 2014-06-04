@@ -456,3 +456,10 @@ Packagehint=leap
 [FPGA Platform Build Pipeline (HW/SW)]
 File=modules/leap/build-support/pipelines/hwsw/multifpga_platform/fpga-platform-build-pipeline.awb
 Packagehint=multifpga
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

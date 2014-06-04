@@ -54,3 +54,5 @@ Packagehint=leap-platforms-acp
 File=modules/leap/build-support/project/null_environment.awb
 Packagehint=multifpga
 
+[Hybrid ACP Dual Compute Environment with SRAM Central Cache FPGA1 (Nallatech)/Params]
+BUILD_COMMON_SERVICES=0

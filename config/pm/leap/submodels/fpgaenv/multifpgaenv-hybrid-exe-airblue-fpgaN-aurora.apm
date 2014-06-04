@@ -179,6 +179,7 @@ Packagehint=leap-platforms
 [Simlutation Communication Device with Aurora Stack/Requires]
 aurora_flowcontrol=Aurora Device Reliable Flowcontrol
 aurora_driver=Aurora Driver, Simulation
+aurora_common=Aurora Common Definitions
 
 [Simlutation Communication Device with Aurora Stack]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation/aurora-device-simulation.awb
@@ -200,3 +201,14 @@ aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
 
 [UNIX Communication Physical Device/Params]
 UNIX_COMM_ERRORS=1
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms
+
+[Aurora Common Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
+Packagehint=leap-platforms

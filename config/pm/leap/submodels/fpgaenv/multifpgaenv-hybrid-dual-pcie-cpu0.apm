@@ -178,3 +178,13 @@ Packagehint=leap-platforms
 [Differential Crystal Clocks Device from Clocks]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-from-clocks.awb
 Packagehint=leap-platforms
+
+[Software build tool/Params]
+DUMP_LIM_GRAPH=1
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms

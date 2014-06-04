@@ -168,7 +168,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
             # we must create a logical chain information
             chainsStr += 'let chain_' + dangling.name + ' = ' + \
                          'LOGICAL_CHAIN_INFO{logicalName: "' + dangling.name + '", ' + \
-                         'logicalType: "' + dangling.raw_type + '", computePlatform: "' + platform + '", ' + \
+                         'logicalType: "' + dangling.raw_type + '", ' + \
                          'incoming: tpl_2(pack_chain_' + dangling.name + '), ' + \
                          'outgoing: unpack_chain_' + dangling.name + ', ' + \
                          'bitWidth: ' + str(dangling.bitwidth) + ', ' + \

@@ -21,6 +21,7 @@ class FPGAEnvironment(object):
             self.addPlatform(platform)
         self.graphize()
         self.buildTransitTables()
+        
 
     def addPlatform(self,platform):
         self.platforms[platform.name] = platform;
@@ -119,7 +120,12 @@ class FPGAEnvironment(object):
         paths = pygraph.algorithms.minmax.shortest_path(self.graph,ingress)
         path = []
         hop = egress
-        lastNode = egress 
+        lastNode = egress
+
+        # Adjacent platforms have None as their path.
+        if(paths[0][hop] is None):
+            return []
+
         while paths[0][hop] != ingress:
             hop = paths[0][hop]
             path.append(hop)           
