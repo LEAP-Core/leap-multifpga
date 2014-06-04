@@ -41,6 +41,7 @@
 `include "awb/provides/virtual_devices.bsh"
 `include "awb/provides/physical_platform.bsh"
 `include "awb/provides/clocks_device.bsh"
+`include "awb/provides/platform_services.bsh"
 
 `include "awb/rrr/server_connections.bsh"
 `include "awb/rrr/client_connections.bsh"
@@ -70,6 +71,13 @@ module [CONNECTED_MODULE] mkVirtualPlatform
 
     let vdevs  <- mkVirtualDevices(llpi, clocked_by clk, reset_by rst);
     
+    //
+    // Platform services are layered on the virtual platform.  These services
+    // are typically device independent and must expose their interfaces as
+    // soft connections.
+    //
+    let spi <- mkPlatformServices(clocked_by clk, reset_by rst);
+
     interface physicalDrivers = llpi.physicalDrivers;
     interface topLevelWires = llpi.topLevelWires;
 

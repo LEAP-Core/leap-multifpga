@@ -6745,3 +6745,14 @@ Automated resource extraction from first-pass lim builds.
 The first pass LIM build will now dump .resources files per LI module.
 These files will be picked up during LIM compilation and used in
 module placement.
+
+----------
+keflemin    Date: Wed Jun  4 13:50:22 EDT 2014  CSN: CSN-multifpga-258
+                  Wed Jun  4 17:50:22 UTC 2014
+
+
+Directory modules/leap/virtual-platform
+ virtual-platform-li.bsv   Locally Modified          257 
+
+
+Mirrored platform services rotation in LIM code. 
