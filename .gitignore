@@ -1,0 +1,8 @@
+# Editor and OS temporary files
+*~
+!\#*#
+*.DS_Store
+
+# Generated files
+*.pyc
+
