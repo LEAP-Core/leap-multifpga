@@ -4,6 +4,6 @@ Buildorder=1000
 Version=1
 Lock=asim-multifpga
 Description=Description of multifpga
-Name=multifpga
+Name=leap-multifpga
 Tag=HEAD
 CSN=CSN-multifpga-258
