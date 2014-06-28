@@ -371,11 +371,13 @@ class MultiFPGAGenerateLogfile():
                   print "platformPath: " + platformPath
 
               subbuild = moduleList.env.Command(
-                  [wrapperLogTgt, platformLI],
+                  [wrapperLogTgt, wrapperLogBld, platformLI],
                   [routerBSH],
                   [ compile_closure(platform, doCache),
                     SCons.Script.Copy(wrapperLogTgt, wrapperLogBld) ]
                   )                         
+
+              
 
               moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += [wrapperLogTgt]
 
