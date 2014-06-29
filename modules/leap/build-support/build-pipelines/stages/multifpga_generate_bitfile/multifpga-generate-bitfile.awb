@@ -1,7 +1,0 @@
-%name multiFPGA Generate bitfle
-%desc Constructs a bitfile after 
-%attributes tool
-
-%provides multi_fpga_generate_bitfile
-
-%scons %library multiFPGAGenerateBitfile.py
