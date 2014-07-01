@@ -108,7 +108,7 @@ class MultiFPGAGenerateLogfile():
 
                  # Compute command line arguments in case they affect topology
                  #compile_cmd = 'scons '
-                 compile_cmd = 'scons --cache-show --debug=explain  --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name)) + ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_frontend_'+platform.name)) + ' ' 
+                 compile_cmd = 'scons  --cache-show --debug=explain  --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name)) + ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_frontend_'+platform.name)) + ' ' 
                  compile_cmd += ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
 
                  compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
@@ -362,25 +362,17 @@ class MultiFPGAGenerateLogfile():
 
           if(platform.platformType == 'FPGA' or platform.platformType == 'BLUESIM'):
 
-              wrapperLogTgt =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log.multi_fpga'
-              wrapperLogBld =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log'
-
               routerBSH =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/multifpga_routing.bsh'
 
               if(self.pipeline_debug):
                   print "platformPath: " + platformPath
 
               subbuild = moduleList.env.Command(
-                  [wrapperLogTgt, wrapperLogBld, platformLI],
-                  [routerBSH],
-                  [ compile_closure(platform, doCache),
-                    SCons.Script.Copy(wrapperLogTgt, wrapperLogBld) ]
+                      [platformLI],
+                      [routerBSH],
+                      [compile_closure(platform, doCache)]       
                   )                         
-
               
-
-              moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += [wrapperLogTgt]
-
               # we now need to create a multifpga_routing.bsh so that we can get the sizes of the various links.
               # we'll need this later on. 
               # TODO: This should be refactored as a generate code method.
@@ -388,10 +380,9 @@ class MultiFPGAGenerateLogfile():
               header.write('`include "awb/provides/stats_service.bsh"\n')
               header.write('`include "awb/provides/debug_scan_service.bsh"\n')
               header.write('`include "awb/provides/physical_platform.bsh"\n')
-              header.write('`include "awb/provides/low_level_platform_interface.bsh"\n')
               header.write('// we need to pick up the module sizes\n')
-              header.write('module [CONNECTED_MODULE] mkCommunicationModule#(VIRTUAL_PLATFORM vplat) (Empty);\n')
-              header.write('let m <- mkCommunicationModuleIfaces(vplat ') 
+              header.write('module [CONNECTED_MODULE] mkCommunicationModule#(PHYSICAL_DRIVERS physicalDrivers) (Empty);\n')
+              header.write('let m <- mkCommunicationModuleIfaces(physicalDrivers ') 
               for target in  platform.getEgresses().keys():
                   header.write(', ' + platform.getEgress(target).physicalName + '.write')
               for target in  platform.getIngresses().keys():
@@ -408,7 +399,7 @@ class MultiFPGAGenerateLogfile():
 
               header.write('endmodule\n')
 
-              header.write('module [CONNECTED_MODULE] mkCommunicationModuleIfaces#(VIRTUAL_PLATFORM vplat ')
+              header.write('module [CONNECTED_MODULE] mkCommunicationModuleIfaces#(PHYSICAL_DRIVERS physicalDrivers ')
 
               for target in  platform.getEgresses().keys():
                   # really I should disambiguate by way of a unique path

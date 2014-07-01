@@ -35,9 +35,6 @@
  * The routing module is named mkCommunicationModule (which is why you won't find it by grepping)
  */
 
-`include "asim/provides/virtual_platform.bsh"
-`include "asim/provides/virtual_devices.bsh"
-`include "asim/provides/low_level_platform_interface.bsh"
 `include "asim/provides/rrr.bsh"
 `include "asim/provides/umf.bsh"
 `include "asim/provides/channelio.bsh"
@@ -53,6 +50,6 @@ import SpecialFIFOs::*;
 `include "multifpga_routing.bsh"
 
 
-module [CONNECTED_MODULE] mkMultifpgaRouterServices#(VIRTUAL_PLATFORM vplat) (Empty);
-    let m <- mkCommunicationModule(vplat);
+module [CONNECTED_MODULE] mkMultifpgaRouterServices#(PHYSICAL_DRIVERS physicalDrivers) (Empty);
+    let m <- mkCommunicationModule(physicalDrivers);
 endmodule 

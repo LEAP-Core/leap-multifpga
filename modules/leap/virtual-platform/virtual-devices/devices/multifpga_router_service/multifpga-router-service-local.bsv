@@ -39,9 +39,6 @@
 
 import Vector::*;
 
-`include "awb/provides/virtual_platform.bsh"
-`include "awb/provides/virtual_devices.bsh"
-`include "awb/provides/low_level_platform_interface.bsh"
 `include "awb/provides/umf.bsh"
 `include "awb/provides/channelio.bsh"
 `include "awb/provides/physical_platform.bsh"
@@ -50,9 +47,6 @@ import Vector::*;
 `include "awb/provides/librl_bsv_storage.bsh"
 `include "awb/provides/multifpga_switch.bsh"
 `include "awb/provides/stats_service.bsh"
-`include "awb/provides/librl_bsv_storage.bsh"
-`include "awb/provides/librl_bsv_base.bsh"
-
 `include "awb/provides/multifpga_router_service.bsh"
 
 typedef function m#(Empty) f(PHYSICAL_SEND#(PHYSICAL_CHAIN_DATA) send) SEND_PACKETIZER_CONSTRUCTOR#(type m);

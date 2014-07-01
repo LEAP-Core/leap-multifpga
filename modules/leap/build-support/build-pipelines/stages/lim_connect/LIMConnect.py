@@ -49,8 +49,9 @@ class MultiFPGAConnect():
         self.environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
 
         # we produce some bsh in each platform
-        self.platformData = {}
         moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] = []
+        moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] = []
+
         for platformName in self.environment.getPlatformNames():
         # these defs are copied from a previous tool.  refactor
             platform = self.environment.getPlatform(platformName)
@@ -65,22 +66,21 @@ class MultiFPGAConnect():
             logs = []
    
             # We can now have externally generated log files.  find them here.
-            if(platform.platformType == 'CPU'):
-                if(self.pipeline_debug):
-                    print "Base logs for " + platformName + " are : " + str(moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_LOGS'))
-                logs += map(lambda path: platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + path, moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_LOGS'))
-                # we also need to look at the program log files. 
-                logs += map(lambda path: platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + path, moduleList.getAllDependenciesWithPaths('GIVEN_LOGS'))
+            #if(platform.platformType == 'CPU'):
+            #    if(self.pipeline_debug):
+            #        print "Base logs for " + platformName + " are : " + str(moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_LOGS'))
+            #    logs += map(lambda path: platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + path, moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_LOGS'))
+            #    # we also need to look at the program log files. 
+            #    logs += map(lambda path: platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + path, moduleList.getAllDependenciesWithPaths('GIVEN_LOGS'))
       
 
-            moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += logs
+            #moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += logs
 
             # bsv (FPGA/BLUESIM) builds generate their own log files
-            if(platform.platformType == 'FPGA'  or platform.platformType == 'BLUESIM'):
-                logs += [platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log']
+            #if(platform.platformType == 'FPGA'  or platform.platformType == 'BLUESIM'):
+            #    # READ Logs from LI graph..
+            #    logs += [platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log']
             
-
-
             parameterFile = '?'
             
             liFile = platformBitfileBuildDir + '/lim.li'
@@ -92,6 +92,8 @@ class MultiFPGAConnect():
 
             # We need to build up some context to give bluetcl the right search paths for when
             # we go to inspect the types.  Each platform can have a different hierarchy.
+            # Really, each platform should be providing this. It's a little ugly for this code
+            # be so dependent on bluespec.
             allModules = [moduleList.topModule] + moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].synthBoundaries() + moduleList.synthBoundaries()
             bluetclPaths = ''
 
@@ -103,14 +105,11 @@ class MultiFPGAConnect():
             
             platform.putAttribute('HEADER', parameterFile)
 
-            self.platformData[platform.name] = {'LOG': logs, 'BLUETCL': bluetclPaths, 'DANGLING': [], 'CONNECTED': {}, 'INDEX': {}, 'WIDTHS': {}, 'TYPES':{}}
-
-
             moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] += [parameterFile, liFile] 
     
         mappingFile = moduleList.getAllDependenciesWithPaths('GIVEN_FPGAENV_MAPPINGS')
 
-        subbuildDeps = moduleList.topModule.moduleDependency['PLATFORM_LI'] + moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] 
+        subbuildDeps = moduleList.topModule.moduleDependency['PLATFORM_LI'] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0]] + [moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + mappingFile[0]] 
 
         subbuild = moduleList.env.Command( 
             moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],        
@@ -212,8 +211,12 @@ class MultiFPGAConnect():
     def synthesizeRouters(self, target, source, env):  
         # We should replace this with a call to generate it. 
         environmentGraph = self.environment
-        self.parseWidth(environmentGraph)
+
+        # Pull all the first pass module representations.
         moduleGraph = self.parseModuleGraph(environmentGraph)
+
+        # Find information about physical graph.
+        self.parseWidth(environmentGraph, moduleGraph)
 
         # Assign activity factors to all communications channels.
         if(self.pipeline_debug):
@@ -363,10 +366,28 @@ class MultiFPGAConnect():
     # A routine for gathering information about the physical platform
     # widths.  These widths are dumped during compilation by the
     # various platforms.  This function doesn't really belong here.
-    def parseWidth(self, environmentGraph):
-        for platformName in environmentGraph.getPlatformNames():
-            for infile in self.platformData[platformName]['LOG']:          
-                logfile = open(infile,'r')
+    def parseWidth(self, environmentGraph, moduleGraph):
+        for platformName in environmentGraph.getPlatformNames():            
+            # Get logs for this plaform 
+            logs = []
+            modules = []
+            for module in moduleGraph.modules.values():
+                # Only pinned physical platform modules will have width logs.
+                if(not module.getAttribute('MAPPING') is None):
+                    if(module.getAttribute('MAPPING') == platformName):
+                        modules += [module.name]
+                        logs += module.getObjectCode('GIVEN_LOGS')
+                        logs += module.getObjectCode('GEN_LOGS')
+                        
+            print "Logs for " + platformName + " are " + str(logs)
+            print "Modules for " + platformName + " are " + str(modules)
+            for infile in logs:          
+                try:
+                    logfile = open(infile,'r')
+                except FileNotFoundError:
+                    # Oops. Didn't find the file. 
+                    continue
+
                 for line in logfile:
                     # also pull out link widths
                     matchSize = re.match('.*SizeOfVia:(.*)$',line)
