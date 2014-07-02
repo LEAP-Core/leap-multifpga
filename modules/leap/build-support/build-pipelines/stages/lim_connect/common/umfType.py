@@ -72,7 +72,7 @@ def generateRouterTypes(viaWidth, viaLinks, maxWidth, moduleList):
         msgLength = moduleList.getAWBParam('umf', 'UMF_MSG_LENGTH_BITS')          
 
         fillerWidth = viaWidth - phyReserved - channelID - serviceID - methodID - msgLength
-        print "UMFTYPE using default: " + str(channelID) + "\n"
+
         return UMFType(channelID, serviceID, methodID, msgLength, phyReserved, fillerWidth, viaWidth)
 
     # At some point, we can reduce the number of header bits based on 
