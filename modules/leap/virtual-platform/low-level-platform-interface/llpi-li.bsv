@@ -37,6 +37,8 @@ import Vector::*;
 `include "awb/provides/physical_platform_debugger.bsh"
 `include "awb/provides/clocks_device.bsh"
 `include "awb/provides/umf.bsh"
+`include "awb/provides/soft_services.bsh"
+`include "awb/provides/soft_connections.bsh"
 
 //
 // LowLevelPlatformInterface.
@@ -57,7 +59,7 @@ endinterface
 //
 // Instantiate the subcomponents in one module.
 //
-module mkLowLevelPlatformInterface
+module [CONNECTED_MODULE] mkLowLevelPlatformInterface
     // Interface:
     (LowLevelPlatformInterface);
 

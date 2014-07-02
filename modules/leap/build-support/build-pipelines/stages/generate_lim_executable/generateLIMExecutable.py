@@ -101,6 +101,9 @@ class MultiFPGAGenerateBitfile():
         platformMetadata = []
         
         for platformName in self.environment.getPlatformNames():
+            awbBatchFile = platformName + '.exec.batch'
+            awbBatchHandle = open(awbBatchFile,'w')
+
             platform = self.environment.getPlatform(platformName)
             platformType = platform.platformType
             platformAPMBaseName = makePlatformBitfileName(platform.name,APM_NAME)
@@ -128,13 +131,13 @@ class MultiFPGAGenerateBitfile():
                                     '", "directory" => "' + platformBuildDir + '", "master" => "' + str(platform.master) + \
                                     '", "logicalName" => "' + platform.name + '"}')
 
-            execute('asim-shell --batch cp ' + platform.path +" "+ platformPath)        
+            awbBatchHandle.write('cp ' + platform.path +" "+ platformPath + '\n')        
             
             # For software builds, we don't bother with the object
             # code flow -- software compiles quickly, so the flow is
             # not necessary at this time.
             if(platform.platformType == 'CPU'):
-                execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
+                awbBatchHandle.write('replace module ' + platformPath + ' ' + applicationPath + '\n')
 
             # and now we can build them
             # what we want to gather here is dangling top level connections
@@ -142,17 +145,17 @@ class MultiFPGAGenerateBitfile():
             # Ugly - we need to physically reconstruct the apm path
             # set the fpga parameter
             # for the first pass, we will ignore mismatched platforms
-            execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_ID ' + str((self.environment.getSynthesisBoundaryPlatformID(platform.name))))
-            execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_PLATFORM_NAME \\"' + platform.name + '\\"')
-            execute('asim-shell --batch set parameter ' + platformPath + ' FPGA_NUM_PLATFORMS ' + str(len(self.environment.getPlatformNames())))
-            execute('asim-shell --batch set parameter ' + platformPath + ' CON_CWIDTH ' +  str(moduleList.getAWBParam('lim_graph_generator', 'SOFT_CONN_CWIDTH')))
-            execute('asim-shell --batch set parameter ' + platformPath + ' CON_CHAIN_CWIDTH ' +  str(moduleList.getAWBParam('lim_graph_generator', 'SOFT_CONN_CWIDTH')))
-            execute('asim-shell --batch set parameter ' + platformPath + ' EXPOSE_ALL_CONNECTIONS 0 ')
-            execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_PLATFORM_MODULES 0 ')
-            execute('asim-shell --batch set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ')
-            execute('asim-shell --batch set parameter ' + platformPath + ' USE_BVI 1 ')
-            execute('asim-shell --batch set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ')    
-            execute('asim-shell --batch set parameter ' + platformPath + ' MODULE_UID_OFFSET ' + str(moduleList.topModule.moduleDependency['MODULE_UID_OFFSET']))
+            awbBatchHandle.write(' set parameter ' + platformPath + ' FPGA_PLATFORM_ID ' + str((self.environment.getSynthesisBoundaryPlatformID(platform.name)))  + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' FPGA_PLATFORM_NAME \\"' + platform.name + '\\"' + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' FPGA_NUM_PLATFORMS ' + str(len(self.environment.getPlatformNames()))  + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' CON_CWIDTH ' +  str(moduleList.getAWBParam('lim_graph_generator', 'SOFT_CONN_CWIDTH'))  + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' CON_CHAIN_CWIDTH ' +  str(moduleList.getAWBParam('lim_graph_generator', 'SOFT_CONN_CWIDTH'))  + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' EXPOSE_ALL_CONNECTIONS 0 ' + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' BUILD_PLATFORM_MODULES 0 ' + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' BUILD_LOGS_ONLY 0 ' + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' USE_BVI 1 ' + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' USE_ROUTING_KNOWN 1 ' + '\n')    
+            awbBatchHandle.write(' set parameter ' + platformPath + ' MODULE_UID_OFFSET ' + str(moduleList.topModule.moduleDependency['MODULE_UID_OFFSET']) + '\n')
 
             moduleList.topModule.moduleDependency['MODULE_UID_OFFSET'] += len(moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].synthBoundaries())
             
@@ -173,16 +176,19 @@ class MultiFPGAGenerateBitfile():
             absIncPaths = map(os.path.abspath, incPaths)
             ROOT_DIR_SW_INC = ":".join(absIncPaths)
 
-            execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_INC_DIRS \\"' + ROOT_DIR_SW_INC  + '\\"')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' EXTRA_INC_DIRS \\"' + ROOT_DIR_SW_INC  + '\\"' + '\n')
 
-            execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_INC_DIRS \\"' + ROOT_DIR_SW_INC  + '\\"')
-            execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_DICTS \\"' + missingDicts  + '\\"')
-            execute('asim-shell --batch set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"')                      
-            execute('asim-shell --batch set parameter ' + platformPath + ' CLOSE_CHAINS 1 ')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' EXTRA_INC_DIRS \\"' + ROOT_DIR_SW_INC  + '\\"' + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' EXTRA_DICTS \\"' + missingDicts  + '\\"' + '\n')
+            awbBatchHandle.write(' set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"' + '\n')                      
+            awbBatchHandle.write(' set parameter ' + platformPath + ' CLOSE_CHAINS 1 ' + '\n')
 
             if not os.path.exists(platformBuildDir): os.makedirs(platformBuildDir) 
 
-            execute('asim-shell --batch -- configure model ' + platformPath + ' --builddir ' + platformBuildDir)
+            awbBatchHandle.write(' configure model ' + platformPath + ' --builddir ' + platformBuildDir + '\n')
+            awbBatchHandle.close()
+
+            call(['awb-shell', '--file', awbBatchFile]) 
 
             # set up the symlinks to missing dictionaries- they are broken
             # at first, but as we fill in the platforms, they'll come up
