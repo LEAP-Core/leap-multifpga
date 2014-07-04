@@ -119,8 +119,13 @@ class MultiFPGAGenerateLogfile():
                  # ignore mismatched platforms
 
                  # Compute command line arguments in case they affect topology
-                 #compile_cmd = 'scons '
-                 compile_cmd = 'scons  --cache-show --debug=explain  --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name)) + ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_frontend_'+platform.name)) + ' ' 
+                 compile_cmd = 'scons '
+                 if(moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_CACHING_DEBUG_GRAPH')):
+                     compile_cmd += 'scons  --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name)) 
+  
+                 if(moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_PROFILING_GRAPH')):
+                     compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_frontend_'+platform.name)) + ' ' 
+
                  compile_cmd += ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
 
                  compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
@@ -129,8 +134,7 @@ class MultiFPGAGenerateLogfile():
                      print "Compile command is: " + compile_cmd + "\n"
 
                  # set environment for scons caching     
-                 enableCache = True
-                 if(enableCache):
+                 if(moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_CACHING_GRAPH')):
                      compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name)) + ' '
 
                  sts = execute(compile_cmd)
@@ -228,7 +232,7 @@ class MultiFPGAGenerateLogfile():
         moduleList.topModule.moduleDependency['PLATFORM_LI'] = []
         for platformName in environment.getPlatformNames():
 
-          awbBatchFile = platform.name + '.batch'
+          awbBatchFile = platform.name + '.logs.batch'
           awbBatchHandle = open(awbBatchFile,'w')
 
           platform = environment.getPlatform(platformName)
