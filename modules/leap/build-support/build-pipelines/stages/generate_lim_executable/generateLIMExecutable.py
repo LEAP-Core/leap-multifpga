@@ -75,7 +75,7 @@ class MultiFPGAGenerateBitfile():
                      compile_cmd = 'scons '
 
                      if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_DEBUG_EXECUTABLE')):
-                            compile_cmd = ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_'+platform.name)) 
+                            compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_'+platform.name)) 
 
                      if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_PROFILING_EXECUTABLE')):
                          compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_backend_'+platform.name)) + ' ' 

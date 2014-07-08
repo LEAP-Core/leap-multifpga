@@ -96,13 +96,6 @@ class MultiFPGAGenerateLogfile():
 
         call(['awb-shell', '--file', awbBatchFile]) 
 
-        #call(['asim-shell','--batch','create', 'submodel', APM_FILE , 'connected_application', applicationPath]) 
-        #call(['asim-shell','--batch','rename', 'submodel', applicationPath, applicationRootName]) 
-        # do the same for the fpga mapping
-        #call(['asim-shell','--batch','create', 'submodel', APM_FILE , 'fpga_mapping', mappingPath])        
-        #call(['asim-shell','--batch','create', 'submodel', APM_FILE , 'environment_description', environmentPath])    
-        #call(['asim-shell','--batch','rename', 'submodel', mappingPath, mappingRootName]) 
-
         def compile_closure(platform, enableCache):
              
              def compile_platform_log(target, source, env):
@@ -121,21 +114,21 @@ class MultiFPGAGenerateLogfile():
                  # Compute command line arguments in case they affect topology
                  compile_cmd = 'scons '
                  if(moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_CACHING_DEBUG_GRAPH')):
-                     compile_cmd += 'scons  --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name)) 
+                     compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name)) 
   
                  if(moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_PROFILING_GRAPH')):
                      compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_frontend_'+platform.name)) + ' ' 
 
                  compile_cmd += ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
 
-                 compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
-
-                 if(self.pipeline_debug):
-                     print "Compile command is: " + compile_cmd + "\n"
+                 compile_cmd = ' cd ' + platformBuildDir + '; ' + compile_cmd
 
                  # set environment for scons caching     
                  if(moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_CACHING_GRAPH')):
                      compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name)) + ' '
+
+                 if(self.pipeline_debug or True):
+                     print "Compile command is: " + compile_cmd + "\n"
 
                  sts = execute(compile_cmd)
 
