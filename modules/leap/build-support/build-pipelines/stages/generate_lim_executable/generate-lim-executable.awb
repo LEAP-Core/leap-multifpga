@@ -8,6 +8,6 @@
 
 %param --global ENABLE_SCONS_CACHING_DEBUG_EXECUTABLE    0      "Enable scons caching debug information in the executable scons invocations"
 %param --global ENABLE_SCONS_PROFILING_EXECUTABLE        0      "Enable scons caching in the executable scons invocations"
-%param --global ENABLE_SCONS_CACHING_EXECUTABLE          0      "Enable scons profiling in the executable scons invocations"
+%param --global ENABLE_SCONS_CACHING_EXECUTABLE          1      "Enable scons profiling in the executable scons invocations"
 
 

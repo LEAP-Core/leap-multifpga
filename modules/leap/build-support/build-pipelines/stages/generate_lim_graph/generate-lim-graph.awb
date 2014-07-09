@@ -12,5 +12,5 @@
 
 %param --global ENABLE_SCONS_CACHING_DEBUG_GRAPH    0      "Enable scons caching debug information in the graph-generation scons invocations"
 %param --global ENABLE_SCONS_PROFILING_GRAPH        0      "Enable scons caching in the graph-generation scons invocations"
-%param --global ENABLE_SCONS_CACHING_GRAPH          0      "Enable scons profiling in the graph-generation scons invocations"
+%param --global ENABLE_SCONS_CACHING_GRAPH          1      "Enable scons profiling in the graph-generation scons invocations"
 
