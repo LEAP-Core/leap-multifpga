@@ -16,6 +16,29 @@ def getPartner(connection):
     else:
         return connection.sourcePartnerChain
 
+# CPU platforms do not benefit from the router optimizations that we
+# apply to FPGA/SIMULATOR platforms.  We introduce getMaxViasPair, get
+# MinViasPair, and generateRouterTypesPair to encapsulate this.  If we
+# find a CPU endpoint for a pair, we will turn off all optimizations.
+def getMaxViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph):
+    if(environmentGraph.platforms[platform].platformType == 'CPU' or 
+       environmentGraph.platforms[targetPlatform].platformType == 'CPU'):
+        return 1
+    return moduleList.getAWBParam('lim_analyze_network', 'MAX_NUMBER_OF_VIAS')
+
+def getMinViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph):
+    if(environmentGraph.platforms[platform].platformType == 'CPU' or 
+       environmentGraph.platforms[targetPlatform].platformType == 'CPU'):
+        return 1
+    return moduleList.getAWBParam('lim_analyze_network', 'MIN_NUMBER_OF_VIAS')
+
+def generateRouterTypesPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph, viaWidth, viaLinks, maxWidth):
+    # Communication with CPU type platforms must never use the agressive network type optimizations. 
+    if(environmentGraph.platforms[platform].platformType == 'CPU' or 
+       environmentGraph.platforms[targetPlatform].platformType == 'CPU'):
+        return generateRouterTypes(moduleList, viaWidth, viaLinks, maxWidth, ENABLE_AGRESSIVE_UMF_PARAMETERS=False, USE_DEFAULT_UMF_PARAMETERS=False)
+    return generateRouterTypes(moduleList, viaWidth, viaLinks, maxWidth)
+
 # This code assigns physical indices to the inter-platform connections. 
 def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections, moduleList):
 
@@ -61,8 +84,9 @@ def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformCo
 
 def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platformGraph):
 
-    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MAX_NUMBER_OF_VIAS')
-    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MIN_NUMBER_OF_VIAS')
+    MAX_NUMBER_OF_VIAS = getMaxViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
+    MIN_NUMBER_OF_VIAS = getMinViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
+
     pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
 
     if(pipeline_debug):
@@ -238,7 +262,10 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
     needRecurse = False
     headersNext = []
     for via in range(len(vias)):
-        umfType = generateRouterTypes(vias[via].width, vias[via].links, maxLinkWidth[via], moduleList)
+        # Here, we are calling the baseline generateRouterTypes.  This
+        # works because if we are in fact using a software platform, 
+        # we will only have one via generated anyway. 
+        umfType = generateRouterTypes(moduleList, vias[via].width, vias[via].links, maxLinkWidth[via])
         headerActual = vias[via].width - umfType.fillerBits
         #To ensure termination, we require monotonically increasing
         #header sizes 
@@ -285,8 +312,8 @@ def generateViaCombinational(platform, targetPlatform, moduelList, environmentGr
 
     partnerSortedLinks = map(getPartner, sortedLinks)
 
-    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MAX_NUMBER_OF_VIAS')
-    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MIN_NUMBER_OF_VIAS')      
+    MAX_NUMBER_OF_VIAS = getMaxViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
+    MIN_NUMBER_OF_VIAS = getMinViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
 
     for numberOfVias in range(MIN_NUMBER_OF_VIAS, MAX_NUMBER_OF_VIAS + 1):
         viaSizingIdx = 0          
@@ -396,9 +423,9 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
                     print "Assigned Connections: " + str(assignedConnections) + "\n"
 
                 viaConnections = filter(lambda connection: connection.via_idx_egress == via, assignedConnections)
-                maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections))
+                maxWidth = max([0] + map(lambda connection: connection.bitwidth,viaConnections))
 
-                umfType = generateRouterTypes(viasFinal[via].width, viasFinal[via].links, maxWidth, moduleList)
+                umfType = generateRouterTypesPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph, viasFinal[via].width, viasFinal[via].links, maxWidth)
 
                 egress = Via(platform,targetPlatform,"egress", umfType, viasFinal[via].width, viasFinal[via].links, viasFinal[via].links, 0, hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via) + '_write', 'switch_egress_' + platform + '_to_' + targetPlatform + '_' +hopFromTarget.replace(".","_").replace("[","_").replace("]","_")  + str(via), -1, -1, viasFinal[via].load, umfType.fillerBits)
 
@@ -515,12 +542,12 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
                 # notice that we are not taking in to account the flow
                 # control bits here. We might well want to do that at some
                 # point.
-                maxWidth = max(map(lambda connection: connection.bitwidth, viaConnections)) 
+                maxWidth = max([0] + map(lambda connection: connection.bitwidth, viaConnections)) 
 
                 if(pipeline_debug):
                     print "Idx  " + str(via) + " links " + str(len(egressLinks[platform][targetPlatform])) + " loads " + str(len(viaLoads[platform][targetPlatform]))
 
-                umfType = generateRouterTypes(egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth, moduleList) 
+                umfType = generateRouterTypesPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph, egress_first_pass.via_width, egressLinks[platform][targetPlatform][via], maxWidth) 
 
 
                 # egressLinks and viaLoads are shared by the ingress and egress. They must be symmetric.
@@ -559,8 +586,8 @@ def analyzeNetworkRandom(moduleList, environmentGraph, platformLIGraph):
 
 def analyzeNetworkUniform(useActivity, moduleList, environmentGraph, platformGraph):
 
-    MAX_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MAX_NUMBER_OF_VIAS')
-    MIN_NUMBER_OF_VIAS = moduleList.getAWBParam('lim_analyze_network', 'MIN_NUMBER_OF_VIAS')      
+    MAX_NUMBER_OF_VIAS = getMaxViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
+    MIN_NUMBER_OF_VIAS = getMinViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
 
     numberOfVias = MAX_NUMBER_OF_VIAS
  
@@ -619,9 +646,9 @@ def analyzeNetworkUniform(useActivity, moduleList, environmentGraph, platformGra
                 maxWidth = viaWidth
                 if(len(viaConnections) > 0):
                     # notice that we are not taking in to account the flow control bits here. We might well want to do that at some point. 
-                    maxWidth = max(map(lambda connection: connection.bitwidth,viaConnections))
+                    maxWidth = max([0] + map(lambda connection: connection.bitwidth,viaConnections))
 
-                umfType = generateRouterTypes(viaWidth, viaLinks, maxWidth, moduleList)
+                umfType = generateRouterTypesPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph, viaWidth, viaLinks, maxWidth)
 
 
                 if(pipeline_debug):                

@@ -1,8 +1,8 @@
-model -> FPGA0;
-common_services -> FPGA0;
-connected_application -> FPGA0;
-hardware_system -> FPGA0;
-basestation -> FPGA0;
-repeater1 -> FPGA1;
-repeater2 -> FPGA2;
+model -> fpga0;
+common_services -> fpga0;
+connected_application -> fpga0;
+hardware_system -> fpga0;
+basestation -> fpga0;
+repeater1 -> fpga1;
+repeater2 -> fpga2;
 

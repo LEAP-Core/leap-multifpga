@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation Tri FPGA Environment
+%desc Simulation Tri FPGA Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-tri.env
+%AWB_END

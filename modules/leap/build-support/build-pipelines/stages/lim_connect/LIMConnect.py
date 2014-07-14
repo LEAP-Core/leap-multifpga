@@ -63,24 +63,6 @@ class MultiFPGAConnect():
             platformBitfilePath = makePlatformConfigPath(makePlatformBitfileName(platform.name,APM_NAME))
             platformBitfileBuildDir = 'multi_fpga/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
 
-            logs = []
-   
-            # We can now have externally generated log files.  find them here.
-            #if(platform.platformType == 'CPU'):
-            #    if(self.pipeline_debug):
-            #        print "Base logs for " + platformName + " are : " + str(moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_LOGS'))
-            #    logs += map(lambda path: platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + path, moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].getAllDependenciesWithPaths('GIVEN_LOGS'))
-            #    # we also need to look at the program log files. 
-            #    logs += map(lambda path: platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + path, moduleList.getAllDependenciesWithPaths('GIVEN_LOGS'))
-      
-
-            #moduleList.topModule.moduleDependency['FPGA_PLATFORM_LOGS'] += logs
-
-            # bsv (FPGA/BLUESIM) builds generate their own log files
-            #if(platform.platformType == 'FPGA'  or platform.platformType == 'BLUESIM'):
-            #    # READ Logs from LI graph..
-            #    logs += [platformLogBuildDir +'/'+ moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.bsc/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_Wrapper.log']
-            
             parameterFile = '?'
             
             liFile = platformBitfileBuildDir + '/lim.li'
@@ -266,11 +248,11 @@ class MultiFPGAConnect():
 
         mergedGraph = subordinateGraphs.pop()
         
-        if(self.pipeline_debug):
+        if(self.pipeline_debug or True):
             print 'parseModuleGraph base ' + str(mergedGraph) + 'subordinate graphs'
 
         # merge remaining graphs together 
-        if(self.pipeline_debug):
+        if(self.pipeline_debug or True):
             for graph in subordinateGraphs:
                 print 'parseModuleGraph merging ' + str(graph) + 'subordinate graphs'
            

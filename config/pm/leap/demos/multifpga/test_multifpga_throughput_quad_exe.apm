@@ -1,0 +1,75 @@
+
+[Global]
+SaveParameters=0
+Description=has strange module alingments
+File=test_multifpga_throughput_quad_exe
+Version=2.2
+Name=Multifpga synthesis test 
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=MultiFPGA Throughput Test Connected Application
+environment_description=Simulation Quad FPGA Environment
+build_pipeline=LIM Compiler Pipeline
+fpga_mapping=Dual Repeater Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Test (D)]
+File=modules/multifpga/throughputTest/basestation.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Test (C)]
+File=modules/multifpga/throughputTest/repeater-1.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Test Connected Application/Requires]
+hardware_system=MultiFPGA Throughput Dual Repeater
+
+[MultiFPGA Throughput Test Connected Application]
+File=modules/multifpga/throughputTest/connected_application/connected-application-throughput.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Repeater]
+File=modules/multifpga/throughputTest/throughput_repeater.awb
+Packagehint=leap-multifpga
+
+[Dual Repeater Mapping]
+File=modules/multifpga/throughputTest/dualRepeater/sim_mapping.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Dual Repeater/Requires]
+basestation=MultiFPGA Throughput Test (D)
+repeater2=MultiFPGA Throughput Repeater 2
+throughput_repeater=MultiFPGA Throughput Repeater
+repeater1=MultiFPGA Throughput Test (C)
+
+[MultiFPGA Throughput Repeater 2]
+File=modules/multifpga/throughputTest/repeater_2.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Dual Repeater]
+File=modules/multifpga/throughputTest/dualRepeater/dualRepeater.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Repeater/Params]
+NUM_REPEATERS=2
+
+[LIM Compiler Pipeline]
+File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
+Packagehint=leap-multifpga
+
+[Simulation Quad FPGA Environment]
+File=modules/leap-platforms/fpga-environments/sim/sim_fpga_env_quad.awb
+Packagehint=leap-multifpga

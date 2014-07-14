@@ -57,10 +57,14 @@ class UMFType():
 # In addition to the obvious throughput benefit, it also helps with flowcontrol at the 
 # VC layer, since the VC layer is currently conservative about the buffering and assumes each
 # packet takes the maximum number of chunks
-def generateRouterTypes(viaWidth, viaLinks, maxWidth, moduleList):
+def generateRouterTypes(moduleList, viaWidth, viaLinks, maxWidth, ENABLE_AGRESSIVE_UMF_PARAMETERS = None, USE_DEFAULT_UMF_PARAMETERS = None):
 
-    ENABLE_AGRESSIVE_UMF_PARAMETERS = moduleList.getAWBParam('lim_common', 'ENABLE_AGRESSIVE_UMF_PARAMETERS')
-    USE_DEFAULT_UMF_PARAMETERS = moduleList.getAWBParam('lim_common', 'USE_DEFAULT_UMF_PARAMETERS')
+    if(ENABLE_AGRESSIVE_UMF_PARAMETERS is None):
+        ENABLE_AGRESSIVE_UMF_PARAMETERS = moduleList.getAWBParam('lim_common', 'ENABLE_AGRESSIVE_UMF_PARAMETERS')
+
+    if(USE_DEFAULT_UMF_PARAMETERS is None):
+        USE_DEFAULT_UMF_PARAMETERS = moduleList.getAWBParam('lim_common', 'USE_DEFAULT_UMF_PARAMETERS')
+
     pipeline_debug = getBuildPipelineDebug(moduleList)
 
     #Should we do whatever umf tells us?

@@ -355,14 +355,16 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
 
         # handle chains seperately
         for dangling in ingressChainsByPartner(platformObject, targetPlatform):
-            if(pipeline_debug):
+            if(pipeline_debug or True):
                 print "My type: " + dangling.sc_type
                 print "My raw type: " + dangling.raw_type
                 print "My name: " + dangling.name
+                print "My via ingress: " + str(dangling.via_idx_ingress)
 
             header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_sink_' + dangling.name +' = ?;\n')
           
             packetizerType = 'NoPack'
+            print "IngressVias: " + str(ingressVias)
             header.write('// Via' + str(ingressVias[dangling.via_idx_ingress].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
 
             # Software only handles unmarshalled packets for now...
