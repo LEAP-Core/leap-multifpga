@@ -33,22 +33,12 @@ Packagehint=leap-platforms
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
 fpgaenv=MultiFPGA Simulation FPGAN Environment Quad
 application_env=Soft Services Hybrid Application Environment
-environment_description=Null FPGA Environment
-
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
-
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
 
 [MultiFPGA Simulation FPGAN Environment Quad/Params]
 FPGA_PLATFORM_ID=2
@@ -57,4 +47,4 @@ NUM_FPGA=8
 
 [MultiFPGA Simulation FPGAN Environment Quad]
 File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-fpgaN.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga

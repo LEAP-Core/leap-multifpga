@@ -113,8 +113,8 @@ File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
 
 [FPGA0 Simulation Physical Platform]
-File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0/sim-physical-platform-fpga0.awb
-Packagehint=multifpga
+File=modules/bluespec/common/fpgaenv/physical-platform/simulation/rrr/master/sim-physical-platform-fpga0.awb
+Packagehint=leap-multifpga
 
 [FPGA0 Simulation Physical Platform/Requires]
 clocks_device=Simulation Clocks Device
@@ -156,11 +156,11 @@ Packagehint=leap
 
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [FPGAMap]
 File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
@@ -168,11 +168,11 @@ Packagehint=leap
 
 [MultiFPGA BlueSim Platform Build Pipeline (Legacy)]
 File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [UNIX Communication Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA BlueSim Platform Build Pipeline (Legacy)/Requires]
 li_module=LEAP LI Module Handler
@@ -186,7 +186,7 @@ bluesim_tool=BSV Bluesim Build Tool
 
 [Simlutation Communication Device with raw UNIX Communication]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Simlutation Communication Device with raw UNIX Communication/Requires]
 unix_comm_device=UNIX Communication Physical Device

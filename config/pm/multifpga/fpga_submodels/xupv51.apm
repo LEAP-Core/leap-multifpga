@@ -25,22 +25,14 @@ connected_application=Null Connected Application
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
-environment_description=Null FPGA Environment
 fpgaenv=XUPV5 FPGA 1 
 application_env=Soft Services Hybrid Application Environment
 
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
 
 [Default Hybrid Project Common Utilities]
 File=config/pm/leap/submodels/common/project-common-default.apm
@@ -55,4 +47,4 @@ MODEL_CLOCK_FREQ=25
 
 [XUPV5 FPGA 1 ]
 File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-xupv5-fpga1.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga

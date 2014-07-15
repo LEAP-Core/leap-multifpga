@@ -103,7 +103,7 @@ Packagehint=leap
 
 [UNIX Communication Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [BSV Bluesim Build Tool]
 File=modules/leap/build-support/build-pipelines/stages/bluesim/bsv-exe.awb
@@ -119,11 +119,11 @@ Packagehint=leap
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [FPGAN Simulation Physical Platform]
-File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpgaN/sim-physical-platform-fpgaN.awb
-Packagehint=multifpga
+File=modules/bluespec/common/fpgaenv/physical-platform/simulation/rrr/slaveN/sim-physical-platform-fpgaN.awb
+Packagehint=leap-multifpga
 
 [FPGAN Simulation Physical Platform/Requires]
 clocks_device=Simulation Clocks Device
@@ -136,7 +136,7 @@ Packagehint=leap
 
 [MultiFPGA Slave Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [BSV Build Tool (First Phase)]
 File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
@@ -148,11 +148,11 @@ Packagehint=leap
 
 [FPGAMap]
 File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
@@ -160,7 +160,7 @@ Packagehint=leap
 
 [MultiFPGA BlueSim Platform Build Pipeline (Legacy)]
 File=modules/leap/build-support/pipelines/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA BlueSim Platform Build Pipeline (Legacy)/Requires]
 li_module=LEAP LI Module Handler

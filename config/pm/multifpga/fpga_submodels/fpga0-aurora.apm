@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=ACP FPGA 0 compute platform for multiple FPGA
+Description=Master MultiFPGA Simulator with Aurora Stack (RRR)
 File=fpga0-aurora
 Version=2.2
-Name=ACP FPGA 0
+Name=Master MultiFPGA Simulator with Aurora Stack (RRR)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -33,26 +33,16 @@ Packagehint=leap-platforms
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=MultiFPGA Simulation Aurora FPGA0 Environment
+fpgaenv=Master MultiFPGA Simulation Aurora Environment (RRR)
 application_env=Soft Services Hybrid Application Environment
-environment_description=Null FPGA Environment
 
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
-
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
-
-[MultiFPGA Simulation Aurora FPGA0 Environment]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0-aurora.apm
-Packagehint=multifpga
-
-[MultiFPGA Simulation Aurora FPGA0 Environment/Params]
+[Master MultiFPGA Simulation Aurora Environment (RRR)/Params]
 NUM_FPGA=2
+
+[Master MultiFPGA Simulation Aurora Environment (RRR)]
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0-aurora.apm
+Packagehint=leap-multifpga
