@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=Latency-insensitive Channel Test and Benchmarking Program
 environment_description=Simulation HW/SW Environment
 build_pipeline=LIM Compiler Pipeline
-fpga_mapping=LI Test Single FPGA Mapping
+fpga_mapping=Null FPGA Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -34,11 +34,12 @@ Packagehint=leap-multifpga
 File=modules/apps/examples/litest/litest.awb
 Packagehint=leap-examples
 
-[LI Test Single FPGA Mapping]
-File=modules/apps/examples/litest/mappings/single_fpga.awb
-Packagehint=leap-examples
 
 [LIM Compiler Pipeline]
 File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
 Packagehint=leap-multifpga
 
+
+[Null FPGA Mapping]
+File=modules/leap/build-support/project/null_mapping.awb
+Packagehint=leap-multifpga
