@@ -248,11 +248,11 @@ class MultiFPGAConnect():
 
         mergedGraph = subordinateGraphs.pop()
         
-        if(self.pipeline_debug or True):
+        if(self.pipeline_debug):
             print 'parseModuleGraph base ' + str(mergedGraph) + 'subordinate graphs'
 
         # merge remaining graphs together 
-        if(self.pipeline_debug or True):
+        if(self.pipeline_debug):
             for graph in subordinateGraphs:
                 print 'parseModuleGraph merging ' + str(graph) + 'subordinate graphs'
            
@@ -363,8 +363,6 @@ class MultiFPGAConnect():
                         logs += module.getObjectCode('GIVEN_LOGS')
                         logs += module.getObjectCode('GEN_LOGS')
                         
-            print "Logs for " + platformName + " are " + str(logs)
-            print "Modules for " + platformName + " are " + str(modules)
             for infile in logs:          
                 try:
                     logfile = open(infile,'r')

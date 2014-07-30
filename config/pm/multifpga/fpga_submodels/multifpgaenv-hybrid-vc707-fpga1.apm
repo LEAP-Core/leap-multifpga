@@ -113,7 +113,7 @@ xilinx_loader=Xilinx LOADER
 
 [Null software build tool]
 File=modules/leap/build-support/build-pipelines/stages/null_software/null_software.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MCD Tool for Xilinx]
 File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
@@ -125,7 +125,7 @@ Packagehint=leap
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
@@ -133,7 +133,7 @@ Packagehint=leap-platforms
 
 [MultiFPGA Slave Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Standard Virtual Devices Submodel]
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
@@ -149,11 +149,11 @@ Packagehint=leap
 
 [FPGAMap]
 File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Xilinx DDR SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
@@ -299,7 +299,7 @@ xilinx_loader=Xilinx LOADER
 
 [Null software build tool]
 File=modules/leap/build-support/build-pipelines/stages/null_software/null_software.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MCD Tool for Xilinx]
 File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
@@ -311,7 +311,7 @@ Packagehint=leap
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
@@ -319,7 +319,7 @@ Packagehint=leap-platforms
 
 [MultiFPGA Slave Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Standard Virtual Devices Submodel]
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
@@ -335,11 +335,11 @@ Packagehint=leap
 
 [FPGAMap]
 File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Xilinx DDR SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
@@ -447,7 +447,7 @@ DO_SOFT_RESET=0
 
 [FPGA Platform Build Pipeline (Legacy)]
 File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [FPGA Platform Build Pipeline (Legacy)/Requires]
 fpga_program_tool=FPGA Programming Tool
@@ -488,3 +488,6 @@ RESET_ACTIVE_HIGH=1
 [Differential Crystal Clocks Device from Wires]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-device.awb
 Packagehint=leap-platforms
+
+[BSV Build Tool (First Phase)/Params]
+BSC_FLAGS=" -steps 10000000 +RTS -K1000M -RTS -suppress-warnings G0043 -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -licenseWarning 7 -elab -show-schedule -show-range-conflict -verilog -remove-dollar -show-method-bvi"
