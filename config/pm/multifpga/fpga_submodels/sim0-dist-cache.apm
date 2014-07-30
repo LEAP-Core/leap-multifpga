@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Master MultiFPGA Simulation Environment with distributed caches (RRR)
-File=fpga0-dist-cache
+File=sim0-dist-cache
 Version=2.2
 Name=Master MultiFPGA Simulation Environment  with distributed caches (RRR)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
@@ -41,7 +41,7 @@ fpgaenv=MultiFPGA Simulation FPGA0 Distributed Cache Environment
 application_env=Soft Services Hybrid Application Environment
 
 [MultiFPGA Simulation FPGA0 Distributed Cache Environment]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0-dist-cache.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-sim0-dist-cache.apm
 Packagehint=leap-multifpga
 
 [MultiFPGA Simulation FPGA0 Distributed Cache Environment/Params]

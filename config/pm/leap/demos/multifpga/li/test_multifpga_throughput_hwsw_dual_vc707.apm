@@ -1,0 +1,67 @@
+
+[Global]
+SaveParameters=0
+Description=uses through CPU communications with aurora stack
+File=test_multifpga_throughput_hwsw_dual_vc707
+Version=2.2
+Name=Throughput test for through-CPU simulator communications
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=MultiFPGA Throughput Test Connected Application
+environment_description=VC707 Dual HW/SW Environment
+build_pipeline=LIM Compiler Pipeline
+fpga_mapping=Single Repeater FPGA Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Test (D)]
+File=modules/multifpga/throughputTest/basestation.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Test (C)]
+File=modules/multifpga/throughputTest/repeater-1.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Test Connected Application/Requires]
+hardware_system=MultiFPGA Throughput Single Repeater
+
+[MultiFPGA Throughput Test Connected Application]
+File=modules/multifpga/throughputTest/connected_application/connected-application-throughput.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Repeater]
+File=modules/multifpga/throughputTest/throughput_repeater.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Single Repeater]
+File=modules/multifpga/throughputTest/singleRepeater/singleRepeater.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Throughput Single Repeater/Requires]
+basestation=MultiFPGA Throughput Test (D)
+throughput_repeater=MultiFPGA Throughput Repeater
+repeater1=MultiFPGA Throughput Test (C)
+
+[LIM Compiler Pipeline]
+File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
+Packagehint=leap-multifpga
+
+[VC707 Dual HW/SW Environment]
+File=modules/leap-platforms/fpga-environments/vc707/vc707_dual_hwsw.awb
+Packagehint=leap-multifpga
+
+[Single Repeater FPGA Mapping]
+File=modules/multifpga/throughputTest/singleRepeater/fpga_mapping.awb
+Packagehint=leap-multifpga

@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=Traffic Light from Bluespec Tutorial for simulation w. synthesis boundary
+Description=Intended to test communications over chains. 
 File=hasim_test_dual_sim_hub
 Version=2.2
-Name=Traffic Light Model - Exe with synthesis boundary
+Name=Dual Alpha Model, Targets platform with communication only through software
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -13,7 +13,7 @@ RootName=HW/SW Hybrid Multifpga Project Foundation
 RootProvides=model
 
 [Model]
-DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+DefaultAttributes=
 model=HW/SW Hybrid Multifpga Project Foundation
 
 [HW/SW Hybrid Multifpga Project Foundation/Requires]
@@ -24,16 +24,7 @@ fpga_mapping=Alpha Inorder Sim Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
-Packagehint=multifpga
-
-
-
-
-
-
-
-
-
+Packagehint=leap-multifpga
 
 [Null Memory/Requires]
 memory_base_types=Memory Base Types
@@ -126,24 +117,14 @@ Packagehint=hasim
 File=modules/hasim/timing-models/memory/base-types/memory-base-types.awb
 Packagehint=hasim-models
 
-
 [Simulation Dual Hub HW/SW Environment]
 File=modules/leap-platforms/fpga-environments/sim/sim_dual_hub_hwsw.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Alpha Inorder Sim Mapping]
 File=modules/multifpga/alpha_inorder/sim_mapping.awb
-Packagehint=multifpga
-
-
-
-
-
-
-
-
-
+Packagehint=leap-multifpga
 
 [LIM Compiler Pipeline]
 File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga

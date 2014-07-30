@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=ACP FPGA 0 compute platform for multiple FPGA
-File=fpga0_8
+Description=Master MultiFPGA Simulation Platform 1 of 8 (RRR)
+File=sim0_8
 Version=2.2
-Name=ACP FPGA 0
+Name=Master MultiFPGA Simulation Platform 1 of 8 (RRR)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -41,7 +41,7 @@ fpgaenv=MultiFPGA Simulation FPGA0 Environment
 application_env=Soft Services Hybrid Application Environment
 
 [MultiFPGA Simulation FPGA0 Environment]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-sim0.apm
 Packagehint=leap-multifpga
 
 [MultiFPGA Simulation FPGA0 Environment/Params]

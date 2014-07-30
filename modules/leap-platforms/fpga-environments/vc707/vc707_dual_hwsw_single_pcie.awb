@@ -1,0 +1,8 @@
+%AWB_START
+
+%name VC707 Dual HW/SW Environment Single PCIE
+%desc VC707 Dual HW/SW Environment Single PCIE
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC vc707-dual-hwsw-single-pcie.env
+%AWB_END

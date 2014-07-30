@@ -206,10 +206,10 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
 
     rule debug(`SWITCH_DEBUG == 1 && stateUpdated);
-        $display("Egress Queue buffer max: %d", maximumPacketSize);
+        $display(name + ": Egress Queue buffer max: %d", maximumPacketSize);
         for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
         begin
-            $display("Egress Queue %d thinks bufferAvailable %b portCredits %d, packetSize: %d", i, bufferAvailable[i], portCreditsReg[i], requestQueuesVec[i].maxPacketSize());
+            $display(name + ": Egress Queue %d thinks bufferAvailable %b portCredits %d, packetSize: %d", i, bufferAvailable[i], portCreditsReg[i], requestQueuesVec[i].maxPacketSize());
         end
     endrule
 
@@ -278,19 +278,19 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             if(`SWITCH_DEBUG == 1)
             begin
                 portCreditsReg[responseActiveQueue] <= creditsNext;             
-                $display("Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
+                $display(name + ": Got flow control body for service %d got %d credits, had %d credits, setting portCredits %d", responseActiveQueue, tpl_2(payload), currentCredits, creditsNext);
             end
 
             if(creditsNext < maximumPacketSize)
             begin
-                $display("Setting credits to zero... this is a bug");
+                $display(name + ": Setting credits to zero... this is a bug");
                 $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
                 $finish;
             end      
 
             if(creditsNext > `MULTIFPGA_FIFO_SIZES)
             begin
-                $display("Credits have overflowed fifo size... this is a bug %m");
+                $display(name + ": Credits have overflowed fifo size... this is a bug %m");
                 $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
                 $finish;
             end      
@@ -340,13 +340,13 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             if(creditsNext > `MULTIFPGA_FIFO_SIZES)
             begin
-                $display("Credit overflow");
+                $display(name + ": Credit overflow");
                 $finish;
             end
 
             if(creditsNext < maximumPacketSize)
             begin
-                $display("Setting credits to zero... this is a bug");
+                $display(name + ": Setting credits to zero... this is a bug");
                 $finish;
             end      
         endrule
@@ -408,7 +408,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             if (`SWITCH_DEBUG != 0)
             begin
-                $display("FC wins right to arb");
+                $display(name + ": FC wins right to arb");
             end
         end
         else
@@ -417,7 +417,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             if (`SWITCH_DEBUG != 0 && (pack(req_normal) != 0))
             begin
-                $display("Normal wins right to arb");
+                $display(name + ": Normal wins right to arb");
             end
         end
 
@@ -428,7 +428,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
         if (winner matches tagged Valid .idx &&& `SWITCH_DEBUG == 1)
         begin
-	    $display("Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), pack(reqs), idx);
+	    $display(name + ": Egress BufferAvailible %b Reqs %b choosing %d", pack(readVReg(bufferAvailable)), pack(reqs), idx);
         end
     endrule
 
@@ -462,7 +462,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             if(`SWITCH_DEBUG == 1)
             begin
-                $display("scheduled %d", s);
+                $display(name + ": scheduled %d", s);
             end
 
             requestQueues[s].deqHeader();
@@ -480,13 +480,18 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
 
             if(`SWITCH_DEBUG == 1)
             begin
+                $display(name + ": sending packet header on  %d: %h", requestActiveQueue, header);  
+            end
+
+            if(`SWITCH_DEBUG == 1)
+            begin
                 portCreditsReg[fromInteger(s)] <= newCount;            
-                $display("Setting portCredits for port %d to %d", s, newCount);
+                $display(name + ": Setting portCredits for port %d to %d", s, newCount);
             end
                                                
             if (oldCredits < zeroExtendNP(requestChunks) && (!requestQueues[s].bypassFlowcontrol))
             begin
-                $display("Credit Underflow on channel %d oldCredit %d messageSize %d newCount %d max %d s bypasses flowcontrol %d", s, oldCredits, requestChunks, newCount, maximumPacketSize, requestQueues[s].bypassFlowcontrol);
+                $display(name + ": Credit Underflow on channel %d oldCredit %d messageSize %d newCount %d max %d s bypasses flowcontrol %d", s, oldCredits, requestChunks, newCount, maximumPacketSize, requestQueues[s].bypassFlowcontrol);
                 $finish;               
             end
         endrule
@@ -497,7 +502,7 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     rule writeRequestContinue (requestChunksRemaining != 0);
         if(`SWITCH_DEBUG == 1)
         begin
-            $display("sending packet on  %d", requestActiveQueue);  
+            $display(name + ": sending packet body on  %d: %h", requestActiveQueue, requestQueues[requestActiveQueue].firstBody);  
         end
 
         // get the next packet from the active request queue

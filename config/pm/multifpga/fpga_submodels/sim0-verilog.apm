@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Master MultiFPGA Simulator for Verilog (RRR)
-File=fpga0-verilog
+File=sim0-verilog
 Version=2.2
 Name=Master MultiFPGA Simulator for Verilog (RRR)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
@@ -43,7 +43,7 @@ application_env=Soft Services Hybrid Application Environment
 
 
 [MultiFPGA Verilog Simulation FPGA0 Environment]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-vexe-fpga0.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-vexe-sim0.apm
 Packagehint=leap-multifpga
 
 [MultiFPGA Verilog Simulation FPGA0 Environment/Params]

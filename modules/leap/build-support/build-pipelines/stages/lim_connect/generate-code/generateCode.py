@@ -198,7 +198,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
         # Ingress switches now feed directly into the egress switches to save latency.  
         for via_idx in range(len(ingressVias)):
             if(ingressVias[via_idx].via_links > 0):
-                header.write('INGRESS_SWITCH#(' + str(ingressVias[via_idx].via_links) + ',' + ingressVias[via_idx].umfType.typeBSV() + ',' + egressVias[ingressVias[via_idx].via_outgoing_flowcontrol_via].umfType.headerTypeBSV() + ',' + egressVias[ingressVias[via_idx].via_outgoing_flowcontrol_via].umfType.bodyTypeBSV() + ') ' + ingressVias[via_idx].via_switch + '<- mkIngressSwitch(' + str(ingressVias[via_idx].via_outgoing_flowcontrol_link) + ',' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + '_first, ' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + '_deq);\n\n')
+                header.write('INGRESS_SWITCH#(' + str(ingressVias[via_idx].via_links) + ',' + ingressVias[via_idx].umfType.typeBSV() + ',' + egressVias[ingressVias[via_idx].via_outgoing_flowcontrol_via].umfType.headerTypeBSV() + ',' + egressVias[ingressVias[via_idx].via_outgoing_flowcontrol_via].umfType.bodyTypeBSV() + ') ' + ingressVias[via_idx].via_switch + '<- mkIngressSwitch("' + ingressVias[via_idx].via_switch + '",' + str(ingressVias[via_idx].via_outgoing_flowcontrol_link) + ',' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + '_first, ' + ingress_multiplexor_names[targetPlatform] + '.' + ingressVias[via_idx].via_method  + '_deq);\n\n')
 
         # The egress links now take as input a list of incoming connections
         # that can be manipulated like fifos.  

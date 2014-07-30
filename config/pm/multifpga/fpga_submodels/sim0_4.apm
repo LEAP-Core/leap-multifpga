@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=Master FPGA Simulator, Four platforms (RRR)
-File=fpga0_4
+Descriptio=Master Simulation Platform 1 of 4 (RRR)
+File=sim0_4
 Version=2.2
-Name=Master FPGA Simulator, Four platforms (RRR)
+Name=Master Simulation Platform 1 of 4 (RRR)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -41,6 +41,6 @@ fpgaenv=MultiFPGA Simulation FPGA0 Environment
 application_env=Soft Services Hybrid Application Environment
 
 [MultiFPGA Simulation FPGA0 Environment]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-sim0.apm
 Packagehint=leap-multifpga
 

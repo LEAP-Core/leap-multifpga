@@ -1,0 +1,15 @@
+model -> sim0;
+common_services -> sim0;
+connected_application -> sim0;
+hasim_funcp -> sim0;
+hasim_isa_datapath -> sim0;
+funcp_memstate -> sim0;
+funcp_memstate_tlb -> sim0;
+commands_service -> sim1;
+hasim_timep -> sim1;
+inorder_pipeline_front_end -> sim1;
+decode_stage -> sim1;
+inorder_pipeline_back_end -> sim1;
+hasim_l1_caches-> sim1;
+hasim_last_level_cache-> sim1;
+hasim_private_caches-> sim1;

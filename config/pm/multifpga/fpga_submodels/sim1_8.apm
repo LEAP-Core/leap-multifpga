@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=ACP FPGA 0 compute platform for multiple FPGA
+Description=MultiFPGA Simulator 2 of 8
 File=fpga1_8
 Version=2.2
-Name=ACP FPGA 0
+Name=MultiFPGA Simulator 2 of 8
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -47,5 +47,5 @@ NUM_FPGA=8
 FPGA_PLATFORM_ID=1
 
 [MultiFPGA Simulation FPGAN Environment Quad]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-fpgaN.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-simN.apm
 Packagehint=leap-multifpga

@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=SIM FPGA 0 compute platform for multiple FPGA
+Description=MultiFPGA simulator 2 of 2, with Aurora
 File=fpga1-aurora
 Version=2.2
-Name=SIM FPGA 0
+Name=MultiFPGA simulator 2 of 2, with Aurora
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -46,5 +46,5 @@ application_env=Soft Services Hybrid Application Environment
 NUM_FPGA=2
 
 [MultiFPGA Simulation FPGAN Environment Aurora]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-fpgaN-aurora.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-simN-aurora.apm
 Packagehint=leap-multifpga

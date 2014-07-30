@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=ACP FPGA 0 compute platform for multiple FPGA
-File=fpga1-hwsw
+Description=MultiFPGA Simulator 2 of 2
+File=fpga1
 Version=2.2
-Name=ACP FPGA 0
+Name=MultiFPGA Simulator 2 of 2
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -33,28 +33,18 @@ Packagehint=leap-platforms
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=HWSW MultiFPGA Simulation Aurora FPGA0 Environment
+fpgaenv=MultiFPGA Simulation FPGAN Environment Quad
 application_env=Soft Services Hybrid Application Environment
-environment_description=Null FPGA Environment
 
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
 
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
 
-[HWSW MultiFPGA Simulation Aurora FPGA0 Environment/Params]
+[MultiFPGA Simulation FPGAN Environment Quad/Params]
 NUM_FPGA=2
-PLATFORM_ID="FPGA1"
-MY_ID=1
 
-[HWSW MultiFPGA Simulation Aurora FPGA0 Environment]
-File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hwsw-exe-fpga0-aurora.apm
-Packagehint=multifpga
+[MultiFPGA Simulation FPGAN Environment Quad]
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-simN.apm
+Packagehint=leap-multifpga

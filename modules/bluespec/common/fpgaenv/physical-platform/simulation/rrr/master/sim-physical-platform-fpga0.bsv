@@ -34,10 +34,16 @@
 import Clocks::*;
 import Vector::*;
 
-`include "clocks_device.bsh"
-`include "unix_pipe_device.bsh"
-`include "simulation_communication_device.bsh"
-`include "physical_platform_utils.bsh"
+`include "awb/provides/clocks_device.bsh"
+`include "awb/provides/unix_pipe_device.bsh"
+`include "awb/provides/simulation_communication_device.bsh"
+`include "awb/provides/physical_platform_utils.bsh"
+
+`include "awb/provides/soft_connections.bsh"
+`include "awb/provides/soft_services.bsh"
+`include "awb/provides/soft_services_lib.bsh"
+`include "awb/provides/soft_services_deps.bsh"
+
 
 // PHYSICAL_DRIVERS
 
@@ -84,7 +90,7 @@ endinterface
 // This is a convenient way for the outside world to instantiate all the devices
 // and an aggregation of all the wires.
 
-module mkPhysicalPlatform
+module [CONNECTED_MODULE] mkPhysicalPlatform
     // interface:
     (PHYSICAL_PLATFORM);
     

@@ -41,7 +41,7 @@ fpgaenv=MultiFPGA Verilog Simulation FPGAN Environment Quad
 application_env=Soft Services Hybrid Application Environment
 
 [MultiFPGA Verilog Simulation FPGAN Environment Quad]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-vexe-fpgaN.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-vexe-simN.apm
 Packagehint=leap-multifpga
 
 [MultiFPGA Verilog Simulation FPGAN Environment Quad/Params]

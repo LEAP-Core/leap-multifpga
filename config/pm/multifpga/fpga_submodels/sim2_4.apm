@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=ACP FPGA 0 compute platform for multiple FPGA
+Description=MultiFPGA Simulator 3 of 4
 File=fpga2_4
 Version=2.2
-Name=ACP FPGA 0
+Name=MultiFPGA Simulator 3 of 4
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -44,5 +44,5 @@ application_env=Soft Services Hybrid Application Environment
 MY_ID=2
 
 [MultiFPGA Simulation FPGAN Environment Quad]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-fpgaN.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-simN.apm
 Packagehint=leap-multifpga

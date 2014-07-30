@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=ACP FPGA 0 compute platform for multiple FPGA
-File=fpga0-hwsw
+Description=MultiFPGA Simulator Platform with Host interface (LI)
+File=sim0-aurora-hwsw
 Version=2.2
-Name=ACP FPGA 0
+Name=MultiFPGA Simulator Platform with Host interface (LI)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -33,7 +33,7 @@ Packagehint=leap-platforms
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
 project_common=Default Hybrid Project Common Utilities
@@ -42,8 +42,7 @@ application_env=Soft Services Hybrid Application Environment
 
 [HWSW MultiFPGA Simulation Aurora FPGA0 Environment/Params]
 NUM_FPGA=2
-PLATFORM_ID="fpga0"
 
 [HWSW MultiFPGA Simulation Aurora FPGA0 Environment]
-File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hwsw-exe-fpga0-aurora.apm
-Packagehint=multifpga
+File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hwsw-exe-sim0-aurora.apm
+Packagehint=leap-multifpga

@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation Dual HW/SW Environment (Single Pipe)
+%desc Simulation Dual HW/SW Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-dual-hwsw-single-pipe.env
+%AWB_END

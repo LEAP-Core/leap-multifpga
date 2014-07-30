@@ -1,0 +1,15 @@
+model -> fpga0;
+common_services -> fpga0;
+connected_application -> fpga0;
+hasim_funcp -> fpga0;
+hasim_isa_datapath -> fpga0;
+hasim_private_caches -> fpga0;
+funcp_memstate -> fpga0;
+funcp_memstate_tlb -> fpga0;
+commands_service -> fpga0;
+hasim_timep -> fpga0;
+inorder_pipeline_front_end -> fpga0;
+decode_stage -> fpga0;
+inorder_pipeline_back_end -> fpga0;
+hasim_l1_caches-> fpga0;
+

@@ -1,7 +1,3 @@
-#/********************************************************************
-#* Python libraries for XST synthesis tool
-#********************************************************************/
-
 %name Null FPGA Mapping
 %desc This file is a null mapping
 

@@ -70,7 +70,7 @@ Packagehint=leap
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
@@ -97,7 +97,7 @@ virtual_devices=Standard Virtual Devices Submodel
 
 [LIM Compiler Standard Virtual Platform]
 File=modules/leap/virtual-platform/virtual-platform-li.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [RRR Common Module]
 File=modules/leap/virtual-platform/rrr/rrr-common/rrr-common.awb
@@ -108,7 +108,7 @@ rrr_common=RRR Common Module
 
 [LI RRR Interface Module]
 File=modules/leap/virtual-platform/rrr/li/li-rrr.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Low Level Platform LI/Requires]
 physical_platform=Dual PCIE Software Physical Platform
@@ -121,7 +121,7 @@ physical_channel=BlueNoC PCIe Tunnel
 
 [Low Level Platform LI]
 File=modules/leap/virtual-platform/low-level-platform-interface/llpi-li.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
@@ -159,11 +159,11 @@ Packagehint=leap
 
 [MultiFPGA Master Platform Services (LI)]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master-li.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Dual PCIE Software Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/pcie/dualPCIE/dual-pcie-physical-platform.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Dual PCIE Software Physical Platform/Requires]
 pcie_device=BlueNoC PCIe Bridge
@@ -188,3 +188,6 @@ physical_platform_defs=Common Physical Platform Definitions
 [Common Physical Platform Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
 Packagehint=leap-platforms
+
+[BlueNoC PCIe Bridge/Params]
+DO_SOFT_RESET=0

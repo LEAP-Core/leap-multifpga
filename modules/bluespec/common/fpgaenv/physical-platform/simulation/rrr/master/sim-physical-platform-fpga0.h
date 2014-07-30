@@ -2,6 +2,7 @@
 #define __PHYSICAL_PLATFORM__
 
 #include "awb/provides/physical_channel.h"
+#include "awb/provides/physical_platform_defs.h"
 #include "platforms-module.h"
 
 // ====================================================
@@ -14,6 +15,7 @@ typedef class PHYSICAL_DEVICES_CLASS* PHYSICAL_DEVICES;
 class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
 {
     private:
+  
         SIM_PHYSICAL_CHANNEL_CLASS unixPipeDevice0;
         SIM_PHYSICAL_CHANNEL_CLASS unixPipeDevice1;
 
@@ -27,7 +29,7 @@ class PHYSICAL_DEVICES_CLASS: public PLATFORMS_MODULE_CLASS
         PHYSICAL_CHANNEL GetUNIXPipeDevice1() { return &unixPipeDevice1; }
 	PHYSICAL_CHANNEL GetLegacyPhysicalChannel() 
         { 
-            unixPipeDevice0.RegisterLogicalDeviceName("Legacy");
+            unixPipeDevice0.RegisterLogicalDeviceName(FPGA_PLATFORM_NAME);
             return &unixPipeDevice0; 
         }
 };

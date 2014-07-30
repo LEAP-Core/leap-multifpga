@@ -68,7 +68,7 @@ endinterface
 // The ingress switch takes two arguments - a read and a write.   The read function is a stream 
 // of serialized incoming packets.  The write function is used to send flow control tokens back to 
 // the corresponding egress switch on another FPGA.
-module [CONNECTED_MODULE] mkIngressSwitch#(Integer flowcontrolID, /*STAT_VECTOR#(n) latencyStats,*/ function umf_chunk first(), function Action deq())
+module [CONNECTED_MODULE] mkIngressSwitch#(String name, Integer flowcontrolID, /*STAT_VECTOR#(n) latencyStats,*/ function umf_chunk first(), function Action deq())
 
     (INGRESS_SWITCH#(n, 
                      GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -110,7 +110,7 @@ module [CONNECTED_MODULE] mkIngressSwitch#(Integer flowcontrolID, /*STAT_VECTOR#
                   umf_chunk_w) m = ?;
   if(valueof(n) > 0)
     begin
-      m <- mkFlowControlSwitchIngressNonZero(flowcontrolID, /*latencyStats,*/ first, deq);
+      m <- mkFlowControlSwitchIngressNonZero(name, flowcontrolID, /*latencyStats,*/ first, deq);
     end
   return m;
 endmodule
@@ -118,7 +118,7 @@ endmodule
 
 // Here we are reading and sticking things into the BRAM buffer. 
 // We write back the credits periodically
-module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrolID,/* STAT_VECTOR#(n) latencyStats,*/ function umf_chunk first(), function Action deq())
+module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(String name, Integer flowcontrolID,/* STAT_VECTOR#(n) latencyStats,*/ function umf_chunk first(), function Action deq())
 
     (INGRESS_SWITCH#(n,
                      GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
@@ -171,6 +171,8 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
                            umf_phy_pvt,    filler_bits), umf_chunk))) ingress_ports = newVector();
 
     Vector#(n, Wire#(Bool)) readReady <- replicateM(mkDWire(False));
+    Reg#(Vector#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))) usedLast <- mkReg(replicate(0));
+    Reg#(Vector#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))) freeLast <- mkReg(replicate(0));
     RWire#(Bit#(TLog#(n))) idxExamined <-mkRWire;
     Reg#(Bit#(TLog#(n))) idxRR <- mkReg(0);
     FIFOF#(Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))) sendSize <- mkSizedFIFOF(1);
@@ -196,14 +198,16 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
 
 
     rule debug (`SWITCH_DEBUG == 1);
-        count <= count + 1;
-        let used = requestQueues.used();
-        let free = requestQueues.free();
-        if(count == 0)
+        Vector#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) used = requestQueues.used();
+        Vector#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) free = requestQueues.free();
+        usedLast <= used;
+        freeLast <= free;
+        // Print only if something has changed since last cycle.
+        if(usedLast != used || freeLast != free)
         begin
            for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
            begin
-               $display("Ingress Queue %d free %d used %d ready %b", i, free[i], used[i], readReady[i]);
+               $display(name + ": Ingress Queue %d free %d (was %d) used %d (was %d) ready %b", i, free[i], freeLast[i], used[i], usedLast[i], readReady[i]);
            end
         end
     endrule
@@ -239,7 +243,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
 
                 if(`SWITCH_DEBUG == 1)
                 begin
-                    $display("Flowcontrol Sending %d tokens to %d my id %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
+                    $display(name + ": Flowcontrol Sending %d tokens to %d my id %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
                 end
 
                 Tuple2#(Bit#(umf_service_id),Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) control_packet = tuple2(zeroExtend(use_idx),zeroExtend(requestQueues.free[use_idx]));
@@ -289,7 +293,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
             begin 
                 if(`SWITCH_DEBUG == 1)
                 begin
-                    $display("Flowcontrol Sending %d tokens to %d my idx %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
+                    $display(name + ":flowcontrol-ingress Sending flowcontrol packet: %d tokens to %d my idx %d",requestQueues.free[use_idx],use_idx, fromInteger(flowcontrolID));
                 end
 
                 // This is the flow control packet header. 
@@ -318,7 +322,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
         rule finishSendEmpty;
             if(`SWITCH_DEBUG == 1)
             begin
-                $display("Finished sending tokens");
+                $display(name + ":Finished sending tokens");
             end
             umf_chunk_w body = unpack(zeroExtend(pack(sendSize.first)));
             sendSize.deq;
@@ -352,7 +356,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
 
         if(`SWITCH_DEBUG == 1)
           begin
-            $write("Flowcontrol ingress got a packet ");
+            $write(name + ": flowcontrol-ingress got a packet ");
             $display("channelID: %d, serviceID: %d, method: %d, numChunks: %d, filler: %d", packet.channelID, packet.serviceID, packet.methodID, packet.numChunks, packet.filler); 
           end
 
@@ -485,7 +489,7 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(Integer flowcontrol
     rule warnOnNonDeq(reqIdx matches tagged Valid .idx  &&& !deqFired);
       if(`SWITCH_DEBUG == 1)
       begin
-          $display("Warning: Queue %d was scheduled but did not deq value",idx);
+          $display(name + ": Warning: Queue %d was scheduled but did not deq value",idx);
       end
     endrule
 

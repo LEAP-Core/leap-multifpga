@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Master MultiFPGA Simulator with Aurora Stack (RRR)
-File=fpga0-aurora
+File=sim0-aurora
 Version=2.2
 Name=Master MultiFPGA Simulator with Aurora Stack (RRR)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
@@ -44,5 +44,5 @@ application_env=Soft Services Hybrid Application Environment
 NUM_FPGA=2
 
 [Master MultiFPGA Simulation Aurora Environment (RRR)]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-fpga0-aurora.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-sim0-aurora.apm
 Packagehint=leap-multifpga

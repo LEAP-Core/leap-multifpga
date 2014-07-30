@@ -44,5 +44,5 @@ application_env=Soft Services Hybrid Application Environment
 NUM_FPGA=2
 
 [MultiFPGA Simulation FPGAN Environment Quad]
-File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-fpgaN.apm
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-simN.apm
 Packagehint=leap-multifpga

@@ -1,7 +1,3 @@
-#/********************************************************************
-#* Python libraries for XST synthesis tool
-#********************************************************************/
-
 %name SoftPHY Test ACP Mapping
 %desc This file describes the mapping of the test to the ACP
 

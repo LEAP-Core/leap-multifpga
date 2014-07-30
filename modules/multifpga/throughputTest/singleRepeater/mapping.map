@@ -1,7 +1,7 @@
-model -> fpga0;
-common_services -> fpga0;
-connected_application -> fpga0;
-hardware_system -> fpga0;
-basestation -> fpga0;
-repeater1 -> fpga1;
+model -> sim0;
+common_services -> sim0;
+connected_application -> sim0;
+hardware_system -> sim0;
+basestation -> sim0;
+repeater1 -> sim1;
 

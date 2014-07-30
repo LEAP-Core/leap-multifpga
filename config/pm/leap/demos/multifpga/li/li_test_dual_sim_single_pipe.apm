@@ -1,0 +1,43 @@
+
+[Global]
+SaveParameters=0
+Description=LI with two simulators
+File=li_test_dual_sim_single_pipe
+Version=2.2
+Name=Tests LI communications, uses a dual simulator configuration
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=Latency-insensitive Channel Test and Benchmarking Program
+environment_description=Simulation Dual HW/SW Environment (Single Pipe)
+build_pipeline=LIM Compiler Pipeline
+fpga_mapping=LI Test Dual Sim Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=leap-multifpga
+
+[Latency-insensitive Channel Test and Benchmarking Program]
+File=modules/apps/examples/litest/litest.awb
+Packagehint=leap-examples
+
+[LIM Compiler Pipeline]
+File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
+Packagehint=leap-multifpga
+
+[LI Test Dual Sim Mapping]
+File=modules/apps/examples/litest/mappings/dual_fpga_sim.awb
+Packagehint=leap-examples
+
+[Simulation Dual HW/SW Environment (Single Pipe)]
+File=modules/leap-platforms/fpga-environments/sim/sim_dual_hwsw_single_pipe.awb
+Packagehint=leap-multifpga

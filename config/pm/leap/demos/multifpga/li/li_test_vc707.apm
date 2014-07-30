@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=Traffic Light from Bluespec Tutorial for simulation w. synthesis boundary
+Description=Basic LIM compiler smoke test targeting VC707
 File=li_test_vc707
 Version=2.2
-Name=Traffic Light Model - Exe with synthesis boundary
+Name=Tests LI communications, targeting VC707
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
