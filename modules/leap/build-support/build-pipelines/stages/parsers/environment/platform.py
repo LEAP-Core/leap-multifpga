@@ -1,4 +1,5 @@
 from physical_via import *
+from parameter    import *
 
 ##
 ##  This class represents a platform, a computational entity capable
@@ -37,12 +38,12 @@ class Platform(object):
         else:
             return None    
 
-    def __init__(self, platformType, name, isMaster, path, physicalViaList):
+    def __init__(self, platformType, name, isMaster, path, platformDescriptorList):
         self.name = name
         self.platformType = platformType
         self.path = path
         self.master = isMaster
-
+        self.parameters = {}
         self.attributes = {}
 
         self.ingresses = {}
@@ -51,13 +52,19 @@ class Platform(object):
         self.ingressesByPhysicalName = {} 
         self.egressesByPhysicalName = {} 
 
-        for physicalVia in physicalViaList:
-            if(physicalVia.direction == PhysicalVia.ingress):
-                self.insertIngress(physicalVia.endpointName, physicalVia)
-                self.ingressesByPhysicalName[physicalVia.physicalName] = physicalVia
+        # the physical via list can have both vias AND paramters. 
+        for platformDescriptor in platformDescriptorList:
+            if(isinstance(platformDescriptor, PhysicalVia)):
+                physicalVia = platformDescriptor
+                if(physicalVia.direction == PhysicalVia.ingress):
+                    self.insertIngress(physicalVia.endpointName, physicalVia)
+                    self.ingressesByPhysicalName[physicalVia.physicalName] = physicalVia
+                else:
+                    self.insertEgress(physicalVia.endpointName, physicalVia)
+                    self.egressesByPhysicalName[physicalVia.physicalName] = physicalVia
             else:
-                self.insertEgress(physicalVia.endpointName, physicalVia)
-                self.egressesByPhysicalName[physicalVia.physicalName] = physicalVia
+                # this is a parameter.
+                self.parameters[platformDescriptor.name] = platformDescriptor.value
 
     def __repr__(self):
        ingressRepr = ''

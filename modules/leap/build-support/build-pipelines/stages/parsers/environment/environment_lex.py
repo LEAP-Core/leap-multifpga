@@ -11,11 +11,12 @@ reserved = {
     'endplatform': 'ENDPLATFORM',
     }
 
-tokens = [ 'RARROW', 'LARROW', 'SEMICOLON',
+tokens = [ 'RARROW', 'LARROW', 'SEMICOLON', 'EQUAL',
            'NAME', 'STRING'
          ] + list(reserved.values())
 
 
+t_EQUAL = r'='
 t_RARROW = r'->'
 t_LARROW = r'<-'
 t_SEMICOLON = r';'

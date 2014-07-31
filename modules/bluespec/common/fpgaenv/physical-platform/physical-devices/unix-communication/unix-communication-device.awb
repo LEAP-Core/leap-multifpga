@@ -20,12 +20,27 @@
 %generated -t BA comm_can_write.ba
 %generated -t BA comm_write.ba
 
+%generated -t VPI_C vpi_wrapper_comm_init.c
+%generated -t VPI_C vpi_wrapper_comm_open.c
+%generated -t VPI_C vpi_wrapper_comm_can_read.c
+%generated -t VPI_C vpi_wrapper_comm_read.c
+%generated -t VPI_C vpi_wrapper_comm_can_write.c
+%generated -t VPI_C vpi_wrapper_comm_write.c
+
+%generated -t VPI_H vpi_wrapper_comm_init.h
+%generated -t VPI_H vpi_wrapper_comm_open.h
+%generated -t VPI_H vpi_wrapper_comm_can_read.h
+%generated -t VPI_H vpi_wrapper_comm_read.h
+%generated -t VPI_H vpi_wrapper_comm_can_write.h
+%generated -t VPI_H vpi_wrapper_comm_write.h
+
 %param UNIX_COMM_NUM_WORDS  4 "Width of unix comm device in 64-bit words.  Device will scale its clock to provide upgraded bandwidth"
 %param UNIX_COMM_WORD_WIDTH 64 "Width of unix comm device words. This must be less than or equal to 64."
 
 %param UNIX_COMM_DEBUG 0 "Unix communication device"
 %param UNIX_COMM_ERRORS 0 "Turns on occasional bit errors"
-%param UNIX_COMM_ERRORS_FREQ 14 "Sets frequency of damaged packets.  Damage occurs with 1/2^(UNIX_COMM_ERRORS_FREQ + 1) probability."
+%param UNIX_COMM_ERRORS_FREQ 14 "Sets frequency of damaged packets.  Damage occurs with 1/2^(UNIX_C vpi_wrapper_OMM_ERRORS_FREQ + 1) probability."
+
 
 
 

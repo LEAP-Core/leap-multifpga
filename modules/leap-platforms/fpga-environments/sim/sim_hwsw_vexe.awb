@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation (Verilog) HW/SW Environment
+%desc Simulation (Verilog) HW/SW Environment
+%provides environment_description
+ 
+%sources -t FPGAENV -v PUBLIC sim-verilog-hwsw.env
+%AWB_END

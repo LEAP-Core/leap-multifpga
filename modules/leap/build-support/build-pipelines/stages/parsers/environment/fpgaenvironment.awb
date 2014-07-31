@@ -8,6 +8,7 @@
 
 %provides fpga_environment_parser
 
+%scons %library parameter.py
 %scons %library platform.py
 %scons %library environment.py
 %scons %library physical_via.py

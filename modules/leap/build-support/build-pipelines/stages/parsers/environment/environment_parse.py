@@ -24,20 +24,25 @@ def p_platform_list(p):
     else:
         # the eval strips out the "" on the string
         p[0] = [Platform(p[2], p[3], False, eval(p[4]), p[6])] + p[8] 
-        
+
+# The third pattern match, the EQUAL is used to declare parameter values. 
+# Probably it would be more clean to make this a seperate syntax element.         
 def p_connection_list(p):
     """
     connection_list :
     connection_list : NAME RARROW STRING SEMICOLON connection_list
     connection_list : NAME LARROW STRING SEMICOLON connection_list
+    connection_list : NAME EQUAL  STRING SEMICOLON connection_list
     """     
     if len(p) == 1:
         p[0] = []
     else:
         if(p[2] == '<-'):
             p[0] = [PhysicalVia(PhysicalVia.ingress,p[1],eval(p[3]))] + p[5]
-        else:
+        elif(p[2] == '->'):
             p[0] = [PhysicalVia(PhysicalVia.egress,p[1],eval(p[3]))] + p[5]
+        else:
+            p[0] = [Parameter(p[1],eval(p[3]))] + p[5]
 
 def p_error(p):
     print "LIM ENVIRONMENT: Syntax error at token", p.type
