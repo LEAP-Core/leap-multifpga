@@ -1,0 +1,51 @@
+
+[Global]
+SaveParameters=0
+Description=MultiFPGA Simulator 2 of 8
+File=fpga1_8
+Version=2.2
+Name=MultiFPGA Simulator 2 of 8
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=MultiFPGA Platform
+RootProvides=model
+
+[Model]
+DefaultAttributes=
+model=MultiFPGA Platform
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment/Requires]
+connected_application=Null Connected Application
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/leap/submodels/common/project-common-default.apm
+Packagehint=leap
+
+[Null Connected Application]
+File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
+Packagehint=leap-platforms
+
+[MultiFPGA Platform]
+File=modules/leap/build-support/project/platform-multifpga.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Platform/Requires]
+project_common=Default Hybrid Project Common Utilities
+fpgaenv=MultiFPGA Simulation FPGAN Environment Quad
+application_env=Soft Services Hybrid Application Environment
+
+
+
+[MultiFPGA Simulation FPGAN Environment Quad/Params]
+NUM_FPGA=8
+FPGA_PLATFORM_ID=1
+
+[MultiFPGA Simulation FPGAN Environment Quad]
+File=config/pm/leap/submodels/fpgaenv/multifpgaenv-hybrid-exe-airblue-simN.apm
+Packagehint=leap-multifpga

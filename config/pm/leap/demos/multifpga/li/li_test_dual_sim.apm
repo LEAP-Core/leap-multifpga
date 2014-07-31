@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=Traffic Light from Bluespec Tutorial for simulation w. synthesis boundary
+Description=LI with two simulators
 File=li_test_dual_sim
 Version=2.2
-Name=Traffic Light Model - Exe with synthesis boundary
+Name=Tests LI communications, uses a dual simulator configuration
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -20,20 +20,11 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=Latency-insensitive Channel Test and Benchmarking Program
 environment_description=Simulation Dual HW/SW Environment
 build_pipeline=LIM Compiler Pipeline
-fpga_mapping=LI Test Dual FPGA Mapping
+fpga_mapping=LI Test Dual Sim Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
-Packagehint=multifpga
-
-
-
-
-
-
-
-
-
+Packagehint=leap-multifpga
 
 [Latency-insensitive Channel Test and Benchmarking Program]
 File=modules/apps/examples/litest/litest.awb
@@ -41,22 +32,12 @@ Packagehint=leap-examples
 
 [Simulation Dual HW/SW Environment]
 File=modules/leap-platforms/fpga-environments/sim/sim_dual_hwsw.awb
-Packagehint=multifpga
-
-
-[LI Test Dual FPGA Mapping]
-File=modules/apps/examples/litest/mappings/dual_fpga.awb
-Packagehint=leap-examples
-
-
-
-
-
-
-
-
-
+Packagehint=leap-multifpga
 
 [LIM Compiler Pipeline]
 File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
+
+[LI Test Dual Sim Mapping]
+File=modules/apps/examples/litest/mappings/dual_fpga_sim.awb
+Packagehint=leap-examples

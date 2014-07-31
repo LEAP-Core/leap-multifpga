@@ -1,4 +1,4 @@
-model -> FPGA0;
+model -> fpga0;
 common_services -> fpga0;
 connected_application -> fpga0;
 hasim_funcp -> fpga0;

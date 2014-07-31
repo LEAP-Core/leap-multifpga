@@ -33,19 +33,18 @@ class FPGAEnvironment(object):
         return self.platforms.keys()
 
     def getSynthesisBoundaryPlatformID(self,boundary):
+
         # Master platform/some FPGA must be assinged the 0 id
         # for backwards compatibility.  We achieve this by using
         # a sort function that orders by master and thence by platform 
-        # type.  This is a major hack. 
-        def platformSort(plat):
-            if(self.platforms[plat].master):
-                return 0
-            elif (self.platforms[plat].platformType == 'FPGA'):
-                return 1
-            else:
-                return 2
-
-        return (sorted(self.platforms.keys(), key=platformSort)).index(boundary)
+        # type.  Alphabetical sorting helps make code consistent across builds. 
+        # This is a major hack. 
+        masterList = filter(lambda plat: self.platforms[plat].master, self.platforms.keys())
+        fpgaList = filter(lambda plat: not self.platforms[plat].master and (self.platforms[plat].platformType == 'FPGA' or self.platforms[plat].platformType == 'BLUESIM'), self.platforms.keys())
+        otherList =  filter(lambda plat: not (self.platforms[plat].master or self.platforms[plat].platformType == 'FPGA' or self.platforms[plat].platformType == 'BLUESIM'), self.platforms.keys())
+        
+        #put things in alphabetical order
+        return (masterList + sorted(fpgaList) + sorted(otherList)).index(boundary)
 
     # build a graph. This will make life easier
     # graph legalization consists of ensuring that if a platform claims to 

@@ -1,7 +1,3 @@
-#/********************************************************************
-#* Python libraries for XST synthesis tool
-#********************************************************************/
-
 %name Alpha Inorder Sim Mapping
 %desc This file describes the mapping of the alhpa inorder pipeline to the ACP
 

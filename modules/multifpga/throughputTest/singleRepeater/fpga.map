@@ -1,0 +1,7 @@
+model -> fpga0;
+common_services -> fpga0;
+connected_application -> fpga0;
+hardware_system -> fpga0;
+basestation -> fpga0;
+repeater1 -> fpga1;
+

@@ -16,7 +16,7 @@
 %sources -t H -v PUBLIC  flowcontrol-ingress.h
 %sources -t H -v PUBLIC  flowcontrol-egress.h
 
-%param --global MULTIFPGA_FIFO_SIZES 128 "True if we can expect that the router has been generated"
+%param --global MULTIFPGA_FIFO_SIZES 128 "FIFO size provided to each LI channel by this router."
 %param  SWITCH_DEBUG 0 "Enables copious switch debug printing"
 %param  TIME_SWITCH 0 "Enables performance timing of switch""
 %param  PACK_FLOWCONTROL 0 "Try to pack flowcontrol messages with header"

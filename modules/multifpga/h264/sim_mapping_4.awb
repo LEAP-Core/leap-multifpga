@@ -1,7 +1,3 @@
-#/********************************************************************
-#* Python libraries for XST synthesis tool
-#********************************************************************/
-
 %name H.264 Test Sim Mapping Quad
 %desc This file describes the mapping of the test to the ACP
 

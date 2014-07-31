@@ -4,7 +4,7 @@ SaveParameters=0
 Description=ML605 master fpga
 File=ml605_0
 Version=2.2
-Name=ACP FPGA 0
+Name=Master ML605 (RRR)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -33,33 +33,23 @@ Packagehint=leap-platforms
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
 fpgaenv=ML605 FPGA 0
 application_env=Soft Services Hybrid Application Environment
-environment_description=Null FPGA Environment
-
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
-
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
 
 [ML605 FPGA 0]
 File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-ml605-fpga0.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Global]
 SaveParameters=0
 Description=ML605 master fpga
 File=ml605_0
 Version=2.2
-Name=ACP FPGA 0
+Name=Master ML605 (RRR)
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -88,23 +78,15 @@ Packagehint=leap-platforms
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
 fpgaenv=ML605 FPGA 0
 application_env=Soft Services Hybrid Application Environment
-environment_description=Null FPGA Environment
 
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
 
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
 
 [ML605 FPGA 0]
 File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-ml605-fpga0.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga

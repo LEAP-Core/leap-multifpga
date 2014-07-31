@@ -31,63 +31,18 @@ Packagehint=leap
 File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
 Packagehint=leap-platforms
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
 fpgaenv=XUPV5 FPGA 1 (AURORA SATA)
 application_env=Soft Services Hybrid Application Environment
-environment_description=Null FPGA Environment
-
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
 
 [XUPV5 FPGA 1 (AURORA SATA)]
 File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-xupv5-fpga1-sata.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
-
-[XUPV5 FPGA 1 (AURORA SATA)/Params]
-SCRATCHPAD_STD_PVT_CACHE_ENTRIES=4096
-BUILD_LOGS_ONLY=1
-MODEL_CLOCK_FREQ=25
-CON_CWIDTH=128

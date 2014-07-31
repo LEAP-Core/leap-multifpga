@@ -1,6 +1,3 @@
-#/********************************************************************
-#* Python libraries for XST synthesis tool
-#********************************************************************/
 %name Null software build tool
 %desc Build for software side of hybrid system
 

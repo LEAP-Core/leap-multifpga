@@ -17,9 +17,10 @@ void FLOWCONTROL_IN_CLASS::pushUMF(UMF_MESSAGE &message)
 {
 
     UMF_CHUNK phyPvt = message->ExtractChunk();
+
     if(SWITCH_DEBUG)
     {
-        cout << endl << "Provisional Flowcontrol Message length "<< dec << (UINT32) (message->GetLength()) << endl;  
+        cout << endl << "Incoming Provisional Flowcontrol Message length "<< dec << (UINT32) (message->GetLength()) << endl;  
         cout << "Channel ID "<< dec << message->GetChannelID() << endl;
     }
   

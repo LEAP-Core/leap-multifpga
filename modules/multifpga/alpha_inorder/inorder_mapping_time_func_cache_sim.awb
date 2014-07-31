@@ -1,0 +1,9 @@
+%name Alpha Inorder Mapping Timing/Functional partition with Cache (Sim)
+%desc This file describes the mapping of the Alpha inorder pipeline to two partitions
+
+%attributes tool
+
+%provides fpga_mapping
+
+%sources -t FPGAENV_MAPPING -v PUBLIC inorder-mapping-time-func-cache-sim.map
+%sources -t STAT -v PUBLIC inorder-mapping-time-func-cache.stats

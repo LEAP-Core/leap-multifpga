@@ -92,6 +92,7 @@ assertions_service=Assertions Service
 stdio_service=Standard I/O Services
 debug_scan_service=Debug Scan Services
 dynamic_parameters_service=Dynamic Parameter Service
+starter_service=Starter Service
 
 [Debug Scan Services]
 File=modules/leap/libraries/platform-services/common-services/debug-scan-service/debug-scan-service.awb
@@ -123,3 +124,7 @@ Packagehint=leap
 
 [Common Services/Params]
 BUILD_COMMON_SERVICES=0
+
+[Starter Service]
+File=modules/leap/libraries/platform-services/starter-service/starter-service.awb
+Packagehint=leap

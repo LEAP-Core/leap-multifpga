@@ -119,28 +119,28 @@ class MultiFPGAConnect():
             if(self.pipeline_debug):
                 print "Adding hop: " + src.name + "Hop" + hop        
 
-            #    def __init__(self, sc_type, raw_type, module_idx, name, platform, optional, bitwidth, module_name, type_structure):
-
-            newSink = LIChannel("ChainRoutingRecv", src.raw_type, -1, 
-                                src.name + "RoutethroughFrom_" + src.platform + "_To_" + sink.platform + "_Via" + hop, 
-                                hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure)
+            #     def __init__(self, sc_type, raw_type, module_idx, name,           optional, bitwidth, module_name, type_structure):
+            newSink = LIChannel("Recv", src.raw_type, -1, 
+                                src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop, 
+                                "False", src.bitwidth, "RouteThrough", src.type_structure)
             
             newSink.module_name = hop
             newSink.module = platformGraph.modules[hop]
-            sinks.append(newSink)
-            platformGraph.modules[hop].addChannel(newSink)
+            sinks.append(platformGraph.modules[hop].addChannel(newSink))
 
-            newSrc = LIChannel("ChainRoutingSend", src.raw_type, -1, 
-                               src.name + "RoutethroughFrom_" + src.platform + "_To_" + sink.platform + "_Via" + hop, 
-                               hop, "False", src.bitwidth, "RouteThrough", "RouteThrough", src.type_structure)
+            newSrc = LIChannel("Send", src.raw_type, -1, 
+                               src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop, 
+                               "False", src.bitwidth, "RouteThrough", src.type_structure)
 
             newSrc.module_name = hop
             newSrc.module = platformGraph.modules[hop]
-            srcs.append(newSrc)
-            platformGraph.modules[hop].addChannel(newSrc)
+            
+            srcs.append(platformGraph.modules[hop].addChannel(newSrc))
 
         sinks.append(sink)
-      
+
+        platformGraph.matchGraphChannels()
+
         # We need to fix the srcs and sinks to point to one another Note
         # that chains and send/recv route-throughs are different.
         for pair in zip(srcs,sinks):
@@ -248,11 +248,11 @@ class MultiFPGAConnect():
 
         mergedGraph = subordinateGraphs.pop()
         
-        if(self.pipeline_debug or True):
+        if(self.pipeline_debug):
             print 'parseModuleGraph base ' + str(mergedGraph) + 'subordinate graphs'
 
         # merge remaining graphs together 
-        if(self.pipeline_debug or True):
+        if(self.pipeline_debug):
             for graph in subordinateGraphs:
                 print 'parseModuleGraph merging ' + str(graph) + 'subordinate graphs'
            
@@ -338,10 +338,12 @@ class MultiFPGAConnect():
                 if(self.pipeline_debug):
                     print "Trying to pair " + chainIngresses[i].module_name + " and " + chainEgresses[i].module_name + " on chain " + chainName
                 self.connectPath(chainIngresses[i],chainEgresses[i], platformGraph)
-       
+ 
+        platformGraph.matchGraphChannels()
         #unmatched connections at this point are an error. Die.
-        if(platformGraph.unmatchedChannels):
-            print 'Unmatched channel, terminating ' 
+        if(platformGraph.checkUnmatchedChannels()):
+            print 'Unmatched channel, terminating '  
+            mergedGraph.dumpUnmatchedChannels()
             sys.exit(0)
    
 
@@ -361,8 +363,6 @@ class MultiFPGAConnect():
                         logs += module.getObjectCode('GIVEN_LOGS')
                         logs += module.getObjectCode('GEN_LOGS')
                         
-            print "Logs for " + platformName + " are " + str(logs)
-            print "Modules for " + platformName + " are " + str(modules)
             for infile in logs:          
                 try:
                     logfile = open(infile,'r')

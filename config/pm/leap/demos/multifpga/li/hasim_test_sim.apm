@@ -1,10 +1,10 @@
 
 [Global]
 SaveParameters=0
-Description=Traffic Light from Bluespec Tutorial for simulation w. synthesis boundary
+Description=Tests LI channel communications (no chains)
 File=hasim_test_sim
 Version=2.2
-Name=Traffic Light Model - Exe with synthesis boundary
+Name=Dual Alpha Model, LI test with single simulator and cpu
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
 Type=Leap
 Class=Asim::Model
@@ -24,11 +24,11 @@ fpga_mapping=Alpha Inorder HWSW Sim Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Simulation HW/SW Environment]
 File=modules/leap-platforms/fpga-environments/sim/sim_hwsw.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Null Memory/Requires]
 memory_base_types=Memory Base Types
@@ -123,11 +123,11 @@ Packagehint=hasim-models
 
 [Alpha Inorder HWSW Sim Mapping]
 File=modules/multifpga/alpha_inorder/sim_mapping_hwsw.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [LIM Compiler Pipeline]
 File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [LIM Compiler Pipeline/Params]
 USE_DEFAULT_UMF_PARAMETERS=1
