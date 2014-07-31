@@ -42,7 +42,3 @@ Packagehint=leap-multifpga
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=leap-multifpga
 
-[LIM Compiler Pipeline/Params]
-USE_DEFAULT_UMF_PARAMETERS=1
-ENABLE_AGRESSIVE_UMF_PARAMETERS=0
-MAX_NUMBER_OF_VIAS=1

@@ -44,6 +44,7 @@ set types [::utils::tail $args]
 
 if { $packName == "" } { usage }
 
+Bluetcl::flags set -wait-for-license
 
 ## Set any flags for search path, e,g -p
 if { [info exists OPT(-p)] } {

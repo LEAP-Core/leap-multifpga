@@ -1,5 +1,5 @@
 %name Null FPGA Mapping
-%desc This file is a null mapping
+%desc NULL mapping may be used for all single-FPGA designs.
 
 %attributes tool
 
