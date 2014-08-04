@@ -4,13 +4,13 @@
 #
 # ***************
 
-experiments = throughput throughput_reliable li_test
+experiments = throughput throughput_reliable li_test throughput_vc707 li_test_dual li_test_single_pipe throughput_hub
 #
 # A simple configuration
 #
 config/bm/leap/demos.cfx/benchmarks/null.cfg
 
-experiments = alpha_test
+experiments = alpha_test alpha_li_dual alpha_li_single_pipe 
 #
 config/bm/alpha/6_375.cfx/benchmarks/median_001t.cfg
 config/bm/alpha/6_375.cfx/benchmarks/multiply_001t.cfg
