@@ -1,0 +1,200 @@
+
+[Global]
+SaveParameters=0
+Description=MultiFPGA Slave Simulator Platform with Host Interface and Aurora Stack (LI)
+File=multifpgaenv-hwsw-exe-simN-aurora
+Version=2.2
+Type=Leap
+Name=MultiFPGA Slave Simulator Platform with Host Interface and Aurora Stack (LI)
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+RootName=FPGA Environment
+RootProvides=fpgaenv
+
+[Model]
+DefaultAttributes=hybrid exe
+model=FPGA Environment
+
+[FPGA Environment]
+File=modules/leap/virtual-platform/fpga-environment.awb
+Packagehint=leap
+
+[FPGA Environment/Requires]
+virtual_platform=LIM Compiler Standard Virtual Platform
+fpga_components=Software FPGA Components
+librl_bsv=RL Bluespec Library Submodel
+build_pipeline=MultiFPGA BlueSim Platform Build Pipeline (HW/SW)
+soft_services=Soft Services for MultiFPGA Submodel
+
+[UNIX Pipe Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-pipe/unix-pipe-device.awb
+Packagehint=leap-platforms
+
+[Software FPGA Components]
+File=modules/bluespec/common/fpgaenv/fpga-components/software-fpga-components.awb
+Packagehint=leap-platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=leap-platforms
+
+[Local Memory Interface using BRAM]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-bram.awb
+Packagehint=leap
+
+[Simulation Clocks Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/simulation/sim-clocks-device.awb
+Packagehint=leap-platforms
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=leap-platforms
+
+[Local Memory Interface using BRAM/Params]
+LOCAL_MEM_WRITE_LATENCY=4
+LOCAL_MEM_READ_LATENCY=8
+LOCAL_MEM_ADDR_BITS=10
+
+[Null Remote Memory]
+File=modules/leap/virtual-platform/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=leap
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[RRR Common Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-common.awb
+Packagehint=leap
+
+[Standard Virtual Devices Submodel]
+File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
+Packagehint=leap
+
+[RL Bluespec Library Submodel]
+File=config/pm/leap/submodels/common/librl-bsv.apm
+Packagehint=leap
+
+[UNIX Communication Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
+Packagehint=leap-multifpga
+
+[FPGA0 Simulation Physical Platform]
+File=modules/bluespec/common/fpgaenv/physical-platform/simulation/rrr/master/sim-physical-platform-fpga0.awb
+Packagehint=leap-multifpga
+
+[FPGA0 Simulation Physical Platform/Requires]
+clocks_device=Simulation Clocks Device
+physical_platform_utils=Common Physical Platform Utilities
+unix_pipe_device=UNIX Pipe Physical Device
+simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
+
+[BSV Bluesim Build Tool]
+File=modules/leap/build-support/build-pipelines/stages/bluesim/bsv-exe.awb
+Packagehint=leap
+
+[Interface builder]
+File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
+Packagehint=leap
+
+[Software build tool]
+File=modules/leap/build-support/build-pipelines/stages/software/software.awb
+Packagehint=leap
+
+[Soft Services for MultiFPGA Submodel]
+File=config/pm/leap/submodels/common/multifpga-soft-services.apm
+Packagehint=leap-multifpga
+
+[BSV Build Tool (First Phase)]
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
+Packagehint=leap
+
+[Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
+Packagehint=leap
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
+Packagehint=leap-multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
+Packagehint=leap-multifpga
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap
+
+[Null Channel IO Module]
+File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
+Packagehint=leap
+
+[Low Level Platform LI/Requires]
+physical_platform=FPGA0 Simulation Physical Platform
+remote_memory=Null Remote Memory
+channelio=Null Channel IO Module
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=Local Memory Interface using BRAM
+rrr=LI RRR Interface Module
+physical_channel=Simulation Physical Channel
+
+[Low Level Platform LI]
+File=modules/leap/virtual-platform/low-level-platform-interface/llpi-li.awb
+Packagehint=leap-multifpga
+
+[LIM Compiler Standard Virtual Platform/Requires]
+umf=Little-Endian Unified Message Format
+platform_services=MultiFPGA Slave Platform Services LI
+low_level_platform_interface=Low Level Platform LI
+virtual_devices=Standard Virtual Devices Submodel
+
+[LIM Compiler Standard Virtual Platform]
+File=modules/leap/virtual-platform/virtual-platform-li.awb
+Packagehint=leap-multifpga
+
+[LI RRR Interface Module/Requires]
+rrr_common=RRR Common Module
+
+[LI RRR Interface Module]
+File=modules/leap/virtual-platform/rrr/li/li-rrr.awb
+Packagehint=leap-multifpga
+
+[Simulation Physical Channel]
+File=modules/leap/virtual-platform/physical-channel/sim/sim-physical-channel.awb
+Packagehint=leap
+
+[Little-Endian Unified Message Format/Params]
+UMF_CHUNK_BYTES=16
+
+[MultiFPGA BlueSim Platform Build Pipeline (HW/SW)/Requires]
+li_module=LEAP LI Module Handler
+iface_tool=Interface builder
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Software build tool
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+bluesim_tool=BSV Bluesim Build Tool
+
+[MultiFPGA BlueSim Platform Build Pipeline (HW/SW)]
+File=modules/leap/build-support/pipelines/hwsw/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
+Packagehint=leap-multifpga
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms
+
+[Simlutation Communication Device with raw UNIX Communication]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
+Packagehint=leap-multifpga
+
+[Simlutation Communication Device with raw UNIX Communication/Requires]
+unix_comm_device=UNIX Communication Physical Device
+
+[MultiFPGA Slave Platform Services LI]
+File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave-li.apm
+Packagehint=leap-multifpga
