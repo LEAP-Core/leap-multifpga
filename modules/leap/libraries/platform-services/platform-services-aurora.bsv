@@ -38,8 +38,6 @@ import Vector::*;
 
 `include "awb/provides/soft_connections.bsh"
 
-`include "awb/provides/front_panel_service.bsh"
-`include "awb/provides/starter_service.bsh"
 `include "awb/provides/mem_services.bsh"
 `include "awb/provides/common_services.bsh"
 
@@ -60,8 +58,7 @@ module [CONNECTED_MODULE] mkPlatformServices#(VIRTUAL_PLATFORM virtualPlatform)
 		let auroraService <- mkAuroraService(physicalDrivers);
 
     // Instantiate soft interfaces to the virtual devices
-    let starterService  <- mkStarterService(vdevs);
-    let fpService       <- mkFrontPanelService(vdevs);
+
     let memServices     <- mkMemServices();
     let commonServices  <- mkCommonServices();
 

@@ -9,4 +9,4 @@
 
 %public platform-services-aurora.bsv
 
-%requires  starter_service front_panel_service mem_services common_services aurora_service
+%requires  mem_services common_services aurora_service

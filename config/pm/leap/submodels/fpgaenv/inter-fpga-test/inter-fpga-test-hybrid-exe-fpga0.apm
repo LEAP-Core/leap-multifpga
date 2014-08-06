@@ -117,13 +117,14 @@ File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
 [FPGA0 Simulation Physical Platform]
-File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0/sim-physical-platform-fpga0.awb
-Packagehint=multifpga
+File=modules/bluespec/common/fpgaenv/physical-platform/simulation/rrr/master/sim-physical-platform-fpga0.awb
+Packagehint=leap-multifpga
 
 [FPGA0 Simulation Physical Platform/Requires]
 clocks_device=Simulation Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 unix_pipe_device=UNIX Pipe Physical Device
+simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
 
 [Build Pipeline Bluesim]
 File=config/pm/leap/submodels/pipelines/build-pipeline-bluesim.apm
@@ -143,3 +144,14 @@ physical_platform_defs=Common Physical Platform Definitions
 [Common Physical Platform Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
 Packagehint=leap-platforms
+
+[Simlutation Communication Device with raw UNIX Communication]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
+Packagehint=leap-multifpga
+
+[Simlutation Communication Device with raw UNIX Communication/Requires]
+unix_comm_device=UNIX Communication Physical Device
+
+[UNIX Communication Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
+Packagehint=leap-multifpga

@@ -81,7 +81,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-com
 Packagehint=leap-multifpga
 
 [FPGA0 Simulation Physical Platform]
-File=modules/bluespec/common/fpgaenv/physical-platform/simulation/fpga0/sim-physical-platform-fpga0.awb
+File=modules/bluespec/common/fpgaenv/physical-platform/simulation/rrr/master/sim-physical-platform-fpga0.awb
 Packagehint=leap-multifpga
 
 [FPGA0 Simulation Physical Platform/Requires]
