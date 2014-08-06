@@ -1,4 +1,5 @@
 throughput                    config/pm/leap/demos/multifpga/test_multifpga_throughput_exe.apm
+throughput_quad               config/pm/leap/demos/multifpga/test_multifpga_throughput_quad_exe.apm
 throughput_vc707              config/pm/leap/demos/multifpga/test_multifpga_throughput_vc707.apm         --fakestats
 throughput_reliable           config/pm/leap/demos/multifpga/test_multifpga_throughput_aurora_exe.apm
 throughput_hub                config/pm/leap/demos/multifpga/li/test_multifpga_throughput_dual_sim_hub.apm

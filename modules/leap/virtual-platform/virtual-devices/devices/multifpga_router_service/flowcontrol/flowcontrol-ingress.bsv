@@ -365,6 +365,13 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(String name, Intege
         requestActiveQueue     <= truncate(packet.serviceID);
         requestQueues.enq(truncate(packet.serviceID), tagged UMF_PACKET_header packet);
 
+        // Software switches use sparse channel enumerations, so sanity check ID claims.
+        Bit#(32) nLarge = fromInteger(valueof(n));
+        if(zeroExtendNP(packet.serviceID) > nLarge)
+        begin
+             $display("Received invalid service ID: %d > %d (max)", packet.serviceID, valueof(n));
+             $finish; 
+        end
     endrule
 
     // scan channel for request message chunks

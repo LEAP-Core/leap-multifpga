@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=MultiFPGA Throughput Test Connected Application
 environment_description=Simulation Tri FPGA Environment
 build_pipeline=LIM Compiler Pipeline
-fpga_mapping=Dual Repeater Mapping
+fpga_mapping=Dual Repeater Mapping (Sim)
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -43,10 +43,6 @@ Packagehint=leap-multifpga
 
 [MultiFPGA Throughput Repeater]
 File=modules/multifpga/throughputTest/throughput_repeater.awb
-Packagehint=leap-multifpga
-
-[Dual Repeater Mapping]
-File=modules/multifpga/throughputTest/dualRepeater/sim_mapping.awb
 Packagehint=leap-multifpga
 
 [MultiFPGA Throughput Dual Repeater/Requires]
@@ -72,4 +68,8 @@ Packagehint=leap-multifpga
 
 [Simulation Tri FPGA Environment]
 File=modules/leap-platforms/fpga-environments/sim/sim_fpga_env_tri.awb
+Packagehint=leap-multifpga
+
+[Dual Repeater Mapping (Sim)]
+File=modules/multifpga/throughputTest/dualRepeater/sim_mapping.awb
 Packagehint=leap-multifpga

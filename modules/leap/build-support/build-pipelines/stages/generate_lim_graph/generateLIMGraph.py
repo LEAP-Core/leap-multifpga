@@ -269,7 +269,10 @@ class MultiFPGAGenerateLogfile():
           awbBatchHandle.write('set parameter ' + platformPath + ' MODULE_UID_OFFSET ' + str(moduleList.topModule.moduleDependency['MODULE_UID_OFFSET']) + '\n')
           awbBatchHandle.write('set parameter ' + platformPath + ' USE_ROUTING_KNOWN 0 ' + '\n')
 
-
+          # Platforms may have their own parameter sets. 
+          for parameter in platform.parameters:
+              awbBatchHandle.write('set parameter ' + platformPath + ' ' + parameter + ' ' + str(platform.parameters[parameter]) + '\n')
+ 
           # update uid
           moduleList.topModule.moduleDependency['MODULE_UID_OFFSET'] += len(moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].synthBoundaries())
           # for one platform, we must also include the user code.

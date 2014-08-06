@@ -11,5 +11,7 @@
 %public  connected-application-throughput.h
 %public  connected-application-throughput.cpp
 
+%param --dynamic MAXIMUM_TEST_ITERATIONS 10000  "Maximum number of tokens in throughput test"
+
 %param SYNTH_BOUNDARY mkConnectedApplication "name of synthesis boundary"
 

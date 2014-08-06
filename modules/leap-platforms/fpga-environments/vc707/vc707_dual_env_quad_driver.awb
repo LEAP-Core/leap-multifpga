@@ -1,0 +1,9 @@
+%AWB_START
+
+%name VC707 Dual FPGA Environment (Quad Driver)
+%desc VC707 Dual FPGA Environment (Quad Driver)
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC vc707-dual-quad.env
+
+%AWB_END

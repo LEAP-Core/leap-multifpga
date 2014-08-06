@@ -20,7 +20,7 @@ model=HW/SW Hybrid Multifpga Project Foundation
 connected_application=MultiFPGA Throughput Test Connected Application
 environment_description=VC707 Tri FPGA Environment
 build_pipeline=LIM Compiler Pipeline
-fpga_mapping=Single Repeater Mapping
+fpga_mapping=Single Repeater FPGA Mapping
 
 [HW/SW Hybrid Multifpga Project Foundation]
 File=modules/leap/build-support/project/project-multifpga.awb
@@ -54,14 +54,14 @@ basestation=MultiFPGA Throughput Test (D)
 throughput_repeater=MultiFPGA Throughput Repeater
 repeater1=MultiFPGA Throughput Test (C)
 
-[Single Repeater Mapping]
-File=modules/multifpga/throughputTest/singleRepeater/sim_mapping.awb
-Packagehint=leap-multifpga
-
 [LIM Compiler Pipeline]
 File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
 Packagehint=leap-multifpga
 
 [VC707 Tri FPGA Environment]
 File=modules/leap-platforms/fpga-environments/vc707/vc707_tri_env.awb
+Packagehint=leap-multifpga
+
+[Single Repeater FPGA Mapping]
+File=modules/multifpga/throughputTest/singleRepeater/fpga_mapping.awb
 Packagehint=leap-multifpga

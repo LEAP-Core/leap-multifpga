@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=ML605 slave fpga
-File=vc707_1
+File=vc707_1_synplify
 Version=2.2
 Type=Leap
 Name=VC707 FPGA 1
@@ -29,7 +29,7 @@ Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=VC707 FPGA 1 
+fpgaenv=VC707 FPGA 1 (Synplify)
 application_env=Soft Services Hybrid Application Environment
 
 [Default Hybrid Project Common Utilities]
@@ -43,7 +43,7 @@ Packagehint=leap
 [Global]
 SaveParameters=0
 Description=ML605 slave fpga
-File=vc707_1
+File=vc707_1_synplify
 Version=2.2
 Type=Leap
 Name=VC707 FPGA 1
@@ -70,7 +70,7 @@ Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=VC707 FPGA 1 
+fpgaenv=VC707 FPGA 1 (Synplify)
 application_env=Soft Services Hybrid Application Environment
 
 [Default Hybrid Project Common Utilities]
@@ -81,7 +81,6 @@ Packagehint=leap
 File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
 Packagehint=leap
 
-[VC707 FPGA 1 ]
-File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-vc707-fpga1.apm
+[VC707 FPGA 1 (Synplify)]
+File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-vc707-fpga1-synplify.apm
 Packagehint=leap-multifpga
-

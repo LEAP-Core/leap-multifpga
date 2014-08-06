@@ -1,0 +1,8 @@
+model -> sim0;
+common_services -> sim0;
+connected_application -> sim0;
+hardware_system -> sim0;
+basestation -> sim0;
+repeater1 -> sim1;
+repeater2 -> sim2;
+

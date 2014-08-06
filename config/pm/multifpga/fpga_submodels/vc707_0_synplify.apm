@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=VC707 master fpga
-File=vc707_0-hwsw
+File=vc707_0_synplify
 Version=2.2
 Name=VC707 FPGA 0
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
@@ -37,13 +37,13 @@ Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=HWSW VC707 FPGA 0
+fpgaenv=VC707 FPGA 0 (synplify)
 application_env=Soft Services Hybrid Application Environment
 
 [Global]
 SaveParameters=0
 Description=VC707 master fpga
-File=vc707_0-hwsw
+File=vc707_0_synplify
 Version=2.2
 Name=VC707 FPGA 0
 DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
@@ -78,14 +78,9 @@ Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
 project_common=Default Hybrid Project Common Utilities
-fpgaenv=HWSW VC707 FPGA 0
+fpgaenv=VC707 FPGA 0 (synplify)
 application_env=Soft Services Hybrid Application Environment
 
-
-
-[HWSW VC707 FPGA 0/Params]
-MODEL_CLOCK_FREQ=50
-
-[HWSW VC707 FPGA 0]
-File=config/pm/multifpga/fpga_submodels/hwsw/multifpgaenv-hwsw-vc707-fpga0.apm
+[VC707 FPGA 0 (synplify)]
+File=config/pm/multifpga/fpga_submodels/multifpgaenv-hybrid-vc707-fpga0-synplify.apm
 Packagehint=leap-multifpga

@@ -1,11 +1,11 @@
-%name Dual Repeater Mapping
+%name Dual Repeater Mapping (Sim)
 %desc This file describes the mapping of the test to the ACP
 
 %attributes tool
 
 %provides fpga_mapping
 
-%sources -t FPGAENV_MAPPING -v PUBLIC mapping.map
+%sources -t FPGAENV_MAPPING -v PUBLIC mapping-sim.map
 
 
 

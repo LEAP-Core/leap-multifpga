@@ -404,7 +404,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdra
 Packagehint=leap-platforms
 
 [VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-5gbps-64.awb
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-10gbps-64.awb
 Packagehint=leap-platforms
 
 [LEAP LI Module Handler]

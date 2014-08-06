@@ -1,0 +1,12 @@
+%name Dual Repeater Mapping (FPGA)
+%desc Dual Repeater test case as mapped to FPGA
+
+%attributes tool
+
+%provides fpga_mapping
+
+%sources -t FPGAENV_MAPPING -v PUBLIC mapping.map
+
+
+
+

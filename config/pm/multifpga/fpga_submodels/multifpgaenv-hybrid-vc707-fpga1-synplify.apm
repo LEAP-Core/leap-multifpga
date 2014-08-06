@@ -2,10 +2,10 @@
 [Global]
 SaveParameters=0
 Description=Uses a single sata link to communicate between FPGAs
-File=multifpgaenv-hybrid-vc707-fpga1
+File=multifpgaenv-hybrid-vc707-fpga1-synplify
 Version=2.2
 Type=Leap
-Name=VC707 FPGA 1 
+Name=VC707 FPGA 1 (Synplify)
 Class=Asim::Model
 DefaultBenchmark=
 DefaultRunOpts=
@@ -180,18 +180,14 @@ Packagehint=leap-platforms
 
 [Little-Endian Unified Message Format/Params]
 UMF_CHUNK_BYTES=16
-
-[XST Synthesis Tool]
-File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
-Packagehint=leap
 
 [Global]
 SaveParameters=0
 Description=Uses a single sata link to communicate between FPGAs
-File=multifpgaenv-hybrid-vc707-fpga1
+File=multifpgaenv-hybrid-vc707-fpga1-synplify
 Version=2.2
 Type=Leap
-Name=VC707 FPGA 1 
+Name=VC707 FPGA 1 (Synplify)
 Class=Asim::Model
 DefaultBenchmark=
 DefaultRunOpts=
@@ -366,10 +362,6 @@ Packagehint=leap-platforms
 
 [Little-Endian Unified Message Format/Params]
 UMF_CHUNK_BYTES=16
-
-[XST Synthesis Tool]
-File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
-Packagehint=leap
 
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
@@ -428,9 +420,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/synthesis/synthesis_library.awb
 Packagehint=leap
 
-[XST Synthesis Tool/Requires]
-synthesis_library=Synthesis library
-
 [Aurora Device Reliable Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
 Packagehint=leap-platforms
@@ -455,7 +444,7 @@ li_module=LEAP LI Module Handler
 mcd_tool=MCD Tool for Xilinx
 iface_tool=Interface builder
 parameter_substitution=AWB Parameter Substitution Parser
-synthesis_tool=XST Synthesis Tool
+synthesis_tool=Synplify/XST Synthesis Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
@@ -491,3 +480,10 @@ Packagehint=leap-platforms
 
 [BSV Build Tool (First Phase)/Params]
 BSC_FLAGS=" -steps 10000000 +RTS -K1000M -RTS -suppress-warnings G0043 -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -licenseWarning 7 -elab -show-schedule -show-range-conflict -verilog -remove-dollar -show-method-bvi"
+
+[Synplify/XST Synthesis Tool]
+File=modules/leap/build-support/build-pipelines/stages/synplify/synplify-sub.awb
+Packagehint=leap
+
+[Synplify/XST Synthesis Tool/Requires]
+synthesis_library=Synthesis library

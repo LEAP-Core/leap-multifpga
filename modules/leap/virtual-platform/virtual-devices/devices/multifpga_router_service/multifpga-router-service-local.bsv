@@ -126,13 +126,13 @@ module mkPacketizeConnectionSendNoPack#(String name,
                              umf_phy_pvt,    filler_bits), umf_chunk) packet <- port.read();
          if(`MARSHALLING_DEBUG == 1)
          begin
-             $display("Send NoPack Data Header: %h", pack(packet));
+             $display("Send NoPack %s Data Header: %h", name, pack(packet));
              $display("NoPack Connection %s RX starting request dataSz: %d chunkSz: %d type:  %d listed: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
          end
 
          if(packet.UMF_PACKET_header.numChunks != fromInteger(valueof(t_NUM_CHUNKS)))
          begin
-             $display("NoPack Connection %s RX starting request dataSz: %d chunkSz: %d header chunks:  %d expected chunks: %d", name, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
+             $display("Send NoPack Connection %s RX starting request header: %h dataSz: %d chunkSz: %d header chunks:  %d expected chunks: %d", name, packet.UMF_PACKET_header, valueof(t_DATA_SZ), valueof(SizeOf#(umf_chunk)) ,packet.UMF_PACKET_header.numChunks, fromInteger(valueof(t_NUM_CHUNKS)));
 	     $finish;
          end
 
@@ -152,7 +152,7 @@ module mkPacketizeConnectionSendNoPack#(String name,
             statIncrReceived();
             if(`MARSHALLING_DEBUG == 1)
             begin
-                $display("Send NoPack Data Packet: %h", pack(packet));
+                $display("Send NoPack %s Data Packet: %h", name, pack(packet));
                 $display("Connection RX %s receives: %h", name, packet.UMF_PACKET_dataChunk);
             end
         endrule
