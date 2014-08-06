@@ -575,21 +575,26 @@ def generateCodeCPP(moduleList, platform, environmentGraph, platformGraph):
             if('ROUTE_THROUGH' in dangling.attributes):
                 routeThrough = True
 
-            if(dangling.sc_type == 'Recv' and isinstance(dangling.partnerChannel,LIChannel)):
+            if(dangling.sc_type == 'Recv'):
                 if(pipeline_debug):
                     print " CPU lays down (inverse Recv)" + str(dangling) 
       
                 #these need to be ordered so that the index operator in the read thread will do the right thing.  
-                incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link_ingress) + ') = new MARSHALLED_LI_CHANNEL_IN_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.name + '", (UMF_FACTORY) new ' + egressFactoryNames[targetPlatform][ingressVias[dangling.via_idx_ingress].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link_ingress) +'\n\n')
-            elif(dangling.sc_type == 'Recv' and (isinstance(dangling.partnerChannel,LIChain)):
-                incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link_ingress) + ') = new ROUTE_THROUGH_LI_CHANNEL_IN_CLASS(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.name + '", (UMF_FACTORY) new ' + egressFactoryNames[targetPlatform][ingressVias[dangling.via_idx_ingress].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link_ingress) +'\n\n')
-            elif(dangling.sc_type == 'Send' and isinstance(dangling.partnerChannel,LIChannel)):
+                # channel terminates in software
+                if(not routeThrough):
+                    incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link_ingress) + ') = new MARSHALLED_LI_CHANNEL_IN_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.name + '", (UMF_FACTORY) new ' + egressFactoryNames[targetPlatform][ingressVias[dangling.via_idx_ingress].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link_ingress) +'\n\n')
+                
+                # channel goes somewhere else (chains cannot terminate in software at this time).
+                else:
+                    incomingChannels[targetPlatform].append('\t\tincomingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link_ingress) + ') = new ROUTE_THROUGH_LI_CHANNEL_IN_CLASS(mergedOutQ["'+ targetPlatform +'"], "'+ dangling.name + '", (UMF_FACTORY) new ' + egressFactoryNames[targetPlatform][ingressVias[dangling.via_idx_ingress].via_outgoing_flowcontrol_via] +'(), ' + str(ingressVias[0].via_outgoing_flowcontrol_link) + ');//' +  str(dangling.via_link_ingress) +'\n\n')
+            elif(dangling.sc_type == 'Send'):
                 if(pipeline_debug):
                     print " CPU lays down (inverse Send) " + str(dangling) 
 
-                outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link_egress) + ') = new MARSHALLED_LI_CHANNEL_OUT_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[targetPlatform][egressVias[dangling.via_idx_egress].via_outgoing_flowcontrol_via] + '(),\n\t\t"'+ dangling.name + '",' + str(dangling.via_link_egress) + ');\n\n')
-            elif(dangling.sc_type == 'Send' and isinstance(dangling.partnerChannel,LIChain)):
-                outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link_egress) + ') = new ROUTE_THROUGH_LI_CHANNEL_OUT_CLASS(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[targetPlatform][egressVias[dangling.via_idx_egress].via_outgoing_flowcontrol_via] + '(),\n\t\t"'+ dangling.name + '",' + str(dangling.via_link_egress) + ');\n\n')
+                if(not routeThrough):
+                    outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link_egress) + ') = new MARSHALLED_LI_CHANNEL_OUT_CLASS<' + magicTypeTable[dangling.CPPType()] +'>(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[targetPlatform][egressVias[dangling.via_idx_egress].via_outgoing_flowcontrol_via] + '(),\n\t\t"'+ dangling.name + '",' + str(dangling.via_link_egress) + ');\n\n')
+                else:
+                    outgoingChannels[targetPlatform].append('\t\toutgoingChannels["' + targetPlatform + '"]->at(' + str(dangling.via_link_egress) + ') = new ROUTE_THROUGH_LI_CHANNEL_OUT_CLASS(mergedOutQ["'+ targetPlatform +'"],(UMF_FACTORY) new ' + egressFactoryNames[targetPlatform][egressVias[dangling.via_idx_egress].via_outgoing_flowcontrol_via] + '(),\n\t\t"'+ dangling.name + '",' + str(dangling.via_link_egress) + ');\n\n')
             else:
                 print "Unknown Connection in CPP Code Gen: " + str(dangling)
                 exit(1)

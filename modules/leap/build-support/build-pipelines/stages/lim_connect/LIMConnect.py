@@ -123,7 +123,7 @@ class MultiFPGAConnect():
             newSink = LIChannel("Recv", src.raw_type, -1, 
                                 src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop, 
                                 "False", src.bitwidth, "RouteThrough", src.type_structure)
-            
+            newSink.attributes['ROUTE_THROUGH'] = True 
             newSink.module_name = hop
             newSink.module = platformGraph.modules[hop]
             sinks.append(platformGraph.modules[hop].addChannel(newSink))
@@ -131,7 +131,7 @@ class MultiFPGAConnect():
             newSrc = LIChannel("Send", src.raw_type, -1, 
                                src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop, 
                                "False", src.bitwidth, "RouteThrough", src.type_structure)
-
+            newSrc.attributes['ROUTE_THROUGH'] = True 
             newSrc.module_name = hop
             newSrc.module = platformGraph.modules[hop]
             
