@@ -1,13 +1,14 @@
-throughput                    config/pm/leap/demos/multifpga/test_multifpga_throughput_exe.apm
-throughput_quad               config/pm/leap/demos/multifpga/test_multifpga_throughput_quad_exe.apm
+throughput                    config/pm/leap/demos/multifpga/test_multifpga_throughput_exe.apm              --timeout=3600
+throughput_quad               config/pm/leap/demos/multifpga/test_multifpga_throughput_quad_exe.apm         --timeout=3600
 throughput_vc707              config/pm/leap/demos/multifpga/test_multifpga_throughput_vc707.apm            --fakestats
-throughput_reliable           config/pm/leap/demos/multifpga/test_multifpga_throughput_aurora_exe.apm
-throughput_hub                config/pm/leap/demos/multifpga/li/test_multifpga_throughput_dual_sim_hub.apm
-li_test                       config/pm/leap/demos/multifpga/li/li_test_sim.apm
-li_test_dual                  config/pm/leap/demos/multifpga/li/li_test_dual_sim.apm
-li_test_single_pipe           config/pm/leap/demos/multifpga/li/li_test_dual_sim_single_pipe.apm
-alpha_test                    config/pm/hasim-alpha/multifpga/alpha_inorder_multifpga_exe.apm
-alpha_li_dual                 config/pm/leap/demos/multifpga/li/hasim_test_dual_sim.apm
-alpha_li_single_pipe          config/pm/leap/demos/multifpga/li/hasim_test_dual_sim_single_pipe.apm
+throughput_reliable           config/pm/leap/demos/multifpga/test_multifpga_throughput_aurora_exe.apm       --timeout=3600
+throughput_hub                config/pm/leap/demos/multifpga/li/test_multifpga_throughput_dual_sim_hub.apm  --timeout=3600
+li_test                       config/pm/leap/demos/multifpga/li/li_test_sim.apm                             --timeout=3600
+li_test_dual                  config/pm/leap/demos/multifpga/li/li_test_dual_sim.apm                        --timeout=3600
+li_test_single_pipe           config/pm/leap/demos/multifpga/li/li_test_dual_sim_single_pipe.apm            --timeout=3600
+alpha_test                    config/pm/hasim-alpha/multifpga/alpha_inorder_multifpga_exe.apm               --timeout=3600
+alpha_li_dual                 config/pm/leap/demos/multifpga/li/hasim_test_dual_sim.apm                     --timeout=3600
+alpha_li_single_pipe          config/pm/leap/demos/multifpga/li/hasim_test_dual_sim_single_pipe.apm         --timeout=3600
+
 
 
