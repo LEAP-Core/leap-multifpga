@@ -350,7 +350,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/confi
 Packagehint=leap-platforms
 
 [VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-5gbps-64.awb
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-10gbps-64.awb
 Packagehint=leap-platforms
 
 [LEAP LI Module Handler]
@@ -413,7 +413,6 @@ virtual_devices=Standard Virtual Devices Submodel
 File=modules/leap/virtual-platform/virtual-platform-li.awb
 Packagehint=leap-multifpga
 
-
 [FPGA Platform Build Pipeline (HW/SW)/Requires]
 fpga_program_tool=FPGA Programming Tool
 li_module=LEAP LI Module Handler
@@ -445,7 +444,6 @@ Packagehint=leap-platforms
 
 [Differential Crystal Clocks Device from Wires/Params]
 CRYSTAL_CLOCK_FREQ=200
-MODEL_CLOCK_FREQ=100
 RESET_ACTIVE_HIGH=1
 
 [Differential Crystal Clocks Device from Wires]

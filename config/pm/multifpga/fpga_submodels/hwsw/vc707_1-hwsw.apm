@@ -82,7 +82,6 @@ fpgaenv=HWSW VC707 FPGA 0
 application_env=Soft Services Hybrid Application Environment
 
 [HWSW VC707 FPGA 0/Params]
-MODEL_CLOCK_FREQ=50
 BUILD_COMMON_SERVICES=0
 
 [HWSW VC707 FPGA 0]
