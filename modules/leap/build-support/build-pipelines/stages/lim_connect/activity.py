@@ -14,6 +14,8 @@ def parseStats(statsFile):
     if( not os.path.exists(statsFile)):
         return stats
 
+    print "Parsing activity statistics file: " + statsFile
+
     logfile = open(statsFile,'r')  
     for line in logfile:
         # There are several ways that we can get stats. One way is instrumenting the router. 
