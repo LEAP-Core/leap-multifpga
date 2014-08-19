@@ -6,3 +6,22 @@
 # Generated files
 *.pyc
 
+# /
+/Makefile
+/config.log
+/config.status
+/autom4te.cache
+/build-arch-stamp
+/build-indep-stamp
+/config.guess
+/config.sub
+
+# /debian/
+/debian/files
+/debian/*.log
+/debian/*.substvars
+/debian/*.debhelper
+/debian/leap-multifpga
+/debian/leap-multifpga-bin
+/debian/leap-multifpga-HEAD
+/debian/leap-multifpga-??.??
