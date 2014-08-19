@@ -1,4 +1,4 @@
-leap-multifpga (14.08~git1407844432r694f09d08742812733b7bff764616b8357a6ddca+precise) precise; urgency=low
+leap-multifpga (14.08+fixes~git1407844432r694f09d08742812733b7bff764616b8357a6ddca+precise) precise; urgency=low
 
   [ Joel Emer ]
   * New debian package with version v14.08.

@@ -6,5 +6,5 @@ Lock=asim-multifpga
 Description=Description of multifpga
 Name=leap-multifpga
 Tag=14.08
-Prerelease=1
+Prerelease=0
 CSN=CSN-multifpga-258
