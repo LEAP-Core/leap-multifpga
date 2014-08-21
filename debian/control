@@ -22,7 +22,7 @@ Section: devel
 
 Package: leap-multifpga-bin
 Architecture: any
-Depends: awb, glpk, python-glpk ${misc:Depends}
+Depends: awb, glpk, python-glpk, ${misc:Depends}
 Description: Executables for the Leap multifpga environement
  Core executables and drivers for Leap multifpga
 Section: devel
