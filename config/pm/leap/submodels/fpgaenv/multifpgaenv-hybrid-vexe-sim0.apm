@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=MultiFPGA Verilog Simulation FPGA0 Environment
-File=multifpgaenv-hybrid-vexe-fpga0
+File=multifpgaenv-hybrid-vexe-sim0
 Version=2.2
 Type=Leap
 Name=MultiFPGA Verilog Simulation FPGA0 Environment
@@ -177,12 +177,9 @@ Packagehint=leap
 File=modules/leap/build-support/pipelines/multifpga_platform_verilog/verilog-sim-build-pipeline-multifpga.awb
 Packagehint=leap-multifpga
 
-[Verilog Build Tool]
-File=modules/leap/build-support/build-pipelines/stages/verilog/verilog.awb
-Packagehint=leap
 
 [MultiFPGA Verilog Platform Build Pipeline (Legacy)/Requires]
-verilog_tool=Verilog Build Tool
+verilog_tool=IVerilog Build Tool
 li_module=LEAP LI Module Handler
 iface_tool=Interface builder
 bsv_tool=BSV Build Tool (First Phase)
@@ -197,3 +194,7 @@ physical_platform_defs=Common Physical Platform Definitions
 [Common Physical Platform Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
 Packagehint=leap-platforms
+
+[IVerilog Build Tool]
+File=modules/leap/build-support/build-pipelines/stages/verilog/iverilog/verilog.awb
+Packagehint=leap
