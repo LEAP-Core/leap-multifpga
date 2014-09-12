@@ -205,16 +205,13 @@ Packagehint=leap-platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
 Packagehint=leap-platforms
 
-[Verilog Build Tool]
-File=modules/leap/build-support/build-pipelines/stages/verilog/verilog.awb
-Packagehint=leap
 
 [MultiFPGA Verilog Platform Build Pipeline (HW/SW)]
 File=modules/leap/build-support/pipelines/hwsw/multifpga_platform_verilog/verilog-build-pipeline-multifpga.awb
 Packagehint=leap-multifpga
 
 [MultiFPGA Verilog Platform Build Pipeline (HW/SW)/Requires]
-verilog_tool=Verilog Build Tool
+verilog_tool=IVerilog Build Tool
 li_module=LEAP LI Module Handler
 iface_tool=Interface builder
 bsv_tool=BSV Build Tool (First Phase)
@@ -222,3 +219,7 @@ fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+
+[IVerilog Build Tool]
+File=modules/leap/build-support/build-pipelines/stages/verilog/iverilog/verilog.awb
+Packagehint=leap
