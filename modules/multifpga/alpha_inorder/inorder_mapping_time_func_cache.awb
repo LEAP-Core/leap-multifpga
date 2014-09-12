@@ -6,4 +6,4 @@
 %provides fpga_mapping
 
 %sources -t FPGAENV_MAPPING -v PUBLIC inorder-mapping-time-func-cache.map
-%sources -t STAT -v PUBLIC inorder-mapping-time-func-cache.stats
+
