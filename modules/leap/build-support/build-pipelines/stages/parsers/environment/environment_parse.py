@@ -30,19 +30,39 @@ def p_platform_list(p):
 def p_connection_list(p):
     """
     connection_list :
-    connection_list : NAME RARROW STRING SEMICOLON connection_list
-    connection_list : NAME LARROW STRING SEMICOLON connection_list
-    connection_list : NAME EQUAL  STRING SEMICOLON connection_list
+    connection_list : physical_via connection_list
+    connection_list : int_param connection_list
+    connection_list : string_param connection_list
     """     
+
     if len(p) == 1:
         p[0] = []
     else:
-        if(p[2] == '<-'):
-            p[0] = [PhysicalVia(PhysicalVia.ingress,p[1],eval(p[3]))] + p[5]
-        elif(p[2] == '->'):
-            p[0] = [PhysicalVia(PhysicalVia.egress,p[1],eval(p[3]))] + p[5]
-        else:
-            p[0] = [Parameter(p[1],eval(p[3]))] + p[5]
+        p[0] = p[1] + p[2]
+        
+
+def p_physical_via(p):
+    """
+    physical_via : NAME RARROW STRING SEMICOLON
+    physical_via : NAME LARROW STRING SEMICOLON
+    """     
+
+    if(p[2] == '<-'):
+        p[0] = [PhysicalVia(PhysicalVia.ingress,p[1],eval(p[3]))]
+    elif(p[2] == '->'):
+        p[0] = [PhysicalVia(PhysicalVia.egress,p[1],eval(p[3]))] 
+
+def p_int_param(p):
+    """
+    int_param : NAME EQUAL INT SEMICOLON
+    """     
+    p[0] = [Parameter(p[1],int(eval(p[3])), "INT")]
+
+def p_string_param(p):
+    """
+    string_param : NAME EQUAL STRING SEMICOLON
+    """     
+    p[0] = [Parameter(p[1],eval(p[3]), "STR")]
 
 def p_error(p):
     print "LIM ENVIRONMENT: Syntax error at token", p.type

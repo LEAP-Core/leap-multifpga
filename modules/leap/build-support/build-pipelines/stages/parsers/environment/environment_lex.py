@@ -12,7 +12,7 @@ reserved = {
     }
 
 tokens = [ 'RARROW', 'LARROW', 'SEMICOLON', 'EQUAL',
-           'NAME', 'STRING'
+           'NAME', 'STRING', 'INT'
          ] + list(reserved.values())
 
 
@@ -34,6 +34,11 @@ def t_NAME(t):
 def t_STRING(t):
     r'".*"'
     t.type = reserved.get(t.value,'STRING')
+    return t
+
+def t_INT(t):
+    r'[0-9]+'
+    t.type = reserved.get(t.value,'INT')
     return t
 
 t_ignore = " \t\r" #white space requirements are evil

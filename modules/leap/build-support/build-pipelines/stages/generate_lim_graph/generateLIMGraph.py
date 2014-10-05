@@ -271,7 +271,7 @@ class MultiFPGAGenerateLogfile():
 
           # Platforms may have their own parameter sets. 
           for parameter in platform.parameters:
-              awbBatchHandle.write('set parameter ' + platformPath + ' ' + parameter + ' ' + str(platform.parameters[parameter]) + '\n')
+              awbBatchHandle.write('set parameter ' + platformPath + ' ' + parameter + ' ' + platform.parameters[parameter].getAWBRepresentation() + '\n')
  
           # update uid
           moduleList.topModule.moduleDependency['MODULE_UID_OFFSET'] += len(moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName].synthBoundaries())

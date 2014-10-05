@@ -63,8 +63,8 @@ class Platform(object):
                     self.insertEgress(physicalVia.endpointName, physicalVia)
                     self.egressesByPhysicalName[physicalVia.physicalName] = physicalVia
             else:
-                # this is a parameter.
-                self.parameters[platformDescriptor.name] = platformDescriptor.value
+                # this is a parameter. 
+                self.parameters[platformDescriptor.name] = platformDescriptor
 
     def __repr__(self):
        ingressRepr = ''
