@@ -42,7 +42,8 @@ import Vector::*;
 module [CONNECTED_MODULE] mkPlatformServices
     // interface
         ();
-
-    let memoryServices <- mkMemServices();
-
+    if (`MULTI_FPGA_SLAVE_MEMORY_SERVICE_ENABLE == 1)
+    begin
+        let memoryServices <- mkMemServices();
+    end
 endmodule

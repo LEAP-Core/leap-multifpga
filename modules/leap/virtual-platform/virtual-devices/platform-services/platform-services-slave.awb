@@ -12,11 +12,6 @@
 %requires  common_services
 %requires  multifpga_router_service
 
-
-
-
-
-
-
+%param --global MULTI_FPGA_SLAVE_MEMORY_SERVICE_ENABLE  1  "Enables Central Cache on Slave Platform"
 
 

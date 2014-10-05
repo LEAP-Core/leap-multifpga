@@ -1,0 +1,10 @@
+%AWB_START
+
+%name VC707 Dual FPGA Environment (SMA) with Coherent Fence Enabled
+%desc VC707 Dual FPGA Environment (SMA) with Coherent Fence Enabled
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC vc707-dual-fence.env
+
+
+%AWB_END

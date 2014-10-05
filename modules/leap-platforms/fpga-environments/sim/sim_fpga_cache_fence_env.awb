@@ -1,0 +1,8 @@
+%AWB_START
+
+%name Simulation Dual FPGA Environment with Dual Cache and Pipelined Fence Enabled
+%desc Simulation Dual FPGA Environment with Dual Cache and Pipelined Fence Enabled
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC sim-cache-dual-fence.env
+%AWB_END
