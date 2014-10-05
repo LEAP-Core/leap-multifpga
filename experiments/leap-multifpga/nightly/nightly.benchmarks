@@ -4,7 +4,7 @@
 #
 # ***************
 
-experiments = throughput throughput_reliable li_test throughput_vc707 li_test_dual li_test_single_pipe throughput_hub throughput_quad
+experiments = throughput throughput_reliable li_test throughput_vc707 li_test_dual li_test_single_pipe throughput_hub throughput_quad hello_vexe_li hello_exe_li
 #
 # A simple configuration
 #

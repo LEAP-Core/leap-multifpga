@@ -88,7 +88,7 @@ Packagehint=leap-multifpga
 clocks_device=Simulation Clocks Device
 physical_platform_utils=Common Physical Platform Utilities
 unix_pipe_device=UNIX Pipe Physical Device
-simulation_communication_device=Simlutation Communication Device with Aurora Stack
+simulation_communication_device=Simlutation Communication Device with raw UNIX Communication
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
@@ -118,36 +118,9 @@ Packagehint=leap-multifpga
 File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
 Packagehint=leap-multifpga
 
-[Simlutation Communication Device with Aurora Stack/Requires]
-aurora_flowcontrol=Aurora Device Reliable Flowcontrol
-aurora_driver=Aurora Driver, Simulation
-aurora_common=Aurora Common Definitions
-
-[Simlutation Communication Device with Aurora Stack]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-simulation/aurora-device-simulation.awb
-Packagehint=leap-platforms
-
-[Aurora Driver, Simulation]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-simulation/aurora-driver-simulation.awb
-Packagehint=leap-platforms
-
-[Aurora Driver, Simulation/Requires]
-unix_comm_device=UNIX Communication Physical Device
-
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
 Packagehint=leap
-
-[Aurora Device Reliable Flowcontrol Debugger]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
-Packagehint=leap-platforms
-
-[Aurora Device Reliable Flowcontrol]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/aurora-device.awb
-Packagehint=leap-platforms
-
-[Aurora Device Reliable Flowcontrol/Requires]
-aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
 
 [Null Channel IO Module]
 File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
@@ -201,20 +174,12 @@ physical_platform_defs=Common Physical Platform Definitions
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
 Packagehint=leap-platforms
 
-[Aurora Common Definitions]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
-Packagehint=leap-platforms
-
-[Verilog Build Tool]
-File=modules/leap/build-support/build-pipelines/stages/verilog/verilog.awb
-Packagehint=leap
-
 [MultiFPGA Verilog Platform Build Pipeline (HW/SW)]
 File=modules/leap/build-support/pipelines/hwsw/multifpga_platform_verilog/verilog-build-pipeline-multifpga.awb
 Packagehint=leap-multifpga
 
 [MultiFPGA Verilog Platform Build Pipeline (HW/SW)/Requires]
-verilog_tool=Verilog Build Tool
+verilog_tool=VCS Build Tool
 li_module=LEAP LI Module Handler
 iface_tool=Interface builder
 bsv_tool=BSV Build Tool (First Phase)
@@ -222,3 +187,14 @@ fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+
+[VCS Build Tool]
+File=modules/leap/build-support/build-pipelines/stages/verilog/vcs/verilog.awb
+Packagehint=leap
+
+[Simlutation Communication Device with raw UNIX Communication]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
+Packagehint=leap-multifpga
+
+[Simlutation Communication Device with raw UNIX Communication/Requires]
+unix_comm_device=UNIX Communication Physical Device

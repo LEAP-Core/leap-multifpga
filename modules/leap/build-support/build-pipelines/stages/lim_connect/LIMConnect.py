@@ -123,6 +123,7 @@ class MultiFPGAConnect():
             newSink = LIChannel("Recv", src.raw_type, -1, 
                                 src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop, 
                                 "False", src.bitwidth, "RouteThrough", src.type_structure)
+            newSink.activity = sink.activity
             newSink.attributes['ROUTE_THROUGH'] = True 
             newSink.module_name = hop
             newSink.module = platformGraph.modules[hop]
@@ -131,6 +132,7 @@ class MultiFPGAConnect():
             newSrc = LIChannel("Send", src.raw_type, -1, 
                                src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop, 
                                "False", src.bitwidth, "RouteThrough", src.type_structure)
+            newSrc.activity = src.activity
             newSrc.attributes['ROUTE_THROUGH'] = True 
             newSrc.module_name = hop
             newSrc.module = platformGraph.modules[hop]
@@ -209,6 +211,8 @@ class MultiFPGAConnect():
         # Assign modules to platforms.  This yields the platformGraph, a
         # view in which all LIMs have been assigned a platform.
         platformGraph = placeModules(self.moduleList, environmentGraph, moduleGraph)
+
+        assignActivity(self.moduleList, platformGraph)
 
         # Route LI channels between platforms.      
         self.routeConnections(platformGraph)

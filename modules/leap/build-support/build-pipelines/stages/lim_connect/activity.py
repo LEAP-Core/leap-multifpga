@@ -4,7 +4,7 @@ from li_module import *
 from model import *
 
 # Notice that chains will have their platform direction labelled
-def parseStats(statsFile):
+def parseStats(statsFile, debug=False):
     # let's read in a stats file
 
     stats = {}
@@ -14,16 +14,24 @@ def parseStats(statsFile):
     if( not os.path.exists(statsFile)):
         return stats
 
-    print "Parsing activity statistics file: " + statsFile
+    if(debug):
+        print "Parsing activity statistics file: " + statsFile
 
     logfile = open(statsFile,'r')  
     for line in logfile:
         # There are several ways that we can get stats. One way is instrumenting the router. 
         if(re.match('^TRAFFIC_',line)):
             #We may have a chunked pattern.   
-            match = re.match('^TRAFFIC_(\w+),.*,(\d+)',line)
+            if(debug):
+                print "ACTIVITY match: " + line
+
+            match = re.match('^TRAFFIC_(\w+)_from_(\w+),.*,(\d+)',line)
+
             if(match):
-                stats[match.group(1)] = int(match.group(2))
+                if(debug):
+                    print "ACTIVITY setting:  " + match.group(1) +  " to " + match.group(3)
+
+                stats[match.group(1)] = int(match.group(3))
 
         # TODO: a second way is instrumenting the LI channels directly. 
 

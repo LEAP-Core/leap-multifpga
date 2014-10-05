@@ -1,0 +1,7 @@
+leap-multifpga for Debian
+--------------
+
+Packaged for debian
+    To change version update number in control and rules
+
+ -- Joel Emer <emer@csail.mit.edu> Mon, 18 Aug 2014 19:20:17 -0400

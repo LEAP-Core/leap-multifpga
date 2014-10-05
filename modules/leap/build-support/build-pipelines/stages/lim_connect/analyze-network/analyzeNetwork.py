@@ -43,7 +43,7 @@ def generateRouterTypesPair(platform, targetPlatform, moduleList, environmentGra
 # This code assigns physical indices to the inter-platform connections. 
 def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections, moduleList):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG') or True
+    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
     # by definition these are sources
     for provisional in provisionalAssignments:
         assigned = False
@@ -66,9 +66,9 @@ def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformCo
 
                 if(pipeline_debug):
                     if(isinstance(platformConnections[idx], LIChannel)):
-                        print "Assigning egress " + platformConnections[idx].name + ' from ' + platformConnections[idx].module.name + ' -> ' + platformConnections[idx].partnerModule.name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+                        print "Assigning egress " + platformConnections[idx].name + ' with weight ' + str(platformConnections[idx].activity)   + 'with width ' +  str(platformConnections[idx].bitwidth) +  '  from ' + platformConnections[idx].module.name + ' -> ' + platformConnections[idx].partnerModule.name + ' of type ' + platformConnections[idx].sc_type  +' lane: ' + str(provisional.via_idx) + ' channel: ' + str(provisional.via_link)
                     else:
-                        print "Assigning egress (chain) " + platformConnections[idx].name + ' from ' + platformConnections[idx].module.name + ' -> ' + platformConnections[idx].sinkPartnerModule.name + ' of type ' + platformConnections[idx].sc_type  +' ' + str(provisional.via_idx) + ' ' + str(provisional.via_link)
+                        print "Assigning egress (chain) " + platformConnections[idx].name + ' with weight ' + str(platformConnections[idx].activity)   + 'with width ' +  str(platformConnections[idx].bitwidth) + ' from ' + platformConnections[idx].module.name + ' -> ' + platformConnections[idx].sinkPartnerModule.name + ' of type ' + platformConnections[idx].sc_type  +' lane: ' + str(provisional.via_idx) + ' channel: ' + str(provisional.via_link)
         if(not assigned):
             print "assignLinks failed to assign: " + platformConnections[idx].name +"\n"
             exit(0)
@@ -79,7 +79,7 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
     MAX_NUMBER_OF_VIAS = getMaxViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
     MIN_NUMBER_OF_VIAS = getMinViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
 
-    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
+    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG') 
 
     if(pipeline_debug):
         print "Allocating vias for " + platform + " -> " + targetPlatform + "\n"
@@ -98,7 +98,9 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
     moduleLinks = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
 
     sortedLinks = sorted(moduleLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
-    
+    # We'll use links to size the router lanes, but we should only use each link once. 
+    usedLinks = [False for x in range(len(sortedLinks))]
+
     partnerSortedLinks = map(getPartner, sortedLinks)
 
     for numberOfVias in range(MIN_NUMBER_OF_VIAS, MAX_NUMBER_OF_VIAS+1):
@@ -125,7 +127,12 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
                 
                 # search for a link which has size less than the remaining via width
                 noViasRemaining = True
+                
+                # earlier iterations may have chosen some of the candidates. 
                 for linkIdx in range(len(sortedLinks)):
+                    if(usedLinks[linkIdx]):
+                        continue
+
                     viaSizingIdx = linkIdx
                     linkWidth = (sortedLinks[viaSizingIdx].bitwidth + 2*(headerSize + 1))# Give extra for header sizing - the base via should also have space
                     # have we found a sufficiently small link?
@@ -141,6 +148,9 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
                         viaWidths[0] = viaWidths[0] + 1
                 # found a sufficiently small link, so we create a new lane and adjust the 0 lane to reflect the partitioning.
                 else:
+                    if(pipeline_debug):
+                        print "Updating vias using idx " + str(viaSizingIdx) + " : " + str(sortedLinks[viaSizingIdx]) + ", activity" + str(sortedLinks[viaSizingIdx].activity) 
+                    usedLinks[linkIdx] = True
                     viaWidths[0] = viaWidths[0] - (sortedLinks[viaSizingIdx].bitwidth + headerSize + 1)
                     viaWidths.append(sortedLinks[viaSizingIdx].bitwidth + headerSize) # need one bit for the header
                     viaSizingIdx += 1
@@ -162,7 +172,7 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
         # send/recv pairs had better be matched.
         # so let's match them up
         # need to maintain the sorted order
-        if(pipeline_debug or True):
+        if(pipeline_debug):
             print "sortedLinks: " + str(sortedLinks) + "\n"
             print "partnerSortedLinks: " + str(partnerSortedLinks) + "\n"
 
@@ -178,13 +188,16 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
    
         if(max([via.load for via in viasProvisional]) < maxLoad or firstAllocationPass):
             if(pipeline_debug):
-                print "Better allocation with  " + str(len(viasProvisional)) + " vias found."
+                print "Better allocation with  " + str(len(viasProvisional)) + ": was " +  str(viasFinal) + " -> " + str(viasProvisional)  + " vias found."
 
             maxLoad = max([via.load for via in viasProvisional])
             viasFinal = viasProvisional
             assignLinks(platformConnectionsProvisional, targetPlatformConnectionsProvisional, platformConnections, targetPlatformConnections, moduleList)
 
         firstAllocationPass = False
+
+    if(pipeline_debug):
+        print "Final Allocation  " + str(len(viasFinal)) + ": " +  str(viasFinal) + " vias found."
 
     return viasFinal
 
@@ -661,3 +674,4 @@ def analyzeNetworkUniform(useActivity, moduleList, environmentGraph, platformGra
 def analyzeNetwork(moduleList, environmentGraph, platformGraph):
     ANALYZE_NETWORK = moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK')
     eval(ANALYZE_NETWORK + '(moduleList, environmentGraph, platformGraph)')
+  

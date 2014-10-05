@@ -66,29 +66,40 @@ def decorateModulesWithMapFile(moduleList, environmentGraph, moduleGraph):
 # different modules.
 def assignResources(moduleList, environmentGraph, moduleGraph):
 
+    pipeline_debug = getBuildPipelineDebug(moduleList)
+
     # We require this extra 'S', but maybe this should not be the case.
     resourceFile = moduleList.getAllDependenciesWithPaths('GIVEN_RESOURCESS')    
-    filename = ""
+    filenames = []
     if(len(resourceFile) > 0):
-        filename = moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + resourceFile[0]
+        filenames.append(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + resourceFile[0])
         # let's read in a resource file
-
+        
+    # we can also get resource files from the first compilation pass.
+    # pick those resource files up here.
+    for moduleName in moduleGraph.modules:
+        moduleObject = moduleGraph.modules[moduleName]   
+        filenames += moduleObject.getObjectCode('RESOURCES')
 
     resources = {}
 
     # need to check for file existance. returning an empty resource
     # dictionary is acceptable.
-    if( not os.path.exists(filename)):
-        return resources
+    for filename in filenames:
+        if( not os.path.exists(filename)):
+            print "Warning, no resources found...\n"
+            continue
 
-    logfile = open(filename,'r')  
-    for line in logfile:
-        # There are several ways that we can get resource. One way is instrumenting the router. 
-        params = line.split(':')
-        moduleName = params.pop(0)
-        resources[moduleName] = {}
-        for index in range(len(params)/2):
-            resources[moduleName][params[2*index]] = float(params[2*index+1])
+        logfile = open(filename,'r')  
+        for line in logfile:
+            # There are several ways that we can get resource. One way is instrumenting the router. 
+            params = line.split(':')
+            moduleName = params.pop(0)
+            resources[moduleName] = {}
+            for index in range(len(params)/2):
+                resources[moduleName][params[2*index]] = float(params[2*index+1])
+    if(pipeline_debug):        
+        print "PLACER RESOURCES: " + str(resources)
 
     return resources
 
@@ -211,11 +222,18 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
                         return getColorEdge(channel.name, srcColor, color)
                     modHandle.write('\t' + " + ".join(map(defineSrcVal,edgeColorPairs[channel.name][0])) + ' = ' + getColorModule(moduleName, color) + ';\n')
 
+    thresholds = {'LUT': 0.8,'Reg': 0.8, 'BRAM': .9}
+
     # Now we emit resource constraints. This is somewhat tied to the resource matrix :/
     for platformName in environmentGraph.getPlatformNames():
-        # For each resource that the plaform has, we need to emit a constraint. 
-        if(platformName in resources):
-            for resourceCandidate in resources[platformName]:
+        # For each resource that the plaform has, we need to emit a constraint.
+        # Need to find the module associated with this platform.
+        platformModuleName = platformName +'_platform' # We should have a function for this
+        if(platformModuleName in resources):
+            if(pipeline_debug):
+                print "For platform name: " + platformModuleName + " resources are: " + str(resources[platformModuleName])
+
+            for resourceCandidate in resources[platformModuleName]:
                 #The following line is a kind of hack. 
                 match = re.match('^Total(.*)',resourceCandidate)
                 if(match):
@@ -235,8 +253,10 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
                     #if there are no constraints, do nothing.
                     if(len(constraints) > 0):
                         modHandle.write('subject to resource_' + resourceClass + '_platform_' + platformName +':\n')
-                        modHandle.write(' + '.join(constraints) + ' <= ' + str(.6*resources[platformName][resourceCandidate]) + ';\n')
-        
+                        modHandle.write(' + '.join(constraints) + ' <= ' + str(thresholds[resourceClass]*resources[platformModuleName][resourceCandidate]) + ';\n')
+        else:            
+            print "WARNING: did not find resources for " + platformName
+
     modHandle.write('\n\nend;\n')
     modHandle.close()
 

@@ -9,6 +9,7 @@ li_test_single_pipe           config/pm/leap/demos/multifpga/li/li_test_dual_sim
 alpha_test                    config/pm/hasim-alpha/multifpga/alpha_inorder_multifpga_exe.apm               --timeout=3600
 alpha_li_dual                 config/pm/leap/demos/multifpga/li/hasim_test_dual_sim.apm                     --timeout=3600
 alpha_li_single_pipe          config/pm/leap/demos/multifpga/li/hasim_test_dual_sim_single_pipe.apm         --timeout=3600
-
+hello_vexe_li                 config/pm/leap/demos/hello/hello_hybrid_vexe_li.apm                           --timeout=3600 
+hello_exe_li                  config/pm/leap/demos/hello/hello_hybrid_exe_li.apm                            --timeout=3600 
 
 
