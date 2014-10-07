@@ -179,7 +179,7 @@ File=modules/leap/build-support/pipelines/hwsw/multifpga_platform_verilog/verilo
 Packagehint=leap-multifpga
 
 [MultiFPGA Verilog Platform Build Pipeline (HW/SW)/Requires]
-verilog_tool=VCS Build Tool
+verilog_tool=IVerilog Build Tool
 li_module=LEAP LI Module Handler
 iface_tool=Interface builder
 bsv_tool=BSV Build Tool (First Phase)
@@ -188,13 +188,13 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 
-[VCS Build Tool]
-File=modules/leap/build-support/build-pipelines/stages/verilog/vcs/verilog.awb
-Packagehint=leap
-
 [Simlutation Communication Device with raw UNIX Communication]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
 Packagehint=leap-multifpga
 
 [Simlutation Communication Device with raw UNIX Communication/Requires]
 unix_comm_device=UNIX Communication Physical Device
+
+[IVerilog Build Tool]
+File=modules/leap/build-support/build-pipelines/stages/verilog/iverilog/verilog.awb
+Packagehint=leap
