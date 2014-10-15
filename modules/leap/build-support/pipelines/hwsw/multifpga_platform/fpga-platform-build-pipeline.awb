@@ -13,6 +13,7 @@
 %requires bsv_tool
 %requires iface_tool
 %requires software_tool
+%requires area_group_tool
 %requires synthesis_tool
 %requires post_synthesis_tool
 %requires area_group_tool

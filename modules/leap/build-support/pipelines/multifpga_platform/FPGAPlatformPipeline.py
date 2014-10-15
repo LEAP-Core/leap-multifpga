@@ -4,6 +4,7 @@ import SCons.Script
 from model import  *
 from wrapper_gen_tool import *
 from iface_tool import *
+from area_group_tool import  *
 from bsv_tool import *
 from fpga_program_tool import *
 from software_tool import *
@@ -16,6 +17,12 @@ class Build(ProjectDependency):
     def __init__(self, moduleList):
         WrapperGen(moduleList)
         Iface(moduleList)
+
+        # Floor planner can influence the BSV build, and must therefore
+        # run first.
+        if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
+            Floorplanner(moduleList)
+
         BSV(moduleList)
         FPGAProgram(moduleList)
         MCD(moduleList)

@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=Master MultiFPGA Simulation Aurora Environment (RRR)
-File=multifpgaenv-hybrid-exe-fpga0-aurora
+File=multifpgaenv-hybrid-exe-sim0-aurora
 Version=2.2
 Type=Leap
 Name=Master MultiFPGA Simulation Aurora Environment (RRR)
@@ -183,6 +183,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
+area_group_tool=Area Group Tool
 
 [Aurora Device Reliable Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
@@ -224,3 +225,14 @@ Packagehint=leap-platforms
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
 Packagehint=leap-platforms
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap

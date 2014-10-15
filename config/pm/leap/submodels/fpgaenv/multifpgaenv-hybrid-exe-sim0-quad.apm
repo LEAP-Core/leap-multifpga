@@ -179,6 +179,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
+area_group_tool=Area Group Tool
 
 [Common Physical Platform Utilities/Requires]
 physical_platform_defs=Common Physical Platform Definitions
@@ -197,3 +198,14 @@ unix_comm_device=UNIX Communication Physical Device
 [UNIX Communication Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
 Packagehint=leap-multifpga
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap

@@ -2,6 +2,7 @@ import os
 import re
 import SCons.Script  
 from iface_tool import *
+from area_group_tool import  *
 from bsv_tool import *
 from verilog_tool import *
 from software_tool import *
@@ -14,6 +15,12 @@ class Build(ProjectDependency):
         #build interface first 
         WrapperGen(moduleList)
         Iface(moduleList)
+
+        # Floor planner can influence the BSV build, and must therefore
+        # run first.
+        if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
+            Floorplanner(moduleList)
+
         BSV(moduleList)
         if (moduleList.getAWBParam('software_tool', 'BUILD_FIRST_PASS_SOFTWARE')):
             Software(moduleList)

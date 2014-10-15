@@ -165,7 +165,6 @@ Packagehint=leap
 File=modules/leap/build-support/pipelines/multifpga_platform_verilog/verilog-sim-build-pipeline-multifpga.awb
 Packagehint=leap-multifpga
 
-
 [MultiFPGA Verilog Platform Build Pipeline (Legacy)/Requires]
 verilog_tool=IVerilog Build Tool
 li_module=LEAP LI Module Handler
@@ -175,6 +174,7 @@ fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 software_tool=Null software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+area_group_tool=Area Group Tool
 
 [Common Physical Platform Utilities/Requires]
 physical_platform_defs=Common Physical Platform Definitions
@@ -185,4 +185,15 @@ Packagehint=leap-platforms
 
 [IVerilog Build Tool]
 File=modules/leap/build-support/build-pipelines/stages/verilog/iverilog/verilog.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
 Packagehint=leap

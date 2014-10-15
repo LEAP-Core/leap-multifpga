@@ -11,6 +11,7 @@
 %requires fpgamap_parser
 %requires fpga_environment_parser
 %requires bsv_tool
+%requires area_group_tool
 %requires iface_tool
 %requires software_tool
 %requires verilog_tool

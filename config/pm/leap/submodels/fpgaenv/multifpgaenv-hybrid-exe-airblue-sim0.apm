@@ -2,7 +2,7 @@
 [Global]
 SaveParameters=0
 Description=MultiFPGA AirblueSimulation FPGA0 Environment
-File=multifpgaenv-hybrid-exe-airblue-fpga0
+File=multifpgaenv-hybrid-exe-airblue-sim0
 Version=2.2
 Type=Leap
 Name=MultiFPGA Airblue nSimulation FPGA0 Environment
@@ -183,6 +183,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
+area_group_tool=Area Group Tool
 
 [Simlutation Communication Device with raw UNIX Communication]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
@@ -197,3 +198,14 @@ physical_platform_defs=Common Physical Platform Definitions
 [Common Physical Platform Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
 Packagehint=leap-platforms
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap

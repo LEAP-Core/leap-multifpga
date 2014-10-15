@@ -481,6 +481,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+area_group_tool=Area Group Tool
 
 [BlueNoC PCIe Bridge/Params]
 DO_SOFT_RESET=0
@@ -502,3 +503,14 @@ Packagehint=leap-platforms
 
 [BSV Build Tool (First Phase)/Params]
 BSC_FLAGS=" -steps 10000000 +RTS -K1000M -RTS -suppress-warnings G0043 -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -licenseWarning 7 -elab -show-schedule -show-range-conflict -verilog -remove-dollar -show-method-bvi"
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap

@@ -176,11 +176,11 @@ Packagehint=leap-platforms
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Master Platform Services]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [BSV Build Tool (First Phase)]
 File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
@@ -192,11 +192,11 @@ Packagehint=leap
 
 [FPGAMap]
 File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [FPGA Environment Datatype]
 File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Old-Style Bluespec PCIe Physical Channel]
 File=modules/leap/virtual-platform/physical-channel/pcie/bluespec/pcie-bluespec-physical-channel.awb
@@ -223,7 +223,7 @@ synthesis_library=Synthesis library
 
 [FPGA Platform Build Pipeline (Legacy)]
 File=modules/leap/build-support/pipelines/multifpga_platform/fpga-platform-build-pipeline.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [FPGA Platform Build Pipeline (Legacy)/Requires]
 fpga_program_tool=FPGA Programming Tool
@@ -238,6 +238,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+area_group_tool=Area Group Tool
 
 [Common Physical Platform Utilities/Requires]
 physical_platform_defs=Common Physical Platform Definitions
@@ -245,3 +246,14 @@ physical_platform_defs=Common Physical Platform Definitions
 [Common Physical Platform Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
 Packagehint=leap-platforms
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap

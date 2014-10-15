@@ -176,6 +176,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 bluesim_tool=BSV Bluesim Build Tool
+area_group_tool=Area Group Tool
 
 [MultiFPGA BlueSim Platform Build Pipeline (HW/SW)]
 File=modules/leap/build-support/pipelines/hwsw/multifpga_platform_sim/sim-build-pipeline-multifpga.awb
@@ -198,3 +199,14 @@ unix_comm_device=UNIX Communication Physical Device
 [MultiFPGA Slave Platform Services LI]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave-li.apm
 Packagehint=leap-multifpga
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap

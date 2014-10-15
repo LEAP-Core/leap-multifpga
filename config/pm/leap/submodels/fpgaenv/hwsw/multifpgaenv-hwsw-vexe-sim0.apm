@@ -187,6 +187,7 @@ fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+area_group_tool=Area Group Tool
 
 [Simlutation Communication Device with raw UNIX Communication]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/simulation-communication/simulation-communication-device.awb
@@ -197,4 +198,15 @@ unix_comm_device=UNIX Communication Physical Device
 
 [IVerilog Build Tool]
 File=modules/leap/build-support/build-pipelines/stages/verilog/iverilog/verilog.awb
+Packagehint=leap
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
 Packagehint=leap

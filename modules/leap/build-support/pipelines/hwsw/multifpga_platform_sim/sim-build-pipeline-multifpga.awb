@@ -8,6 +8,7 @@
 
 %provides build_pipeline
 %requires wrapper_gen_tool
+%requires area_group_tool
 %requires fpgamap_parser
 %requires fpga_environment_parser
 %requires bsv_tool

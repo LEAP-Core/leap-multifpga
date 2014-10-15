@@ -451,6 +451,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Null software build tool
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+area_group_tool=Area Group Tool
 
 [Null Channel IO Module with Dummy Physical/Requires]
 physical_channel=BlueNoC PCIe Tunnel
@@ -487,3 +488,14 @@ Packagehint=leap
 
 [Synplify/XST Synthesis Tool/Requires]
 synthesis_library=Synthesis library
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap

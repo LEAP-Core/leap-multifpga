@@ -4,6 +4,7 @@ import SCons.Script
 from iface_tool import *
 from bsv_tool import *
 from bluesim_tool import *
+from area_group_tool import  *
 from software_tool import *
 from wrapper_gen_tool import *
 from model import  *
@@ -14,6 +15,12 @@ class Build(ProjectDependency):
         WrapperGen(moduleList)
 
         Iface(moduleList)
+
+        # Floor planner can influence the BSV build, and must therefore
+        # run first.
+        if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
+            Floorplanner(moduleList)
+
         bsv = BSV(moduleList)
         if not bsv.isDependsBuild:
             if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):

@@ -472,6 +472,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+area_group_tool=Area Group Tool
 
 [BlueNoC PCIe Bridge/Params]
 DO_SOFT_RESET=0
@@ -499,3 +500,14 @@ Packagehint=leap-platforms
 aurora_flowcontrol=Aurora Device Reliable Flowcontrol
 aurora_driver=VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps
 aurora_common=Aurora Common Definitions
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap

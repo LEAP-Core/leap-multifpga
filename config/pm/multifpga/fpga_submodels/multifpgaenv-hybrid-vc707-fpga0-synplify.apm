@@ -385,7 +385,6 @@ Packagehint=leap
 [Little-Endian Unified Message Format/Params]
 UMF_CHUNK_BYTES=16
 
-
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
 Packagehint=leap-platforms
@@ -471,6 +470,7 @@ fpga_environment_parser=FPGA Environment Datatype
 software_tool=Software build tool
 post_synthesis_tool=Xilinx Post-synthesis Toolchain
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+area_group_tool=Area Group Tool
 
 [BlueNoC PCIe Bridge/Params]
 DO_SOFT_RESET=0
@@ -499,3 +499,14 @@ Packagehint=leap
 
 [Synplify/XST Synthesis Tool/Requires]
 synthesis_library=Synthesis library
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap
