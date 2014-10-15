@@ -43,6 +43,7 @@ fpga_program_tool=FPGA Programming Tool
 wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
 li_module=LEAP LI Module Handler
 parameter_substitution=AWB Parameter Substitution Parser
+area_group_tool=Area Group Tool
 
 [Xilinx Post-synthesis Toolchain]
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-post-synth.awb
@@ -105,3 +106,14 @@ Packagehint=leap
 
 [XST Synthesis Tool/Requires]
 synthesis_library=Synthesis library
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser

@@ -62,47 +62,6 @@ def decorateModulesWithMapFile(moduleList, environmentGraph, moduleGraph):
                 moduleObject = moduleGraph.modules[moduleName]   
                 moduleObject.putAttribute('MAPPING', platform)
 
-# this function allows us to supply resource utilizations for
-# different modules.
-def assignResources(moduleList, environmentGraph, moduleGraph):
-
-    pipeline_debug = getBuildPipelineDebug(moduleList)
-
-    # We require this extra 'S', but maybe this should not be the case.
-    resourceFile = moduleList.getAllDependenciesWithPaths('GIVEN_RESOURCESS')    
-    filenames = []
-    if(len(resourceFile) > 0):
-        filenames.append(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + resourceFile[0])
-        # let's read in a resource file
-        
-    # we can also get resource files from the first compilation pass.
-    # pick those resource files up here.
-    for moduleName in moduleGraph.modules:
-        moduleObject = moduleGraph.modules[moduleName]   
-        filenames += moduleObject.getObjectCode('RESOURCES')
-
-    resources = {}
-
-    # need to check for file existance. returning an empty resource
-    # dictionary is acceptable.
-    for filename in filenames:
-        if( not os.path.exists(filename)):
-            print "Warning, no resources found...\n"
-            continue
-
-        logfile = open(filename,'r')  
-        for line in logfile:
-            # There are several ways that we can get resource. One way is instrumenting the router. 
-            params = line.split(':')
-            moduleName = params.pop(0)
-            resources[moduleName] = {}
-            for index in range(len(params)/2):
-                resources[moduleName][params[2*index]] = float(params[2*index+1])
-    if(pipeline_debug):        
-        print "PLACER RESOURCES: " + str(resources)
-
-    return resources
-
 # Places modules onto platforms using a programmer-supplied
 # mapping file.                                                                                             
 def placeModulesILP(moduleList, environmentGraph, moduleGraph):
