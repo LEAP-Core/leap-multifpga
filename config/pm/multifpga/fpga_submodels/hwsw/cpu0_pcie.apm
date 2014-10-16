@@ -33,23 +33,13 @@ Packagehint=leap-platforms
 
 [MultiFPGA Platform]
 File=modules/leap/build-support/project/platform-multifpga.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Platform/Requires]
-fpga_mapping=Null FPGA Mapping
 project_common=Default Hybrid Project Common Utilities
 fpgaenv=LEAP PCIE CPU0 Environment
 application_env=Soft Services Hybrid Application Environment
-environment_description=Null FPGA Environment
-
-[Null FPGA Mapping]
-File=modules/leap/build-support/project/null_mapping.awb
-Packagehint=multifpga
-
-[Null FPGA Environment]
-File=modules/leap/build-support/project/null_environment.awb
-Packagehint=multifpga
 
 [LEAP PCIE CPU0 Environment]
 File=config/pm/leap/submodels/fpgaenv/hwsw/multifpgaenv-hybrid-pcie-cpu0.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga

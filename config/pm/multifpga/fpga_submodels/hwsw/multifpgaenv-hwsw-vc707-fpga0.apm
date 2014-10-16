@@ -465,3 +465,4 @@ area_group_parser=Area Group Parser
 [Area Group Parser]
 File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
 Packagehint=leap
+
