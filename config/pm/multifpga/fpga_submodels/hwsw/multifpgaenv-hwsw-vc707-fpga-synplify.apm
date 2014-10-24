@@ -1,0 +1,442 @@
+
+[Global]
+SaveParameters=0
+Description=Uses a single sata link to communicate between FPGAs
+File=multifpgaenv-hwsw-vc707-fpga-synplify
+Version=2.2
+Type=Leap
+Name=HWSW VC707 FPGA (No Aurora) (Synplify)
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+RootName=FPGA Environment
+RootProvides=fpgaenv
+
+[Model]
+DefaultAttributes=bluespec htg-v5-jtag
+model=FPGA Environment
+
+[FPGA Environment/Requires]
+virtual_platform=LIM Compiler Standard Virtual Platform
+fpga_components=Hardware FPGA Components for Virtex 7
+librl_bsv=RL Bluespec Library Submodel
+build_pipeline=FPGA Platform Build Pipeline (HW/SW)
+soft_services=Soft Services for MultiFPGA Submodel
+
+[FPGA Environment]
+File=modules/leap/virtual-platform/fpga-environment.awb
+Packagehint=leap
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=leap-platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=leap-platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[RRR Common Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-common.awb
+Packagehint=leap
+
+[Null Remote Memory]
+File=modules/leap/virtual-platform/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=leap
+
+[RL Bluespec Library Submodel]
+File=config/pm/leap/submodels/common/librl-bsv.apm
+Packagehint=leap
+
+[Xilinx BITGEN]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
+Packagehint=leap
+
+[Xilinx LOADER]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
+Packagehint=leap
+
+[Interface builder]
+File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
+Packagehint=leap
+
+[Xilinx NGD]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-ngd.awb
+Packagehint=leap
+
+[FPGA Programming Tool]
+File=modules/leap/build-support/build-pipelines/stages/fpgaprog/fpgaprog.awb
+Packagehint=leap
+
+[Xilinx Post-synthesis Toolchain]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-post-synth.awb
+Packagehint=leap
+
+[Xilinx PAR]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-par.awb
+Packagehint=leap
+
+[Xilinx Post-synthesis Toolchain/Requires]
+xilinx_ngd=Xilinx NGD
+xilinx_bitgen=Xilinx BITGEN
+xilinx_par=Xilinx PAR
+xilinx_map=Xilinx MAP
+xilinx_loader=Xilinx LOADER
+
+[MCD Tool for Xilinx]
+File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
+Packagehint=leap
+
+[Xilinx MAP]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
+Packagehint=leap
+
+[Soft Services for MultiFPGA Submodel]
+File=config/pm/leap/submodels/common/multifpga-soft-services.apm
+Packagehint=leap-multifpga
+
+[Standard Virtual Devices Submodel]
+File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
+Packagehint=leap
+
+[BSV Build Tool (First Phase)]
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
+Packagehint=leap
+
+[Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
+Packagehint=leap
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
+Packagehint=leap-multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
+Packagehint=leap-multifpga
+
+[Xilinx DDR SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
+Packagehint=leap-platforms
+
+[Xilinx DDR SDRAM Physical Device/Requires]
+ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
+
+[BlueNoC PCIe Bridge/Requires]
+pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
+pcie_bluenoc_device=Virtex-7 PCIE Device (BlueNoC)
+
+[BlueNoC PCIe Bridge]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
+Packagehint=leap-platforms
+
+[BlueNoC PCIe Bridge Interfaces]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc-ifc.awb
+Packagehint=leap-platforms
+
+[BlueNoC PCIe Tunnel]
+File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
+Packagehint=leap
+
+[Local Memory using DDR DRAM (burst holds at least one line)]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-ddr-wide.awb
+Packagehint=leap
+
+[Little-Endian Unified Message Format/Params]
+UMF_CHUNK_BYTES=16
+
+[Global]
+SaveParameters=0
+Description=Uses a single sata link to communicate between FPGAs
+File=multifpgaenv-hwsw-vc707-fpga-synplify
+Version=2.2
+Type=Leap
+Name=HWSW VC707 FPGA (No Aurora) (Synplify)
+Class=Asim::Model
+DefaultBenchmark=
+DefaultRunOpts=
+RootName=FPGA Environment
+RootProvides=fpgaenv
+
+[Model]
+DefaultAttributes=bluespec htg-v5-jtag
+model=FPGA Environment
+
+[FPGA Environment/Requires]
+virtual_platform=LIM Compiler Standard Virtual Platform
+fpga_components=Hardware FPGA Components for Virtex 7
+librl_bsv=RL Bluespec Library Submodel
+build_pipeline=FPGA Platform Build Pipeline (HW/SW)
+soft_services=Soft Services for MultiFPGA Submodel
+
+[FPGA Environment]
+File=modules/leap/virtual-platform/fpga-environment.awb
+Packagehint=leap
+
+[Common Physical Platform Utilities]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
+Packagehint=leap-platforms
+
+[Null Physical Platform Debugger]
+File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
+Packagehint=leap-platforms
+
+[Little-Endian Unified Message Format]
+File=modules/bluespec/common/fpgaenv/virtual-platform/umf/little-endian/umf-little-endian.awb
+Packagehint=leap-platforms
+
+[RRR Common Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-common.awb
+Packagehint=leap
+
+[Null Remote Memory]
+File=modules/leap/virtual-platform/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
+Packagehint=leap
+
+[RL Bluespec Library Submodel]
+File=config/pm/leap/submodels/common/librl-bsv.apm
+Packagehint=leap
+
+[Xilinx BITGEN]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
+Packagehint=leap
+
+[Xilinx LOADER]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
+Packagehint=leap
+
+[Interface builder]
+File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
+Packagehint=leap
+
+[Xilinx NGD]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-ngd.awb
+Packagehint=leap
+
+[FPGA Programming Tool]
+File=modules/leap/build-support/build-pipelines/stages/fpgaprog/fpgaprog.awb
+Packagehint=leap
+
+[Xilinx Post-synthesis Toolchain]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-post-synth.awb
+Packagehint=leap
+
+[Xilinx PAR]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-par.awb
+Packagehint=leap
+
+[Xilinx Post-synthesis Toolchain/Requires]
+xilinx_ngd=Xilinx NGD
+xilinx_bitgen=Xilinx BITGEN
+xilinx_par=Xilinx PAR
+xilinx_map=Xilinx MAP
+xilinx_loader=Xilinx LOADER
+
+[MCD Tool for Xilinx]
+File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
+Packagehint=leap
+
+[Xilinx MAP]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-map.awb
+Packagehint=leap
+
+[Soft Services for MultiFPGA Submodel]
+File=config/pm/leap/submodels/common/multifpga-soft-services.apm
+Packagehint=leap-multifpga
+
+[Standard Virtual Devices Submodel]
+File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
+Packagehint=leap
+
+[BSV Build Tool (First Phase)/Params]
+BSC_FLAGS="-steps 10000000 +RTS -K1000M -RTS -keep-fires -aggressive-conditions -wait-for-license -no-show-method-conf -no-opt-bool -licenseWarning 7 -elab -show-schedule -verilog -show-range-conflict -remove-dollar"
+
+[BSV Build Tool (First Phase)]
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
+Packagehint=leap
+
+[Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
+Packagehint=leap
+
+[FPGAMap]
+File=modules/leap/build-support/build-pipelines/stages/parsers/map/fpgamap_parser.awb
+Packagehint=leap-multifpga
+
+[FPGA Environment Datatype]
+File=modules/leap/build-support/build-pipelines/stages/parsers/environment/fpgaenvironment.awb
+Packagehint=leap-multifpga
+
+[Xilinx DDR SDRAM Physical Device]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
+Packagehint=leap-platforms
+
+[Xilinx DDR SDRAM Physical Device/Requires]
+ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
+
+[BlueNoC PCIe Bridge/Requires]
+pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
+pcie_bluenoc_device=Virtex-7 PCIE Device (BlueNoC)
+
+[BlueNoC PCIe Bridge]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
+Packagehint=leap-platforms
+
+[BlueNoC PCIe Bridge Interfaces]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc-ifc.awb
+Packagehint=leap-platforms
+
+[BlueNoC PCIe Tunnel]
+File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
+Packagehint=leap
+
+[Local Memory using DDR DRAM (burst holds at least one line)]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-ddr-wide.awb
+Packagehint=leap
+
+[Little-Endian Unified Message Format/Params]
+UMF_CHUNK_BYTES=16
+
+[PCIe Board with DDR]
+File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/pcie-generic-platform.awb
+Packagehint=leap-platforms
+
+[PCIe Board with DDR/Requires]
+pcie_device=BlueNoC PCIe Bridge
+clocks_device=Differential Crystal Clocks Device from Wires
+physical_platform_config=VC707 Virtex-7 Platform with PCIe
+physical_platform_utils=Common Physical Platform Utilities
+ddr_sdram_device=Xilinx DDR SDRAM Physical Device
+aurora_device=Aurora Device Wrapper Null
+
+[Virtex-7 PCIE Device (BlueNoC)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/pcie-virtex7.awb
+Packagehint=leap-platforms
+
+[Hardware FPGA Components for Virtex 7]
+File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex7.awb
+Packagehint=leap-platforms
+
+[VC707 DDR3 SDRAM]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707/ddr3-sdram-device.awb
+Packagehint=leap-platforms
+
+[VC707 Virtex-7 Platform with PCIe]
+File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707/vc707-v7-pcie-dma.awb
+Packagehint=leap-platforms
+
+[LEAP LI Module Handler]
+File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
+Packagehint=leap
+
+[AWB Parameter Substitution Parser]
+File=modules/leap/build-support/build-pipelines/stages/parameter_substitution/parameter_substitution.awb
+Packagehint=leap
+
+[Synthesis library]
+File=modules/leap/build-support/build-pipelines/stages/synthesis/synthesis_library.awb
+Packagehint=leap
+
+[Low Level Platform LI/Requires]
+physical_platform=PCIe Board with DDR
+rrr=LI RRR Interface Module
+remote_memory=Null Remote Memory
+channelio=Null Channel IO Module
+physical_platform_debugger=Null Physical Platform Debugger
+local_mem=Local Memory using DDR DRAM (burst holds at least one line)
+physical_channel=BlueNoC PCIe Tunnel
+
+[Low Level Platform LI]
+File=modules/leap/virtual-platform/low-level-platform-interface/llpi-li.awb
+Packagehint=leap-multifpga
+
+[LI RRR Interface Module]
+File=modules/leap/virtual-platform/rrr/li/li-rrr.awb
+Packagehint=leap-multifpga
+
+[LI RRR Interface Module/Requires]
+rrr_common=RRR Common Module
+
+[Null Channel IO Module]
+File=modules/leap/virtual-platform/channelio/null/null-channelio.awb
+Packagehint=leap
+
+[LIM Compiler Standard Virtual Platform/Requires]
+umf=Little-Endian Unified Message Format
+platform_services=MultiFPGA Master Platform Services (LI)
+low_level_platform_interface=Low Level Platform LI
+virtual_devices=Standard Virtual Devices Submodel
+
+[LIM Compiler Standard Virtual Platform]
+File=modules/leap/virtual-platform/virtual-platform-li.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Master Platform Services (LI)]
+File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master-li.apm
+Packagehint=leap-multifpga
+
+[FPGA Platform Build Pipeline (HW/SW)/Requires]
+fpga_program_tool=FPGA Programming Tool
+li_module=LEAP LI Module Handler
+mcd_tool=MCD Tool for Xilinx
+iface_tool=Interface builder
+parameter_substitution=AWB Parameter Substitution Parser
+synthesis_tool=Synplify/XST Synthesis Tool
+bsv_tool=BSV Build Tool (First Phase)
+fpgamap_parser=FPGAMap
+fpga_environment_parser=FPGA Environment Datatype
+software_tool=Software build tool
+post_synthesis_tool=Xilinx Post-synthesis Toolchain
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+area_group_tool=Area Group Tool
+
+[Software build tool]
+File=modules/leap/build-support/build-pipelines/stages/software/software.awb
+Packagehint=leap
+
+[FPGA Platform Build Pipeline (HW/SW)]
+File=modules/leap/build-support/pipelines/hwsw/multifpga_platform/fpga-platform-build-pipeline.awb
+Packagehint=leap-multifpga
+
+[Common Physical Platform Utilities/Requires]
+physical_platform_defs=Common Physical Platform Definitions
+
+[Common Physical Platform Definitions]
+File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
+Packagehint=leap-platforms
+
+[Differential Crystal Clocks Device from Wires/Params]
+CRYSTAL_CLOCK_FREQ=200
+RESET_ACTIVE_HIGH=1
+
+[Differential Crystal Clocks Device from Wires]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-device.awb
+Packagehint=leap-platforms
+
+[Synplify/XST Synthesis Tool]
+File=modules/leap/build-support/build-pipelines/stages/synplify/synplify-sub.awb
+Packagehint=leap
+
+[Synplify/XST Synthesis Tool/Requires]
+synthesis_library=Synthesis library
+
+[Area Group Tool]
+File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
+Packagehint=leap
+
+[Area Group Tool/Requires]
+area_group_parser=Area Group Parser
+
+[Area Group Parser]
+File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
+Packagehint=leap
+
+[Area Group Tool/Params]
+ENABLE_SMART_AREA_GROUPS=0
+
+[Aurora Device Wrapper Null]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-null/aurora-device-null.awb
+Packagehint=leap-platforms
