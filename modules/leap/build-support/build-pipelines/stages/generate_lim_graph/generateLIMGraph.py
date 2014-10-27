@@ -121,9 +121,9 @@ class MultiFPGAGenerateLogfile():
 
                  compile_cmd += ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
 
-                 compile_cmd = ' cd ' + platformBuildDir + '; ' + compile_cmd
+                 compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
 
-                 # set environment for scons caching     
+                 # set environment for scons caching
                  if(moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_CACHING_GRAPH')):
                      compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name)) + ' '
 

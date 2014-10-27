@@ -80,16 +80,16 @@ class MultiFPGAGenerateBitfile():
                      if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_PROFILING_EXECUTABLE')):
                          compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_backend_'+platform.name)) + ' ' 
 
-                     compile_cmd += ' DEBUG=1' if getDebug(moduleList) else ' OPT=1'
-                     compile_cmd += ' TRACE=' + str(getTrace(moduleList))
-                     compile_cmd += ' EVENTS=' + str(getEvents(moduleList))
+                     compile_cmd += ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
 
-                 
-                 
+                 compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
+
+                 # set environment for scons caching
                  if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_EXECUTABLE')):
                      compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name)) + ' '
 
-                 compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
+                 if(self.pipeline_debug or True):
+                     print "Compile command is: " + compile_cmd + "\n"
 
                  sts = execute(compile_cmd)
                  
