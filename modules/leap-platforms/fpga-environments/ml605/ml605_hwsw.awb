@@ -1,0 +1,8 @@
+%AWB_START
+
+%name ML605 HW/SW Environment
+%desc ML605 HW/SW Environment
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC ml605-hwsw.env
+%AWB_END
