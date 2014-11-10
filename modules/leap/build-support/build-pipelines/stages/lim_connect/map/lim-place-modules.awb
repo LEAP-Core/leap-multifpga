@@ -8,5 +8,7 @@
 %scons %library placeModules.py
 
 %param --global PLACER_ALGORITHM "placeModulesILP" "Which placement function should we be calling."
+%param --global RESOURCE_UTILIZATION_THRESHOLD 0.95 "Resource utilization threshold for ILP problem"
+
 
 

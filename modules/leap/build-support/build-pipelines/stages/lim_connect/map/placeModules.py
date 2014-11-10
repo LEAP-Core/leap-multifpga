@@ -181,7 +181,9 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
                         return getColorEdge(channel.name, srcColor, color)
                     modHandle.write('\t' + " + ".join(map(defineSrcVal,edgeColorPairs[channel.name][0])) + ' = ' + getColorModule(moduleName, color) + ';\n')
 
-    thresholds = {'LUT': 0.8,'Reg': 0.8, 'BRAM': .9}
+    resource_threshold = moduleList.getAWBParam('lim_place_modules', 'RESOURCE_UTILIZATION_THRESHOLD')
+
+    thresholds = {'LUT': resource_threshold, 'Reg': resource_threshold, 'BRAM': resource_threshold}
 
     # Now we emit resource constraints. This is somewhat tied to the resource matrix :/
     for platformName in environmentGraph.getPlatformNames():
