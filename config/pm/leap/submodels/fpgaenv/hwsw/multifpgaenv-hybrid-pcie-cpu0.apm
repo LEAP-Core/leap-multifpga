@@ -74,7 +74,7 @@ Packagehint=leap
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [LEAP LI Module Handler]
 File=modules/leap/build-support/build-pipelines/stages/li_module/li_module.awb
@@ -101,7 +101,7 @@ virtual_devices=Standard Virtual Devices Submodel
 
 [LIM Compiler Standard Virtual Platform]
 File=modules/leap/virtual-platform/virtual-platform-li.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [RRR Common Module]
 File=modules/leap/virtual-platform/rrr/rrr-common/rrr-common.awb
@@ -112,7 +112,7 @@ rrr_common=RRR Common Module
 
 [LI RRR Interface Module]
 File=modules/leap/virtual-platform/rrr/li/li-rrr.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Low Level Platform LI/Requires]
 physical_platform=Dual PCIE Software Physical Platform
@@ -125,11 +125,11 @@ physical_channel=BlueNoC PCIe Tunnel
 
 [Low Level Platform LI]
 File=modules/leap/virtual-platform/low-level-platform-interface/llpi-li.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
 
 [BlueNoC PCIe Tunnel]
 File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
@@ -143,9 +143,6 @@ Packagehint=leap-platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707/vc707-v7-pcie-dma.awb
 Packagehint=leap-platforms
 
-[Virtex-7 PCIE Device (BlueNoC)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/pcie-virtex7.awb
-Packagehint=leap-platforms
 
 [BlueNoC PCIe Bridge Interfaces]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc-ifc.awb
@@ -163,11 +160,11 @@ Packagehint=leap
 
 [MultiFPGA Master Platform Services (LI)]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master-li.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Dual PCIE Software Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/pcie/dualPCIE/dual-pcie-physical-platform.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Dual PCIE Software Physical Platform/Requires]
 pcie_device=BlueNoC PCIe Bridge
@@ -189,3 +186,7 @@ physical_platform_defs=Common Physical Platform Definitions
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
 Packagehint=leap-platforms
 
+
+[Virtex-7 PCIE Device v1.07 (BlueNoC)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
+Packagehint=leap-platforms

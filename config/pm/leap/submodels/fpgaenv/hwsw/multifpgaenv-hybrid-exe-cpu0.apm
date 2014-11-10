@@ -74,7 +74,7 @@ Packagehint=leap
 
 [UNIX Communication Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/unix-communication/unix-communication-device.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
@@ -86,7 +86,7 @@ Packagehint=leap
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Simlutation Communication Device with Aurora Stack/Requires]
 aurora_flowcontrol=Aurora Device Reliable Flowcontrol
@@ -130,7 +130,7 @@ Packagehint=leap
 
 [Simulation Physical Channel]
 File=modules/leap/virtual-platform/physical-channel/sim/sim-physical-channel-software.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [LI Channel Multiplexer]
 File=modules/leap/virtual-platform/channelio/li/li-channelio.awb
@@ -144,7 +144,7 @@ virtual_devices=Standard Virtual Devices Submodel
 
 [LIM Compiler Standard Virtual Platform]
 File=modules/leap/virtual-platform/virtual-platform-li.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [RRR Common Module]
 File=modules/leap/virtual-platform/rrr/rrr-common/rrr-common.awb
@@ -155,7 +155,7 @@ rrr_common=RRR Common Module
 
 [LI RRR Interface Module]
 File=modules/leap/virtual-platform/rrr/li/li-rrr.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Low Level Platform LI/Requires]
 physical_platform=CPU0 Hybrid Physical Platform
@@ -168,7 +168,7 @@ physical_channel=MultiFPGA Combined Physical Channel
 
 [Low Level Platform LI]
 File=modules/leap/virtual-platform/low-level-platform-interface/llpi-li.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [LI Channel Multiplexer/Requires]
 li_base_types=LI Channel Base Types
@@ -182,7 +182,7 @@ Packagehint=leap
 
 [MultiFPGA Master Platform Services (LI)]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-master-li.apm
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Combined Physical Channel/Requires]
 pcie_physical_channel=BlueNoC PCIe Tunnel
@@ -190,23 +190,20 @@ sim_physical_channel=Simulation Physical Channel
 
 [BlueNoC PCIe Tunnel]
 File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel-software.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [MultiFPGA Combined Physical Channel]
 File=modules/leap/virtual-platform/physical-channel/combined/combined-physical-channel.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
 Packagehint=leap-platforms
 
-[Virtex-7 PCIE Device (BlueNoC)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/pcie-virtex7.awb
-Packagehint=leap-platforms
 
 [BlueNoC PCIe Bridge Interfaces]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc-ifc.awb
@@ -221,7 +218,7 @@ unix_pipe_device=UNIX Pipe Physical Device
 
 [CPU0 Hybrid Physical Platform]
 File=modules/bluespec/common/fpgaenv/physical-platform/simulation/li/cpu0/physical-platform-cpu0.awb
-Packagehint=multifpga
+Packagehint=leap-multifpga
 
 [Software build tool/Params]
 DUMP_LIM_GRAPH=1
@@ -235,4 +232,8 @@ Packagehint=leap-platforms
 
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
+Packagehint=leap-platforms
+
+[Virtex-7 PCIE Device v1.07 (BlueNoC)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
 Packagehint=leap-platforms

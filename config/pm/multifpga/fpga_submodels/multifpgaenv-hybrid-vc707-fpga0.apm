@@ -171,7 +171,7 @@ ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
@@ -368,7 +368,7 @@ ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
@@ -413,9 +413,6 @@ aurora_device=Aurora Device Wrapper VC707
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707/aurora-device-vc707.awb
 Packagehint=leap-platforms
 
-[Virtex-7 PCIE Device (BlueNoC)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/pcie-virtex7.awb
-Packagehint=leap-platforms
 
 [Hardware FPGA Components for Virtex 7]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex7.awb
@@ -515,5 +512,7 @@ area_group_parser=Area Group Parser
 File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
 Packagehint=leap
 
-[Area Group Tool/Params]
-ENABLE_SMART_AREA_GROUPS=0
+
+[Virtex-7 PCIE Device v1.07 (BlueNoC)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
+Packagehint=leap-platforms
