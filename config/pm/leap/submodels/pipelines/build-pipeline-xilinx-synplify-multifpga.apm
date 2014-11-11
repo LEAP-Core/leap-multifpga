@@ -1,11 +1,11 @@
 
 [Global]
 SaveParameters=0
-Description=FPGA Platform Build Pipeline Xilinx (Legacy)
-File=build-pipeline-xilinx-multifpga
+Description=FPGA Platform Build Pipeline Xilinx (Legacy) (Synplify)
+File=build-pipeline-xilinx-synplify-multifpga
 Version=2.2
 Type=HAsim
-Name=FPGA Platform Build Pipeline Xilinx (Legacy) 
+Name=FPGA Platform Build Pipeline Xilinx (Legacy) (Synplify)
 Class=Asim::Model
 DefaultBenchmark=
 DefaultRunOpts=
@@ -63,10 +63,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
 Packagehint=leap
 
-[XST Synthesis Tool]
-File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-xst.awb
-Packagehint=leap
-
 [BSV Build Tool (First Phase)]
 File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
 Packagehint=leap
@@ -82,9 +78,6 @@ Packagehint=leap
 [Synthesis library]
 File=modules/leap/build-support/build-pipelines/stages/synthesis/synthesis_library.awb
 Packagehint=leap
-
-[XST Synthesis Tool/Requires]
-synthesis_library=Synthesis library
 
 [Xilinx LOADER (ISE/Impact)]
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
@@ -105,7 +98,7 @@ mcd_tool=MCD Tool for Xilinx
 iface_tool=Interface builder
 area_group_tool=Area Group Tool
 parameter_substitution=AWB Parameter Substitution Parser
-synthesis_tool=XST Synthesis Tool
+synthesis_tool=Synplify/XST Synthesis Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
@@ -127,3 +120,10 @@ Packagehint=leap-multifpga
 
 [Area Group Tool/Requires]
 area_group_parser=Area Group Parser
+
+[Synplify/XST Synthesis Tool]
+File=modules/leap/build-support/build-pipelines/stages/synplify/synplify-sub.awb
+Packagehint=leap
+
+[Synplify/XST Synthesis Tool/Requires]
+synthesis_library=Synthesis library
