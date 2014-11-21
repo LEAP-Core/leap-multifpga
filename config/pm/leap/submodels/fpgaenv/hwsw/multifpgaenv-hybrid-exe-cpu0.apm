@@ -123,6 +123,8 @@ aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
 li_module=LEAP LI Module Handler
 software_tool=Software build tool
 iface_tool=Interface builder
+wrapper_gen_tool=Synthesis Boundary Wrapper generation tool
+bsv_tool=BSV Build Tool (First Phase)
 
 [LEAP Software Build Pipeline]
 File=modules/leap/build-support/build-pipelines/pipelines/software/sw-build-pipeline.awb
@@ -204,7 +206,6 @@ pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
 Packagehint=leap-platforms
 
-
 [BlueNoC PCIe Bridge Interfaces]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc-ifc.awb
 Packagehint=leap-platforms
@@ -237,3 +238,11 @@ Packagehint=leap-platforms
 [Virtex-7 PCIE Device v1.07 (BlueNoC)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
 Packagehint=leap-platforms
+
+[Synthesis Boundary Wrapper generation tool]
+File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
+Packagehint=leap
+
+[BSV Build Tool (First Phase)]
+File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
+Packagehint=leap
