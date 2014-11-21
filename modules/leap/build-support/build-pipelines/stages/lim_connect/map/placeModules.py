@@ -197,7 +197,7 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
             for resourceCandidate in resources[platformModuleName]:
                 #The following line is a kind of hack. 
                 match = re.match('^Total(.*)',resourceCandidate)
-                if(match):
+                if(match and (match.group(1) in thresholds)):
                     # we found a resource class that this platform cares about.
                     resourceClass = match.group(1)
                     constraints = []
