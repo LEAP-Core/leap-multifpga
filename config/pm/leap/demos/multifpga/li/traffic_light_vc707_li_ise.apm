@@ -1,0 +1,57 @@
+
+[Global]
+SaveParameters=0
+Description=A basic smoke test for the LIM compiler
+File=traffic_light_vc707_li_ise
+Version=2.2
+Name=Traffic Light Model - Exe with synthesis boundary
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[Traffic Light System with Soft Connections]
+File=modules/leap/examples/traffic-light/traffic-light-system.awb
+Packagehint=leap
+
+[Default Software Connected Application]
+File=modules/leap/build-support/project/application-env/soft-services/default-sw/connected-application-default-sw.awb
+Packagehint=leap
+
+[Traffic Light System with Soft Connections/Requires]
+traffic_light_function=Traffic light function w. synthesis boundary
+
+[Default Software Connected Application/Requires]
+hardware_system=Traffic Light System with Soft Connections
+
+[Traffic light function w. synthesis boundary]
+File=modules/leap/examples/traffic-light/traffic-light-function/traffic-light-function-smart-synth-boundary.awb
+Packagehint=leap
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=Default Software Connected Application
+environment_description=VC707 HW/SW Environment (Legacy ISE)
+build_pipeline=LIM Compiler Pipeline
+fpga_mapping=Null FPGA Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=leap-multifpga
+
+[LIM Compiler Pipeline]
+File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
+Packagehint=leap-multifpga
+
+[Null FPGA Mapping]
+File=modules/leap/build-support/project/null_mapping.awb
+Packagehint=leap-multifpga
+
+[VC707 HW/SW Environment (Legacy ISE)]
+File=modules/leap-platforms/fpga-environments/vc707/vc707_hwsw_ise.awb
+Packagehint=leap-multifpga
