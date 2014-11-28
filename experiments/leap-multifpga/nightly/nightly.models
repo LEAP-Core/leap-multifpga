@@ -11,5 +11,7 @@ alpha_li_dual                 config/pm/leap/demos/multifpga/li/hasim_test_dual_
 alpha_li_single_pipe          config/pm/leap/demos/multifpga/li/hasim_test_dual_sim_single_pipe.apm         --timeout=3600
 hello_vexe_li                 config/pm/leap/demos/hello/hello_hybrid_vexe_li.apm                           --timeout=3600 
 hello_exe_li                  config/pm/leap/demos/hello/hello_hybrid_exe_li.apm                            --timeout=3600 
+traffic_light_li_vivado       config/pm/leap/demos/multifpga/li/traffic_light_vc707_li.apm                  --fakestats
+traffic_light_li_ise          config/pm/leap/demos/multifpga/li/traffic_light_vc707_li_ise.apm              --fakestats
 
 
