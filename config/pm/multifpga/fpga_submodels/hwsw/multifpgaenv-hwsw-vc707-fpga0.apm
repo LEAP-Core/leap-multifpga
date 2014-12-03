@@ -55,10 +55,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
 Packagehint=leap
 
-[Xilinx LOADER]
-File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
-Packagehint=leap
-
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
 Packagehint=leap
@@ -84,7 +80,7 @@ xilinx_ngd=Xilinx NGD
 xilinx_bitgen=Xilinx BITGEN
 xilinx_par=Xilinx PAR
 xilinx_map=Xilinx MAP
-xilinx_loader=Xilinx LOADER
+xilinx_loader=Xilinx LOADER (ISE/Impact)
 
 [MCD Tool for Xilinx]
 File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
@@ -208,9 +204,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
 Packagehint=leap
 
-[Xilinx LOADER]
-File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
-Packagehint=leap
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
@@ -237,7 +230,7 @@ xilinx_ngd=Xilinx NGD
 xilinx_bitgen=Xilinx BITGEN
 xilinx_par=Xilinx PAR
 xilinx_map=Xilinx MAP
-xilinx_loader=Xilinx LOADER
+xilinx_loader=Xilinx LOADER (ISE/Impact)
 
 [MCD Tool for Xilinx]
 File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
@@ -327,7 +320,6 @@ aurora_device=Aurora Device Wrapper VC707
 [Aurora Device Wrapper VC707]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707/aurora-device-vc707.awb
 Packagehint=leap-platforms
-
 
 [Hardware FPGA Components for Virtex 7]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex7.awb
@@ -463,7 +455,10 @@ area_group_parser=Area Group Parser
 File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
 Packagehint=leap
 
-
 [Virtex-7 PCIE Device v1.07 (BlueNoC)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
 Packagehint=leap-platforms
+
+[Xilinx LOADER (ISE/Impact)]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
+Packagehint=leap
