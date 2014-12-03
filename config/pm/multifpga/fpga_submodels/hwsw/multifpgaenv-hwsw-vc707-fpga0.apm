@@ -204,7 +204,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
 Packagehint=leap
 
-
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
 Packagehint=leap
