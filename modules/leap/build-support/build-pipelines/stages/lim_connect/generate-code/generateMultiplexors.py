@@ -2,13 +2,8 @@
 import re
 import sys
 
-# AWB dependencies
-from model import  *
-from li_module import *
-
-
 # local files
-from routerStats import *
+from routerStats import RouterStats
 
 
 def generateEgressMultiplexorMultiple(platform, targetPlatform, packPulseWires, moduleList, environmentGraph, platformGraph): 

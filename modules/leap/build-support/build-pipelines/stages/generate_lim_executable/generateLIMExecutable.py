@@ -1,11 +1,13 @@
+import os
+import subprocess
 import re
 import sys
 import SCons.Script
 
-from lim_graph_generator import *
-from fpga_environment_parser import *
-from fpgamap_parser import *
-from model import  *
+import model
+import lim_graph_generator
+from fpga_environment_parser import parseFPGAEnvironment
+from fpgamap_parser import parseFPGAMap
 
 def makePlatformBitfileName(name, apm):
     return name +'_'+ apm + '_multifpga_bitfile'
@@ -14,7 +16,7 @@ class MultiFPGAGenerateBitfile():
 
     def __init__(self, moduleList):
 
-        self.pipeline_debug = getBuildPipelineDebug(moduleList)
+        self.pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
         def makePlatformConfigPath(name):
             config_dir = 'multi_fpga/apm-local/'
@@ -91,7 +93,7 @@ class MultiFPGAGenerateBitfile():
                  if(self.pipeline_debug or True):
                      print "Compile command is: " + compile_cmd + "\n"
 
-                 sts = execute(compile_cmd)
+                 sts = model.execute(compile_cmd)
                  
                  return sts
              return compile_platform_executable
@@ -200,7 +202,7 @@ class MultiFPGAGenerateBitfile():
             awbBatchHandle.write(' configure model ' + platformPath + ' --builddir ' + platformBuildDir + '\n')
             awbBatchHandle.close()
 
-            call(['awb-shell', '--file', awbBatchFile]) 
+            subprocess.call(['awb-shell', '--file', awbBatchFile]) 
 
             # set up the symlinks to missing dictionaries- they are broken
             # at first, but as we fill in the platforms, they'll come up
@@ -211,7 +213,7 @@ class MultiFPGAGenerateBitfile():
                     dictPath = os.path.realpath(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict])
                     linkDir  = makePlatformDictDir(platform.name)  
                     linkPath = linkDir  + '/' + dict
-                    relDictPath = relpath(dictPath, linkDir)
+                    relDictPath = os.path.relpath(dictPath, linkDir)
                     if(os.path.lexists(linkPath)):
                         os.remove(linkPath)
                     
@@ -231,7 +233,7 @@ class MultiFPGAGenerateBitfile():
                     linkDir = os.path.dirname(linkPath)
                     if(not os.path.exists(linkDir)):
                         os.makedirs(linkDir)
-                    os.symlink(relpath(rrrPath, linkDir), linkPath)
+                    os.symlink(os.path.relpath(rrrPath, linkDir), linkPath)
                   
             strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMBaseName + '.str'
 
@@ -245,7 +247,7 @@ class MultiFPGAGenerateBitfile():
             moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] += [subbuild] 
 
         paramsSet = moduleList.topModule.moduleDependency['CANONICAL_PARAMS'][0]
-        writeDynamicParameters(self.environment, makePlatformBuildDir, paramsSet) 
+        lim_graph_generator.writeDynamicParameters(self.environment, makePlatformBuildDir, paramsSet) 
                
         # END for platform
         configFile.write('platforms=['+ ",".join(platformMetadata) +']\n')

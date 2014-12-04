@@ -1,5 +1,5 @@
 # python libraries
-
+import os
 import re
 import sys
 import SCons.Script
@@ -8,22 +8,16 @@ import itertools
 import cPickle as pickle
 
 # AWB dependencies
-from model import  *
-from fpga_environment_parser import *
-from type_parser import *
-from lim_executable_generator import *
-from lim_graph_generator import *
-from li_module import *
-from lim_generate_code import *
-from lim_common import *
-from lim_compression import *
-from lim_analyze_network import *
-from lim_place_modules import *
-from lim_backend_builds import *
-
-# dependencies from our package 
-from activity import *
-
+import model
+from fpga_environment_parser import parseFPGAEnvironment
+from li_module import LIChannel
+import lim_executable_generator
+import lim_graph_generator
+import lim_connect
+import lim_place_modules
+import lim_analyze_network
+import lim_generate_code
+import lim_backend_builds
 
 class MultiFPGAConnect():
 
@@ -34,7 +28,7 @@ class MultiFPGAConnect():
             if not os.path.exists(config_dir): os.makedirs(config_dir)
             return config_dir + name
 
-        self.pipeline_debug = getBuildPipelineDebug(moduleList)
+        self.pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
         self.unique = 0;
         self.moduleList = moduleList
@@ -55,13 +49,13 @@ class MultiFPGAConnect():
         for platformName in self.environment.getPlatformNames():
         # these defs are copied from a previous tool.  refactor
             platform = self.environment.getPlatform(platformName)
-            platformLogAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
-            platformLogPath = makePlatformConfigPath(makePlatformLogName(platform.name,APM_NAME))
-            platformLogBuildDir = 'multi_fpga/' + makePlatformLogName(platform.name,APM_NAME) + '/pm'
+            platformLogAPMName = lim_graph_generator.makePlatformLogName(platform.name,APM_NAME) + '.apm'
+            platformLogPath = makePlatformConfigPath(lim_graph_generator.makePlatformLogName(platform.name,APM_NAME))
+            platformLogBuildDir = 'multi_fpga/' + lim_graph_generator.makePlatformLogName(platform.name,APM_NAME) + '/pm'
 
-            platformBitfileAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
-            platformBitfilePath = makePlatformConfigPath(makePlatformBitfileName(platform.name,APM_NAME))
-            platformBitfileBuildDir = 'multi_fpga/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
+            platformBitfileAPMName = lim_executable_generator.makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
+            platformBitfilePath = makePlatformConfigPath(lim_executable_generator.makePlatformBitfileName(platform.name,APM_NAME))
+            platformBitfileBuildDir = 'multi_fpga/' + lim_executable_generator.makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
 
             parameterFile = '?'
             
@@ -121,8 +115,10 @@ class MultiFPGAConnect():
 
             #     def __init__(self, sc_type, raw_type, module_idx, name,           optional, bitwidth, module_name, type_structure):
             newSink = LIChannel("Recv", src.raw_type, -1, 
-                                src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop, 
-                                "False", src.bitwidth, "RouteThrough", src.type_structure)
+                                src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop,
+                                "False", src.bitwidth,
+                                "RouteThrough", "RouteThrough",
+                                src.type_structure)
             newSink.activity = sink.activity
             newSink.attributes['ROUTE_THROUGH'] = True 
             newSink.module_name = hop
@@ -130,8 +126,10 @@ class MultiFPGAConnect():
             sinks.append(platformGraph.modules[hop].addChannel(newSink))
 
             newSrc = LIChannel("Send", src.raw_type, -1, 
-                               src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop, 
-                               "False", src.bitwidth, "RouteThrough", src.type_structure)
+                               src.name + "RoutethroughFrom_" + src.platform() + "_To_" + sink.platform() + "_Via" + hop,
+                               "False", src.bitwidth,
+                               "RouteThrough", "RouteThrough",
+                               src.type_structure)
             newSrc.activity = src.activity
             newSrc.attributes['ROUTE_THROUGH'] = True 
             newSrc.module_name = hop
@@ -146,7 +144,7 @@ class MultiFPGAConnect():
         # We need to fix the srcs and sinks to point to one another Note
         # that chains and send/recv route-throughs are different.
         for pair in zip(srcs,sinks):
-            if(isinstance(pair[0],LIChannel)):
+            if (isinstance(pair[0], LIChannel)):
                 pair[0].partnerChannel = pair[1]
                 pair[0].partnerModule = pair[1].module
                 pair[0].matched = True
@@ -154,7 +152,7 @@ class MultiFPGAConnect():
                 pair[0].sinkPartnerChain = pair[1]
                 pair[0].sinkPartnerModule = pair[1].module
                          
-            if(isinstance(pair[1],LIChannel)):
+            if (isinstance(pair[1], LIChannel)):
                 pair[1].partnerChannel = pair[0]
                 pair[1].partnerModule = pair[0].module                    
                 pair[1].matched = True
@@ -206,30 +204,30 @@ class MultiFPGAConnect():
         if(self.pipeline_debug):
             print "Module Graph: " + str(moduleGraph) + "\n"
   
-        assignActivity(self.moduleList, moduleGraph)
+        lim_connect.assignActivity(self.moduleList, moduleGraph)
 
         # Assign modules to platforms.  This yields the platformGraph, a
         # view in which all LIMs have been assigned a platform.
-        platformGraph = placeModules(self.moduleList, environmentGraph, moduleGraph)
+        platformGraph = lim_place_modules.placeModules(self.moduleList, environmentGraph, moduleGraph)
 
-        assignActivity(self.moduleList, platformGraph)
+        lim_connect.assignActivity(self.moduleList, platformGraph)
 
         # Route LI channels between platforms.      
         self.routeConnections(platformGraph)
 
         # Apply compression here. 
 
-        analyzeNetwork(self.moduleList, environmentGraph, platformGraph)
+        lim_analyze_network.analyzeNetwork(self.moduleList, environmentGraph, platformGraph)
  
         if(self.pipeline_debug):
             print "Platform Graph: " + str(platformGraph) + "\n"
 
-        generateCode(self.moduleList,environmentGraph, platformGraph)
+        lim_generate_code.generateCode(self.moduleList,environmentGraph, platformGraph)
 
         # Build backend flow using object code created during the
         # first pass. The module graph is needed here because it
         # contains the object code from the first pass. 
-        constructBackendBuilds(self.moduleList, environmentGraph, platformGraph, moduleGraph)
+        lim_backend_builds.constructBackendBuilds(self.moduleList, environmentGraph, platformGraph, moduleGraph)
 
 
     # Constructs a graph representation of the complete LI program.
@@ -244,7 +242,7 @@ class MultiFPGAConnect():
         # I could also just use the PLATFORM_LIs
         for platformName in environmentGraph.getPlatformNames():          
             #open up pickles
-            picklePath = makePlatformLogBuildDir(platformName,APM_NAME) + '/' + makePlatformLogName(platformName,APM_NAME) + '.li'
+            picklePath = lim_graph_generator.makePlatformLogBuildDir(platformName,APM_NAME) + '/' + lim_graph_generator.makePlatformLogName(platformName,APM_NAME) + '.li'
             pickleHandle = open(picklePath, 'rb')
             subordinateGraphs.append(pickle.load(pickleHandle))
             pickleHandle.close()

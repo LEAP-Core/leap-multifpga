@@ -1,7 +1,7 @@
 import sys
 import math
 
-from model import  *
+import model
 
 class UMFType():
   #GENERIC_UMF_PACKET_HEADER#(`UMF_CHANNEL_ID_BITS,`UMF_SERVICE_ID_BITS,`UMF_METHOD_ID_BITS,`UMF_MSG_LENGTH_BITS,`UMF_PHY_CHANNEL_RESERVED_BITS,UMF_PACKET_HEADER_FILLER_BITS)
@@ -65,7 +65,7 @@ def generateRouterTypes(moduleList, viaWidth, viaLinks, maxWidth, ENABLE_AGRESSI
     if(USE_DEFAULT_UMF_PARAMETERS is None):
         USE_DEFAULT_UMF_PARAMETERS = moduleList.getAWBParam('lim_common', 'USE_DEFAULT_UMF_PARAMETERS')
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
     #Should we do whatever umf tells us?
     if(USE_DEFAULT_UMF_PARAMETERS):      

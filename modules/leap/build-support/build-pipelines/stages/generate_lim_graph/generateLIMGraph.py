@@ -1,13 +1,14 @@
 import os
 import sys
 import re
+import subprocess
+from subprocess import Popen, PIPE, STDOUT
+
 import SCons.Script
-from model import  *
-from fpga_environment_parser import *
-from subprocess import call
-from subprocess import Popen
-from subprocess import PIPE
-from subprocess import STDOUT
+
+import model
+from model import Module
+from fpga_environment_parser import parseFPGAEnvironment
 
 # Dynamic parameters are global, and each platform may have a few
 # dynamic parameters.  First we read in the dynamic parameters of
@@ -51,7 +52,7 @@ class MultiFPGAGenerateLogfile():
 
     def __init__(self, moduleList):
 
-        self.pipeline_debug = getBuildPipelineDebug(moduleList)
+        self.pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
         APM_FILE = moduleList.env['DEFS']['APM_FILE']
         APM_NAME = moduleList.env['DEFS']['APM_NAME']
@@ -94,7 +95,7 @@ class MultiFPGAGenerateLogfile():
 
         awbBatchHandle.close()
 
-        call(['awb-shell', '--file', awbBatchFile]) 
+        subprocess.call(['awb-shell', '--file', awbBatchFile]) 
 
         def compile_closure(platform, enableCache):
              
@@ -130,7 +131,7 @@ class MultiFPGAGenerateLogfile():
                  if(self.pipeline_debug or True):
                      print "Compile command is: " + compile_cmd + "\n"
 
-                 sts = execute(compile_cmd)
+                 sts = model.execute(compile_cmd)
 
                  if(self.pipeline_debug):
                      print "tool.py: dead in call platform log" + platform.name
@@ -156,7 +157,7 @@ class MultiFPGAGenerateLogfile():
                 print "leap-configure --pythonize " +  platform.path
 
             rawDump = Popen(["leap-configure", "--pythonize", "--silent", platform.path], stdout=PIPE ).communicate()[0]
-            moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName] = ModuleList(moduleList.env, eval(rawDump), moduleList.arguments, "")
+            moduleList.topModule.moduleDependency['PLATFORM_HIERARCHIES'][platformName] = model.ModuleList(moduleList.env, eval(rawDump), moduleList.arguments, "")
             
         # check that all same named file are the same.  Then we can blindly copy all files to all directories and life will be good. 
         # once that's done, we still need to tell the child about these extra dicts. 
@@ -239,9 +240,9 @@ class MultiFPGAGenerateLogfile():
           relativeAPMPath = os.path.relpath(platformAPMPath, makePlatformConfigPath("")) 
           linkAPMPath = makePlatformConfigPath(platform.getAPMName())
 
-          execute('ln -s  ' + relativeAPMPath + ' ' + linkAPMPath)
+          model.execute('ln -s  ' + relativeAPMPath + ' ' + linkAPMPath)
           
-          execute('asim-shell --batch cp ' + platform.path +" "+ platformPath) 
+          model.execute('asim-shell --batch cp ' + platform.path +" "+ platformPath) 
           # We only need to build the application once for each platform type.
           # The second leg of the or statement deals with legacy platforms which have a master.
           doCache = False
@@ -249,7 +250,7 @@ class MultiFPGAGenerateLogfile():
               doCache = True
               platformBindings[platform.platformType] = platformName
               awbBatchHandle.write('replace module ' + platformPath + ' ' + applicationPath + '\n')
-              #execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
+              #model.execute('asim-shell --batch replace module ' + platformPath + ' ' + applicationPath)
 
               if(self.pipeline_debug):
                   print "Platform binding for " + platform.platformType + " is " + platformName
@@ -331,7 +332,7 @@ class MultiFPGAGenerateLogfile():
           awbBatchHandle.write('configure model ' + platformPath + ' --builddir ' + platformBuildDir + '\n')
 
           awbBatchHandle.close()
-          call(['awb-shell', '--file', awbBatchFile]) 
+          subprocess.call(['awb-shell', '--file', awbBatchFile]) 
           # TODO: Refactor me!
           # set up the symlinks to missing dictionaries- they aree broken
           # at first, but as we fill in the platforms, they'll come up
@@ -342,7 +343,7 @@ class MultiFPGAGenerateLogfile():
                   dictPath = os.path.realpath(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict])
                   linkDir  = makePlatformDictDir(platform.name)  
                   linkPath = linkDir  + '/' + dict
-                  relDictPath = relpath(dictPath, linkDir)
+                  relDictPath = os.path.relpath(dictPath, linkDir)
                   if(self.pipeline_debug):
                       print "missing link: " + linkPath + ' -> ' + relDictPath
 
@@ -369,7 +370,7 @@ class MultiFPGAGenerateLogfile():
                   if(not os.path.exists(linkDir)):
                       os.makedirs(linkDir)
 
-                  os.symlink(relpath(rrrpath, linkDir), linkPath)
+                  os.symlink(os.path.relpath(rrrpath, linkDir), linkPath)
               
 
           platformLI = platformBuildDir + '/' + platformAPM +  '.li'
