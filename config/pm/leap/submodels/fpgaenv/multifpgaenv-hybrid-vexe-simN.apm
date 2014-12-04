@@ -198,5 +198,3 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
 Packagehint=leap
 
-[Area Group Tool/Params]
-ENABLE_SMART_AREA_GROUPS=0
