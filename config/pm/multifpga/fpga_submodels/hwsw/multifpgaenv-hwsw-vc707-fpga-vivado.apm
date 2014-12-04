@@ -318,7 +318,7 @@ li_module=LEAP LI Module Handler
 mcd_tool=MCD Tool for Xilinx
 iface_tool=Interface builder
 parameter_substitution=AWB Parameter Substitution Parser
-synthesis_tool=Generic Synplify Synthesis Tool
+synthesis_tool=Vivado Synthesis Tool
 bsv_tool=BSV Build Tool (First Phase)
 fpgamap_parser=FPGAMap
 fpga_environment_parser=FPGA Environment Datatype
@@ -380,9 +380,9 @@ Packagehint=leap
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_10/pcie-virtex7.awb
 Packagehint=leap-platforms
 
-[Generic Synplify Synthesis Tool]
-File=modules/leap/build-support/build-pipelines/stages/synplify/synplify-functional.awb
-Packagehint=leap
-
-[Generic Synplify Synthesis Tool/Requires]
+[Vivado Synthesis Tool/Requires]
 synthesis_library=Synthesis library
+
+[Vivado Synthesis Tool]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/vivado/synthesis/vivado-synthesis.awb
+Packagehint=leap
