@@ -131,7 +131,7 @@ Packagehint=leap-multifpga
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.10 (BlueNoC)
 
 [BlueNoC PCIe Tunnel]
 File=modules/leap/virtual-platform/physical-channel/pcie/bluenoc/pcie-bluenoc-physical-channel.awb
@@ -187,9 +187,6 @@ physical_platform_defs=Common Physical Platform Definitions
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/physical-defs.awb
 Packagehint=leap-platforms
 
-[Virtex-7 PCIE Device v1.07 (BlueNoC)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
-Packagehint=leap-platforms
 
 [BSV Build Tool (First Phase)]
 File=modules/leap/build-support/build-pipelines/stages/bluespec/bsv.awb
@@ -198,3 +195,7 @@ Packagehint=leap
 [Synthesis Boundary Wrapper generation tool]
 File=modules/leap/build-support/build-pipelines/stages/wrapper_gen/synthesis_boundary_wrapper_gen.awb
 Packagehint=leap
+
+[Virtex-7 PCIE Device v1.10 (BlueNoC)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_10/pcie-virtex7.awb
+Packagehint=leap-platforms

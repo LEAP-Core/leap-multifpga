@@ -25,12 +25,12 @@ from lim_backend_builds import *
 from activity import *
 
 
-class MultiFPGAConnect():
+class LIMConnect():
 
     def __init__(self, moduleList):
 
         def makePlatformConfigPath(name):
-            config_dir = 'multi_fpga/apm-local/'
+            config_dir = 'lim/apm-local/'
             if not os.path.exists(config_dir): os.makedirs(config_dir)
             return config_dir + name
 
@@ -57,11 +57,11 @@ class MultiFPGAConnect():
             platform = self.environment.getPlatform(platformName)
             platformLogAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
             platformLogPath = makePlatformConfigPath(makePlatformLogName(platform.name,APM_NAME))
-            platformLogBuildDir = 'multi_fpga/' + makePlatformLogName(platform.name,APM_NAME) + '/pm'
+            platformLogBuildDir = 'lim/' + makePlatformLogName(platform.name,APM_NAME) + '/pm'
 
             platformBitfileAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
             platformBitfilePath = makePlatformConfigPath(makePlatformBitfileName(platform.name,APM_NAME))
-            platformBitfileBuildDir = 'multi_fpga/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
+            platformBitfileBuildDir = 'lim/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
 
             parameterFile = '?'
             

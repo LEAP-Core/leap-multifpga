@@ -55,9 +55,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
 Packagehint=leap
 
-[Xilinx LOADER]
-File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
-Packagehint=leap
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
@@ -84,7 +81,7 @@ xilinx_ngd=Xilinx NGD
 xilinx_bitgen=Xilinx BITGEN
 xilinx_par=Xilinx PAR
 xilinx_map=Xilinx MAP
-xilinx_loader=Xilinx LOADER
+xilinx_loader=Xilinx LOADER (ISE/Impact)
 
 [MCD Tool for Xilinx]
 File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
@@ -127,7 +124,7 @@ ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.10 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
@@ -209,8 +206,6 @@ File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
 Packagehint=leap
 
 [Xilinx LOADER]
-File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
-Packagehint=leap
 
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
@@ -237,7 +232,7 @@ xilinx_ngd=Xilinx NGD
 xilinx_bitgen=Xilinx BITGEN
 xilinx_par=Xilinx PAR
 xilinx_map=Xilinx MAP
-xilinx_loader=Xilinx LOADER
+xilinx_loader=Xilinx LOADER (ISE/Impact)
 
 [MCD Tool for Xilinx]
 File=modules/leap/build-support/build-pipelines/stages/mcd/mcd-tcl.awb
@@ -283,7 +278,7 @@ ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.10 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
@@ -327,7 +322,6 @@ aurora_device=Aurora Device Wrapper VC707
 [Aurora Device Wrapper VC707]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-device-vc707/aurora-device-vc707.awb
 Packagehint=leap-platforms
-
 
 [Hardware FPGA Components for Virtex 7]
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex7.awb
@@ -464,6 +458,10 @@ File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-gr
 Packagehint=leap
 
 
-[Virtex-7 PCIE Device v1.07 (BlueNoC)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
+[Virtex-7 PCIE Device v1.10 (BlueNoC)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_10/pcie-virtex7.awb
 Packagehint=leap-platforms
+
+[Xilinx LOADER (ISE/Impact)]
+File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-loader.awb
+Packagehint=leap

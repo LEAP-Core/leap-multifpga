@@ -8,9 +8,9 @@ from lim_executable_generator import  *
 
 class Build(ProjectDependency):
     def __init__(self, moduleList):
-        MultiFPGAGenerateLogfile(moduleList)
-        MultiFPGAConnect(moduleList)
-        MultiFPGAGenerateBitfile(moduleList)
+        GenerateLIMGraph(moduleList)
+        LIMConnect(moduleList)
+        GenerateLIMExecutable(moduleList)
 
 
 

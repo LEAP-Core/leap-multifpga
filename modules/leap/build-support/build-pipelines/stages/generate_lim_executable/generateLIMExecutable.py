@@ -8,16 +8,16 @@ from fpgamap_parser import *
 from model import  *
 
 def makePlatformBitfileName(name, apm):
-    return name +'_'+ apm + '_multifpga_bitfile'
+    return name +'_'+ apm + '_lim_bitfile'
 
-class MultiFPGAGenerateBitfile():
+class GenerateLIMExecutable():
 
     def __init__(self, moduleList):
 
         self.pipeline_debug = getBuildPipelineDebug(moduleList)
 
         def makePlatformConfigPath(name):
-            config_dir = 'multi_fpga/apm-local/'
+            config_dir = 'lim/apm-local/'
             if not os.path.exists(config_dir): os.makedirs(config_dir)
             return config_dir + name
 
@@ -25,18 +25,18 @@ class MultiFPGAGenerateBitfile():
         # looks a lot like the log file generation, but with different params.  We should refactor
         APM_FILE = moduleList.env['DEFS']['APM_FILE']
         APM_NAME = moduleList.env['DEFS']['APM_NAME']
-        applicationRootName = APM_NAME  + '_mutlifpga_connected_application'
+        applicationRootName = APM_NAME  + '_lim_connected_application'
         applicationName = applicationRootName + '.apm'
         applicationPath =  makePlatformConfigPath(applicationName)
-        mappingRootName = APM_NAME  + '_mutlifpga_mapping'
+        mappingRootName = APM_NAME  + '_lim_mapping'
         mappingName = mappingRootName + '.apm'
         mappingPath =  makePlatformConfigPath(mappingName)
-        environmentRootName = APM_NAME  + '_multifpga_environment'
+        environmentRootName = APM_NAME  + '_lim_environment'
         environmentName = environmentRootName + '.apm'
         environmentPath =  makePlatformConfigPath(environmentName)
 
         def makePlatformBuildDir(name):
-            return 'multi_fpga/' + makePlatformBitfileName(name,APM_NAME) + '/pm'
+            return 'lim/' + makePlatformBitfileName(name,APM_NAME) + '/pm'
 
         def makePlatformDictDir(name):
             return makePlatformBuildDir(name) + '/iface/src/dict'

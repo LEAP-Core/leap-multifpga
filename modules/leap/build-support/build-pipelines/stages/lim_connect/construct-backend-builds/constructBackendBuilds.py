@@ -26,7 +26,7 @@ def constructBackendBuilds(moduleList, environmentGraph, platformGraph, moduleGr
     for platformName in platformGraph.modules:
 
         APM_NAME = moduleList.env['DEFS']['APM_NAME']
-        platformBitfileBuildDir = 'multi_fpga/' + makePlatformBitfileName(platformName,APM_NAME) + '/pm/'
+        platformBitfileBuildDir = 'lim/' + makePlatformBitfileName(platformName,APM_NAME) + '/pm/'
         liFile = platformBitfileBuildDir + '/lim.li'
 
 

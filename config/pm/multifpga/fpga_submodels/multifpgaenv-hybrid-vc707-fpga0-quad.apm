@@ -87,16 +87,6 @@ physical_channel=BlueNoC PCIe Tunnel
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
-
-
-
-
-
-
-
-
-
-
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=leap-multifpga
@@ -109,10 +99,6 @@ Packagehint=leap-multifpga
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
 
-
-
-
-
 [Xilinx DDR SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
 Packagehint=leap-platforms
@@ -122,7 +108,7 @@ ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.10 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
@@ -142,7 +128,6 @@ Packagehint=leap
 
 [Little-Endian Unified Message Format/Params]
 UMF_CHUNK_BYTES=16
-
 
 [Global]
 SaveParameters=0
@@ -232,26 +217,15 @@ physical_channel=BlueNoC PCIe Tunnel
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
-[Xilinx BITGEN]
 
 
-[Interface builder]
 
-[Xilinx NGD]
 
-[FPGA Programming Tool]
 
-[Xilinx Post-synthesis Toolchain]
 
-[Xilinx PAR]
 
-[Xilinx Post-synthesis Toolchain/Requires]
 
-[MCD Tool for Xilinx]
 
-[Xilinx MAP]
-
-[Software build tool]
 
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
@@ -265,13 +239,9 @@ Packagehint=leap-multifpga
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
 
-[BSV Build Tool (First Phase)]
 
-[Synthesis Boundary Wrapper generation tool]
 
-[FPGAMap]
 
-[FPGA Environment Datatype]
 
 [Xilinx DDR SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
@@ -282,7 +252,7 @@ ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.10 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
@@ -303,7 +273,6 @@ Packagehint=leap
 [Little-Endian Unified Message Format/Params]
 UMF_CHUNK_BYTES=16
 
-[XST Synthesis Tool]
 
 [Aurora Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-common/aurora-common.awb
@@ -337,10 +306,6 @@ Packagehint=leap-platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-10gbps-64.awb
 Packagehint=leap-platforms
 
-
-
-
-
 [Aurora Device Reliable Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
 Packagehint=leap-platforms
@@ -351,8 +316,6 @@ aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
 [Aurora Device Reliable Flowcontrol]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/aurora-device.awb
 Packagehint=leap-platforms
-
-
 
 [BlueNoC PCIe Bridge/Params]
 DO_SOFT_RESET=0
@@ -382,13 +345,10 @@ aurora_driver=VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps
 aurora_common=Aurora Common Definitions
 
 
-
-
-[Virtex-7 PCIE Device v1.07 (BlueNoC)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
-Packagehint=leap-platforms
-
-
 [FPGA Platform Build Pipeline Xilinx (Legacy) ]
 File=config/pm/leap/submodels/pipelines/build-pipeline-xilinx-multifpga.apm
 Packagehint=leap-multifpga
+
+[Virtex-7 PCIE Device v1.10 (BlueNoC)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_10/pcie-virtex7.awb
+Packagehint=leap-platforms

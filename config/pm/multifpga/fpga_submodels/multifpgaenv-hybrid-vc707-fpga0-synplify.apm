@@ -108,7 +108,7 @@ ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.10 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
@@ -238,7 +238,7 @@ ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
 
 [BlueNoC PCIe Bridge/Requires]
 pcie_bluenoc_ifc=BlueNoC PCIe Bridge Interfaces
-pcie_bluenoc_device=Virtex-7 PCIE Device v1.07 (BlueNoC)
+pcie_bluenoc_device=Virtex-7 PCIE Device v1.10 (BlueNoC)
 
 [BlueNoC PCIe Bridge]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc/pcie-bluenoc.awb
@@ -329,10 +329,11 @@ RESET_ACTIVE_HIGH=1
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-device.awb
 Packagehint=leap-platforms
 
-[Virtex-7 PCIE Device v1.07 (BlueNoC)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_7/pcie-virtex7.awb
-Packagehint=leap-platforms
 
 [FPGA Platform Build Pipeline Xilinx (Legacy) (Synplify)]
 File=config/pm/leap/submodels/pipelines/build-pipeline-xilinx-synplify-multifpga.apm
 Packagehint=leap-multifpga
+
+[Virtex-7 PCIE Device v1.10 (BlueNoC)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_10/pcie-virtex7.awb
+Packagehint=leap-platforms
