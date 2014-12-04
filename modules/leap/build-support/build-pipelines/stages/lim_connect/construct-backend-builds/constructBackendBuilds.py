@@ -6,11 +6,8 @@ import math
 import cPickle as pickle
 
 # AWB dependencies
-from model import  *
-from li_module import *
-from lim_common import *
-from lim_graph_generator import *
-from lim_executable_generator import *
+from li_module import LIGraph
+from lim_executable_generator import makePlatformBitfileName
 
 
 # This function takes the object code scrubbed from the first-pass

@@ -1,7 +1,7 @@
 import os
+import re
 
-from li_module import *
-from model import *
+import model
 
 # Notice that chains will have their platform direction labelled
 def parseStats(statsFile, debug=False):
@@ -46,7 +46,7 @@ def parseStats(statsFile, debug=False):
 # We seem to match only out bound channels. 
 def assignActivity(moduleList, moduleGraph):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
     statsFile = moduleList.getAllDependenciesWithPaths('GIVEN_STATS')    
     filename = ""

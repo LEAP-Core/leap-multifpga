@@ -8,10 +8,10 @@ import time
 import os
 
 # AWB dependencies
-from model import  *
+import model
+import li_module
+from li_module import LIGraph
 from fpgamap_parser import parseFPGAMap
-from li_module import *
-from lim_common import *
 
 
 def isModuleCompatibleWithPlatform(module, platform):
@@ -66,7 +66,7 @@ def decorateModulesWithMapFile(moduleList, environmentGraph, moduleGraph):
 # mapping file.                                                                                             
 def placeModulesILP(moduleList, environmentGraph, moduleGraph):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
     # As a prepass, tag modules according to map file.
     decorateModulesWithMapFile(moduleList, environmentGraph, moduleGraph)
@@ -74,7 +74,7 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
     modHandle = open(modFile,'w')
 
     # Obtain information about resource usage
-    resources = assignResources(moduleList, environmentGraph, moduleGraph)
+    resources = li_module.assignResources(moduleList, environmentGraph, moduleGraph)
     
     # Set up variables
     
@@ -111,7 +111,7 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
             if(moduleName == partnerName):
                 continue
             # we use egress so that each channel is modelled once. 
-            channels = egressChannelsByPartner(moduleObject, partnerName)
+            channels = li_module.egressChannelsByPartner(moduleObject, partnerName)
             sourceColors = moduleColors[moduleName]
             destColors = moduleColors[partnerName]
             for channel in channels:
@@ -247,7 +247,7 @@ def placeModulesILP(moduleList, environmentGraph, moduleGraph):
 # elaborated in subsequent compilation passes.
 def placeModules(moduleList, environmentGraph, moduleGraph):
     
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
     # first we need to map the platform modules (those physically tied
     # to the platform) to their platform

@@ -4,10 +4,11 @@ import sys
 import copy
 import math
 
-# AWB dependencies
-from model import  *
-from li_module import *
-from lim_common import *
+import model
+import li_module
+from li_module import LIChannel
+import lim_common
+from lim_common import Via, ViaAssignment, LinkAssignment
 
 # Gets the partner of the given connection.
 def getPartner(connection):
@@ -36,14 +37,14 @@ def generateRouterTypesPair(platform, targetPlatform, moduleList, environmentGra
     # Communication with CPU type platforms must never use the agressive network type optimizations. 
     if(environmentGraph.platforms[platform].platformType == 'CPU' or 
        environmentGraph.platforms[targetPlatform].platformType == 'CPU'):
-        return generateRouterTypes(moduleList, viaWidth, viaLinks, maxWidth, ENABLE_AGRESSIVE_UMF_PARAMETERS=False, USE_DEFAULT_UMF_PARAMETERS=True)
+        return lim_common.generateRouterTypes(moduleList, viaWidth, viaLinks, maxWidth, ENABLE_AGRESSIVE_UMF_PARAMETERS=False, USE_DEFAULT_UMF_PARAMETERS=True)
 
-    return generateRouterTypes(moduleList, viaWidth, viaLinks, maxWidth)
+    return lim_common.generateRouterTypes(moduleList, viaWidth, viaLinks, maxWidth)
 
 # This code assigns physical indices to the inter-platform connections. 
 def assignLinks(provisionalAssignments, provisionalTargetAssignments, platformConnections, targetPlatformConnections, moduleList):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
+    pipeline_debug = model.getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
     # by definition these are sources
     for provisional in provisionalAssignments:
         assigned = False
@@ -79,7 +80,7 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
     MAX_NUMBER_OF_VIAS = getMaxViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
     MIN_NUMBER_OF_VIAS = getMinViasPair(platform, targetPlatform, moduleList, environmentGraph, platformGraph)
 
-    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG') 
+    pipeline_debug = model.getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG') 
 
     if(pipeline_debug):
         print "Allocating vias for " + platform + " -> " + targetPlatform + "\n"
@@ -95,7 +96,7 @@ def generateViaLJF(platform, targetPlatform, moduleList, environmentGraph, platf
     hopToTarget = environmentGraph.transitTablesOutgoing[targetPlatform][platform]
     ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
-    moduleLinks = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
+    moduleLinks = li_module.egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + li_module.egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
 
     sortedLinks = sorted(moduleLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
     # We'll use links to size the router lanes, but we should only use each link once. 
@@ -211,7 +212,7 @@ def allocateLJF(platformLinks, targetLinks, vias, moduleList):
 
 def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
+    pipeline_debug = model.getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
 
     #first sort the links on both sides
     links = sorted(platformLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending   
@@ -279,7 +280,7 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
         # Here, we are calling the baseline generateRouterTypes.  This
         # works because if we are in fact using a software platform, 
         # we will only have one via generated anyway. 
-        umfType = generateRouterTypes(moduleList, vias[via].width, vias[via].links, maxLinkWidth[via])
+        umfType = lim_common.generateRouterTypes(moduleList, vias[via].width, vias[via].links, maxLinkWidth[via])
         headerActual = vias[via].width - umfType.fillerBits
         #To ensure termination, we require monotonically increasing
         #header sizes 
@@ -307,7 +308,7 @@ def allocateLJFWithHeaders(platformLinks, targetLinks, vias, headers, moduleList
 
 def generateViaCombinational(platform, targetPlatform, moduelList, environmentGraph, platformGraph):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
+    pipeline_debug = model.getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
 
     firstAllocationPass = True; # We can't terminate in the first pass 
     viaWidthsFinal = [] # at some point, we'll want to derive this. 
@@ -320,7 +321,7 @@ def generateViaCombinational(platform, targetPlatform, moduelList, environmentGr
     hopToTarget = environmentGraph.transitTablesOutgoing[targetPlatform][platform]
     ingressVia = hopToTarget.replace(".","_").replace("[","_").replace("]","_") + '_read'
 
-    moduleLinks = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
+    moduleLinks = li_module.egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + li_module.egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
 
     sortedLinks = sorted(moduleLinks, key = lambda dangling: dangling.activity * -2048 + dangling.bitwidth) # sorted is ascending
 
@@ -375,7 +376,7 @@ def generateViaCombinational(platform, targetPlatform, moduelList, environmentGr
 
 def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, platformGraph):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
+    pipeline_debug = model.getBuildPipelineDebug(moduleList) or moduleList.getAWBParam('lim_analyze_network', 'ANALYZE_NETWORK_DEBUG')
 
     # set up intermediate data structures.  We need a couple of passes to resolve link allocation. 
     # This analysis operates on sources. The sinks on the target
@@ -432,7 +433,7 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
             for via in range(len(viasFinal)):
 
                 # let's find the maximum width connection so that we calculate the types correctly.
-                assignedConnections = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
+                assignedConnections = li_module.egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + li_module.egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
                 if(pipeline_debug):
                     print "Assigned Connections: " + str(assignedConnections) + "\n"
 
@@ -546,7 +547,7 @@ def analyzeNetworkNonuniform(allocateFunction, moduleList, environmentGraph, pla
 
 
                 # let's find the maximum width guy so that we calculate the types correctly. 
-                assignedConnections = egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
+                assignedConnections = li_module.egressChannelsByPartner(platformGraph.modules[platform], targetPlatform) + li_module.egressChainsByPartner(platformGraph.modules[platform], targetPlatform)
                 if(pipeline_debug):
                     print "Assigned Connections: " + str(assignedConnections) + "\n"
 

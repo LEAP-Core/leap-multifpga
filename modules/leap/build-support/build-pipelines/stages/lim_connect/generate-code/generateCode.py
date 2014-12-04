@@ -1,13 +1,10 @@
 # python libraries
-import re
 import sys
 
-# AWB dependencies
-from model import  *
-from li_module import *
-
-#local package includes
-from generateMultiplexors import *
+import model
+import li_module
+from generateMultiplexors import generateIngressMultiplexor, generateEgressMultiplexor
+from routerStats import RouterStats
 
 def getTargetPlatforms(platformGraph, platform):
 
@@ -22,7 +19,7 @@ def getTargetPlatforms(platformGraph, platform):
 
 def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
     
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
     ENABLE_TYPE_COMPRESSION = moduleList.getAWBParam('lim_connect', 'ENABLE_TYPE_COMPRESSION')
     GENERATE_ROUTER_DEBUG = moduleList.getAWBParam('lim_graph_generator', 'GENERATE_ROUTER_DEBUG')
@@ -94,7 +91,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
 
     # Dangling Channels for this platform may have some declarations.  We insert them here.
     for targetPlatform in targetPlatforms:
-        for dangling in channelsByPartner(platformObject, targetPlatform):
+        for dangling in li_module.channelsByPartner(platformObject, targetPlatform):
             header.write("// Compression code has been removed.\n")#dangling.code.declaration)
 
     header.write(egress_multiplexor_instantiations + ingress_multiplexor_instantiations)
@@ -117,7 +114,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
 
         # Handle the soft connection declarations of for each
         # channel between platform and targetPlatform.            
-        for dangling in channelsByPartner(platformObject,targetPlatform):
+        for dangling in li_module.channelsByPartner(platformObject,targetPlatform):
             if(pipeline_debug):
                 print "Laying down " + dangling.name + " of type " + dangling.sc_type + " on " + dangling.platform
 
@@ -163,7 +160,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
       
 
         # Handle Chains seperately
-        for dangling in ingressChainsByPartner(platformObject,targetPlatform):
+        for dangling in li_module.ingressChainsByPartner(platformObject,targetPlatform):
             chains += 1 
 
             if(GENERATE_ROUTER_STATS > 1):
@@ -183,7 +180,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
                   
             chainsStr += 'registerChain(chain_' + dangling.name + ');\n'
 
-        for dangling in egressChainsByPartner(platformObject,targetPlatform):
+        for dangling in li_module.egressChainsByPartner(platformObject,targetPlatform):
             if(GENERATE_ROUTER_STATS):
                 stats.addCounter('blocked_chain_' + dangling.name,
                                  'ROUTER_' + platform + '_' + targetPlatform + '_' + dangling.name + '_BLOCKED',
@@ -211,7 +208,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
 
         # the egress links need to go first, since they are provided as an argument to the 
         # switches           
-        for dangling in egressChannelsByPartner(platformObject, targetPlatform):
+        for dangling in li_module.egressChannelsByPartner(platformObject, targetPlatform):
             packetizerType = 'Marshalled'
             header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_recv_' + dangling.name +' = ?;\n')
             egressVectors[dangling.via_idx_egress][dangling.via_link_egress] = 'pack_recv_' + dangling.name
@@ -238,7 +235,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
             header.write('\trecv_' + dangling.name + ');\n\n')
 
         #Handle Chains seperately
-        for dangling in egressChainsByPartner(platformObject, targetPlatform):
+        for dangling in li_module.egressChainsByPartner(platformObject, targetPlatform):
             header.write('// Via' + str(egressVias[dangling.via_idx_egress].via_width) + ' mine:' + str(dangling.bitwidth) + '\n')
             #header.write('NumTypeParam#(PHYSICAL_CONNECTION_SIZE) width_chain_' + dangling.name +' = ?;\n')
             header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_chain_' + dangling.name +' = ?;\n')
@@ -323,14 +320,14 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
         # human readable format.  Therefore, we first sort the connections by assignment.            
         # and dump a link manifest.
         maximumLinks = max(ingressVias, key = lambda via: via.via_links).via_links;
-        sortedIngressLinks = sorted(ingressChainsByPartner(platformObject,targetPlatform) + ingressChannelsByPartner(platformObject,targetPlatform), key = lambda dangling: dangling.via_link_ingress + maximumLinks * dangling.via_idx_ingress) # sorted is ascending
+        sortedIngressLinks = sorted(li_module.ingressChainsByPartner(platformObject,targetPlatform) + li_module.ingressChannelsByPartner(platformObject,targetPlatform), key = lambda dangling: dangling.via_link_ingress + maximumLinks * dangling.via_idx_ingress) # sorted is ascending
 
         for dangling in sortedIngressLinks:
             header.write('// ingress from '+ targetPlatform + ' ' + dangling.name + ' via_idx: ' + str(dangling.via_idx_ingress) + ' link_idx: ' +  str(dangling.via_link_ingress) + '\n')
             header.write('// egress ' + dangling.name + ' via_idx: ' + str(dangling.via_idx_egress) + ' link_idx: ' +  str(dangling.via_link_egress) + '\n')
 
         # and now we actually generate the connections
-        for dangling in ingressChannelsByPartner(platformObject, targetPlatform):
+        for dangling in li_module.ingressChannelsByPartner(platformObject, targetPlatform):
             header.write('NumTypeParam#('+ str(dangling.bitwidth) +') width_send_' + dangling.name +' = ?;\n\n')
             packetizerType = 'NoPack'
             # Software only handles unmarshalled packets for now...
@@ -355,7 +352,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
             header.write('\tsend_' + dangling.name + ');\n\n')
 
         # handle chains seperately
-        for dangling in ingressChainsByPartner(platformObject, targetPlatform):
+        for dangling in li_module.ingressChainsByPartner(platformObject, targetPlatform):
             if(pipeline_debug or True):
                 print "My type: " + dangling.sc_type
                 print "My raw type: " + dangling.raw_type
@@ -404,7 +401,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
 # this needs to be translated. 
 def generateCodeCPP(moduleList, platform, environmentGraph, platformGraph):
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = model.getBuildPipelineDebug(moduleList)
 
     platformObject = platformGraph.modules[platform]
 
@@ -524,7 +521,7 @@ def generateCodeCPP(moduleList, platform, environmentGraph, platformGraph):
         # need some syntax for this.
         hopFromTarget = environmentGraph.transitTablesIncoming[platform][targetPlatform]
 
-        channels = channelsByPartner(platformObject, targetPlatform)
+        channels = li_module.channelsByPartner(platformObject, targetPlatform)
         sends = 0
         recvs = 0
         for dangling in channels:
@@ -567,7 +564,7 @@ def generateCodeCPP(moduleList, platform, environmentGraph, platformGraph):
     for targetPlatform in targetPlatforms:
         egressVias = environmentGraph.platforms[platform].getEgress(targetPlatform).logicalVias
         ingressVias = environmentGraph.platforms[platform].getIngress(targetPlatform).logicalVias
-        for dangling in channelsByPartner(platformObject, targetPlatform):      
+        for dangling in li_module.channelsByPartner(platformObject, targetPlatform):      
             #danglingTypeHack = "UMF_MESSAGE"
             # For now, we use the vanilla MARSHALLED_LI_CHANNEL_IN_CLASS for chain route-throughs
             # However, route-throughs require special handling. 
@@ -671,7 +668,7 @@ def generateCode(moduleList, environmentGraph, platformGraph):
     # really, this is a pairwise decision, but for now we'll assume the underlying calls will 
     # interrogate the type of their counterpart.
 
-    pipeline_debug = getBuildPipelineDebug(moduleList)
+    pipeline_debug = model.getBuildPipelineDebug(moduleList)
     if(pipeline_debug):
         for platformName in environmentGraph.getPlatformNames(): 
             platform = environmentGraph.getPlatform(platformName)         
