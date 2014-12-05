@@ -133,8 +133,8 @@ class GenerateLIMExecutable():
             # to maintain compatibility, we inject a pointer to the CPU in this case.
             if(master):
                 # For legacy builds, software is generated during the first pass of compilation. 
-                platformLogBuildDir = makePlatformLogBuildDir(platform.name, APM_NAME)
-                platformMetadata.append('{"name" =>"' + makePlatformLogName(platform.name,APM_NAME) + '", "type" => "CPU"' + \
+                platformLogBuildDir = lim_graph_generator.makePlatformLogBuildDir(platform.name, APM_NAME)
+                platformMetadata.append('{"name" =>"' + lim_graph_generator.makePlatformLogName(platform.name,APM_NAME) + '", "type" => "CPU"' + \
                                         ', "directory" => "' + platformLogBuildDir + '", "master" => "0" , "logicalName" => "CPU0"}')
           
             platformMetadata.append('{"name" =>"' + makePlatformBitfileName(platform.name,APM_NAME) + '", "type" => "' + platformType + \

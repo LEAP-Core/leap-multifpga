@@ -49,23 +49,13 @@ class LIMConnect():
         for platformName in self.environment.getPlatformNames():
         # these defs are copied from a previous tool.  refactor
             platform = self.environment.getPlatform(platformName)
-<<<<<<< HEAD
-            platformLogAPMName = makePlatformLogName(platform.name,APM_NAME) + '.apm'
-            platformLogPath = makePlatformConfigPath(makePlatformLogName(platform.name,APM_NAME))
-            platformLogBuildDir = 'lim/' + makePlatformLogName(platform.name,APM_NAME) + '/pm'
-
-            platformBitfileAPMName = makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
-            platformBitfilePath = makePlatformConfigPath(makePlatformBitfileName(platform.name,APM_NAME))
-            platformBitfileBuildDir = 'lim/' + makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
-=======
             platformLogAPMName = lim_graph_generator.makePlatformLogName(platform.name,APM_NAME) + '.apm'
             platformLogPath = makePlatformConfigPath(lim_graph_generator.makePlatformLogName(platform.name,APM_NAME))
-            platformLogBuildDir = 'multi_fpga/' + lim_graph_generator.makePlatformLogName(platform.name,APM_NAME) + '/pm'
+            platformLogBuildDir = 'lim/' + lim_graph_generator.makePlatformLogName(platform.name,APM_NAME) + '/pm'
 
             platformBitfileAPMName = lim_executable_generator.makePlatformBitfileName(platform.name,APM_NAME) + '.apm'
             platformBitfilePath = makePlatformConfigPath(lim_executable_generator.makePlatformBitfileName(platform.name,APM_NAME))
-            platformBitfileBuildDir = 'multi_fpga/' + lim_executable_generator.makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
->>>>>>> 778e87e4e00bd267f61fca74c7751df587abee2a
+            platformBitfileBuildDir = 'lim/' + lim_executable_generator.makePlatformBitfileName(platform.name,APM_NAME) + '/pm/'
 
             parameterFile = '?'
             
