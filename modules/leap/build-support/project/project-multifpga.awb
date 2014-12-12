@@ -15,6 +15,7 @@
 
 # We should pick these up on union dir
 %makefile Makefile.top.template
+%scons %main    SConstruct.top.template
 %scons %top   SCons.top.pipeline.template
 %scons %sw    SCons.sw.pipeline.template
 %scons %iface SCons.iface.template

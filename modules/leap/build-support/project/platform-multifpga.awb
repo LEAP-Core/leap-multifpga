@@ -25,6 +25,7 @@
 %library lib/libasim/libasim.a
 
 %makefile Makefile.top.template
+%scons %main    SConstruct.top.template
 %scons %top     SCons.top.pipeline.template
 %scons %library ModuleList.py
 %scons %library Module.py
