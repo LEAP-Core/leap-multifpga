@@ -240,7 +240,7 @@ class GenerateLIMGraph():
           relativeAPMPath = os.path.relpath(platformAPMPath, makePlatformConfigPath("")) 
           linkAPMPath = makePlatformConfigPath(platform.getAPMName())
 
-          model.execute('ln -s  ' + relativeAPMPath + ' ' + linkAPMPath)
+          model.execute('rm -f ' + linkAPMPath + '; ln -s  ' + relativeAPMPath + ' ' + linkAPMPath)
           
           model.execute('asim-shell --batch cp ' + platform.path +" "+ platformPath) 
           # We only need to build the application once for each platform type.
