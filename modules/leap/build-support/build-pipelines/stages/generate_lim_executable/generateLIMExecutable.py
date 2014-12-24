@@ -76,8 +76,8 @@ class GenerateLIMExecutable():
                      # Compute the build options
                      compile_cmd = 'scons '
 
-                     if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_DEBUG_EXECUTABLE')):
-                            compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_'+platform.name)) + ' '
+                     if (moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_DEBUG_EXECUTABLE')):
+                         compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_'+platform.name)) + ' '
 
                      if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_PROFILING_EXECUTABLE')):
                          compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_backend_'+platform.name)) + ' ' 
@@ -89,9 +89,6 @@ class GenerateLIMExecutable():
                  # set environment for scons caching
                  if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_EXECUTABLE')):
                      compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name)) + ' '
-
-                 if(self.pipeline_debug or True):
-                     print "Compile command is: " + compile_cmd + "\n"
 
                  sts = model.execute(compile_cmd)
                  
@@ -111,9 +108,6 @@ class GenerateLIMExecutable():
         platformMetadata = []
         
         for platformName in self.environment.getPlatformNames():
-            awbBatchFile = platformName + '.exec.batch'
-            awbBatchHandle = open(awbBatchFile,'w')
-
             platform = self.environment.getPlatform(platformName)
             platformType = platform.platformType
             platformAPMBaseName = makePlatformBitfileName(platform.name,APM_NAME)
@@ -122,16 +116,21 @@ class GenerateLIMExecutable():
             platformBuildDir = makePlatformBuildDir(platform.name)
             bitfile = platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.xilinx/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_'
 
+            awbBatchFile = 'config/' + platformName + '.exec.batch'
+            need_config = not os.path.isdir(platformBuildDir)
+            if (need_config):
+                awbBatchHandle = open(awbBatchFile, 'w')
+            else:
+                awbBatchHandle = open(os.devnull, 'w')
 
             #sprinkle breadcrumbs in config file
             master = 0
-
-            if(platform.master):
+            if (platform.master):
                 master = 1
 
             # in legacy multifpga compiles, master refers to the platform with the CPU attached. 
             # to maintain compatibility, we inject a pointer to the CPU in this case.
-            if(master):
+            if (master):
                 # For legacy builds, software is generated during the first pass of compilation. 
                 platformLogBuildDir = lim_graph_generator.makePlatformLogBuildDir(platform.name, APM_NAME)
                 platformMetadata.append('{"name" =>"' + lim_graph_generator.makePlatformLogName(platform.name,APM_NAME) + '", "type" => "CPU"' + \
@@ -146,7 +145,7 @@ class GenerateLIMExecutable():
             # For software builds, we don't bother with the object
             # code flow -- software compiles quickly, so the flow is
             # not necessary at this time.
-            if(platform.platformType == 'CPU'):
+            if (platform.platformType == 'CPU'):
                 awbBatchHandle.write('replace module ' + platformPath + ' ' + applicationPath + '\n')
 
             # and now we can build them
@@ -197,43 +196,43 @@ class GenerateLIMExecutable():
             awbBatchHandle.write(' set parameter ' + platformPath + ' EXTRA_RRRS \\"' + missingRRRs  + '\\"' + '\n')                      
             awbBatchHandle.write(' set parameter ' + platformPath + ' CLOSE_CHAINS 1 ' + '\n')
 
-            if not os.path.exists(platformBuildDir): os.makedirs(platformBuildDir) 
-
             awbBatchHandle.write(' configure model ' + platformPath + ' --builddir ' + platformBuildDir + '\n')
             awbBatchHandle.close()
 
-            subprocess.call(['awb-shell', '--file', awbBatchFile]) 
+            # Configure the build tree
+            if need_config:
+                os.makedirs(platformBuildDir)
+                model.execute(['awb-shell', '--file', awbBatchFile], shell=False)
 
             # set up the symlinks to missing dictionaries- they are broken
             # at first, but as we fill in the platforms, they'll come up
             for dict in moduleList.topModule.moduleDependency['MISSING_DICTS'].keys():
-                if(not dict in platformDicts):
+                if (not dict in platformDicts):
                     # lexists works on broken symlinks...
-                    path = os.getcwd()
                     dictPath = os.path.realpath(moduleList.topModule.moduleDependency['MISSING_DICTS'][dict])
                     linkDir  = makePlatformDictDir(platform.name)  
                     linkPath = linkDir  + '/' + dict
-                    relDictPath = os.path.relpath(dictPath, linkDir)
-                    if(os.path.lexists(linkPath)):
-                        os.remove(linkPath)
-                    
-                    os.symlink(relDictPath, linkPath)
+                    relPath = os.path.relpath(dictPath, linkDir)
+
+                    if (not os.path.lexists(linkPath)):
+                        print "Link: " + linkPath + ' -> ' + relPath
+                        os.symlink(relPath, linkPath)
             
             # do the same for missing RRRs - this code is similar to that above and should be refactored. 
             for rrr in moduleList.topModule.moduleDependency['MISSING_RRRS'].keys():
-                if(not rrr in platformRRRs):
+                if (not rrr in platformRRRs):
                     # lexists works on broken symlinks...
-                    path = os.getcwd()
-                    linkPath  = makePlatformRRRDir(platform.name)  + '/' + rrr
-                    if(os.path.lexists(linkPath)):
-                        os.remove(linkPath)
-
                     rrrPath = os.path.realpath(moduleList.topModule.moduleDependency['MISSING_RRRS'][rrr])
-                    #the rrr values have some hierarchical information in them...
+                    linkPath  = makePlatformRRRDir(platform.name)  + '/' + rrr
                     linkDir = os.path.dirname(linkPath)
-                    if(not os.path.exists(linkDir)):
-                        os.makedirs(linkDir)
-                    os.symlink(os.path.relpath(rrrPath, linkDir), linkPath)
+                    relPath = os.path.relpath(rrrPath, linkDir)
+
+                    if (not os.path.lexists(linkPath)):
+                        print "Link: " + linkPath + ' -> ' + relPath
+                        d = os.path.dirname(linkPath)
+                        if (not os.path.isdir(d)):
+                            os.makedirs(d)
+                        os.symlink(relPath, linkPath)
                   
             strfile = os.getcwd() + '/' + platformBuildDir + '/.bsc/' + platformAPMBaseName + '.str'
 
