@@ -24,6 +24,7 @@
 %scons %library AWBParams.py
 %scons %library PythonTidy.py
 %scons %library Utils.py
+%scons %library Source.py
 %scons %library CommandLine.py
 %scons %library ProjectDependency.py
 
