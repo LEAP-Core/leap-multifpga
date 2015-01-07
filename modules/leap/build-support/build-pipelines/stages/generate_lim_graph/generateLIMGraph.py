@@ -32,9 +32,14 @@ def writeDynamicParameters(environmentGraph, buildDirFunction, dynamicParamsSet)
     for platformName in environmentGraph.getPlatformNames():
         platform = environmentGraph.getPlatform(platformName)
         platformBuildDir = buildDirFunction(platform.name)
+
+        # Sort the set by making a list.  We want the file to be the same each
+        # time it is generated.
+        params = sorted([line for line in dynamicParamsSet])
+
         paramsFile = os.getcwd() + '/' + platformBuildDir + '/iface/src/dict/dynamic_params.dic'
         paramsHandle = open(paramsFile, 'w')
-        for line in dynamicParamsSet:
+        for line in params:
             paramsHandle.write(line)
     
 def makePlatformLogName(name, apm):
@@ -443,9 +448,12 @@ class GenerateLIMGraph():
 
                 header.close();
 
-                #force build remove me later....          
                 moduleList.topDependency += [subbuild]
+                # Force build (dependence isn't tracked through sub-builds)
                 moduleList.env.AlwaysBuild(subbuild)
+                # Don't delete the top-level target.  It might not need to be
+                # rebuilt.
+                moduleList.env.Precious(subbuild)
 
             elif (platform.platformType == 'CPU'):
                 routerH =  platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_SW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/software_routing.h'
@@ -482,9 +490,12 @@ class GenerateLIMGraph():
                                                   [routerH],
                                                   [compile_closure(platform, False)])
 
-                # Force build remove me later....          
                 moduleList.topDependency += [subbuild]
+                # Force build (dependence isn't tracked through sub-builds)
                 moduleList.env.AlwaysBuild(subbuild)
+                # Don't delete the top-level target.  It might not need to be
+                # rebuilt.
+                moduleList.env.Precious(subbuild)
 
         paramsSet = canonicalizeDynamicParameters(environment, makePlatformBuildDir) 
         writeDynamicParameters(environment, makePlatformBuildDir, paramsSet) 

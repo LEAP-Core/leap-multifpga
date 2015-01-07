@@ -243,6 +243,13 @@ class GenerateLIMExecutable():
                 moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
                 compile_closure_executable(platform)
                 )                   
+
+            # Force build (dependence isn't tracked through sub-builds)
+            moduleList.env.AlwaysBuild(subbuild)
+            # Don't delete the top-level target.  It might not need to be
+            # rebuilt.
+            moduleList.env.Precious(subbuild)
+
             moduleList.topModule.moduleDependency['FPGA_PLATFORM_BITFILES'] += [subbuild] 
 
         paramsSet = moduleList.topModule.moduleDependency['CANONICAL_PARAMS'][0]
