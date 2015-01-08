@@ -128,7 +128,7 @@ class GenerateLIMGraph():
                  # ignore mismatched platforms
 
                  # Compute command line arguments in case they affect topology
-                 compile_cmd = 'scons --debug=explain '
+                 compile_cmd = 'scons '
                  if(moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_CACHING_DEBUG_GRAPH')):
                      compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name)) + ' '
   
