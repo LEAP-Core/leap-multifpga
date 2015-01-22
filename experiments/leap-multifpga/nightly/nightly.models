@@ -13,5 +13,6 @@ hello_vexe_li                 config/pm/leap/demos/hello/hello_hybrid_vexe_li.ap
 hello_exe_li                  config/pm/leap/demos/hello/hello_hybrid_exe_li.apm                            --timeout=3600 
 traffic_light_li_vivado       config/pm/leap/demos/multifpga/li/traffic_light_vc707_li.apm                  --fakestats
 traffic_light_li_ise          config/pm/leap/demos/multifpga/li/traffic_light_vc707_li_ise.apm              --fakestats
+traffic_light_li_synplify     config/pm/leap/demos/multifpga/li/traffic_light_vc707_li_synplify.apm         --fakestats
 
 
