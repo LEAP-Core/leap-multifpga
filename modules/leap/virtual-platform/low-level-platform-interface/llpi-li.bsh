@@ -1,1 +1,1 @@
-`include "physical_channel.bsh"
+`include "awb/provides/physical_channel.bsh"

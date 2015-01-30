@@ -366,11 +366,7 @@ class LIMConnect():
                         logs += module.getObjectCode('GEN_LOGS')
                         
             for infile in logs:          
-                try:
-                    logfile = open(infile,'r')
-                except FileNotFoundError:
-                    # Oops. Didn't find the file. 
-                    continue
+                logfile = open(infile.from_root(),'r')
 
                 for line in logfile:
                     # also pull out link widths

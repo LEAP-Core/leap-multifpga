@@ -1,3 +1,3 @@
-`include "clocks_device.bsh"
-`include "unix_pipe_device.bsh"
-`include "simulation_communication_device.bsh"
+`include "awb/provides/clocks_device.bsh"
+`include "awb/provides/unix_pipe_device.bsh"
+`include "awb/provides/simulation_communication_device.bsh"

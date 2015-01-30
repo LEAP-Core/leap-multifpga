@@ -74,21 +74,22 @@ class GenerateLIMExecutable():
                  compile_cmd = moduleList.arguments.get('MULTIFPGA_BITFILE_COMPILE_CMD', None)
                  if (compile_cmd == None):
                      # Compute the build options
-                     compile_cmd = 'scons '
+                     compile_cmd = 'scons'
 
                      if (moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_DEBUG_EXECUTABLE')):
-                         compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_'+platform.name)) + ' '
+                         compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_'+platform.name))
 
                      if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_PROFILING_EXECUTABLE')):
-                         compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_backend_'+platform.name)) + ' ' 
+                         compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_backend_'+platform.name))
 
-                     compile_cmd += ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
+                     compile_cmd += ' ' + ' '.join(['%s="%s"' % (key, value) for (key, value) in moduleList.arguments.items()])
 
                  compile_cmd = 'cd ' + platformBuildDir + '; ' + compile_cmd
+                 compile_cmd += ' LIM_BUILD_DIR=' + platformBuildDir
 
                  # set environment for scons caching
-                 if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_EXECUTABLE')):
-                     compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name)) + ' '
+                 if (moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_EXECUTABLE')):
+                     compile_cmd += ' LEAP_BUILD_CACHE_DIR=' + os.path.abspath(makePlatformConfigPath('codeCache' + platform.name))
 
                  sts = model.execute(compile_cmd)
                  
