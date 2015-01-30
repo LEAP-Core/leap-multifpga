@@ -22,7 +22,7 @@ class Build(ProjectDependency):
             Floorplanner(moduleList)
 
         bsv = BSV(moduleList)
-        if not bsv.isDependsBuild:
+        if not moduleList.isDependsBuild:
             if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
                 Bluesim(moduleList)                      
             if (moduleList.getAWBParam('software_tool', 'BUILD_FIRST_PASS_SOFTWARE')):
