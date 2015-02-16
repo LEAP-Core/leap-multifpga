@@ -131,7 +131,10 @@ class GenerateLIMGraph():
                  compile_cmd = 'cd ' + platformBuildDir + '; scons'
                  if (moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_CACHING_DEBUG_GRAPH')):
                      compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_frontend_'+platform.name))
-  
+
+                 compile_cmd += " " + moduleList.getAWBParam('lim_graph_generator', 'BUILD_PARAMETERS') + " "
+                 print "PARAMS: " + str(moduleList.getAWBParam('lim_graph_generator', 'BUILD_PARAMETERS'))
+
                  if (moduleList.getAWBParam('lim_graph_generator', 'ENABLE_SCONS_PROFILING_GRAPH')):
                      compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_frontend_'+platform.name))
 

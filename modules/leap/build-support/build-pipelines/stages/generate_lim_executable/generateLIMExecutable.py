@@ -79,6 +79,8 @@ class GenerateLIMExecutable():
                      if (moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_CACHING_DEBUG_EXECUTABLE')):
                          compile_cmd += ' --cache-show --cache-debug=' + os.path.abspath(makePlatformConfigPath('debug_'+platform.name))
 
+                     compile_cmd += " " + moduleList.getAWBParam('lim_graph_generator', 'BUILD_PARAMETERS') + " "
+                     
                      if(moduleList.getAWBParam('lim_executable_generator', 'ENABLE_SCONS_PROFILING_EXECUTABLE')):
                          compile_cmd += ' --profile=' + os.path.abspath(makePlatformConfigPath('profile_backend_'+platform.name))
 
