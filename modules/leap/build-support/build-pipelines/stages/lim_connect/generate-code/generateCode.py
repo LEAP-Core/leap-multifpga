@@ -46,6 +46,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
     header.write('import FIFOF::*;\n')
     header.write('import SpecialFIFOs::*;\n')
     header.write('import Connectable::*;\n')
+    header.write('import DefaultValue::*;\n')
      
     # With compressed connections, we need other bo to be imported
     # TODO: This code is currently not working.  Needs to be fixed..
@@ -120,14 +121,14 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
 
             if(dangling.isSource()): # this channel is egress
                 if(ENABLE_TYPE_COMPRESSION and dangling.type_structure.compressable):
-                        header.write('\nCONNECTION_RECV#(' +  dangling.raw_type + ') recv_uncompressed_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
+                        header.write('\nCONNECTION_RECV#(' +  dangling.raw_type + ') recv_uncompressed_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, "' + dangling.raw_type + '", defaultValue);\n')
                         #header.write('COMPRESSION_ENCODER#(' + dangling.raw_type + ',enc_type_'+ dangling.inverse_name +') recv_' + dangling.inverse_name + '_compressed <- mkCompressor();\n')
                         header.write('let recv_' + dangling.name + '_compressed <- mkCompressor();\n')
                         header.write('Put#('+ dangling.raw_type + ') put_' + dangling.name + '_compressed = toPut(recv_' + dangling.name + '_compressed);\n')
                         header.write('mkConnection(put_' + dangling.name + '_compressed, toGet(recv_uncompressed_' + dangling.name + '));\n')
                         header.write('let recv_' + dangling.name +' = toConnectionRecv(recv_' + dangling.name + '_compressed);\n\n')
                 else:
-                    header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '");\n')
+                    header.write('\nCONNECTION_RECV#(Bit#(PHYSICAL_CONNECTION_SIZE)) recv_' + dangling.name + ' <- mkPhysicalConnectionRecv("' + dangling.name + '", tagged Invalid, "' + dangling.raw_type + '", defaultValue);\n')
                 if(GENERATE_ROUTER_STATS):
                     stats.addCounter('blocked_' + dangling.name,
                                      'ROUTER_' + dangling.name + '_BLOCKED',
@@ -148,14 +149,14 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
                                      dangling.name + ' on ingress' + str(dangling.via_idx_ingress) + ' link ' + str(dangling.via_link_ingress) + ' received cycles')
 
                 if(ENABLE_TYPE_COMPRESSION and dangling.type_structure.compressable):
-                    header.write('PHYSICAL_SEND#(' +  dangling.raw_type + ') send_uncompressed_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
+                    header.write('PHYSICAL_SEND#(' +  dangling.raw_type + ') send_uncompressed_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, "' + dangling.raw_type + '", defaultValue);\n')
                     
                     header.write('let send_' + dangling.name + '_decompressed <- mkDecompressor();\n')
                     header.write('Get#('+ dangling.raw_type + ') get_' + dangling.name + '_decompressed = toGet(send_' + dangling.name + '_decompressed);\n')
                     header.write('mkConnection(get_' + dangling.name + '_decompressed, toPut(send_uncompressed_' + dangling.name + '));\n')
                     header.write('let send_' + dangling.name + ' <- mkPhysicalSend(send_' + dangling.name + '_decompressed);\n\n')
                 else:
-                    header.write('PHYSICAL_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, False, "' + dangling.raw_type + '", True);\n')
+                    header.write('PHYSICAL_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_' + dangling.name + ' <- mkPhysicalConnectionSend("' + dangling.name + '", tagged Invalid, "' + dangling.raw_type + '", defaultValue);\n')
                 sends += 1
       
 

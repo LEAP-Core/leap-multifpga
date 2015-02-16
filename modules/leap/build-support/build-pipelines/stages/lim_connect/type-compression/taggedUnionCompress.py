@@ -101,10 +101,7 @@ class TaggedUnionDecompressor(Code):
             self.channels = [indexChannel.channel]
             self.definition += "\t" + indexChannel.declaration      
             
-            
-#PHYSICAL_SEND#(Bit#(PHYSICAL_CONNECTION_SIZE)) send_rrr_server_TESTDRRR_resp <- mkPhysicalConnectionSend("rrr_server_TESTDRRR_resp", tagged Invalid, False, "umf::GENERIC_UMF_PACKET#(umf::GENERIC_UMF_PACKET_HEADER#(4, 8, 4, 15, 1, 0), Bit#(32))", True);
-
-            self.definition += "\t" + "PHYSICAL_SEND#(Bit#(" + str(type.width) + ')) outputConnection <- mkPhysicalConnectionSend("' + connection.name + '", tagged Invalid, False, "' + connection.raw_type + '", True);\n' 
+            self.definition += "\t" + "PHYSICAL_SEND#(Bit#(" + str(type.width) + ')) outputConnection <- mkPhysicalConnectionSend("' + connection.name + '", tagged Invalid, "' + connection.raw_type + '", defaultValue);\n'
             self.definition += "\t" + "Wire#(Maybe#(Bit#(" + str(width) +"))) attemptInput <- mkDWire(tagged Invalid);\n"  
 
             # So the issue here is that members may be of various
@@ -204,7 +201,7 @@ class TaggedUnionCompressor(Code):
 
             #def __init__(self, sc_type, raw_type, idx, name, platform, optional, bitwidth, modulename, chainroot, type_structure):
 
-            self.definition += "\t" + "CONNECTION_RECV#(Bit#(" + str(type.width) + ')) inputConnection <- mkPhysicalConnectionRecv("' + connection.name + '", tagged Invalid, False, "' + connection.raw_type + '");\n' 
+            self.definition += "\t" + "CONNECTION_RECV#(Bit#(" + str(type.width) + ')) inputConnection <- mkPhysicalConnectionRecv("' + connection.name + '", tagged Invalid, "' + connection.raw_type + '", defaultValue);\n' 
 
             width = int(math.ceil(math.log(len(type.members),2)))
 
