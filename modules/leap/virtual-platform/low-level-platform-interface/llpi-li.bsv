@@ -31,7 +31,6 @@
 
 import Vector::*;
 
-`include "awb/provides/local_mem.bsh"
 `include "awb/provides/remote_memory.bsh"
 `include "awb/provides/physical_platform.bsh"
 `include "awb/provides/physical_platform_debugger.bsh"
@@ -46,12 +45,9 @@ import Vector::*;
 // A convenient bundle of all ways to interact with the outside world.
 //
 interface LowLevelPlatformInterface;
-
-    interface LOCAL_MEM                 localMem;
     interface REMOTE_MEMORY             remoteMemory;
     interface PHYSICAL_DRIVERS          physicalDrivers;
     interface TOP_LEVEL_WIRES           topLevelWires;
-
 endinterface
 
 //
@@ -78,14 +74,11 @@ module [CONNECTED_MODULE] mkLowLevelPlatformInterface
     PHYSICAL_DRIVERS  drivers   <- mkPhysicalPlatformDebugger(phys_plat.physicalDrivers, clocked_by clk, reset_by rst);
     
     // interfaces to the physical platform
-    LOCAL_MEM     locMem <- mkLocalMem(drivers, clocked_by clk, reset_by rst);
     REMOTE_MEMORY remMem <- mkRemoteMemory(drivers, clocked_by clk, reset_by rst);
   
     // plumb interfaces
 
-    interface localMem         = locMem;
     interface remoteMemory     = remMem;
     interface physicalDrivers  = drivers;
     interface topLevelWires    = phys_plat.topLevelWires;
-
 endmodule

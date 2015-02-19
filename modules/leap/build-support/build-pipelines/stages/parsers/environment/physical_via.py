@@ -13,16 +13,19 @@ class PhysicalVia(object):
         self.width = "unassigned" 
 
     def __repr__(self):
-        strRepr = ''
-        if(self.direction == PhysicalVia.ingress):
-            strRepr += 'CONNECTION\n' + self.endpointName + ' input from '  + self.physicalName + "\n"
+        strRepr = 'CONNECTION\n    ' + self.endpointName
+        if (self.direction == PhysicalVia.ingress):
+            strRepr += ' input from '
         else:
-            strRepr += 'CONNECTION\n' + self.endpointName + ' output to '  + self.physicalName +"\n"
+            strRepr += ' output to '
+        strRepr += self.physicalName + '\n'
         
-        if(isinstance(self.logicalVias, str)):
-            strRepr += "Logical Vias Unassigned" + "\n"
+        strRepr += '    width ' + str(self.width) + '\n'
+
+        if (isinstance(self.logicalVias, str)):
+            strRepr += '    Logical Vias Unassigned\n'
         else:
             for via in self.logicalVias:
-                strRepr += str(via) + "\n"
+                strRepr += '    ' + str(via) + '\n'
 
         return strRepr
