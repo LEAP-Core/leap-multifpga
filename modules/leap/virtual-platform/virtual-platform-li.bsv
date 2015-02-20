@@ -89,6 +89,10 @@ module [CONNECTED_MODULE] mkVirtualPlatform
     let routes <-  mkCommunicationModule(llpi.physicalDrivers, clocked_by clk, reset_by rst);
 `endif
 
+    // Some platforms have no channels, causing the lim compiler to
+    // optimize them away. Inject a vestigial channel to prevent this. 
+    Connection_Send#(Bit#(1)) optimizationPreventer <- mkConnectionSendOptional("optimizationPreventer",  clocked_by clk, reset_by rst);
+
     interface physicalDrivers = llpi.physicalDrivers;
     interface topLevelWires = llpi.topLevelWires;
 
