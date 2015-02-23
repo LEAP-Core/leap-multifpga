@@ -16,4 +16,4 @@ class Parameter(object):
         if(self.type == "INT"):
             return str(self.value)
         else:
-            return '\\"' + str(self.value) + '\\"'
+            return '"' + str(self.value) + '"'
