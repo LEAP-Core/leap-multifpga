@@ -1,3 +1,9 @@
+leap-multifpga (15.02~gite4940c645d48daa3818ea17287a5d58df3e4176+trusty) trusty; urgency=medium
+
+  * Updated AWB metadata for release
+
+ -- Kermin E Fleming <kfleming@leap.csail.mit.edu>  Fri, 27 Feb 2015 14:07:55 -0500
+
 leap-multifpga (15.02~gitc1e475079f317959e805c0efb458d4eed9375621+trusty) trusty; urgency=low
 
   * Move to version 15.02
