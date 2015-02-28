@@ -9,9 +9,9 @@
 %sources -t BDPI_C -v PRIVATE unix-communication-device-bdpi.c
 %sources -t BLUESIM_LDFLAGS -v PRIVATE unix-communication-device.ld
 
-%library libglib-2.0.a
-%library libgthread-2.0.a
-%library librt.a
+%syslibrary glib-2.0
+%syslibrary gthread-2.0
+%syslibrary rt
 
 %generated -t BA comm_init.ba
 %generated -t BA comm_open.ba

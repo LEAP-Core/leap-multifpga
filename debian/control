@@ -1,19 +1,19 @@
 Source: leap-multifpga
 Section: devel
 Priority: optional
-Maintainer: Joel Emer <emer@csail.mit.edu>
+Maintainer: Kermin Fleming <kermin.fleming@gmail.com>
 Build-Depends: debhelper (>= 7), dkms, autotools-dev
 Standards-Version: 3.7.2
 
 Package: leap-multifpga
 Architecture: all
-Depends: leap-multifpga-14.08
+Depends: leap-multifpga-15.02
 Recommends:
 Description: Dependency package for Leap multifpga environment
  Dependency package for the Leap multifpga environment
 Section: devel
 
-Package: leap-multifpga-14.08
+Package: leap-multifpga-15.02
 Architecture: any
 Depends: leap-multifpga-bin, ${misc:Depends}
 Description: Sharable package for the Leap multifpga
@@ -22,7 +22,7 @@ Section: devel
 
 Package: leap-multifpga-bin
 Architecture: any
-Depends: awb, glpk, python-glpk, ${misc:Depends}
+Depends: awb, python-ply, python-pygraph, python-glpk, ${misc:Depends}
 Description: Executables for the Leap multifpga environement
  Core executables and drivers for Leap multifpga
 Section: devel
