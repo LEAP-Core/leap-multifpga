@@ -8,6 +8,7 @@ from area_group_tool import  *
 from software_tool import *
 from wrapper_gen_tool import *
 from model import  *
+import li_module
 
 class Build(ProjectDependency):
     def __init__(self, moduleList):
@@ -18,13 +19,15 @@ class Build(ProjectDependency):
 
         # Floor planner can influence the BSV build, and must therefore
         # run first.
-        if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
-            Floorplanner(moduleList)
+        Floorplanner(moduleList)
 
         bsv = BSV(moduleList)
         if not moduleList.isDependsBuild:
             if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
-                Bluesim(moduleList)                      
+                Bluesim(moduleList)
+            else:
+                li_module.dump_lim_graph(moduleList)
+                      
             if (moduleList.getAWBParam('software_tool', 'BUILD_FIRST_PASS_SOFTWARE')):
                 Software(moduleList)
               

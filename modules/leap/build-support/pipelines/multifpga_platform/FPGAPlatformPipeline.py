@@ -10,8 +10,7 @@ from fpga_program_tool import *
 from software_tool import *
 from synthesis_tool import  *
 from post_synthesis_tool import *
-from mcd_tool import *
-
+import li_module
 
 class Build(ProjectDependency):
     def __init__(self, moduleList):
@@ -25,11 +24,12 @@ class Build(ProjectDependency):
 
         BSV(moduleList)
         FPGAProgram(moduleList)
-        MCD(moduleList)
         Synthesize(moduleList)
 
         if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
             PostSynthesize(moduleList)
+        else:
+            li_module.dump_lim_graph(moduleList)
 
         if (moduleList.getAWBParam('software_tool', 'BUILD_FIRST_PASS_SOFTWARE')):
             Software(moduleList)
