@@ -8,6 +8,7 @@ from verilog_tool import *
 from software_tool import *
 from wrapper_gen_tool import *
 from model import  *
+import li_module
 
 class Build(ProjectDependency):
     def __init__(self, moduleList):
@@ -24,6 +25,9 @@ class Build(ProjectDependency):
         BSV(moduleList)
         if (moduleList.getAWBParam('software_tool', 'BUILD_FIRST_PASS_SOFTWARE')):
             Software(moduleList)
+        else:
+            li_module.dump_lim_graph(moduleList)
+
         if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
             Verilog(moduleList, True)
         

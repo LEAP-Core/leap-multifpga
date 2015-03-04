@@ -1,8 +1,8 @@
-model -> FPGA0;
-common_services -> FPGA0;
-connected_application -> FPGA0;
-hardware_system -> FPGA0;
-test_a -> FPGA0;
-test_c -> FPGA0;
-test_b -> FPGA1;
-test_d -> FPGA1;
+model -> sim0;
+common_services -> sim0;
+connected_application -> sim0;
+hardware_system -> sim0;
+test_a -> sim0;
+test_c -> sim0;
+test_b -> sim1;
+test_d -> sim1;
