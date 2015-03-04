@@ -9,6 +9,7 @@ import SCons.Script
 
 import model
 from model import Module
+from model import Source
 from fpga_environment_parser import parseFPGAEnvironment
 
 # Dynamic parameters are global, and each platform may have a few
