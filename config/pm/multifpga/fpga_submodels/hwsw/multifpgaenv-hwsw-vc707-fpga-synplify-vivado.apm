@@ -395,3 +395,6 @@ DRAM_CLOCK_MECHANISM="ExternalDifferential"
 [VC707 DDR3 SDRAM (v2.3)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707-v2.3/ddr3-sdram-device.awb
 Packagehint=leap-platforms
+
+[Generic Synplify Synthesis Tool/Params]
+USE_VIVADO_SOURCES=1
