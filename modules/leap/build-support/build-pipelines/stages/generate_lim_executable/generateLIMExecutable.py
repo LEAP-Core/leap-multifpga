@@ -95,6 +95,20 @@ class GenerateLIMExecutable():
 
                  sts = model.execute(compile_cmd)
                  
+                 # Check for non-fatal failures, communicated using an error file.
+                 if (sts == 0):
+                     try:
+                         errinfo_file = platformBuildDir + '/' + \
+                                        makePlatformBitfileName(platform.name, APM_NAME) + \
+                                        '_hw.errinfo'
+                         if os.stat(errinfo_file).st_size > 0:
+                             print "Non-fatal error: " + errinfo_file
+                             # Note error at end of build
+                             model.nonFatalFailures.append(errinfo_file)
+                     except OSError:
+                         # Assume no error if errinfo file not found
+                         pass
+
                  return sts
              return compile_platform_executable
 
