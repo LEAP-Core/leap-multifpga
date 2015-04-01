@@ -18,9 +18,10 @@ void translateUMFMessage(LI_CHANNEL_RECV_CLASS<UMF_MESSAGE> *channel, UMF_MESSAG
     UMF_MESSAGE incoming;
 
     channel->pop(incoming);
-
     element->DecodeHeader(*((UMF_CHUNK*)incoming));
      
+    // UMF_MESSAGE allocator expects the overloaded free list pointer to be NULL. 
+    incoming->SetFreeListNext(NULL);
     delete incoming;
 
     // Reassemble other message components.                                                                                                                                               
@@ -29,7 +30,8 @@ void translateUMFMessage(LI_CHANNEL_RECV_CLASS<UMF_MESSAGE> *channel, UMF_MESSAG
     {
         channel->pop(incoming);
         element->AppendChunk(*((UMF_CHUNK*)incoming));
+
+        incoming->SetFreeListNext(NULL);
         delete incoming;
     }
-
 }
