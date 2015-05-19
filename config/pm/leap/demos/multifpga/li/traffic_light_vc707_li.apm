@@ -56,5 +56,3 @@ Packagehint=leap-multifpga
 File=modules/leap/build-support/project/null_mapping.awb
 Packagehint=leap-multifpga
 
-[LIM Compiler Pipeline/Params]
-GENERATE_ROUTER_DEBUG=1
