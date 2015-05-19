@@ -1,11 +1,14 @@
-%name Aurora Service
-%desc Aurora Service
+%name Aurora Debugger
+%desc Aurora Debugger
 
-%provides aurora_service
+%provides physical_platform_debugger
 
 %attributes hybrid connected
 
-%public aurora-service.bsv
+%public aurora-debugger.bsv
+%public aurora-debugger.cpp
+%public aurora-debugger.h
+
 
 %param --global DEBUG_DRIVER_MODE 0 "Exposes a direct driver interface to user program"
 %param --global MONITOR_DRIVER_MODE 1 "Instantiates a runtime monitor for the aurora driver"

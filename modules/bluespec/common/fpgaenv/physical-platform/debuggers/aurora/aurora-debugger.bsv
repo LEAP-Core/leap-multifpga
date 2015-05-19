@@ -54,7 +54,7 @@ import Complex::*;
 `include "awb/provides/dynamic_parameters_service.bsh"
 `include "awb/dict/PARAMS_AURORA_SERVICE.bsh"
 
-module [CONNECTED_MODULE] mkAuroraService#(PHYSICAL_DRIVERS drivers) (); 
+module [CONNECTED_MODULE] mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers) (); 
 
 
     if(`DEBUG_DRIVER_MODE != 0)
