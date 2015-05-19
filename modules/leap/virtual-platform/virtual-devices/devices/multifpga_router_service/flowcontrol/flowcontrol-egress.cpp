@@ -2,7 +2,10 @@
 
 UINT32 FLOWCONTROL_LI_CHANNEL_OUT_CLASS::retryThreshold = 1000;
 
-// Classes for handling flowcontrol
+/// 
+// FLOWCONTROL_IN_CLASS -
+//  Constructs instance of FLOWCONTROL_IN_CLASS. This class receives flowcontrol messages from 
+//  the hardware layer and multiplexes them among the software-side channels.
 FLOWCONTROL_IN_CLASS::FLOWCONTROL_IN_CLASS(vector<LI_CHANNEL_OUT> *outChannelsInitializer,
                          tbb::concurrent_bounded_queue<UMF_MESSAGE> *flowcontrolQInitializer,
       	                 UMF_FACTORY factoryInitializer,
@@ -10,9 +13,14 @@ FLOWCONTROL_IN_CLASS::FLOWCONTROL_IN_CLASS(vector<LI_CHANNEL_OUT> *outChannelsIn
       LI_CHANNEL_IN_CLASS() // Perhaps a better name?
 {
     outChannels = outChannelsInitializer;   
+    debugLog.open("flowcontrol_in." + to_string(flowcontrolChannelIDInitializer) + ".log");
     // there is no need to keep the other variables, since flowcontrol messages do not block 
 }
 
+///
+// pushUMF -  
+//  Actually revceives a flowcontrol message. We inspect the message and update the 
+//  flow control credits for the appropriate software-side channel.
 void FLOWCONTROL_IN_CLASS::pushUMF(UMF_MESSAGE &message) 
 {
 
@@ -20,8 +28,8 @@ void FLOWCONTROL_IN_CLASS::pushUMF(UMF_MESSAGE &message)
 
     if(SWITCH_DEBUG)
     {
-        cout << endl << "Incoming Provisional Flowcontrol Message length "<< dec << (UINT32) (message->GetLength()) << endl;  
-        cout << "Channel ID "<< dec << message->GetChannelID() << endl;
+        debugLog << endl << "Incoming Provisional Flowcontrol Message length "<< dec << (UINT32) (message->GetLength()) << endl;  
+        debugLog << "Channel ID "<< dec << message->GetChannelID() << endl;
     }
   
     UINT32 credits = phyPvt & (MULTIFPGA_FIFO_SIZES * 2 - 1);   
@@ -30,14 +38,14 @@ void FLOWCONTROL_IN_CLASS::pushUMF(UMF_MESSAGE &message)
 
     if(SWITCH_DEBUG)
     {
-        cout << "*** Credit Message" << endl;
-        message->Print(cout); 
+        debugLog << "*** Credit Message" << endl;
+        message->Print(debugLog); 
     }
 
 
     if(SWITCH_DEBUG)
     {
-        cout << "Flowcontrol in Credit Message channel: " << dec << channel << " credits: " << dec << credits << endl;
+        debugLog << "Flowcontrol in Credit Message channel: " << dec << channel << " credits: " << dec << credits << endl;
     }
 
     delete message;
