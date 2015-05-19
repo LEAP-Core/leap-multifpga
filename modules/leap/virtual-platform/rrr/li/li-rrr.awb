@@ -10,3 +10,6 @@
 %sources -t BSV -v PUBLIC  li-rrr.bsv
 %sources -t H   -v PUBLIC  li-rrr-server.h li-rrr-client.h li-rrr-common.h
 %sources -t CPP -v PUBLIC  li-rrr-server.cpp li-rrr-client.cpp li-rrr-common.cpp
+
+%param DEBUG_RRR   0    "Enable RRR Debug"
+

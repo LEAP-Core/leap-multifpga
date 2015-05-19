@@ -53,9 +53,12 @@ using namespace std;
 RRR_SERVER_STUB RRR_SERVER_MONITOR_CLASS::ServerMap[MAX_SERVICES];
 pthread_t       RRR_SERVER_MONITOR_CLASS::ServerThreads[MAX_SERVICES];
 UINT64          RRR_SERVER_MONITOR_CLASS::RegistrationMask = 0;
+std::mutex      RRR_SERVER_MONITOR_CLASS::globalServerMutex;
 
 
-//
+///
+// RRR_SERVER_STUB_CLASS -
+//   Constructs RRR_SERVER_STUB_CLASS, initializing half-channels to the FPGA side. 
 RRR_SERVER_STUB_CLASS::RRR_SERVER_STUB_CLASS(const char *serviceName, const UINT64 serviceID): 
     ServiceName(serviceName), ServiceID(serviceID)
 {
@@ -73,7 +76,11 @@ RRR_SERVER_STUB_CLASS::RRR_SERVER_STUB_CLASS(const char *serviceName, const UINT
 // Server Monitor static methods    
 // =============================
 
-void * RRR_SERVER_THREAD(void *argv)
+///
+// RRR_SERVER_THREAD - 
+//  Thread on which server requests run.  Each server has a thread, although TODO: we should 
+//  consider using a thread poll to reduce runtime overheads.
+void *RRR_SERVER_MONITOR_CLASS::RRR_SERVER_THREAD(void *argv)
 {
   
     void **args = (void **) argv;
@@ -84,20 +91,20 @@ void * RRR_SERVER_THREAD(void *argv)
     {
         UMF_MESSAGE request = new UMF_MESSAGE_CLASS();  // create a new umf message
         translateUMFMessage(server->inputChannel, request);
-        // call service and obtain result
         UMF_MESSAGE result = server->Request(request);
         // not all requests produce a response. 
         if(result) 
-	{
-            server->outputChannel->push(result);
+        {
+             server->outputChannel->push(result);
         }
     }
 
     return NULL;
 }
 
-
-// register a service 
+// RegisterServer -
+//  register a service with service registery.  This enables lower level channel multiplexors to make 
+//  connections back to the service. 
 void
 RRR_SERVER_MONITOR_CLASS::RegisterServer(
     int             serviceID,
@@ -118,6 +125,9 @@ RRR_SERVER_MONITOR_CLASS::RegisterServer(
 
 }
 
+////
+// Methods for querying the server registery. 
+////
 bool
 RRR_SERVER_MONITOR_CLASS::isServerRegistered(
     int serviceid)
@@ -160,7 +170,10 @@ RRR_SERVER_MONITOR_CLASS::~RRR_SERVER_MONITOR_CLASS()
 {
 }
 
-// init: all services MUST have registered when this
+///
+// Init - 
+// Spawns off service threads for the software side.
+// All services MUST have registered when this
 // method is called
 void
 RRR_SERVER_MONITOR_CLASS::Init()
@@ -182,7 +195,7 @@ RRR_SERVER_MONITOR_CLASS::Init()
     	    // spawn off Monitor/Service                                                                         
 	    if (pthread_create(&ServerThreads[i],
                                NULL,
-                               RRR_SERVER_THREAD,
+                               RRR_SERVER_MONITOR_CLASS::RRR_SERVER_THREAD,
                                threadArgs))
 	    {
                 perror("pthread_create, RRR_SERVER_THREAD:");
@@ -196,7 +209,9 @@ RRR_SERVER_MONITOR_CLASS::Init()
     PLATFORMS_MODULE_CLASS::Init();
 }
 
-// uninit: override
+/// 
+// Uninit -
+//  Clean up the server registery.
 void
 RRR_SERVER_MONITOR_CLASS::Uninit()
 {

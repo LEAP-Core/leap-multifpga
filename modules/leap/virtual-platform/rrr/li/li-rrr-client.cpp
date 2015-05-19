@@ -42,15 +42,10 @@ using namespace std;
 // global link
 RRR_CLIENT RRRClient;
 
-// instantiate global service table; this table will be
-// populated by the individual services (also statically
-// instantiated) before main().
-//LI_CHANNEL_RECV_CLASS<UMF_MESSAGE>*             RRR_CLIENT_CLASS::clientResps[MAX_SERVICES];
-//LI_CHANNEL_SEND_CLASS<UMF_MESSAGE>*             RRR_CLIENT_CLASS::clientReqs[MAX_SERVICES];
-//RRR_CLIENT_STUB                                 RRR_CLIENT_CLASS::earlyConstructedClients[MAX_SERVICES];
-//bool                                            RRR_CLIENT_CLASS::constructed = 0;
-
-
+///
+// RRR_CLIENT_STUB_CLASS -
+//   Implements the interface between a specific RRR serve and its underlying channels. 
+//   Two channels are used, one that goes into the FPGA and one that comes out. 
 RRR_CLIENT_STUB_CLASS::RRR_CLIENT_STUB_CLASS(const char *serviceName, const UINT64 serviceID): 
     ServiceName(serviceName), ServiceID(serviceID) 
 {
@@ -60,26 +55,52 @@ RRR_CLIENT_STUB_CLASS::RRR_CLIENT_STUB_CLASS(const char *serviceName, const UINT
 
     inputChannel  = new LI_CHANNEL_RECV_CLASS<UMF_MESSAGE>(inputName);
     outputChannel = new LI_CHANNEL_SEND_CLASS<UMF_MESSAGE>(outputName);
+    debugLog.open(ServiceName + ".log");
 }
 
 
-// make request with response
+///
+// MakeRequest -- 
+// Sends a request and waits for response to come back. 
+// We use a lock to ensure that requests are properly ordered.
 UMF_MESSAGE
 RRR_CLIENT_STUB_CLASS::MakeRequest(UMF_MESSAGE request)
 {
 
     UMF_MESSAGE resp = new UMF_MESSAGE_CLASS();  // create a new umf message
-    outputChannel->push(request);
-    translateUMFMessage(inputChannel, resp);
+    // Force posted-requests to be atomic. 
+    std::unique_lock<std::mutex> lk(makeRequestMutex); 
+    {
+        if (DEBUG_RRR) {
+            totalPackets++;
+            debugLog <<  "Wrote Packet " << hex << totalPackets << endl;
+            request->Print(debugLog);
+        }
+
+        outputChannel->push(request);
+        translateUMFMessage(inputChannel, resp);       
+        resp->Print(debugLog); 
+    }
+
     return resp;
 
 }
 
-// make request with no response
+///
+// MakeRequestNoResponse -- 
+// Sends a request and returns immediately.
 void
 RRR_CLIENT_STUB_CLASS::MakeRequestNoResponse(UMF_MESSAGE request)
-{
+{    
+
+    if (DEBUG_RRR) {    
+        totalPackets++;
+        debugLog <<  "Wrote Packet " << hex << totalPackets << endl;
+        request->Print(debugLog);
+    }
+
     outputChannel->push(request);   
+    
 }
 
 // At some point, we need to memoize the client lookup. 
