@@ -205,7 +205,6 @@ Packagehint=leap
 File=modules/leap/build-support/build-pipelines/stages/xilinx/xilinx-bitgen.awb
 Packagehint=leap
 
-
 [Interface builder]
 File=modules/leap/build-support/build-pipelines/stages/iface/iface.awb
 Packagehint=leap
@@ -444,3 +443,10 @@ Packagehint=leap
 [DDR SDRAM Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram.awb
 Packagehint=leap-platforms
+
+[RRR Debug Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-debug.awb
+Packagehint=leap
+
+[RRR Common Module/Requires]
+rrr_debug=RRR Debug Module

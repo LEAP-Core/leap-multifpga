@@ -119,7 +119,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdra
 Packagehint=leap-platforms
 
 [Xilinx DDR SDRAM Physical Device/Requires]
-ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
+ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM (v1.7)
 ddr_sdram_definitions=DDR SDRAM Common Definitions
 
 [BlueNoC PCIe Bridge/Requires]
@@ -272,7 +272,7 @@ File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdra
 Packagehint=leap-platforms
 
 [Xilinx DDR SDRAM Physical Device/Requires]
-ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM
+ddr_sdram_xilinx_driver=VC707 DDR3 SDRAM (v1.7)
 ddr_sdram_definitions=DDR SDRAM Common Definitions
 
 [BlueNoC PCIe Bridge/Requires]
@@ -326,9 +326,6 @@ Packagehint=leap-platforms
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex7.awb
 Packagehint=leap-platforms
 
-[VC707 DDR3 SDRAM]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707/ddr3-sdram-device.awb
-Packagehint=leap-platforms
 
 [Aurora Device Wrapper VC707/Requires]
 aurora_flowcontrol=Aurora Device Reliable Flowcontrol
@@ -466,4 +463,15 @@ Packagehint=leap-platforms
 
 [DDR SDRAM Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram.awb
+Packagehint=leap-platforms
+
+[RRR Debug Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-debug.awb
+Packagehint=leap
+
+[RRR Common Module/Requires]
+rrr_debug=RRR Debug Module
+
+[VC707 DDR3 SDRAM (v1.7)]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707/ddr3-sdram-device.awb
 Packagehint=leap-platforms
