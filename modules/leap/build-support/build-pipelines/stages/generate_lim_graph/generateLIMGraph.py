@@ -418,7 +418,7 @@ class GenerateLIMGraph():
                 # we also need a stat here to make the stats work right.  
                 # we don't care about the ID because it will get replaced later during the second compilation pass
                 if (moduleList.getAWBParam('lim_graph_generator', 'GENERATE_ROUTER_STATS')):
-                    header.write('let stat <- mkStatCounter(statName("DUMMY", "Dummy stat"));\n')   
+                    header.write('let stat <- mkStatCounter(statName("DUMMY_' + platform.name + '", "Dummy stat"));\n')   
 
                 if (moduleList.getAWBParam('lim_graph_generator', 'GENERATE_ROUTER_DEBUG')):
                     header.write('mkDebugScanNode("dummy",List::nil);\n')   
