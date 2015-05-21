@@ -96,5 +96,3 @@ Packagehint=leap-multifpga
 File=modules/leap/build-support/build-pipelines/stages/generate_lim_executable/generate-lim-executable.awb
 Packagehint=leap-multifpga
 
-[LIM Graph Generation/Params]
-GENERATE_ROUTER_STATS=1
