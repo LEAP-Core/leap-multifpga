@@ -39,6 +39,7 @@
 #include <signal.h>
 #include <string.h>
 #include <iostream>
+#include <mutex>
 
 #include "awb/provides/rrr.h"
 #include "awb/provides/li_base_types.h"
@@ -54,7 +55,8 @@ RRR_SERVER_STUB RRR_SERVER_MONITOR_CLASS::ServerMap[MAX_SERVICES];
 pthread_t       RRR_SERVER_MONITOR_CLASS::ServerThreads[MAX_SERVICES];
 UINT64          RRR_SERVER_MONITOR_CLASS::RegistrationMask = 0;
 std::mutex      RRR_SERVER_MONITOR_CLASS::globalServerMutex;
-
+boost::asio::io_service RRR_SERVER_MONITOR_CLASS::threadPool;
+boost::thread_group RRR_SERVER_MONITOR_CLASS::threads;
 
 ///
 // RRR_SERVER_STUB_CLASS -
@@ -66,41 +68,72 @@ RRR_SERVER_STUB_CLASS::RRR_SERVER_STUB_CLASS(const char *serviceName, const UINT
     std::string inputName("rrr_client_" + ServiceName + "_req");
     std::string outputName("rrr_client_" + ServiceName + "_resp");
 
-    inputChannel = new LI_CHANNEL_RECV_CLASS<UMF_MESSAGE>(inputName);
-    outputChannel = new LI_CHANNEL_SEND_CLASS<UMF_MESSAGE>(outputName);
+    std::function<void (UMF_MESSAGE)> messageHandler = [this] (UMF_MESSAGE msg) { this->HandleMessage(msg); };
 
+    inputChannel = new LI_CHANNEL_EXECUTE_RECV_CLASS<UMF_MESSAGE>(inputName, messageHandler, RRR_SERVER_MONITOR_CLASS::GetThreadPool());
+    outputChannel = new LI_CHANNEL_SEND_CLASS<UMF_MESSAGE>(outputName);
+    currentRequest = NULL;
+    debugLog.open(ServiceName + ".log");
 }
+
+//
+// HandleMessage - 
+//  Processes an incoming message
+void RRR_SERVER_STUB_CLASS::HandleMessage(UMF_MESSAGE incoming)
+{
+    // need a mutex in case we get back-to-back/temporally near messages.
+    std::unique_lock<std::mutex> lk(serverMutex); 
+
+    // One of several things may happen here.
+    // 1) We're starting a new message.
+    if (currentRequest == NULL) 
+    {
+        currentRequest = new UMF_MESSAGE_CLASS();  // create a new umf message
+        currentRequest->DecodeHeader(*((UMF_CHUNK*)incoming));
+     
+        // UMF_MESSAGE allocator expects the overloaded free list pointer to be NULL. 
+        incoming->SetFreeListNext(NULL);
+        delete incoming;
+   
+        currentRequest->StartAppend();
+    }
+
+    // 2) We're assembling the message body.
+    else if (currentRequest->CanAppend())
+    {
+        currentRequest->AppendChunk(*((UMF_CHUNK*)incoming));
+
+        incoming->SetFreeListNext(NULL);
+        delete incoming;
+    }
+
+    // have we finished the message?
+    if  (!currentRequest->CanAppend()) {
+        // If we've completed a message, we can process it. 
+
+        if (DEBUG_RRR) {
+            currentRequest->Print(debugLog);
+        }
+
+        UMF_MESSAGE result = Request(currentRequest);
+        currentRequest = NULL;
+        // not all requests produce a response. 
+        if(result) 
+        {
+            if (DEBUG_RRR) {
+                result->Print(debugLog);
+            }
+
+            outputChannel->push(result);
+        }
+    }        
+}
+
 
 
 // =============================
 // Server Monitor static methods    
 // =============================
-
-///
-// RRR_SERVER_THREAD - 
-//  Thread on which server requests run.  Each server has a thread, although TODO: we should 
-//  consider using a thread poll to reduce runtime overheads.
-void *RRR_SERVER_MONITOR_CLASS::RRR_SERVER_THREAD(void *argv)
-{
-  
-    void **args = (void **) argv;
-    const RRR_SERVER_STUB server = (RRR_SERVER_STUB) args[0];
-
-    // Loop forever, relying on blocking I/O
-    while(1) 
-    {
-        UMF_MESSAGE request = new UMF_MESSAGE_CLASS();  // create a new umf message
-        translateUMFMessage(server->inputChannel, request);
-        UMF_MESSAGE result = server->Request(request);
-        // not all requests produce a response. 
-        if(result) 
-        {
-             server->outputChannel->push(result);
-        }
-    }
-
-    return NULL;
-}
 
 // RegisterServer -
 //  register a service with service registery.  This enables lower level channel multiplexors to make 
@@ -160,7 +193,8 @@ RRR_SERVER_MONITOR_CLASS::unsetServerRegistered(
 RRR_SERVER_MONITOR_CLASS::RRR_SERVER_MONITOR_CLASS(
         PLATFORMS_MODULE p, 
         CHANNELIO cio) :
-        PLATFORMS_MODULE_CLASS(p)
+        PLATFORMS_MODULE_CLASS(p),
+        work(threadPool)
 {
 
 }
@@ -179,6 +213,13 @@ void
 RRR_SERVER_MONITOR_CLASS::Init()
 {
     // initialize services
+
+    for (std::size_t i = 0; i < WORKER_THREADS; ++i) 
+    {
+        threads.create_thread(boost::bind(&boost::asio::io_service::run, &threadPool));
+    }
+
+    /*
     for (int i = 0; i < MAX_SERVICES; i++)
     {
         if (isServerRegistered(i))
@@ -204,6 +245,7 @@ RRR_SERVER_MONITOR_CLASS::Init()
 
 	}
     }
+    */
 
     
     PLATFORMS_MODULE_CLASS::Init();
