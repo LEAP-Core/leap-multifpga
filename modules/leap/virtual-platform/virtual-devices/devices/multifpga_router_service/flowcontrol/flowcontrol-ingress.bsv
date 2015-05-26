@@ -182,6 +182,9 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(String name, Intege
     FIFOF#(umf_chunk_w) bodyFIFO <- mkFIFOF();
 
     Reg#(Bit#(10)) count <- mkReg(0);
+    Reg#(Bool) invalidService <- mkReg(False);
+    Vector#(n, Reg#(Bool)) readOverwrite <- replicateM(mkReg(False));
+    Vector#(n, Reg#(Bit#(16))) nonDeqCount <- replicateM(mkReg(0));
 
 
     // ==============================================================
@@ -195,7 +198,20 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(String name, Intege
             //latencyStats.incrBy(fromInteger(i),zeroExtend(requestQueues.used()[i]));
         end
     endrule
-
+     
+    if(`SWITCH_DEBUG > 0) 
+    begin
+        DEBUG_SCAN_FIELD_LIST via_dbg_list = List::nil;
+        via_dbg_list <- addDebugScanField(via_dbg_list, " invalid service", invalidService);
+        for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
+        begin
+            via_dbg_list <- addDebugScanField(via_dbg_list, "ingress " + name + " channel " + integerToString(i) + " used", usedLast[i]);
+            via_dbg_list <- addDebugScanField(via_dbg_list, "ingress " + name + " channel " + integerToString(i) + " free", freeLast[i]);
+            via_dbg_list <- addDebugScanField(via_dbg_list, "ingress " + name + " channel " + integerToString(i) + " readOverwrite", readOverwrite[i]);
+            via_dbg_list <- addDebugScanField(via_dbg_list, "ingress " + name + " channel " + integerToString(i) + " non-Deqs", nonDeqCount[i]);
+        end
+        let viaDbg <- mkDebugScanNode("Debug ingress switch " + name, via_dbg_list);
+    end
 
     rule debug (`SWITCH_DEBUG == 1);
         Vector#(n,Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) used = requestQueues.used();
@@ -370,10 +386,12 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(String name, Intege
         if(zeroExtendNP(packet.serviceID) > nLarge)
         begin
              $display("Received invalid service ID: %d > %d (max)", packet.serviceID, valueof(n));
-             $finish; 
+             $finish;
+             invalidService <= True; 
         end
-    endrule
 
+    endrule   
+    
     // scan channel for request message chunks
     rule scan_params (requestChunksRemaining != 0);
 
@@ -384,6 +402,13 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(String name, Intege
         // one chunk processed
         requestChunksRemaining <= requestChunksRemaining - 1;
 
+        if(`SWITCH_DEBUG == 1)
+        begin
+            if(requestQueues.used()[requestActiveQueue] + 1> `MULTIFPGA_FIFO_SIZES)
+            begin
+                readOverwrite[requestActiveQueue] <= True;
+            end
+        end
     endrule
 
     // ==============================================================
@@ -493,13 +518,14 @@ module [CONNECTED_MODULE] mkFlowControlSwitchIngressNonZero#(String name, Intege
 
     end
 
-    rule warnOnNonDeq(reqIdx matches tagged Valid .idx  &&& !deqFired);
-      if(`SWITCH_DEBUG == 1)
-      begin
+    if(`SWITCH_DEBUG == 1)
+    begin
+        rule warnOnNonDeq(reqIdx matches tagged Valid .idx  &&& !deqFired);
           $display(name + ": Warning: Queue %d was scheduled but did not deq value",idx);
-      end
-    endrule
-
+          nonDeqCount[idx] <= nonDeqCount[idx] + 1;
+        endrule
+    end
+        
     interface ingressPorts  = ingress_ports;
 
     interface EGRESS_PACKET_GENERATOR flowcontrol_response;

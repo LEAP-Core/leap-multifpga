@@ -17,6 +17,8 @@
 %sources -t H    -v PUBLIC  hello-world.h
 %sources -t CPP  -v PRIVATE hello-world.cpp
 
+%param SYNTH_BOUNDARY mkConnectedApplication "name of synthesis boundary"
+
 %param --dynamic SLEEP_TIME 128  "Time between attempts to transmit"
 %param --dynamic VERBOSE 0       "Turn on all print outs"
 

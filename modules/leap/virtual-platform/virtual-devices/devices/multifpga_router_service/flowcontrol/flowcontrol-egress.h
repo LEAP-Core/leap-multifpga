@@ -1,3 +1,34 @@
+//
+// Copyright (c) 2013, Intel Corporation
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+// Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+//
+// Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+//
+// Neither the name of the Intel Corporation nor the names of its contributors
+// may be used to endorse or promote products derived from this software
+// without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
+//
+
 #ifndef __FLOWCONTROL_EGRESS__
 #define __FLOWCONTORL_EGRESS__
 
@@ -8,6 +39,8 @@
 #include <condition_variable>
 #include <pthread.h>
 
+#include "asim/trace.h"
+
 #include "platforms-module.h"
 #include "awb/provides/umf.h"
 #include "awb/provides/physical_channel.h"
@@ -16,12 +49,24 @@
 #include "tbb/compat/condition_variable"
 #include "tbb/atomic.h"
 
+// FLOWCONTROL_IN_CLASS --
+// Implements a flow control management class for outbound LI
+// channels.  Flowcontrol messages are in-bound from the FPGA, hence
+// the name. This class inherits LI_CHANNEL_IN_CLASS because it receives
+// messages from the FPGA. These messages are special flow control
+// messages, which the class then deals out to the various waiting
+// threads. Incoming credit messages will update the credit count and wake any
+// sleeping threads.
+//
+// This class is instantiated once per physical outbound interconnect, and manages 
+// all outbound channels on that interconnect.
+//
 
-// Handles incoming flowcontrol messages. 
 class FLOWCONTROL_IN_CLASS: public LI_CHANNEL_IN_CLASS
 {
   private:
     vector<LI_CHANNEL_OUT> *outChannels;
+    ofstream debugLog;
 
   public:
     FLOWCONTROL_IN_CLASS(vector<LI_CHANNEL_OUT> *outChannelInitializer,
@@ -33,7 +78,17 @@ class FLOWCONTROL_IN_CLASS: public LI_CHANNEL_IN_CLASS
     void Init() {};
 };
 
-// Add a flow control interface to outbound channels
+// FLOWCONTROL_LI_CHANNEL_OUT_CLASS --
+// Implements flow control for outbound LI channels.  The outbound
+// channel using the service will acquireCredit before it transmits. 
+// If no or too little credit is available, the channel will
+// block. Initially the channel will spin in the hope that a message
+// arrives soon, but later, it will go to sleep on a condition
+// variable.
+//
+// Incoming credit messages will freeCredits, updating the credit count and wake any
+// sleeping threads.
+
 typedef class FLOWCONTROL_LI_CHANNEL_OUT_CLASS* FLOWCONTROL_LI_CHANNEL_OUT;
 class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
 {
@@ -42,12 +97,13 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
     class std::mutex flowcontrolMutex; 
     condition_variable flowcontrolVariable; 
     timespec start;
+    ofstream *debugLog;
 
   public:
 
     static UINT32 retryThreshold;
 
-    FLOWCONTROL_LI_CHANNEL_OUT_CLASS(class tbb::concurrent_bounded_queue<UMF_MESSAGE> *outputQInitializer):
+    FLOWCONTROL_LI_CHANNEL_OUT_CLASS(ofstream *debugLogInitializer, class tbb::concurrent_bounded_queue<UMF_MESSAGE> *outputQInitializer):
         LI_CHANNEL_OUT_CLASS(outputQInitializer),
 	flowcontrolCredits(),
         flowcontrolMutex(),
@@ -57,6 +113,7 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
         flowcontrolCredits.fetch_and_add(MULTIFPGA_FIFO_SIZES);
         flowcontrolMutex.unlock();        
         clock_gettime(CLOCK_REALTIME, &start);
+        debugLog = debugLogInitializer;
     };
 
     ~FLOWCONTROL_LI_CHANNEL_OUT_CLASS() {};
@@ -67,9 +124,9 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
         timespec finish;
         if(outputQ != NULL) // Are we a real channel, or a dummy?
 	{
-            if(SWITCH_DEBUG) 
+            if (SWITCH_DEBUG) 
             {
-                cout << "Attempting to update credits" << endl;
+                (*debugLog) << "Attempting to update credits" << endl;
 	    }
 
             flowcontrolCredits.fetch_and_add(credits);            
@@ -91,19 +148,17 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
                     temp.tv_nsec = finish.tv_nsec-start.tv_nsec;
                 }
 
-                cout << "Seconds since credit update " << temp.tv_sec << endl;
-                cout << "Nanoseconds since credit update " << temp.tv_nsec << endl;
+                (*debugLog) << "Seconds since credit update " << temp.tv_sec << endl;
+                (*debugLog) << "Nanoseconds since credit update " << temp.tv_nsec << endl;
                 start = finish;
 
 	    }
 
-            //assert(credits < MULTIFPGA_FIFO_SIZES); 
-        
 	    flowcontrolVariable.notify_all();
             
-            if(SWITCH_DEBUG) 
+            if (SWITCH_DEBUG)  
             {
-                cout << "credits updated" << endl;
+              (*debugLog) << "credits updated" << endl;
 	    }
 	}
     };
@@ -113,6 +168,7 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
         // it is possible that someone could sneak in an steal our credit even if we are woken.      
         UINT32 retries;        
 
+        // We attempt to wait for credit before acquiring the lock and going to sleep. 
         for(retries = 0; retries < 2500; retries++) 
         {
  	    UINT32 originalCredits = flowcontrolCredits.fetch_and_add(-1 * credits);
@@ -122,44 +178,40 @@ class FLOWCONTROL_LI_CHANNEL_OUT_CLASS: public LI_CHANNEL_OUT_CLASS
 	        // Oops grabbed too much credit
   	        flowcontrolCredits.fetch_and_add(credits);        
 
-	        if(SWITCH_DEBUG)
+                if (SWITCH_DEBUG) 
 	        {
-	            cout << "Channel "<< this << " spins for flowcontrol credits" << endl;
+                    (*debugLog) << "Channel "<< this << " spins for flowcontrol credits" << endl;
 	        }       
 	    } 
             else
 	    {
-	      if(retries > 0) 
-                {
-		  //      cout << "Channel "<< this << " spins " << retries << endl;
-		}
+                // We got our credits.  We can now return. 
 	        return;
 	    } 
 	}
 
-	//   	cout << "Channel "<< this << " spins " << retries << endl;
         // We failed to get credit enough times that we're just going to block... 
         unique_lock<std::mutex> flowcontrolLock(flowcontrolMutex);
 	while(flowcontrolCredits < credits)
 	{
-	    if(SWITCH_DEBUG)
+            if (SWITCH_DEBUG)
 	    {
-	        cout << "Channel "<< this << " Blocks for flowcontrol credits" << endl;
+                (*debugLog) << "Channel "<< this << " Blocks for flowcontrol credits" << endl;
 	    }
                
 	    flowcontrolVariable.wait(flowcontrolLock);  //Need to wait for a credit message.      
 
-            if(SWITCH_DEBUG)
+            if (SWITCH_DEBUG)
 	    {
-	        cout << "Channel "<< this << " Wakes" << endl;
+                (*debugLog) << "Channel "<< this << " Wakes" << endl;
 	    }
 	}
 
 	flowcontrolCredits.fetch_and_add(-1 * credits);
 
-	if(SWITCH_DEBUG)
+	if (SWITCH_DEBUG)
 	{
-	    cout << "Credits remaining: " << dec << flowcontrolCredits << endl;
+            (*debugLog) << "Credits remaining: " << dec << flowcontrolCredits << endl;
 	}
 
     };

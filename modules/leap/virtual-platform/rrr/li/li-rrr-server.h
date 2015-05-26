@@ -26,6 +26,11 @@ class RRR_SERVER_CLASS
 
 // ============== RRR server stub base class =================
 
+///
+// RRR_SERVER_STUB_CLASS -
+//  Layer between server-specific method interface and the underlying
+//  communications hardware.  Maintains two LI channels for communication
+//  with hardware-side client. 
 typedef class RRR_SERVER_STUB_CLASS* RRR_SERVER_STUB;
 class RRR_SERVER_STUB_CLASS
 {
@@ -44,6 +49,12 @@ class RRR_SERVER_STUB_CLASS
 
 // ================== Basic RRR Server Monitor ==================
 
+///
+// RRR_SERVER_MONITOR_CLASS -
+//  A registery for RRR software servers. This is needed to solve a dependency problem in channel construction. 
+//  The software-side server threads touch both halves of the LI channel, and so both must be constructed 
+//  before we spawn the thread.  This class allows servers to register, and then spawns a thread for each of the
+//  servers.  TODO: use a thread pool rather than spawning a huge number of threads. 
 typedef class RRR_SERVER_MONITOR_CLASS* RRR_SERVER_MONITOR;
 class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS
 {
@@ -53,6 +64,8 @@ class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS
     static RRR_SERVER_STUB ServerMap[MAX_SERVICES];
     static pthread_t       ServerThreads[MAX_SERVICES];
     
+    static std::mutex globalServerMutex;
+
     // maintain a valid-mask for services that have properly
     // registered themselves. We do this because it is possible
     // to explicitly intialize a simple integer static variable
@@ -68,6 +81,8 @@ class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS
 
     // static methods used to populate service table
     static void RegisterServer(int serviceid, RRR_SERVER_STUB server_stub);
+
+    static void * RRR_SERVER_THREAD(void *argv);
     
     // regular methods
     RRR_SERVER_MONITOR_CLASS(PLATFORMS_MODULE, CHANNELIO);

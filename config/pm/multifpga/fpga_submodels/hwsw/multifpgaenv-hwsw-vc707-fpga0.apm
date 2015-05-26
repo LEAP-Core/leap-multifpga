@@ -304,4 +304,11 @@ Packagehint=leap-multifpga
 
 [Virtex-7 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-10gbps-64.awb
+
+[RRR Debug Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-debug.awb
+Packagehint=leap
+
+[RRR Common Module/Requires]
+rrr_debug=RRR Debug Module
 Packagehint=leap-platforms

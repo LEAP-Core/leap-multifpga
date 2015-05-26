@@ -287,3 +287,12 @@ Packagehint=leap-platforms
 [FPGA Platform Build Pipeline Xilinx (Vivado)]
 File=config/pm/leap/submodels/pipelines/build-pipeline-xilinx-multifpga-vivado.apm
 Packagehint=leap-multifpga
+
+[RRR Debug Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-debug.awb
+Packagehint=leap
+
+[RRR Common Module/Requires]
+rrr_debug=RRR Debug Module
+
+

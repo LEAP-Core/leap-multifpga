@@ -38,7 +38,6 @@ import FIFO::*;
 import FixedPoint::*;
 import Complex::*;
 
-`include "awb/provides/low_level_platform_interface.bsh"
 `include "awb/provides/physical_platform.bsh"
 `include "awb/provides/aurora_device.bsh"
 `include "awb/provides/aurora_flowcontrol_debugger.bsh"
@@ -52,15 +51,14 @@ import Complex::*;
 `include "awb/provides/librl_bsv_storage.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/provides/dynamic_parameters_service.bsh"
-`include "awb/dict/PARAMS_AURORA_SERVICE.bsh"
+`include "awb/dict/PARAMS_PHYSICAL_PLATFORM_DEBUGGER.bsh"
 
-module [CONNECTED_MODULE] mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers) (); 
-
+module [CONNECTED_MODULE] mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers) (PHYSICAL_DRIVERS); 
 
     if(`DEBUG_DRIVER_MODE != 0)
     begin
         PARAMETER_NODE paramNode  <- mkDynamicParameterNode();
-        Param#(8) targetAurora <- mkDynamicParameter(`PARAMS_AURORA_SERVICE_TARGET_AURORA,paramNode);
+        Param#(8) targetAurora <- mkDynamicParameter(`PARAMS_PHYSICAL_PLATFORM_DEBUGGER_TARGET_AURORA,paramNode);
   
         AURORA_COMPLEX_DRIVER auroraDriver = drivers.auroraDriver[targetAurora];
 
@@ -117,4 +115,6 @@ module [CONNECTED_MODULE] mkPhysicalPlatformDebugger#(PHYSICAL_DRIVERS drivers) 
             let debugger <- mkAuroraDebugger(i,auroraDriver); 
         end  
     end
+
+    return drivers;
 endmodule

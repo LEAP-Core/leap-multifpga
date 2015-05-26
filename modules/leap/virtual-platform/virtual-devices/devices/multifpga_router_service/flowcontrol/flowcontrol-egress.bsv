@@ -46,6 +46,7 @@ import ConfigReg::*;
 `include "awb/provides/channelio.bsh"
 `include "awb/provides/rrr_common.bsh"
 `include "awb/provides/umf.bsh"
+`include "awb/provides/common_services.bsh"
 `include "awb/provides/librl_bsv_base.bsh"
 `include "awb/rrr/service_ids.bsh"
 
@@ -76,12 +77,12 @@ endinterface
 // The egress switch takes two arguments - a read and a write.   The write function is a stream 
 // of serialized outbound packets.  The read function takes in flow control credits from the 
 // corresponding ingress switch on the other FPGA
-module mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
-                                                    umf_channel_id, umf_service_id,
-                                                    umf_method_id,  umf_message_len,
-                                                    umf_phy_pvt,    filler_bits), 
-                                                umf_chunk)  requestQueues[],
-
+module [CONNECTED_MODULE] mkEgressSwitch#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                                        umf_channel_id, umf_service_id,
+                                                        umf_method_id,  umf_message_len,
+                                                        umf_phy_pvt,    filler_bits), 
+                                                    umf_chunk)  requestQueues[],
+        
                        SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                 umf_channel_id_r, umf_service_id_r,
                                                 umf_method_id_r,  umf_message_len_r,
@@ -125,12 +126,12 @@ endmodule
 // General idea here is that we can only send for non-zero values
 // One issue is simplifying the arbitration logic.  On one hand, we would like to just and buffer_available and fifo_ready. That's simple.  
 // But that invovlves dealing with a max sized message, which is probably easy enough.   
-module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
-                                                    umf_channel_id, umf_service_id,
-                                                    umf_method_id,  umf_message_len,
-                                                    umf_phy_pvt,    filler_bits),
-                                                umf_chunk)  requestQueues[],
-
+module [CONNECTED_MODULE] mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PACKET_HEADER#(
+                                                        umf_channel_id, umf_service_id,
+                                                        umf_method_id,  umf_message_len,
+                                                        umf_phy_pvt,    filler_bits),
+                                                    umf_chunk)  requestQueues[],
+            
                                          SWITCH_INGRESS_PORT#(GENERIC_UMF_PACKET#(GENERIC_UMF_PACKET_HEADER#(
                                                                                        umf_channel_id_r, umf_service_id_r,
                                                                                        umf_method_id_r,  umf_message_len_r,
@@ -186,6 +187,12 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
     LUTRAM#(Bit#(n_FIFOS_SAFE_SZ), Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES)))) portCredits <- mkLUTRAM(`MULTIFPGA_FIFO_SIZES);
     Vector#(n, Reg#(Bit#(TAdd#(1,TLog#(`MULTIFPGA_FIFO_SIZES))))) portCreditsReg <- replicateM(mkConfigReg(`MULTIFPGA_FIFO_SIZES));
     Vector#(n,Reg#(Bool)) bufferAvailable <- replicateM(mkReg(True));
+
+    // Debug Error Flags
+    Vector#(n,Reg#(Bool)) creditsUnderflow <- replicateM(mkReg(False));
+    Reg#(Bool)            creditsOverflow <- mkReg(False);
+    Reg#(Bool)            creditsEnd <- mkReg(False);   
+
     Vector#(n,Bool) requestQueuesNotEmpty = newVector();
 
     PulseWire adjustCreditsFired <- mkPulseWire;
@@ -203,7 +210,20 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
         stateUpdated <= True;
     endrule
 
+    if(`SWITCH_DEBUG > 0) 
+    begin
+        DEBUG_SCAN_FIELD_LIST via_dbg_list = List::nil;
 
+        via_dbg_list <- addDebugScanField(via_dbg_list, "credits zeroed", creditsEnd);
+        via_dbg_list <- addDebugScanField(via_dbg_list, "credits overflowed", creditsOverflow);
+        for(Integer i = 0; i < fromInteger(valueof(n)); i = i + 1)
+        begin
+            via_dbg_list <- addDebugScanField(via_dbg_list, "engress " + name + " channel " + integerToString(i) + " bufferAvailable", bufferAvailable[i]);
+            via_dbg_list <- addDebugScanField(via_dbg_list, "egress " + name + " channel " + integerToString(i) + " portCredits", portCreditsReg[i]);
+            via_dbg_list <- addDebugScanField(via_dbg_list, "egress " + name + " channel " + integerToString(i) + " credit underflow", creditsUnderflow[i]);
+        end
+        let viaDbg <- mkDebugScanNode("Debug egress switch " + name, via_dbg_list);
+    end
 
     rule debug(`SWITCH_DEBUG == 1 && stateUpdated);
         $display(name + ": Egress Queue buffer max: %d", maximumPacketSize);
@@ -286,6 +306,10 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                 $display(name + ": Setting credits to zero... this is a bug");
                 $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
                 $finish;
+                if(`SWITCH_DEBUG > 0) 
+                begin
+                    creditsEnd <= True;
+                end
             end      
 
             if(creditsNext > `MULTIFPGA_FIFO_SIZES)
@@ -293,6 +317,10 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
                 $display(name + ": Credits have overflowed fifo size... this is a bug %m");
                 $display("Switch %s For link %d creditNext %d creditsRX %d currentCredits %d", name, responseActiveQueue, creditsNext, tpl_2(payload), currentCredits);
                 $finish;
+                if(`SWITCH_DEBUG > 0) 
+                begin
+                    creditsOverflow <= True;
+                end
             end      
 
 
@@ -342,12 +370,20 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             begin
                 $display(name + ": Credit overflow");
                 $finish;
+                if(`SWITCH_DEBUG > 0) 
+                begin
+                    creditsOverflow <= True;
+                end
             end
 
             if(creditsNext < maximumPacketSize)
             begin
                 $display(name + ": Setting credits to zero... this is a bug");
                 $finish;
+                if(`SWITCH_DEBUG > 0) 
+                begin
+                    creditsEnd <= True;
+                end
             end      
         endrule
     end
@@ -492,6 +528,11 @@ module mkFlowControlSwitchEgressNonZero#(EGRESS_PACKET_GENERATOR#(GENERIC_UMF_PA
             if (oldCredits < zeroExtendNP(requestChunks) && (!requestQueues[s].bypassFlowcontrol))
             begin
                 $display(name + ": Credit Underflow on channel %d oldCredit %d messageSize %d newCount %d max %d s bypasses flowcontrol %d", s, oldCredits, requestChunks, newCount, maximumPacketSize, requestQueues[s].bypassFlowcontrol);
+                if(`SWITCH_DEBUG > 0) 
+                begin
+                    creditsUnderflow[s] <= True;
+                end
+
                 $finish;               
             end
         endrule
