@@ -22,7 +22,7 @@ Section: devel
 
 Package: leap-multifpga-bin
 Architecture: any
-Depends: awb, python-ply, python-pygraph, python-glpk, ${misc:Depends}
+Depends: awb, python-ply, python-pygraph, python-glpk, libboost-system-dev, libboost-thread-dev, ${misc:Depends}
 Description: Executables for the Leap multifpga environement
  Core executables and drivers for Leap multifpga
 Section: devel

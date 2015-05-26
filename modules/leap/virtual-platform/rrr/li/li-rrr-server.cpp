@@ -62,27 +62,25 @@ boost::thread_group RRR_SERVER_MONITOR_CLASS::threads;
 // RRR_SERVER_STUB_CLASS -
 //   Constructs RRR_SERVER_STUB_CLASS, initializing half-channels to the FPGA side. 
 RRR_SERVER_STUB_CLASS::RRR_SERVER_STUB_CLASS(const char *serviceName, const UINT64 serviceID): 
+    // Call receive channel base class constructor. 
+    LI_CHANNEL_RECV_CLASS<UMF_MESSAGE>("rrr_client_" + std::string(serviceName) + "_req"),
     ServiceName(serviceName), ServiceID(serviceID)
 {
-
-    std::string inputName("rrr_client_" + ServiceName + "_req");
     std::string outputName("rrr_client_" + ServiceName + "_resp");
 
-    std::function<void (UMF_MESSAGE)> messageHandler = [this] (UMF_MESSAGE msg) { this->HandleMessage(msg); };
+    messageHandler = [this] () { this->HandleMessage(); };
 
-    inputChannel = new LI_CHANNEL_EXECUTE_RECV_CLASS<UMF_MESSAGE>(inputName, messageHandler, RRR_SERVER_MONITOR_CLASS::GetThreadPool());
     outputChannel = new LI_CHANNEL_SEND_CLASS<UMF_MESSAGE>(outputName);
     currentRequest = NULL;
-    debugLog.open(ServiceName + ".log");
+
+    if (DEBUG_RRR) 
+    {
+        debugLog.open(ServiceName + ".log");
+    }
 }
 
-//
-// HandleMessage - 
-//  Processes an incoming message
-void RRR_SERVER_STUB_CLASS::HandleMessage(UMF_MESSAGE incoming)
+void RRR_SERVER_STUB_CLASS::push(UMF_MESSAGE &incoming)
 {
-    // need a mutex in case we get back-to-back/temporally near messages.
-    std::unique_lock<std::mutex> lk(serverMutex); 
 
     // One of several things may happen here.
     // 1) We're starting a new message.
@@ -94,39 +92,70 @@ void RRR_SERVER_STUB_CLASS::HandleMessage(UMF_MESSAGE incoming)
         // UMF_MESSAGE allocator expects the overloaded free list pointer to be NULL. 
         incoming->SetFreeListNext(NULL);
         delete incoming;
+
+        if (DEBUG_RRR) {
+            debugLog << "Starting new request" << endl;
+        }
    
         currentRequest->StartAppend();
     }
-
     // 2) We're assembling the message body.
     else if (currentRequest->CanAppend())
     {
         currentRequest->AppendChunk(*((UMF_CHUNK*)incoming));
-
         incoming->SetFreeListNext(NULL);
         delete incoming;
+
+        if (DEBUG_RRR) {
+            debugLog << "Continuing request" << endl;
+        }
+
     }
 
     // have we finished the message?
-    if  (!currentRequest->CanAppend()) {
-        // If we've completed a message, we can process it. 
-
+    if  (!currentRequest->CanAppend()) 
+    {
+        // Post a message for execution.  Queue is better. 
         if (DEBUG_RRR) {
-            currentRequest->Print(debugLog);
+            debugLog << "Posting packet to messageHandler" << endl;
         }
 
-        UMF_MESSAGE result = Request(currentRequest);
+        dataQ.push(currentRequest);
+        RRR_SERVER_MONITOR_CLASS::threadPool.post(messageHandler);
         currentRequest = NULL;
-        // not all requests produce a response. 
-        if(result) 
-        {
-            if (DEBUG_RRR) {
-                result->Print(debugLog);
-            }
-
-            outputChannel->push(result);
-        }
     }        
+
+}
+
+//
+// HandleMessage - 
+//  Processes an incoming message
+void RRR_SERVER_STUB_CLASS::HandleMessage()
+{
+    // need a mutex in case we get back-to-back/temporally near messages.
+    std::unique_lock<std::mutex> lk(serverMutex); 
+
+    UMF_MESSAGE request;
+
+    dataQ.pop(request);
+
+    if (DEBUG_RRR) {
+        request->Print(debugLog);
+    }
+
+    UMF_MESSAGE result = Request(request);
+   
+    // not all requests produce a response. 
+    if(result) 
+    {
+        if (DEBUG_RRR) 
+        {
+            result->Print(debugLog);
+        }
+
+        outputChannel->push(result);
+    }
+
 }
 
 
@@ -150,11 +179,9 @@ RRR_SERVER_MONITOR_CLASS::RegisterServer(
         exit(1);
     }
 
-
     // set link in map table
     ServerMap[serviceID] = server;
     setServerRegistered(serviceID);
-
 
 }
 
@@ -213,40 +240,25 @@ void
 RRR_SERVER_MONITOR_CLASS::Init()
 {
     // initialize services
-
+  
+    // First load up some threads into the thread pool.
     for (std::size_t i = 0; i < WORKER_THREADS; ++i) 
     {
         threads.create_thread(boost::bind(&boost::asio::io_service::run, &threadPool));
     }
 
-    /*
+    // Call Init on the services so that they're ready for execution.  Calling Init
+    // is required for the services. 
     for (int i = 0; i < MAX_SERVICES; i++)
     {
         if (isServerRegistered(i))
         {
-            void **threadArgs = (void**) malloc(sizeof(void*));
-            threadArgs[0] = (void *)ServerMap[i]; 
-            
             // set myself as the PLATFORMS_MODULE parent
             // for all services so that I can chain
             // uninit()s to them
             ServerMap[i]->Init(this);
-        
-
-    	    // spawn off Monitor/Service                                                                         
-	    if (pthread_create(&ServerThreads[i],
-                               NULL,
-                               RRR_SERVER_MONITOR_CLASS::RRR_SERVER_THREAD,
-                               threadArgs))
-	    {
-                perror("pthread_create, RRR_SERVER_THREAD:");
-                exit(1);
-	    }
-
 	}
     }
-    */
-
     
     PLATFORMS_MODULE_CLASS::Init();
 }
@@ -268,10 +280,13 @@ RRR_SERVER_MONITOR_CLASS::Uninit()
             ServerMap[i] = NULL;
         }
     }
+
     RegistrationMask = 0;
 
-    // chain
-    PLATFORMS_MODULE_CLASS::Uninit();
+    // tear down thread pool
+    threadPool.stop();
+    threads.join_all();
+
 }
 
 // poll

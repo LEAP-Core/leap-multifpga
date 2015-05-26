@@ -12,7 +12,7 @@
 #include <mutex>
 
 #define MAX_SERVICES            64
-#define WORKER_THREADS          1
+#define WORKER_THREADS          2
 
 // ============== RRR server base class =================
 
@@ -35,24 +35,28 @@ class RRR_SERVER_CLASS
 // RRR_SERVER_STUB_CLASS -
 //  Layer between server-specific method interface and the underlying
 //  communications hardware.  Maintains two LI channels for communication
-//  with hardware-side client. 
+//  with hardware-side client. One of these channels, the incoming channel, 
+//  is obtained through inheritance.
 typedef class RRR_SERVER_STUB_CLASS* RRR_SERVER_STUB;
-class RRR_SERVER_STUB_CLASS
+class RRR_SERVER_STUB_CLASS: LI_CHANNEL_RECV_CLASS<UMF_MESSAGE>
 {
   protected:
     std::mutex serverMutex;
     UMF_MESSAGE currentRequest;
     ofstream debugLog;
-
-    void HandleMessage(UMF_MESSAGE);
+    // This is a c++11 function pointer. 
+    std::function<void ()> messageHandler;
+    void HandleMessage();
 
   public:
     RRR_SERVER_STUB_CLASS(const char *serviceName, const UINT64 serviceID);
     const std::string ServiceName;
     const UINT64 ServiceID;
 
-    LI_CHANNEL_EXECUTE_RECV_CLASS<UMF_MESSAGE> *inputChannel; 
+    // LI_CHANNEL_EXECUTE_RECV_CLASS<UMF_MESSAGE> *inputChannel; 
     LI_CHANNEL_SEND_CLASS<UMF_MESSAGE>         *outputChannel; 
+
+    void push(UMF_MESSAGE &message); 
 
     virtual UMF_MESSAGE Request(UMF_MESSAGE)   = 0;
     virtual void        Init(PLATFORMS_MODULE) = 0;
@@ -113,19 +117,3 @@ class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS
 
 #endif
 
-/*
-Create an io_service:
-
-and some work to stop its run() function from exiting if it has nothing else to do:
-
-Start some worker threads:
-
-
-Post the tasks to the io_service so they can be performed by the worker threads:
-
-io_service.post(boost::bind(a_long_running_task, 123));
-Finally, before the program exits shut down the io_service and wait for all threads to exit:
-  io_service.stop();
-threads.join_all();
-Edit | Attach | Print 
-*/
