@@ -6,8 +6,13 @@
 #include "platforms-module.h"
 #include "li-rrr-common.h"
 #include "awb/provides/channelio.h"
+#include "boost/asio.hpp"
+#include "boost/thread.hpp"
+#include "boost/bind.hpp"
+#include <mutex>
 
 #define MAX_SERVICES            64
+#define WORKER_THREADS          2
 
 // ============== RRR server base class =================
 
@@ -30,17 +35,28 @@ class RRR_SERVER_CLASS
 // RRR_SERVER_STUB_CLASS -
 //  Layer between server-specific method interface and the underlying
 //  communications hardware.  Maintains two LI channels for communication
-//  with hardware-side client. 
+//  with hardware-side client. One of these channels, the incoming channel, 
+//  is obtained through inheritance.
 typedef class RRR_SERVER_STUB_CLASS* RRR_SERVER_STUB;
-class RRR_SERVER_STUB_CLASS
+class RRR_SERVER_STUB_CLASS: LI_CHANNEL_RECV_CLASS<UMF_MESSAGE>
 {
+  protected:
+    std::mutex serverMutex;
+    UMF_MESSAGE currentRequest;
+    ofstream debugLog;
+    // This is a c++11 function pointer. 
+    std::function<void ()> messageHandler;
+    void HandleMessage();
+
   public:
     RRR_SERVER_STUB_CLASS(const char *serviceName, const UINT64 serviceID);
     const std::string ServiceName;
     const UINT64 ServiceID;
 
-    LI_CHANNEL_RECV_CLASS<UMF_MESSAGE> *inputChannel; 
-    LI_CHANNEL_SEND_CLASS<UMF_MESSAGE> *outputChannel; 
+    // LI_CHANNEL_EXECUTE_RECV_CLASS<UMF_MESSAGE> *inputChannel; 
+    LI_CHANNEL_SEND_CLASS<UMF_MESSAGE>         *outputChannel; 
+
+    void push(UMF_MESSAGE &message); 
 
     virtual UMF_MESSAGE Request(UMF_MESSAGE)   = 0;
     virtual void        Init(PLATFORMS_MODULE) = 0;
@@ -58,6 +74,9 @@ class RRR_SERVER_STUB_CLASS
 typedef class RRR_SERVER_MONITOR_CLASS* RRR_SERVER_MONITOR;
 class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS
 {
+  // The server stubs need to get at the global thread pool. 
+  friend class RRR_SERVER_STUB_CLASS; 
+   
   private:
     
     // static service table
@@ -65,6 +84,9 @@ class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS
     static pthread_t       ServerThreads[MAX_SERVICES];
     
     static std::mutex globalServerMutex;
+
+    static boost::asio::io_service threadPool;
+    static boost::thread_group threads;
 
     // maintain a valid-mask for services that have properly
     // registered themselves. We do this because it is possible
@@ -76,14 +98,15 @@ class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS
     static inline bool isServerRegistered(int serviceid);
     static inline void setServerRegistered(int serviceid);
     static inline void unsetServerRegistered(int serviceid);
-    
-  public:
 
+  protected:  
+    static boost::asio::io_service *GetThreadPool() {return &threadPool;};  
+    boost::asio::io_service::work work; // Creates work for the threadPool, in case no work is otherwise available.
+  public:
+    
     // static methods used to populate service table
     static void RegisterServer(int serviceid, RRR_SERVER_STUB server_stub);
 
-    static void * RRR_SERVER_THREAD(void *argv);
-    
     // regular methods
     RRR_SERVER_MONITOR_CLASS(PLATFORMS_MODULE, CHANNELIO);
     ~RRR_SERVER_MONITOR_CLASS();
@@ -93,3 +116,4 @@ class RRR_SERVER_MONITOR_CLASS: public PLATFORMS_MODULE_CLASS
 };
 
 #endif
+

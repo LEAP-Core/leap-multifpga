@@ -35,3 +35,5 @@ void translateUMFMessage(LI_CHANNEL_RECV_CLASS<UMF_MESSAGE> *channel, UMF_MESSAG
         delete incoming;
     }
 }
+
+

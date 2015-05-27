@@ -13,3 +13,6 @@
 
 %param DEBUG_RRR   0    "Enable RRR Debug"
 
+%syslibrary boost_system
+%syslibrary boost_thread
+

@@ -55,7 +55,11 @@ RRR_CLIENT_STUB_CLASS::RRR_CLIENT_STUB_CLASS(const char *serviceName, const UINT
 
     inputChannel  = new LI_CHANNEL_RECV_CLASS<UMF_MESSAGE>(inputName);
     outputChannel = new LI_CHANNEL_SEND_CLASS<UMF_MESSAGE>(outputName);
-    debugLog.open(ServiceName + ".log");
+
+    if (DEBUG_RRR) 
+    {
+        debugLog.open(ServiceName + ".log");
+    }
 }
 
 
