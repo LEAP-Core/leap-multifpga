@@ -142,9 +142,6 @@ Packagehint=leap
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
-
-
-
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=leap-multifpga
@@ -152,10 +149,6 @@ Packagehint=leap-multifpga
 [Standard Virtual Devices Submodel]
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
-
-
-
-
 
 [Xilinx DDR SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
@@ -287,3 +280,10 @@ Packagehint=leap-platforms
 [FPGA Platform Build Pipeline Xilinx (Vivado)]
 File=config/pm/leap/submodels/pipelines/build-pipeline-xilinx-multifpga-vivado.apm
 Packagehint=leap-multifpga
+
+[RRR Debug Module]
+File=modules/leap/virtual-platform/rrr/rrr-common/rrr-debug.awb
+Packagehint=leap
+
+[RRR Common Module/Requires]
+rrr_debug=RRR Debug Module
