@@ -1,0 +1,10 @@
+%AWB_START
+
+%name VC709 Dual FPGA Environment (SATA)
+%desc VC709 Dual FPGA Environment (SATA)
+%provides environment_description
+
+%sources -t FPGAENV -v PUBLIC vc709-dual.env
+
+
+%AWB_END

@@ -1,0 +1,88 @@
+
+[Global]
+SaveParameters=0
+Description=ML605 slave fpga
+File=vc709_1
+Version=2.2
+Type=Leap
+Name=VC707 FPGA 1
+Class=Asim::Model
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+DefaultRunOpts=
+RootName=MultiFPGA Platform
+RootProvides=model
+
+[Model]
+DefaultAttributes=
+model=MultiFPGA Platform
+
+[Null Connected Application]
+File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
+Packagehint=leap-platforms
+
+[Soft Services Hybrid Application Environment/Requires]
+connected_application=Null Connected Application
+
+[MultiFPGA Platform]
+File=modules/leap/build-support/project/platform-multifpga.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Platform/Requires]
+project_common=Default Hybrid Project Common Utilities
+fpgaenv=VC709 FPGA 1 
+application_env=Soft Services Hybrid Application Environment
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/leap/submodels/common/project-common-default.apm
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+[Global]
+SaveParameters=0
+Description=ML605 slave fpga
+File=vc709_1
+Version=2.2
+Type=Leap
+Name=VC707 FPGA 1
+Class=Asim::Model
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+DefaultRunOpts=
+RootName=MultiFPGA Platform
+RootProvides=model
+
+[Model]
+DefaultAttributes=
+model=MultiFPGA Platform
+
+[Null Connected Application]
+File=modules/bluespec/tests/NullConnectedApp/null_connected_application.awb
+Packagehint=leap-platforms
+
+[Soft Services Hybrid Application Environment/Requires]
+connected_application=Null Connected Application
+
+[MultiFPGA Platform]
+File=modules/leap/build-support/project/platform-multifpga.awb
+Packagehint=leap-multifpga
+
+[MultiFPGA Platform/Requires]
+project_common=Default Hybrid Project Common Utilities
+fpgaenv=VC709 FPGA 1 
+application_env=Soft Services Hybrid Application Environment
+
+[Default Hybrid Project Common Utilities]
+File=config/pm/leap/submodels/common/project-common-default.apm
+Packagehint=leap
+
+[Soft Services Hybrid Application Environment]
+File=modules/leap/build-support/project/application-env/soft-services/application-env-hybrid-soft-service.awb
+Packagehint=leap
+
+
+
+[VC709 FPGA 1 ]
+File=config/pm/multifpga/fpga_submodels/vc709/multifpgaenv-hybrid-vc709-fpga1.apm
+Packagehint=leap-multifpga

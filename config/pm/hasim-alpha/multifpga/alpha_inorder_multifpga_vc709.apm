@@ -1,0 +1,130 @@
+
+[Global]
+SaveParameters=0
+Description=has strange module alingments
+File=alpha_inorder_multifpga_vc709
+Version=2.2
+Name=Multifpga synthesis test 
+DefaultBenchmark=
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=function_as_boundary traffic_light demo connected slave hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+connected_application=HAsim Performance Model
+environment_description=VC709 Dual FPGA Environment (SATA)
+build_pipeline=LIM Compiler Pipeline
+fpga_mapping=Alpha Inorder Sim Mapping
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=leap-multifpga
+
+[Null Memory/Requires]
+memory_base_types=Memory Base Types
+
+[HAsim Modeling Library/Requires]
+hasim_cache_algorithms=Cache Modeling Algorithms
+
+[HAsim Common Default Configuration]
+File=config/pm/hasim/submodels/common/hasim_common.apm
+Packagehint=hasim
+
+[Chip Base Types]
+File=modules/hasim/timing-models/chip/base-types/chip-base-types.awb
+Packagehint=hasim-models
+
+[Cache Modeling Algorithms]
+File=modules/hasim/timing-models/caches/cache-algorithms/cache-algorithms.awb
+Packagehint=hasim-models
+
+[Pipeline and Caches/Requires]
+hasim_pipeline=Inorder Pipeline, 2-bit branch predictor
+hasim_private_caches=Null Private caches
+
+[Alpha ISA Definition]
+File=modules/hasim/functional-partition/isa/definition/isa_definition_alpha.awb
+Packagehint=hasim-alpha
+
+[HAsim Modeling Library]
+File=modules/hasim/util/modellib/hasim-modellib.awb
+Packagehint=hasim
+
+[Inorder Pipeline, 2-bit branch predictor]
+File=config/pm/hasim-models/pipeline/inorder/inorder.apm
+Packagehint=hasim-models
+
+[Alpha Functional Model]
+File=config/pm/hasim-alpha/submodels/funcp/alpha_funcp_v3.apm
+Packagehint=hasim-alpha
+
+[Single Chip Timing Partition/Requires]
+hasim_memory=Null Memory
+hasim_modellib=HAsim Modeling Library
+hasim_chip=Single Core Chip
+
+[Single Chip Timing Partition]
+File=modules/hasim/timing-partition/single-chip/single-chip-timing-partition.awb
+Packagehint=hasim
+
+[Pipeline and Caches]
+File=modules/hasim/timing-models/core/core-with-cache/core-with-cache.awb
+Packagehint=hasim-models
+
+[Default HAsim Model Services]
+File=config/pm/hasim/submodels/common/hasim-model-services.apm
+Packagehint=hasim
+
+[HAsim Performance Model/Requires]
+hasim_common=HAsim Common Default Configuration
+hasim_timep=Single Chip Timing Partition
+hasim_isa=Alpha ISA Definition
+hasim_funcp=Alpha Functional Model
+hasim_model_services=Default HAsim Model Services
+
+[Single Core Chip/Requires]
+chip_base_types=Chip Base Types
+hasim_core=Pipeline and Caches
+hasim_chip_topology=Standard Topology Manager
+
+[Single Core Chip]
+File=modules/hasim/timing-models/chip/single-core-chip.awb
+Packagehint=hasim-models
+
+[Null Memory]
+File=modules/hasim/timing-models/memory/memory-null.awb
+Packagehint=hasim-models
+
+[HAsim Performance Model]
+File=modules/hasim/model/hasim-model.awb
+Packagehint=hasim
+
+[Memory Base Types]
+File=modules/hasim/timing-models/memory/base-types/memory-base-types.awb
+Packagehint=hasim-models
+
+[Standard Topology Manager]
+File=modules/hasim/timing-models/chip/topology/std/topology-std.awb
+Packagehint=hasim-models
+
+[Null Private caches]
+File=config/pm/hasim-models/private-caches/null-private-caches.apm
+Packagehint=hasim-models
+
+[Alpha Inorder Sim Mapping]
+File=modules/multifpga/alpha_inorder/sim_mapping.awb
+Packagehint=leap-multifpga
+
+[LIM Compiler Pipeline]
+File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
+Packagehint=leap-multifpga
+
+[VC709 Dual FPGA Environment (SATA)]
+File=modules/leap-platforms/fpga-environments/vc709/vc709_dual_env.awb
+Packagehint=leap-multifpga
