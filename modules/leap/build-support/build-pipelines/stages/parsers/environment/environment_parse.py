@@ -10,9 +10,17 @@ def p_environment(p):
     """
     p[0] = FPGAEnvironment(p[1])    
 
+def p_comment(p):
+    """
+    comment : COMMENT
+    """
+    #We aren't supposed to get here.
+    p[0]  = None
+
 def p_platform_list(p):
     """
     platform_list :
+    platform_list : comment
     platform_list : PLATFORM NAME NAME STRING SEMICOLON connection_list ENDPLATFORM platform_list
     platform_list : MASTER NAME NAME STRING SEMICOLON connection_list ENDMASTER platform_list
     """
@@ -30,6 +38,7 @@ def p_platform_list(p):
 def p_connection_list(p):
     """
     connection_list :
+    
     connection_list : physical_via connection_list
     connection_list : int_param connection_list
     connection_list : string_param connection_list

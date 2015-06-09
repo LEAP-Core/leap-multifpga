@@ -11,7 +11,7 @@ reserved = {
     'endplatform': 'ENDPLATFORM',
     }
 
-tokens = [ 'RARROW', 'LARROW', 'SEMICOLON', 'EQUAL',
+tokens = [ 'RARROW', 'LARROW', 'SEMICOLON', 'EQUAL','COMMENT',
            'NAME', 'STRING', 'INT'
          ] + list(reserved.values())
 
@@ -25,6 +25,10 @@ t_ENDPLATFORM = r'endplatform'
 t_MASTER = r'master'
 t_ENDMASTER = r'endmaster'
 #t_ENDPLATFORM = r'unknown'
+
+def t_ignore_COMMENT(t):
+    r'\#.*'
+    pass
 
 def t_NAME(t):
     r'[a-zA-Z_][]a-zA-Z0-9_[]*'
