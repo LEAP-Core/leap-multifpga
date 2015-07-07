@@ -198,10 +198,16 @@ area_group_parser=Area Group Parser
 File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
 Packagehint=leap
 
-
 [RRR Debug Module]
 File=modules/leap/virtual-platform/rrr/rrr-common/rrr-debug.awb
 Packagehint=leap
 
 [RRR Common Module/Requires]
 rrr_debug=RRR Debug Module
+
+[Local Memory Interface using BRAM/Requires]
+local_mem_interface=Local Memory Interface
+
+[Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-interface/local-mem-interface.awb
+Packagehint=leap

@@ -130,7 +130,6 @@ aurora_device=Aurora Device Wrapper VC709
 File=modules/bluespec/common/fpgaenv/fpga-components/hardware-fpga-components-virtex7.awb
 Packagehint=leap-platforms
 
-
 [Common Physical Platform Utilities/Requires]
 physical_platform_defs=Common Physical Platform Definitions
 
@@ -214,3 +213,10 @@ aurora_flowcontrol_debugger=Aurora Device Reliable Flowcontrol Debugger
 [Aurora Device Reliable Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
 Packagehint=leap-platforms
+
+[NULL Local Memory Interface/Requires]
+local_mem_interface=Local Memory Interface
+
+[Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-interface/local-mem-interface.awb
+Packagehint=leap

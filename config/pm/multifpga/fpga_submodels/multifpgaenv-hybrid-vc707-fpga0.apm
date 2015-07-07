@@ -294,7 +294,6 @@ aurora_common=Aurora Common Definitions
 File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707/vc707-v7-pcie-dma.awb
 Packagehint=leap-platforms
 
-
 [Aurora Device Reliable Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
 Packagehint=leap-platforms
@@ -325,7 +324,6 @@ RESET_ACTIVE_HIGH=1
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/clocks/differential/differential-clocks-device.awb
 Packagehint=leap-platforms
 
-
 [Virtex-7 PCIE Device v1.10 (BlueNoC)]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/pci-express/pcie-bluenoc-virtex7/1_10/pcie-virtex7.awb
 Packagehint=leap-platforms
@@ -333,7 +331,6 @@ Packagehint=leap-platforms
 [DDR SDRAM Common Definitions]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram.awb
 Packagehint=leap-platforms
-
 
 [FPGA Platform Build Pipeline Xilinx (Vivado)]
 File=config/pm/leap/submodels/pipelines/build-pipeline-xilinx-multifpga-vivado.apm
@@ -361,3 +358,10 @@ Packagehint=leap
 [RRR Common Module/Requires]
 rrr_debug=RRR Debug Module
 
+
+[Local Memory using DDR DRAM (burst holds at least one line)/Requires]
+local_mem_interface=Local Memory Interface
+
+[Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-interface/local-mem-interface.awb
+Packagehint=leap

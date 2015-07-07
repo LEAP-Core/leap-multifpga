@@ -196,7 +196,6 @@ Packagehint=leap-multifpga
 [Simlutation Communication Device with raw UNIX Communication/Requires]
 unix_comm_device=UNIX Communication Physical Device
 
-
 [Area Group Tool]
 File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
 Packagehint=leap
@@ -218,3 +217,10 @@ rrr_debug=RRR Debug Module
 [MultiFPGA Slave Platform Services (LI)]
 File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave-li.apm
 Packagehint=leap-multifpga
+
+[Local Memory Interface using BRAM/Requires]
+local_mem_interface=Local Memory Interface
+
+[Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-interface/local-mem-interface.awb
+Packagehint=leap

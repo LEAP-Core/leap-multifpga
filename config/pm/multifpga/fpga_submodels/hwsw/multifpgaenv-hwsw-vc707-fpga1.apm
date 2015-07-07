@@ -214,7 +214,6 @@ aurora_common=Aurora Common Definitions
 File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707/vc707-v7-pcie-dma.awb
 Packagehint=leap-platforms
 
-
 [Aurora Device Reliable Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
 Packagehint=leap-platforms
@@ -313,6 +312,10 @@ Packagehint=leap
 [RRR Common Module/Requires]
 rrr_debug=RRR Debug Module
 
-[VC707 DDR3 SDRAM (v1.7)]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr3-sdram-vc707/ddr3-sdram-device.awb
-Packagehint=leap-platforms
+
+[Local Memory using DDR DRAM (burst holds at least one line)/Requires]
+local_mem_interface=Local Memory Interface
+
+[Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-interface/local-mem-interface.awb
+Packagehint=leap

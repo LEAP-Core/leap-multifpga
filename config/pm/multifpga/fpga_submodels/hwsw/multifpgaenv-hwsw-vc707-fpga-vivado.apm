@@ -142,9 +142,6 @@ Packagehint=leap
 File=config/pm/leap/submodels/common/librl-bsv.apm
 Packagehint=leap
 
-
-
-
 [Soft Services for MultiFPGA Submodel]
 File=config/pm/leap/submodels/common/multifpga-soft-services.apm
 Packagehint=leap-multifpga
@@ -152,10 +149,6 @@ Packagehint=leap-multifpga
 [Standard Virtual Devices Submodel]
 File=config/pm/leap/submodels/virtual-devices/std-virtual-devices.apm
 Packagehint=leap
-
-
-
-
 
 [Xilinx DDR SDRAM Physical Device]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/ddr-sdram/ddr-sdram-xilinx/ddr-sdram-xilinx.awb
@@ -296,3 +289,9 @@ Packagehint=leap
 rrr_debug=RRR Debug Module
 
 
+[Local Memory using DDR DRAM (burst holds at least one line)/Requires]
+local_mem_interface=Local Memory Interface
+
+[Local Memory Interface]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-interface/local-mem-interface.awb
+Packagehint=leap
