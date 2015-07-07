@@ -287,16 +287,13 @@ Packagehint=leap-platforms
 
 [Aurora Device Wrapper VC707/Requires]
 aurora_flowcontrol=Aurora Device Reliable Flowcontrol
-aurora_driver=VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps
+aurora_driver=Virtex-7 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps
 aurora_common=Aurora Common Definitions
 
 [VC707 Virtex-7 Platform with PCIe]
 File=modules/bluespec/common/fpgaenv/physical-platform/pci-express-generic/config/vc707/vc707-v7-pcie-dma.awb
 Packagehint=leap-platforms
 
-[VC707 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps]
-File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-10gbps-64.awb
-Packagehint=leap-platforms
 
 [Aurora Device Reliable Flowcontrol Debugger]
 File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-reliable/debugger/aurora-debugger.awb
@@ -350,3 +347,7 @@ Packagehint=leap
 
 [RRR Common Module/Requires]
 rrr_debug=RRR Debug Module
+
+[Virtex-7 Aurora Device, Single Lane, 64b/66b, 64-bit, 10 gbps]
+File=modules/bluespec/common/fpgaenv/physical-platform/physical-devices/aurora/aurora-driver-virtex7-64b66b-10gbps/aurora-virtex7-10gbps-64.awb
+Packagehint=leap-platforms

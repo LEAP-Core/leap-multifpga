@@ -145,7 +145,7 @@ Packagehint=leap-multifpga
 
 [LIM Compiler Standard Virtual Platform/Requires]
 umf=Little-Endian Unified Message Format
-platform_services=MultiFPGA Slave Platform Services LI
+platform_services=MultiFPGA Slave Platform Services (LI)
 low_level_platform_interface=Low Level Platform LI
 virtual_devices=Standard Virtual Devices Submodel
 
@@ -196,9 +196,6 @@ Packagehint=leap-multifpga
 [Simlutation Communication Device with raw UNIX Communication/Requires]
 unix_comm_device=UNIX Communication Physical Device
 
-[MultiFPGA Slave Platform Services LI]
-File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave-li.apm
-Packagehint=leap-multifpga
 
 [Area Group Tool]
 File=modules/leap/build-support/build-pipelines/stages/area_group/area-group-tool.awb
@@ -211,10 +208,13 @@ area_group_parser=Area Group Parser
 File=modules/leap/build-support/build-pipelines/stages/area_group/parser/area-group-parser.awb
 Packagehint=leap
 
-
 [RRR Debug Module]
 File=modules/leap/virtual-platform/rrr/rrr-common/rrr-debug.awb
 Packagehint=leap
 
 [RRR Common Module/Requires]
 rrr_debug=RRR Debug Module
+
+[MultiFPGA Slave Platform Services (LI)]
+File=config/pm/leap/submodels/platform-services/multifpga-platform-services-slave-li.apm
+Packagehint=leap-multifpga
