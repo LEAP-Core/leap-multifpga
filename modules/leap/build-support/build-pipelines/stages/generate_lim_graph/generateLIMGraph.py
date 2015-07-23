@@ -288,6 +288,7 @@ class GenerateLIMGraph():
             awbBatchHandle.write('set parameter ' + platformPath + ' BUILD_LOGS_ONLY 1 ' + '\n')
             awbBatchHandle.write('set parameter ' + platformPath + ' MODULE_UID_OFFSET ' + str(moduleList.topModule.moduleDependency['MODULE_UID_OFFSET']) + '\n')
             awbBatchHandle.write('set parameter ' + platformPath + ' USE_ROUTING_KNOWN 0 ' + '\n')
+            awbBatchHandle.write('set parameter ' + platformPath + ' SOFT_CONNECTION_REMAP 0 ' + '\n')    
 
             # Platforms may have their own parameter sets. 
             for parameter in platform.parameters:
