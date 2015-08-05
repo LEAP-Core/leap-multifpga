@@ -32,6 +32,7 @@
 %param LEAP_BUILD_CACHE_DIR ""                 "Where scons should put the build cache"
 %param LEAP_LIVE_DEBUG_PATH "leap_debug/live"  "Live files (e.g. FIFOs) debugging output directory"
 
-%param INSTANTIATE_ROUTERS 1        "use smart synthesis boundaries"
-%param SMART_SYNTH_BOUNDARY 0        "use smart synthesis boundaries"
+%param INSTANTIATE_ROUTERS        1  "instantiate routers"
+%param SOFT_CONNECTION_REMAP      0  "remap soft connections"
+%param SMART_SYNTH_BOUNDARY       0  "use smart synthesis boundaries"
 %param SYNTH_BOUNDARY       mkError  "name of synthesis boundary"

@@ -9,6 +9,7 @@
 %provides build_pipeline
 %requires lim_graph_generator
 %requires lim_connect
+%requires lim_memory
 %requires lim_executable_generator
 
 %scons %library LIMPipeline.py

@@ -23,6 +23,7 @@ fpga_environment_parser=FPGA Environment Datatype
 lim_graph_generator=LIM Graph Generation
 lim_connect=Latency-insensitive Module Communication Complex Generator
 lim_executable_generator=LIM Compiler Executable Generator
+lim_memory=Latency-insensitive Module Memory Optimizer
 
 [LIM Graph Generation]
 File=modules/leap/build-support/build-pipelines/stages/generate_lim_graph/generate-lim-graph.awb
@@ -96,3 +97,13 @@ Packagehint=leap-multifpga
 File=modules/leap/build-support/build-pipelines/stages/generate_lim_executable/generate-lim-executable.awb
 Packagehint=leap-multifpga
 
+[Latency-insensitive Module Memory Optimizer]
+File=modules/leap/build-support/build-pipelines/stages/lim_memory/lim-memory.awb
+Packagehint=leap-multifpga
+
+[Latency-insensitive Module Memory Optimizer/Requires]
+lim_remap_scratchpad=Latency-insensitive Module Scratchpad Remapping
+
+[Latency-insensitive Module Scratchpad Remapping]
+File=modules/leap/build-support/build-pipelines/stages/lim_memory/remap-scratchpad/remap-scratchpad.awb
+Packagehint=leap-multifpga

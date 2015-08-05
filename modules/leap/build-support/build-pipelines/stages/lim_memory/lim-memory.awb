@@ -1,0 +1,8 @@
+%name Latency-insensitive Module Memory Optimizer 
+%desc Optimize memory hierarchy on multiple FPGAs
+ 
+%provides lim_memory
+%requires lim_remap_scratchpad
+
+%scons %library LIMMemory.py
+

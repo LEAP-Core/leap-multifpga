@@ -1,0 +1,9 @@
+%name Latency-insensitive Module Scratchpad Remapping
+%desc Generates Optimized Memory Hierarchy
+
+%attributes tool
+ 
+%provides lim_remap_scratchpad
+
+%scons %library remapScratchpad.py
+

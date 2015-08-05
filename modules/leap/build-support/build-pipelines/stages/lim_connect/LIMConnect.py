@@ -10,7 +10,7 @@ import cPickle as pickle
 # AWB dependencies
 import model
 from fpga_environment_parser import parseFPGAEnvironment
-from li_module import LIChannel
+from li_module import LIChannel, LIGraph
 import lim_executable_generator
 import lim_graph_generator
 import lim_connect
@@ -29,8 +29,8 @@ class LIMConnect():
             return config_dir + name
 
         self.pipeline_debug = model.getBuildPipelineDebug(moduleList)
-
-        self.unique = 0;
+        
+        self.unique = 0
         self.moduleList = moduleList
            
         APM_FILE = moduleList.env['DEFS']['APM_FILE']
@@ -41,6 +41,7 @@ class LIMConnect():
             print "Found more than one environment file: " + str(envFile) + ", exiting\n"
     
         self.environment = parseFPGAEnvironment(moduleList.env['DEFS']['ROOT_DIR_HW'] + '/' + envFile[0])
+        self.moduleGraph = LIGraph([])
 
         # we produce some bsh in each platform
         moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'] = []
@@ -94,8 +95,8 @@ class LIMConnect():
             )                   
 
         moduleList.topDependency += [subbuild]
-
     
+
     # Expands logical paths to physical paths using Djikstras
     # algorithm to introduce hops across platforms.
     def connectPath(self, src, sink, platformGraph):
@@ -229,6 +230,7 @@ class LIMConnect():
         # contains the object code from the first pass. 
         lim_backend_builds.constructBackendBuilds(self.moduleList, environmentGraph, platformGraph, moduleGraph)
 
+        self.moduleGraph.merge([moduleGraph])
 
     # Constructs a graph representation of the complete LI program.
     # Reads in LI Graphs from each language build/object code, merging

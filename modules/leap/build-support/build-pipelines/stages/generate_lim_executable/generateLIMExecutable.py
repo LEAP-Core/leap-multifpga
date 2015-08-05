@@ -258,7 +258,7 @@ class GenerateLIMExecutable():
             # TODO: This dependency is too coarse. We should only depend on the files for a particular platform.
             subbuild = moduleList.env.Command( 
                 [bitfile, strfile],
-                moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
+                moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'],
                 compile_closure_executable(platform)
                 )                   
 
