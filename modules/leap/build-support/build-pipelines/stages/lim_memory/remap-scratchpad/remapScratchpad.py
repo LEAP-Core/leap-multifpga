@@ -130,7 +130,7 @@ def genRemapWrapper(network, fileLists):
     fileHandle.close()
     
     for file in fileLists:
-        shutil.copy2(refFile, os.path.dirName(file))
+        shutil.copy2(refFile, os.path.dirname(file))
 
 #
 # This function is the top function that handles scratchpad connection remapping
