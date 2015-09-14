@@ -6,3 +6,5 @@
 
 %scons %library LIMMemory.py
 
+%param --global RANDOM_SCRATCHPAD_REMAP    0   "Randomly remap scratchpads to controllers"
+

@@ -90,5 +90,6 @@ class LIMMemory():
         print "LIMMemory: optimizeMemory"
         # generate scratchpad connection remapping function
         remappingFiles = list(self.moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'])
-        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), remappingFiles, self.scratchpadStats) 
+        RANDOM_REMAP = self.moduleList.getAWBParam('lim_memory', 'RANDOM_SCRATCHPAD_REMAP')
+        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), remappingFiles, self.scratchpadStats, RANDOM_REMAP) 
     
