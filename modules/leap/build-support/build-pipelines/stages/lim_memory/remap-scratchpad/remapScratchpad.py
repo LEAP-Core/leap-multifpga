@@ -36,9 +36,12 @@ class ScratchpadTreeNode():
         self.bandwidth = 0
         self.isLeaf = False
     def add_child(self, child):
-        self.children.append(child)
-        self.idRange = (min(self.idRange[0], child.idRange[0]), max(self.idRange[1], child.idRange[1]))
+        if len(self.children) == 0: 
+            self.idRange = child.idRange
+        else:
+            self.idRange = (min(self.idRange[0], child.idRange[0]), max(self.idRange[1], child.idRange[1]))
         self.bandwidth += child.bandwidth
+        self.children.append(child)
     def add_children(self, children):
         for child in children:
             self.add_child(child) 
@@ -543,7 +546,7 @@ def genRemapWrapper(platforms, remapIds, fileLists):
             
             # construct tree networks
             elif platform['networkType'] == "tree": 
-                bandwidth_bits = 4
+                bandwidth_bits = 3
                 if sum(map(len, [x.children for x in platform['network']])) > 0:
                     if len(platforms) == 1: 
                         fileHandle.write("module [CONNECTED_MODULE] connectScratchpadNetwork();\n\n")
@@ -567,9 +570,11 @@ def genRemapWrapper(platforms, remapIds, fileLists):
                             for j, child in enumerate(node.children): 
                                 fileHandle.write("    addressBounds_" + node.name + "[" + str(j) + "] = " + str(child.idRange[0]) + ";\n")
                             fileHandle.write("    addressBounds_" + node.name + "[" + str(r) + "] = " + str(node.idRange[1]+1) + ";\n")
-                            
+                           
+                            bandwidth_max = max([x.bandwidth for x in node.children])
                             for j, child in enumerate(node.children): 
-                                fileHandle.write("    bandwidthFractions_" + node.name + "[" + str(j) + "] = " + str(min(int(math.pow(2, bandwidth_bits))-1, child.bandwidth)) + ";\n")
+                                fraction = max(1,min(child.bandwidth, int(round(float(child.bandwidth)*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
+                                fileHandle.write("    bandwidthFractions_" + node.name + "[" + str(j) + "] = " + str(fraction) + ";\n")
                             
                             if node == root:
                                 fileHandle.write("    mkScratchpadTreeRoot(\"" + controller + "_Req\",\n")
@@ -579,7 +584,7 @@ def genRemapWrapper(platforms, remapIds, fileLists):
                                 fileHandle.write("                         addressBounds_" + node.name + ",\n")
                                 fileHandle.write("                         bandwidthFractions_" + node.name + ");\n\n");
                             else:
-                                fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" + node.name + ", bandwidthFractions_" + node.name + ");\n");
+                                fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" + node.name + ", mkLocalArbiterBandwidth(bandwidthFractions_" + node.name + "));\n");
                              
                 fileHandle.write("endmodule\n\n")
 
