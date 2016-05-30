@@ -5,9 +5,10 @@ import os.path
 import shutil
 import random
 import operator
+import sys
 
 # AWB dependencies
-from li_module import LIModule, LIChain
+from li_module import LIModule, LIChain, LIService
 
 ######################################################################
 #
@@ -59,12 +60,12 @@ class ScratchpadTreeNode():
         return self.__dict__ == other.__dict__
 
 class ScratchpadTreeLeaf():
-    def __init__(self, scratchpad):
+    def __init__(self, scratchpad, newId, bandwidth):
         self.scratchpad = scratchpad
-        self.id = scratchpad.remappedId
-        self.name = "leaf" + scratchpad.remappedId
-        self.idRange = (int(scratchpad.remappedId), int(scratchpad.remappedId))
-        self.bandwidth = scratchpad.bandwidth
+        self.id = newId
+        self.name = "leaf" + newId
+        self.idRange = (int(newId), int(newId))
+        self.bandwidth = max(bandwidth, 1)
         self.isLeaf = True
     def traverse_post_order(self):
         yield self
@@ -74,49 +75,35 @@ class ScratchpadTreeLeaf():
         return self.__dict__ == other.__dict__
 
 class Scratchpad():
-    def __init__(self, id, ringBaseName, platformName="", traffic=0):
+    def __init__(self, id, connection, traffic=0):
         self.id = id
-        self.remappedId = id
-        self.ringBaseName = ringBaseName
-        self.platformName = platformName
+        self.remappedIds = {}
+        self.connection = connection
+        self.platformName = connection.platform()
         self.traffic = traffic
         self.partition = []
         self.controllerIdx = []
+        self.matchingPorts = {}
         self.level = 0
         self.latency = 1
         self.bandwidth = 1
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
-
 #
-# This function separates scratchpad chains into a list of available 
-# scratchpad controllers and a list of client scratchpad IDs 
+# This function separates scratchpad connections based on the platform 
+# they are mapped to
 # 
-def separateScratchpadChains(chains):
-    platforms = []
-    for chain in chains: 
-        names = [x['name'] for x in platforms]
-        idx = 0
-        # new platform name found
-        if chain.platform() not in names:
-            idx = len(platforms)
-            platforms.append({})
-            platforms[idx]['name'] = chain.platform()
-            platforms[idx]['clients'] = []
-            platforms[idx]['controllers'] = []
-        else:
-            idx = names.index(chain.platform())
-        m = re.match("(.*)_(?:Req|Resp)_(\d+)", chain.name)
-        if m:
-            client = Scratchpad(m.group(2), m.group(1), chain.platform())
-            if client not in platforms[idx]['clients']:
-                platforms[idx]['clients'].append(client)
-        else:
-            n = re.match("(.*)_(?:Req|Resp)", chain.name)
-            if n: 
-                if n.group(1) not in platforms[idx]['controllers']:
-                    platforms[idx]['controllers'].append(n.group(1))
-    return platforms
+def separateScratchpadConnections(clients, controllers, platforms):
+    
+    names = [x['name'] for x in platforms]
+    
+    for controller in controllers: 
+        idx = names.index(controller.platform())
+        platforms[idx]['controllers'].append(controller.copy())
+    
+    for client in clients: 
+        idx = names.index(client.platform())
+        platforms[idx]['clients'].append(Scratchpad(client.client_idx, client.copy()))
 
 #
 # This function parses scratchpad statsFile
@@ -217,7 +204,7 @@ def bandwidthPartition(controllers, clients, statsFiles):
         client.controllerIdx += [idx]
     
     for i, c in enumerate(controllers):
-        network[c] = ringstops[i]
+        network[c.name] = ringstops[i]
     printNetwork(network)
     
     print "bandwidthPartition: total bandwidth = " + str(total_bandwidth)
@@ -227,10 +214,10 @@ def bandwidthPartition(controllers, clients, statsFiles):
 #
 # This function assigns client scratchpads to the available controllers
 #
-def connectScratchpadChains(controllers, clients, scratchpadStats, remapMode):
+def assignScratchpadClients(controllers, clients, scratchpadStats, remapMode):
     if len(scratchpadStats) and len(clients) and (remapMode != 1) > 0:
         return bandwidthPartition(controllers, clients, scratchpadStats)
-    else:
+    else: # random partition
         network = {}
         num_groups = len(controllers)
         ringstops = [x[:] for x in [[]]*num_groups]
@@ -243,7 +230,7 @@ def connectScratchpadChains(controllers, clients, scratchpadStats, remapMode):
             ringstops[idx].append(c)
             c.controllerIdx += [idx]
         for i, c in enumerate(controllers):
-            network[c] = ringstops[i]
+            network[c.name] = ringstops[i]
         printNetwork(network)
         return [], clients, controllers
 
@@ -263,11 +250,11 @@ def printNetwork(network):
 # This function prints out the remap table
 #
 def printRemapTable(remapIds):
-    ids = [(x[0], int(x[1])) for x in remapIds.items()]
-    sorted_ids = sorted(ids, key=operator.itemgetter(1))
+    ids = [(int(x[0]), x[1]) for x in remapIds.items()]
+    sorted_ids = sorted(ids, key=operator.itemgetter(0))
     print "Remapped ID: scratchpad ID"
     for i in sorted_ids: 
-        print str(i[1]) + ": " + i[0]
+        print str(i[0]) + ": " + i[1]
 
 #
 # This function remaps client ids for different kinds of networks
@@ -289,6 +276,17 @@ def remapClientIds(platforms, remapMode):
             return buildHierarchicalRing(platforms)
 
 #
+# This function returns the scratchpad client's bandwidth fraction given the 
+# controller index
+#
+def getBandwidthFraction(client, controllerIdx):
+    if len(client.partition) == 0: 
+        return client.bandwidth
+    else:
+        idx = client.controllerIdx.index(controllerIdx)
+        return int(round(client.partition[idx]*client.bandwidth/float(sum(client.partition))))
+
+#
 # This function builds scratchpad trees
 #
 def buildScratchpadTree(platforms): 
@@ -300,7 +298,7 @@ def buildScratchpadTree(platforms):
         controllers = platform['controllers']
         network = [ScratchpadTreeNode("root"+str(x)) for x in range(len(controllers))]
         for i, controller in enumerate(controllers):
-            clients = [x for x in platform['clients'] if i == x.controllerIdx[0]]
+            clients = [x for x in platform['clients'] if i in x.controllerIdx]
             clients.sort(key=lambda x: x.latency, reverse=False)
             total_leaves = len(clients)
             depth = int(math.ceil(math.log(total_leaves,radix)))
@@ -322,16 +320,19 @@ def buildScratchpadTree(platforms):
             
             # remap client IDs
             for client in clients:
-                client.remappedId = str(new_id)
-                remapIds[client.id] = str(new_id)
+                client.remappedIds[i] = str(new_id)
+                if len(client.controllerIdx) > 1: 
+                    remapIds[str(new_id)] = client.id + "*"
+                else:
+                    remapIds[str(new_id)] = client.id
                 new_id += 1
                        
             # build scratchpad tree
             root = network[i]
             if depth >= 2:
                # create leaf nodes
-                parent_nodes = [ScratchpadTreeLeaf(x) for x in clients[:num_leaves[0]]]
-                child_nodes = [ScratchpadTreeLeaf(x) for x in clients[len(clients)-num_leaves[1]:]]
+                parent_nodes = [ScratchpadTreeLeaf(x,x.remappedIds[i],getBandwidthFraction(x,i)) for x in clients[:num_leaves[0]]]
+                child_nodes = [ScratchpadTreeLeaf(x,x.remappedIds[i],getBandwidthFraction(x,i)) for x in clients[len(clients)-num_leaves[1]:]]
                 level = depth
                 if num_leaves[1]%radix > 0:  
                     n = ScratchpadTreeNode("n"+str(internal_node_id))
@@ -352,7 +353,7 @@ def buildScratchpadTree(platforms):
                 root.add_children(child_nodes) 
             else: # depth == 1 
                 # create leaf nodes
-                child_nodes = [ScratchpadTreeLeaf(x) for x in clients]
+                child_nodes = [ScratchpadTreeLeaf(x,x.remappedIds[i],getBandwidthFraction(x,i)) for x in clients]
                 root.add_children(child_nodes)
             print root
         platform['network'] = network
@@ -368,13 +369,13 @@ def buildHierarchicalRing(platforms):
             controllers = platform['controllers']
             network = [x[:] for x in [[]]*len(controllers)]
             for i, controller in enumerate(controllers):
-                clients = [x for x in platform['clients'] if i == x.controllerIdx[0]]
+                clients = [x for x in platform['clients'] if i in x.controllerIdx]
                 clients.sort(key=lambda x: x.level, reverse=True)
                 rings  = network[i]
                 min_id = new_id
                 max_id = new_id
                 for client in clients:
-                    ring = ScratchpadRing(controller, client.level)
+                    ring = ScratchpadRing(controller.name, client.level)
                     if ring not in rings: 
                         if len(rings) > 0: 
                             rings[-1].minId = min_id
@@ -382,8 +383,11 @@ def buildHierarchicalRing(platforms):
                         rings.append(ring)
                         min_id = new_id
                         max_id = new_id
-                    client.remappedId = str(new_id)
-                    remapIds[client.id] = str(new_id)
+                    client.remappedIds[i] = str(new_id)
+                    if len(client.controllerIdx) > 1:
+                        remapIds[str(new_id)] = client.id + "*"
+                    else: 
+                        remapIds[str(new_id)] = client.id
                     new_id += 1
                     max_id += 1
                 if len(rings) > 0: 
@@ -403,279 +407,229 @@ def getHierarchyRingName(baseName, level):
 #
 # This function outputs the remapping function in the bsh wrapper 
 #
-def genRemapWrapper(platforms, remapIds, fileLists):
-    refFile = fileLists.pop()
-    fileHandle = open(refFile, 'w')
-    fileHandle.write("// Generated by build pipeline\n\n")
+def genRemapWrapper(platform, remapIds):
+    
+    fileHandle = open(platform['file'], 'w')
+    fileHandle.write("// Generated by build pipeline (lim_memory)\n\n")
         
     # include headers
     fileHandle.write("`include \"awb/provides/scratchpad_memory_common.bsh\"\n")
     fileHandle.write("`include \"awb/provides/scratchpad_memory_service.bsh\"\n")
+    fileHandle.write("`include \"awb/provides/soft_connections.bsh\"\n")
+    fileHandle.write("`include \"awb/provides/soft_connections_alg.bsh\"\n")
     if len(remapIds) > 0:
         fileHandle.write("`include \"awb/provides/fpga_components.bsh\"\n")
-    if sum([x['networkType'] == "tree" for x in platforms]) > 0:
-        fileHandle.write("`include \"awb/provides/soft_connections.bsh\"\n")
     
     fileHandle.write("\n")
     
-    if sum([len(x['partitioned_clients']) for x in platforms]) + sum([x['networkType'] == "tree" for x in platforms]) > 0:
-        fileHandle.write("import Vector::*;\n\n")
-
-    # For clients that are partitioned across multiple controllers, generate connectors 
-    # which connect each client to associated controllers
-    if sum([len(x['partitioned_clients']) for x in platforms]) > 0:
-        if len(platforms) > 1:
-            fileHandle.write("module [CONNECTED_MODULE] connectPartitionedScratchpads();\n")
-            for platform in platforms:
-                if len(platform['partitioned_clients']) > 0:
-                    fileHandle.write("    connectPartitionedScratchpads" + platform['name'].title() + "();\n")
-            fileHandle.write("endmodule\n\n")
-        
-        for platform in platforms: 
-            pClients = platform['partitioned_clients']
-            controllers = platform['controllers']
-            if len(pClients) > 0:
-                if len(platforms) == 1: 
-                    fileHandle.write("module [CONNECTED_MODULE] connectPartitionedScratchpads()\n")
-                else:
-                    fileHandle.write("module [CONNECTED_MODULE] connectPartitionedScratchpads" + platform['name'].title() + "()\n")
-            addr_bits = [int(math.ceil(math.log(sum(x.partition), 2))) for x in pClients]
-            fileHandle.write("    provisos (NumAlias#(TLog#(" + str(len(controllers)) + "), t_CTRLR_IDX_SZ),\n")
-            fileHandle.write("              Alias#(UInt#(t_CTRLR_IDX_SZ), t_CTRLR_IDX),\n")
-            fileHandle.write("              Bits#(SCRATCHPAD_MEM_ADDRESS, t_ADDR_SZ),\n")
-            fileHandle.write("              Add#(b_, " + str(max(addr_bits)) + ", t_ADDR_SZ));\n\n")
+    fileHandle.write("import Vector::*;\n\n")
     
-            # The current implementation only supports partitioned scratchpads with level 0
-            for i, client in enumerate(pClients):
-            
-                fileHandle.write("    function t_CTRLR_IDX getControllerIdxFromAddr" + str(i) + "(SCRATCHPAD_MEM_ADDRESS addr);\n")
-                fileHandle.write("        Bit#(" + str(addr_bits[i])+ ") test_addr = truncate(addr);\n")
-                
-                for j, par in enumerate(client.partition): 
-                    if j == 0:
-                        fileHandle.write("        if (test_addr < " + str((2**addr_bits[i])*par/sum(client.partition)) + ")\n")
-                        fileHandle.write("            return unpack(0);\n")
-                    elif j == (len(client.partition) -1) :
-                        fileHandle.write("        else\n")
-                        fileHandle.write("            return unpack(" + str(j) + ");\n")
-                    else:
-                        fileHandle.write("        else if (test_addr < " + str((2**addr_bits[i])*par/sum(client.partition)) + ")\n")
-                        fileHandle.write("            return unpack(" + str(j) + ");\n")
-                
-                fileHandle.write("    endfunction\n\n")
-
-                fileHandle.write("    Vector#(" + str(len(client.partition))+ ", String) controllerReqRingNameVec" + str(i) + " = newVector();\n")
-                fileHandle.write("    Vector#(" + str(len(client.partition))+ ", String) controllerRespRingNameVec" + str(i) + " = newVector();\n")
-                for k, c in enumerate(client.controllerIdx):
-                    fileHandle.write("    controllerReqRingNameVec" + str(i) + "[" + str(k) + "] = \"" + controllers[c] + "_Req\";\n")
-                    fileHandle.write("    controllerRespRingNameVec" + str(i) + "[" + str(k) + "] = \"" + controllers[c] + "_Resp\";\n")
-
-                fileHandle.write("\n    mkScratchpadClientRingConnector(\"" + client.ringBaseName + "_Req_" + client.id + "\",\n")
-                fileHandle.write("                                    \"" + client.ringBaseName + "_Resp_" + client.id + "\",\n")
-                if remapIds.has_key(client.id): 
-                    fileHandle.write("                                    " + remapIds[client.id] + ",\n")
-                else:
-                    fileHandle.write("                                    " + client.id + ",\n")
-                fileHandle.write("                                    controllerReqRingNameVec" + str(i) + ",\n")
-                fileHandle.write("                                    controllerRespRingNameVec" + str(i) + ",\n")
-                fileHandle.write("                                    getControllerIdxFromAddr" + str(i) + ");\n\n")
-
-            fileHandle.write("endmodule\n\n")
+    controllers = platform['controllers']
+    pClients = platform['partitioned_clients']
+    rClients = platform['rest_clients']
+    
+    if len(pClients) > 0: 
+        fileHandle.write("module [CONNECTED_MODULE] connectScratchpadNetwork()\n")
+        addr_bits = [int(math.ceil(math.log(sum(x.partition), 2))) for x in pClients]
+        fileHandle.write("    provisos(NumAlias#(TLog#(" + str(len(controllers)) + "), t_CTRLR_IDX_SZ),\n")
+        fileHandle.write("             Alias#(UInt#(t_CTRLR_IDX_SZ), t_CTRLR_IDX),\n")
+        fileHandle.write("             Bits#(SCRATCHPAD_MEM_ADDRESS, t_ADDR_SZ),\n")
+        fileHandle.write("             Add#(b_, " + str(max(addr_bits)) + ", t_ADDR_SZ));\n\n")
     else: 
-        fileHandle.write("module connectPartitionedScratchpads();\nendmodule\n\n")
+        fileHandle.write("module [CONNECTED_MODULE] connectScratchpadNetwork();\n\n")
 
-    # For clients that are not partitioned across multiple controllers or not tree leaves, do name remapping
-    fileHandle.write("function String connectionNameRemap(String inputName);\n")
-    fileHandle.write("    String outputName = inputName;\n")
-    is_first = True
-    for platform in platforms:
-        rClients = platform['rest_clients']
-        controllers = platform['controllers']
-        if platform['networkType'] != "tree":
-            for client in rClients:
-                if is_first:
-                    fileHandle.write("    if (inputName == \"" + client.ringBaseName + "_Req_" + client.id + "\")\n    begin\n")
-                    is_first = False
-                else:
-                    fileHandle.write("    else if (inputName == \"" + client.ringBaseName + "_Req_" + client.id + "\")\n    begin\n")
-                fileHandle.write("        outputName = \"" + getHierarchyRingName(controllers[client.controllerIdx[0]] + "_Req", client.level) + "\";\n    end\n")
-                fileHandle.write("    else if (inputName == \"" + client.ringBaseName + "_Resp_" + client.id + "\")\n    begin\n")
-                fileHandle.write("        outputName = \"" + getHierarchyRingName(controllers[client.controllerIdx[0]] + "_Resp", client.level) + "\";\n    end\n")
-    fileHandle.write("    return outputName;\n")
-    fileHandle.write("endfunction\n\n")
-   
-    # Generate connectors for hierarchical ring and tree networks
-    if len(remapIds) > 0:
-        if len(platforms) > 1:
-            fileHandle.write("module [CONNECTED_MODULE] connectScratchpadNetwork();\n")
-            for platform in platforms:
-                if platform['networkType'] == "hring": 
-                    if sum(map(len,platform['network'])) > 0:
-                        fileHandle.write("    connectScratchpadRings" + platform['name'].title() + "();\n")
-                elif platform['networkType'] == "tree":
-                    if sum(map(len, [x.children for x in platform['network']])) > 0:
-                        fileHandle.write("    connectScratchpadTree" + platform['name'].title() + "();\n")
-            fileHandle.write("endmodule\n\n")
-        
-        for platform in platforms: 
-            network = platform['network']
-            controllers = platform['controllers']
+    fileHandle.write("    let clients <- getUnmatchedServiceClients();\n")
+    fileHandle.write("    let servers <- getUnmatchedServiceServers();\n\n")
 
-            # construct hierarchical ring networks
-            if platform['networkType'] == "hring":
-                if sum(map(len,platform['network'])) > 0:
-                    if len(platforms) == 1: 
-                        fileHandle.write("module [CONNECTED_MODULE] connectScratchpadNetwork();\n\n")
-                    else:
-                        fileHandle.write("module [CONNECTED_MODULE] connectScratchpadRings" + platform['name'].title() + "();\n\n")
-                
-                for i, controller in enumerate(controllers):
-                    rings = network[i]
-                    for j, ring in enumerate(rings):
-                        if ring.level > 0:
-                            if ring.maxId == ring.minId: 
-                                fileHandle.write("    function Bool isChildNodeC" + str(i) + "L" + str(j) + "(SCRATCHPAD_PORT_NUM id) = (id == " + str(ring.maxId) + ");\n")
-                            else:
-                                fileHandle.write("    function Bool isChildNodeC" + str(i) + "L" + str(j) + "(SCRATCHPAD_PORT_NUM id) = (id <= " + str(ring.maxId) + ") && (id >= " + str(ring.minId) + ");\n")
-                            fileHandle.write("\n    mkScratchpadHierarchicalRingConnector(\"" + getHierarchyRingName(ring.baseName + "_Req", ring.level) + "\",\n")
-                            fileHandle.write("                                          \"" + getHierarchyRingName(ring.baseName + "_Resp", ring.level) + "\",\n")
-                            fileHandle.write("                                          \"" + getHierarchyRingName(ring.baseName + "_Req", ring.level - 1) + "\",\n")
-                            fileHandle.write("                                          \"" + getHierarchyRingName(ring.baseName + "_Resp", ring.level - 1) + "\",\n")
-                            fileHandle.write("                                          isChildNodeC" + str(i) + "L" + str(j) + ");\n\n")
-                fileHandle.write("endmodule\n\n")
-            
-            # construct tree networks
-            elif platform['networkType'] == "tree": 
-                bandwidth_bits = 3
-                if sum(map(len, [x.children for x in platform['network']])) > 0:
-                    if len(platforms) == 1: 
-                        fileHandle.write("module [CONNECTED_MODULE] connectScratchpadNetwork();\n\n")
-                    else:
-                        fileHandle.write("module [CONNECTED_MODULE] connectScratchpadTree" + platform['name'].title() + "();\n\n")
-                for i, controller in enumerate(controllers):
-                    root = network[i]
-                    for node in root.traverse_post_order():
-                        if node.isLeaf:
-                            fileHandle.write("    let "+ node.name + " <- mkScratchpadTreeLeafNodeConnector(\"" + node.scratchpad.ringBaseName + "_Req_" + node.scratchpad.id +"\", ")
-                            fileHandle.write("\"" + node.scratchpad.ringBaseName + "_Resp_" + node.scratchpad.id +"\", ")
-                            fileHandle.write(node.id +");\n")
-                        else:
-                            r = len(node.children)
-                            fileHandle.write("\n    Vector#(" + str(r) + ", CONNECTION_ADDR_TREE#(SCRATCHPAD_PORT_NUM, SCRATCHPAD_MEM_REQ, SCRATCHPAD_READ_RSP)) children_" + node.name + " = newVector();\n")
-                            fileHandle.write("    Vector#(" + str(r+1) + ", SCRATCHPAD_PORT_NUM) addressBounds_" + node.name + " = newVector();\n")
-                            fileHandle.write("    Vector#(" + str(r) + ", UInt#(" + str(bandwidth_bits) + ")) bandwidthFractions_" + node.name + " = newVector();\n")
-                            for j, child in enumerate(node.children): 
-                                fileHandle.write("    children_" + node.name + "[" + str(j) + "] = " + child.name + ";\n")
-                                
-                            for j, child in enumerate(node.children): 
-                                fileHandle.write("    addressBounds_" + node.name + "[" + str(j) + "] = " + str(child.idRange[0]) + ";\n")
-                            fileHandle.write("    addressBounds_" + node.name + "[" + str(r) + "] = " + str(node.idRange[1]+1) + ";\n")
-                           
-                            bandwidth_max = max([x.bandwidth for x in node.children])
-                            for j, child in enumerate(node.children): 
-                                fraction = max(1,min(child.bandwidth, int(round(float(child.bandwidth)*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
-                                fileHandle.write("    bandwidthFractions_" + node.name + "[" + str(j) + "] = " + str(fraction) + ";\n")
-                            
-                            if node == root:
-                                fileHandle.write("    mkScratchpadTreeRoot(\"" + controller + "_Req\",\n")
-                                fileHandle.write("                         \"" + controller + "_Resp\",\n")
-                                fileHandle.write("                         " + str(node.idRange[1]) + ",\n")
-                                fileHandle.write("                         children_" + node.name + ",\n")
-                                fileHandle.write("                         addressBounds_" + node.name + ",\n")
-                                fileHandle.write("                         bandwidthFractions_" + node.name + ");\n\n");
-                            else:
-                                fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" + node.name + ", mkLocalArbiterBandwidth(bandwidthFractions_" + node.name + "));\n");
-                             
-                fileHandle.write("endmodule\n\n")
-
-    else: 
-        fileHandle.write("module connectScratchpadNetwork();\nendmodule\n\n")
-
-
-    # Generate scratchpad ID remapping initializer
-    if len(remapIds) > 0:
-        fileHandle.write("interface SCRATCHPAD_ID_REMAP_IFC;\n")
-        fileHandle.write("    method SCRATCHPAD_PORT_NUM getRemappedId(SCRATCHPAD_PORT_NUM id);\n")
-        fileHandle.write("endinterface\n\n")
-        fileHandle.write("module mkScratchpadIdRemapInitializer(SCRATCHPAD_ID_REMAP_IFC);\n\n")
-        fileHandle.write("    Reg#(Bool) initialized <- mkReg(False);\n")
-        fileHandle.write("    Reg#(Bit#(" + str(int(math.ceil(math.log(len(remapIds), 2)))) + ")) remapCnt <- mkReg(0);\n")
-        fileHandle.write("    LUTRAM#(SCRATCHPAD_PORT_NUM, SCRATCHPAD_PORT_NUM) remapTable <- mkLUTRAM(0);\n\n")
-        fileHandle.write("    rule initTable(!initialized);\n")
-        for i, key in enumerate(remapIds.keys()):
-            if i == 0:
-                fileHandle.write("        if (remapCnt == 0)\n")
+    if platform['networkType'] == "ring": 
+        # instantiate service network modules and connect them with service controllers
+        fileHandle.write("    NumTypeParam#(" + str(controllers[0].req_bitwidth) + ") reqSz = ?;\n")
+        fileHandle.write("    NumTypeParam#(" + str(controllers[0].resp_bitwidth) + ") rspSz = ?;\n")
+        fileHandle.write("    NumTypeParam#(" + str(controllers[0].idx_bitwidth) + ") idxSz = ?;\n\n")
+        for i, controller in enumerate(controllers):
+            clients = [x for x in platform['clients'] if i in x.controllerIdx]
+            fileHandle.write("    let server" + str(i) + " <- findMatchingServiceServer(servers, \"" + controller.name + "\");\n")
+            if len(clients) == 1: # no network needed
+                # directly connect the service server with the service client
+                req_matching_port = "server" + str(i) + ".incoming"
+                rsp_matching_port = "resizeServiceConnectionOut(server" + str(i) + ".outgoing)"
+                clients[0].matchingPorts[i] = (req_matching_port, rsp_matching_port)
             else:
-                fileHandle.write("        else if (remapCnt == " + str(i) +")\n")
-            fileHandle.write("        begin\n")
-            fileHandle.write("            remapTable.upd(" + key + "," + remapIds[key] +");\n")
-            if i == (len(remapIds) - 1):
-                fileHandle.write("            initialized <= True;\n")
-            fileHandle.write("        end\n")
-        fileHandle.write("        remapCnt <= remapCnt + 1;\n")
-        fileHandle.write("    endrule\n\n")
+                fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
+                for j, client in enumerate(clients): 
+                     fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  str(client.id) + ";\n")
+                     req_matching_port = "network" + str(i) + ".clientReqPorts[" + str(j) + "]"
+                     rsp_matching_port = "network" + str(i) + ".clientRspPorts[" + str(j) + "]"
+                     client.matchingPorts[i] = (req_matching_port, rsp_matching_port)
+                fileHandle.write("    let network" +  str(i) + " <- mkServiceRingNetworkModule(clientIdVec" + str(i) + ", reqSz, rspSz, idxSz);\n")
+                fileHandle.write("    connectOutToIn(server" + str(i) + ".outgoing, network" + str(i) + ".serverRspPort, 0);\n")
+                fileHandle.write("    connectOutToIn(network" + str(i) + ".serverReqPort, server" + str(i) + ".incoming, 0);\n\n")
         
-        fileHandle.write("    method SCRATCHPAD_PORT_NUM getRemappedId(SCRATCHPAD_PORT_NUM id) if (initialized);\n")
-        fileHandle.write("        return remapTable.sub(id);\n")
-        fileHandle.write("    endmethod\n\n")
-        fileHandle.write("endmodule\n\n")
-
-    # Generate scratchpad ID remapping controller
-    fileHandle.write("module [CONNECTED_MODULE] mkScratchpadIdRemap();\n\n")
-    if len(remapIds) == 0:
-        fileHandle.write("    function SCRATCHPAD_PORT_NUM remappedId(SCRATCHPAD_PORT_NUM id) = id;\n\n")
-    else:
-        fileHandle.write("    SCRATCHPAD_ID_REMAP_IFC m <- mkScratchpadIdRemapInitializer();\n")
-        fileHandle.write("    let remappedId = m.getRemappedId();\n")
-    fileHandle.write("    mkScratchpadIdRemapController(remappedId);\n\n")
+    elif platform['networkType'] == "tree": 
+        network = platform['network']
+        bandwidth_bits = 5
+        for i, controller in enumerate(controllers):
+            root = network[i]
+            for node in root.traverse_post_order():
+                if node.isLeaf:
+                    fileHandle.write("    let "+ node.name + " <- mkServiceTreeLeaf();\n")
+                    req_matching_port = node.name + ".clientReqIncoming"
+                    rsp_matching_port = node.name + ".clientRspOutgoing"
+                    node.scratchpad.matchingPorts[i] = (req_matching_port, rsp_matching_port)
+                else:
+                    r = len(node.children)
+                    fileHandle.write("\n    Vector#(" + str(r) + ", CONNECTION_ADDR_TREE#(SCRATCHPAD_PORT_NUM, SCRATCHPAD_MEM_REQ, SCRATCHPAD_READ_RSP)) children_" + node.name + " = newVector();\n")
+                    fileHandle.write("    Vector#(" + str(r+1) + ", SCRATCHPAD_PORT_NUM) addressBounds_" + node.name + " = newVector();\n")
+                    fileHandle.write("    Vector#(" + str(r) + ", UInt#(" + str(bandwidth_bits) + ")) bandwidthFractions_" + node.name + " = newVector();\n")
+                    for j, child in enumerate(node.children): 
+                        if child.isLeaf: 
+                            name = child.name + ".tree"
+                        else:
+                            name = child.name
+                        fileHandle.write("    children_" + node.name + "[" + str(j) + "] = " + name + ";\n")
+                        
+                    for j, child in enumerate(node.children): 
+                        fileHandle.write("    addressBounds_" + node.name + "[" + str(j) + "] = " + str(child.idRange[0]) + ";\n")
+                    fileHandle.write("    addressBounds_" + node.name + "[" + str(r) + "] = " + str(node.idRange[1]+1) + ";\n")
+                   
+                    bandwidth_max = max(1, max([x.bandwidth for x in node.children]))
+                    for j, child in enumerate(node.children): 
+                        fraction = max(1,min(child.bandwidth, int(round(float(child.bandwidth)*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
+                        fileHandle.write("    bandwidthFractions_" + node.name + "[" + str(j) + "] = " + str(fraction) + ";\n")
+                    
+                    if node == root:
+                        fileHandle.write("\n    let server" + str(i) + " <- findMatchingServiceServer(servers, \"" + controller.name + "\");\n")
+                        remapped_clients = [x for x in platform['clients'] if i in x.controllerIdx and i != x.controllerIdx[0]]
+                        if len(remapped_clients) > 0: 
+                            fileHandle.write("    function SCRATCHPAD_PORT_NUM getRemappedIdx" + str(i) + "(SCRATCHPAD_PORT_NUM idx);\n")
+                            for r, client in enumerate(remapped_clients): 
+                                if r == 0:
+                                    fileHandle.write("        if (pack(idx) == " + client.remappedIds[client.controllerIdx[0]] + ")\n")
+                                else: 
+                                    fileHandle.write("        else if (pack(idx) == " + client.remappedIds[client.controllerIdx[0]] + ")\n")
+                                fileHandle.write("            return unpack(" + client.remappedIds[i] + ");\n")
+                            fileHandle.write("        else\n")
+                            fileHandle.write("            return idx;\n")
+                            fileHandle.write("    endfunction\n\n")
+                            server_rsp_port = "remapScratchpadServiceConnectionOut(server" + str(i) + ".outgoing, getRemappedIdx" + str(i) + ")" 
+                        else: 
+                            server_rsp_port = "server" + str(i) + ".outgoing"
+                            
+                        fileHandle.write("    mkServiceTreeRoot(server" + str(i) + ".incoming,\n")
+                        fileHandle.write("                      " + server_rsp_port + ",\n")
+                        fileHandle.write("                      children_" + node.name + ",\n")
+                        fileHandle.write("                      addressBounds_" + node.name + ",\n")
+                        fileHandle.write("                      bandwidthFractions_" + node.name + ");\n\n");
+                    else:
+                        fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" + node.name + ", mkLocalArbiterBandwidth(bandwidthFractions_" + node.name + "));\n");
+    
+    # connect network modules with services clients
+    fileHandle.write("    // Connect non-interleaved service clients\n")
+    for k, client in enumerate(rClients): 
+        if len(client.remappedIds) == 0:
+            remapped_id = client.id
+        else: 
+            remapped_id = client.remappedIds[client.controllerIdx[0]]
+        fileHandle.write("    let client" +  str(k) + " <- findMatchingServiceClient(clients, \"" + client.connection.name + "\", \"" + client.id + "\");\n")
+        fileHandle.write("    connectOutToIn(client" +  str(k) + ".outgoing, " + client.matchingPorts[client.controllerIdx[0]][0] + ", 0);\n")
+        fileHandle.write("    connectOutToInWithIdx(" + client.matchingPorts[client.controllerIdx[0]][1] + ", client" + str(k) + ".incoming, " + remapped_id + ", 0);\n\n")
+        
+    fileHandle.write("    // Connect interleaved service clients\n")
+    for i, client in enumerate(pClients):
+        fileHandle.write("    function t_CTRLR_IDX getControllerIdxFromAddr" + str(i) + "(SCRATCHPAD_MEM_ADDRESS addr);\n")
+        fileHandle.write("        Bit#(" + str(addr_bits[i])+ ") test_addr = truncate(addr);\n")
+        for j, par in enumerate(client.partition): 
+            if j == 0:
+                fileHandle.write("        if (test_addr < " + str((2**addr_bits[i])*par/sum(client.partition)) + ")\n")
+                fileHandle.write("            return unpack(0);\n")
+            elif j == (len(client.partition) -1) :
+                fileHandle.write("        else\n")
+                fileHandle.write("            return unpack(" + str(j) + ");\n")
+            else:
+                fileHandle.write("        else if (test_addr < " + str((2**addr_bits[i])*par/sum(client.partition)) + ")\n")
+                fileHandle.write("            return unpack(" + str(j) + ");\n")
+        fileHandle.write("    endfunction\n\n")
+        fileHandle.write("    Vector#(" + str(len(client.partition))+ ", CONNECTION_IN#(SERVICE_CON_DATA_SIZE)) controllerReqPortVec" + str(i) + " = newVector();\n")
+        fileHandle.write("    Vector#(" + str(len(client.partition))+ ", CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) controllerRspPortVec" + str(i) + " = newVector();\n")
+        for k, c in enumerate(client.controllerIdx):
+            fileHandle.write("    controllerReqPortVec" + str(i) + "[" + str(k) + "] = " + client.matchingPorts[c][0] + ";\n")
+            fileHandle.write("    controllerRspPortVec" + str(i) + "[" + str(k) + "] = " + client.matchingPorts[c][1] + ";\n")
+        
+        if len(client.remappedIds) == 0:
+            remapped_id = client.id
+        else: 
+            remapped_id = client.remappedIds[client.controllerIdx[0]]
+        
+        fileHandle.write("    let interleaver" + str(i) + " <- mkScratchpadClientInterleaver(controllerReqPortVec" + str(i) + ",")
+        fileHandle.write(" controllerRspPortVec" + str(i) + ", " + remapped_id + ", getControllerIdxFromAddr" + str(i) + ");\n")
+        fileHandle.write("    let client" +  str(i+len(rClients)) + " <- findMatchingServiceClient(clients, \"" + client.connection.name + "\", \"" + client.id + "\");\n")
+        fileHandle.write("    connectOutToIn(client" +  str(i+len(rClients)) + ".outgoing, interleaver" + str(i) + ".clientReqIncoming, 0);\n")
+        fileHandle.write("    connectOutToInWithIdx(interleaver" + str(i) + ".clientRspOutgoing, client" + str(i+len(rClients)) + ".incoming, " + remapped_id + ", 0);\n\n")
+        
     fileHandle.write("endmodule\n\n")
-    
     fileHandle.close()
-    
-    for file in fileLists:
-        shutil.copy2(refFile, os.path.dirname(file))
     
 #
 # This function outputs the default remapping function in the bsh wrapper 
 #
 def createDefaultRemapFile(remapFilePath):
     remapHandle = open(remapFilePath, 'w')
-    remapHandle.write("// Generated by build pipeline\n\n")
-    remapHandle.write("function String connectionNameRemap(String inputName) = inputName;\n\n")
-    remapHandle.write("module connectPartitionedScratchpads();\nendmodule\n\n")
+    remapHandle.write("// Generated by build pipeline (lim_memory)\n\n")
+    # remapHandle.write("function String connectionNameRemap(String inputName) = inputName;\n\n")
+    # remapHandle.write("module connectPartitionedScratchpads();\nendmodule\n\n")
     remapHandle.write("module connectScratchpadNetwork();\nendmodule\n\n")
-    remapHandle.write("module mkScratchpadIdRemap();\nendmodule\n\n")
+    # remapHandle.write("module mkScratchpadIdRemap();\nendmodule\n\n")
     remapHandle.close()
 
 #
 # This function is the top function that handles scratchpad connection remapping
 #
-def remapScratchpadConnections(liModules, fileLists, scratchpadStats, remapMode):
+def remapScratchpadConnections(liModules, platformNames, fileLists, scratchpadStats, remapMode):
     print "remapScratchpadConnections: "
-    scratchChains = []
-    for liModule in liModules:
-        for chain in liModule.chains:
-            if re.search("^Scratchpad_", chain.name):
-                if re.match("Scratchpad_ID_Remap_(?:Req|Resp)", chain.name):
-                    continue
-                print "Find Scratchpad Chain: " + chain.name + " in module: " + chain.module_name + " in platform: " + chain.platform()
-                scratchChains.append(chain)
-        
-    platforms = separateScratchpadChains(scratchChains)
+    scratchpadClients = []
+    scratchpadServers = []
+    nonMemoryConnections = []
+    platforms = []
     
+    for idx, platformName in enumerate(platformNames): 
+        platform = {}
+        platform['name'] = platformName
+        platform['clients'] = []
+        platform['controllers'] = []
+        platform['file'] = fileLists[idx]
+        platforms.append(platform)
+
+    for liModule in liModules:
+        for service in liModule.services:
+            if re.search("^Scratchpad_", service.name):
+                if service.isClient():
+                    print "Find scratchpad service client: " + service.name + " clientId: " + service.client_idx + " in module: " + service.module_name + " idx: " + service.module_idx + " in platform: " + service.platform()
+                    scratchpadClients.append(service)
+                else: 
+                    print "Find scratchpad service server: " + service.name + " in module: " + service.module_name + " idx: " + service.module_idx + " in platform: " + service.platform()
+                    scratchpadServers.append(service)
+            else: 
+                print "Find non-memory service: " + service.name + " in module: " + service.module_name + " idx: " + service.module_idx + " in platform: " + service.platform()
+                nonMemoryConnections.append(service)
+
+    separateScratchpadConnections(scratchpadClients, scratchpadServers, platforms)
+
     # scratchpad remap is enabled
     if sum([len(x['clients']) for x in platforms]) > 0:
         for platform in platforms: 
-            partitioned_clients, rest_clients, controllers = connectScratchpadChains(platform['controllers'], platform['clients'], scratchpadStats, remapMode)
+            partitioned_clients, rest_clients, controllers = assignScratchpadClients(platform['controllers'], platform['clients'], scratchpadStats, remapMode)
             platform['partitioned_clients'] = partitioned_clients 
             platform['rest_clients'] = rest_clients
-        
         remapIds = remapClientIds(platforms, remapMode)
         # print remapIds
         printRemapTable(remapIds)
         print ""
-        genRemapWrapper(platforms, remapIds, fileLists)
-    else:
-        for remapFile in fileLists:
-            createDefaultRemapFile(remapFile)
+        
+    # generate scratchpad service network file
+    
+    for platform in platforms: 
+        if len(platform['clients']) > 0: 
+            genRemapWrapper(platform, remapIds)
+        else:
+            createDefaultRemapFile(platform['file'])
 

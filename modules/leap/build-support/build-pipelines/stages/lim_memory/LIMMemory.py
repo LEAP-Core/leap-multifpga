@@ -50,6 +50,8 @@ class LIMMemory():
         
         moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'] = []
 
+        self.hwPlatformNames = []
+        
         for platformName in self.environment.getPlatformNames():
         # these defs are copied from a previous tool.  refactor
             platform = self.environment.getPlatform(platformName)
@@ -70,7 +72,8 @@ class LIMMemory():
                  # Set dependencies for real output files (in bitfile dir) 
                  parameterFile =  platformBitfileBuildDir +'/'+ remapFile
                  moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'] += [parameterFile]
-        
+                 self.hwPlatformNames.append(platform.name)
+
         subbuild = moduleList.env.Command( 
             moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'],        
             moduleList.topModule.moduleDependency['FPGA_CONNECTION_PARAMETERS'],
@@ -84,5 +87,5 @@ class LIMMemory():
         # generate scratchpad connection remapping function
         remappingFiles = list(self.moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'])
         REMAP_MODE = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_REMAP_MODE')
-        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), remappingFiles, self.scratchpadStats, REMAP_MODE) 
+        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), self.hwPlatformNames, remappingFiles, self.scratchpadStats, REMAP_MODE) 
 

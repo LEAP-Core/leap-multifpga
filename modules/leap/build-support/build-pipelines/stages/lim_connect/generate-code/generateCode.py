@@ -117,7 +117,7 @@ def generateCodeBSV(moduleList, platform, environmentGraph, platformGraph):
         # channel between platform and targetPlatform.            
         for dangling in li_module.channelsByPartner(platformObject,targetPlatform):
             if(pipeline_debug):
-                print "Laying down " + dangling.name + " of type " + dangling.sc_type + " on " + dangling.platform
+                print "Laying down " + dangling.name + " of type " + dangling.sc_type + " on " + dangling.platform()
 
             if(dangling.isSource()): # this channel is egress
                 if(ENABLE_TYPE_COMPRESSION and dangling.type_structure.compressable):
@@ -458,8 +458,8 @@ def generateCodeCPP(moduleList, platform, environmentGraph, platformGraph):
         ingressVias = environmentGraph.platforms[platform].getIngress(targetPlatform).logicalVias
 
         if(pipeline_debug):
-            print "EGRESS: " + str(egressVias.keys()) + " : " + str(egressVias)
-            print "INGRESS: " + str(ingressVias.keys()) + " : " + str(ingressVias)
+            print "EGRESS: " + str(egressVias)
+            print "INGRESS: " + str(ingressVias)
 
         # To do - if we have more have more than one via, this code ought to be in a loop.
 
