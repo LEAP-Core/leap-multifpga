@@ -87,6 +87,12 @@ class Scratchpad():
         self.level = 0
         self.latency = 1
         self.bandwidth = 1
+    def __repr__(self):
+        print_str =  "Scratchpad: name: " + self.connection.name + " id: " + self.id
+        print_str += " controllerIdx: " + str(self.controllerIdx) + " traffic: " + str(self.traffic)
+        print_str += " remappedIds: " + str(self.remappedIds)
+        print_str += " level: " + str(self.level) + " latency: " + str(self.latency) + " bandwidth: " + str(self.bandwidth)
+        return print_str
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 #
@@ -427,7 +433,8 @@ def genRemapWrapper(platform, remapIds):
     controllers = platform['controllers']
     pClients = platform['partitioned_clients']
     rClients = platform['rest_clients']
-    
+    hr_module_body = "" 
+
     if len(pClients) > 0: 
         fileHandle.write("module [CONNECTED_MODULE] connectScratchpadNetwork()\n")
         addr_bits = [int(math.ceil(math.log(sum(x.partition), 2))) for x in pClients]
@@ -441,35 +448,47 @@ def genRemapWrapper(platform, remapIds):
     fileHandle.write("    let clients <- getUnmatchedServiceClients();\n")
     fileHandle.write("    let servers <- getUnmatchedServiceServers();\n\n")
 
-    if platform['networkType'] == "ring": 
-        # instantiate service network modules and connect them with service controllers
+    if platform['networkType'] != "tree": 
         fileHandle.write("    NumTypeParam#(" + str(controllers[0].req_bitwidth) + ") reqSz = ?;\n")
         fileHandle.write("    NumTypeParam#(" + str(controllers[0].resp_bitwidth) + ") rspSz = ?;\n")
         fileHandle.write("    NumTypeParam#(" + str(controllers[0].idx_bitwidth) + ") idxSz = ?;\n\n")
-        for i, controller in enumerate(controllers):
-            clients = [x for x in platform['clients'] if i in x.controllerIdx]
-            fileHandle.write("    let server" + str(i) + " <- findMatchingServiceServer(servers, \"" + controller.name + "\");\n")
-            if len(clients) == 1: # no network needed
-                # directly connect the service server with the service client
-                req_matching_port = "server" + str(i) + ".incoming"
-                rsp_matching_port = "resizeServiceConnectionOut(server" + str(i) + ".outgoing)"
-                clients[0].matchingPorts[i] = (req_matching_port, rsp_matching_port)
-            else:
-                fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
-                for j, client in enumerate(clients): 
-                     fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  str(client.id) + ";\n")
-                     req_matching_port = "network" + str(i) + ".clientReqPorts[" + str(j) + "]"
-                     rsp_matching_port = "network" + str(i) + ".clientRspPorts[" + str(j) + "]"
-                     client.matchingPorts[i] = (req_matching_port, rsp_matching_port)
-                fileHandle.write("    let network" +  str(i) + " <- mkServiceRingNetworkModule(clientIdVec" + str(i) + ", reqSz, rspSz, idxSz);\n")
-                fileHandle.write("    connectOutToIn(server" + str(i) + ".outgoing, network" + str(i) + ".serverRspPort, 0);\n")
-                fileHandle.write("    connectOutToIn(network" + str(i) + ".serverReqPort, server" + str(i) + ".incoming, 0);\n\n")
         
-    elif platform['networkType'] == "tree": 
-        network = platform['network']
-        bandwidth_bits = 5
-        for i, controller in enumerate(controllers):
-            root = network[i]
+    # instantiate service network modules and connect them with service controllers
+    for i, controller in enumerate(controllers):
+        fileHandle.write("    let server" + str(i) + " <- findMatchingServiceServer(servers, \"" + controller.name + "\");\n")
+        clients = [x for x in platform['clients'] if i in x.controllerIdx]
+        # deal with single client service
+        if len(clients) == 1: # no network needed
+            # directly connect the service server with the service client
+            req_matching_port = "server" + str(i) + ".incoming"
+            # need to remap client's id
+            if i != clients[0].controllerIdx[0] and clients[0].remappedIds.has_key(i): 
+                fileHandle.write("    function SCRATCHPAD_PORT_NUM getRemappedIdx" + str(i) + "(SCRATCHPAD_PORT_NUM idx);\n")
+                fileHandle.write("        if (pack(idx) == " + clients[0].remappedIds[clients[0].controllerIdx[0]] + ")\n")
+                fileHandle.write("            return unpack(" + clients[0].remappedIds[i] + ");\n")
+                fileHandle.write("        else\n")
+                fileHandle.write("            return idx;\n")
+                fileHandle.write("    endfunction\n\n")
+                server_rsp_port = "remapScratchpadServiceConnectionOut(server" + str(i) + ".outgoing, getRemappedIdx" + str(i) + ")" 
+            else: 
+                server_rsp_port = "server" + str(i) + ".outgoing"
+            rsp_matching_port = "resizeServiceConnectionOut(" + server_rsp_port + ")"
+            clients[0].matchingPorts[i] = (req_matching_port, rsp_matching_port)
+        
+        elif platform['networkType'] == "ring": 
+            fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
+            for j, client in enumerate(clients): 
+                 fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  str(client.id) + ";\n")
+                 req_matching_port = "network" + str(i) + ".clientReqPorts[" + str(j) + "]"
+                 rsp_matching_port = "network" + str(i) + ".clientRspPorts[" + str(j) + "]"
+                 client.matchingPorts[i] = (req_matching_port, rsp_matching_port)
+            fileHandle.write("    let network" +  str(i) + " <- mkServiceRingNetworkModule(clientIdVec" + str(i) + ", reqSz, rspSz, idxSz);\n")
+            fileHandle.write("    connectOutToIn(server" + str(i) + ".outgoing, network" + str(i) + ".serverRspPort, 0);\n")
+            fileHandle.write("    connectOutToIn(network" + str(i) + ".serverReqPort, server" + str(i) + ".incoming, 0);\n\n")
+        
+        elif platform['networkType'] == "tree": 
+            bandwidth_bits = 5
+            root = platform['network'][i]
             for node in root.traverse_post_order():
                 if node.isLeaf:
                     fileHandle.write("    let "+ node.name + " <- mkServiceTreeLeaf();\n")
@@ -498,7 +517,6 @@ def genRemapWrapper(platform, remapIds):
                         fileHandle.write("    bandwidthFractions_" + node.name + "[" + str(j) + "] = " + str(fraction) + ";\n")
                     
                     if node == root:
-                        fileHandle.write("\n    let server" + str(i) + " <- findMatchingServiceServer(servers, \"" + controller.name + "\");\n")
                         remapped_clients = [x for x in platform['clients'] if i in x.controllerIdx and i != x.controllerIdx[0]]
                         if len(remapped_clients) > 0: 
                             fileHandle.write("    function SCRATCHPAD_PORT_NUM getRemappedIdx" + str(i) + "(SCRATCHPAD_PORT_NUM idx);\n")
@@ -522,51 +540,159 @@ def genRemapWrapper(platform, remapIds):
                         fileHandle.write("                      bandwidthFractions_" + node.name + ");\n\n");
                     else:
                         fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" + node.name + ", mkLocalArbiterBandwidth(bandwidthFractions_" + node.name + "));\n");
-    
+   
+        elif platform['networkType'] == "hring": 
+            fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
+            clients.sort(key=lambda x: x.remappedIds[i], reverse=False)
+            for j, client in enumerate(clients): 
+                 fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  str(client.remappedIds[i]) + ";\n")
+                 req_matching_port = "network" + str(i) + ".clientReqPorts[" + str(j) + "]"
+                 rsp_matching_port = "network" + str(i) + ".clientRspPorts[" + str(j) + "]"
+                 client.matchingPorts[i] = (req_matching_port, rsp_matching_port)
+            fileHandle.write("    let network" +  str(i) + " <- mkServiceHierarchicalRingNetworkModule" + str(i) + "(clientIdVec" + str(i) + ", reqSz, rspSz, idxSz);\n")
+            fileHandle.write("    connectOutToIn(server" + str(i) + ".outgoing, network" + str(i) + ".serverRspPort, 0);\n")
+            fileHandle.write("    connectOutToIn(network" + str(i) + ".serverReqPort, server" + str(i) + ".incoming, 0);\n\n")
+            
+            hrings = platform['network'][i]
+            hr_module_body += "module mkServiceHierarchicalRingNetworkModule" + str(i) + "#(Vector#(t_NUM_CLIENTS, Integer) clientIdVec,\n"
+            hr_module_body += "                                                NumTypeParam#(t_REQ_SZ) reqSz,\n"
+            hr_module_body += "                                                NumTypeParam#(t_RSP_SZ) rspSz,\n" 
+            hr_module_body += "                                                NumTypeParam#(t_IDX_SZ) idxSz)\n"
+            hr_module_body += "    // Interface:\n"
+            hr_module_body += "    (CONNECTION_SERVICE_NETWORK_IFC#(t_NUM_CLIENTS))\n"
+            hr_module_body += "    provisos(Alias#(Bit#(t_REQ_SZ), t_REQ),\n"
+            hr_module_body += "             Alias#(Bit#(t_RSP_SZ), t_RSP),\n"
+            hr_module_body += "             Alias#(Bit#(t_IDX_SZ), t_IDX),\n"
+            hr_module_body += "             Add#(" + str(len(clients)) + ", extras, t_NUM_CLIENTS));\n\n"
+            hr_module_body += "    Clock localClock <- exposeCurrentClock();\n"
+            hr_module_body += "    Reset localReset <- exposeCurrentReset();\n\n"
+            hr_module_body += "    function Bool isLocalFunc(Integer clientId, t_IDX idx);\n"
+            hr_module_body += "        return idx == fromInteger(clientId);\n"
+            hr_module_body += "    endfunction\n\n"
+            hr_module_body += "    Vector#(t_NUM_CLIENTS, CONNECTION_SERVICE_RING_NODE_IFC#(t_REQ_SZ, t_RSP_SZ, t_IDX_SZ)) ringNodes <- \n"
+            hr_module_body += "        mapM(mkServiceRingNode, map(isLocalFunc, clientIdVec));\n\n"
+            hr_module_body += "    function Bool isChildFunc(Integer minId, Integer maxId, t_IDX idx);\n"
+            hr_module_body += "        return (idx >= fromInteger(minId)) && (idx <= fromInteger(maxId));\n"
+            hr_module_body += "    endfunction\n\n"
+           
+            # connect ring nodes on the same level
+            for j in range(len(clients)-1): 
+                 if clients[j].level == clients[j+1].level: 
+                     hr_module_body += "    connectOutToIn(ringNodes[" + str(j) + "].reqChainOutgoing, ringNodes[" + str(j+1) + "].reqChainIncoming, 0);\n"
+                     hr_module_body += "    connectOutToIn(ringNodes[" + str(j) + "].rspChainOutgoing, ringNodes[" + str(j+1) + "].rspChainIncoming, 0);\n"
+                 else:
+                     connector_idx = [x for x, y in enumerate(hrings) if y.level == clients[j].level][0]
+                     ring = hrings[connector_idx]
+                     hr_module_body += "    function Bool isChildFunc" + str(connector_idx) + "(t_IDX idx) = (idx <= " + str(ring.maxId) + ") && (idx >= " + str(ring.minId) + ");\n"
+                     hr_module_body += "    let connector" + str(connector_idx) + " <- mkServiceRingNode(isChildFunc" + str(connector_idx) + ");\n"
+                     hr_module_body += "    connectOutToIn(ringNodes[" + str(j) + "].reqChainOutgoing, connector" + str(connector_idx) + ".clientReqIncoming, 0);\n"
+                     hr_module_body += "    connectOutToIn(connector" + str(connector_idx) + ".clientRspOutgoing, ringNodes[" + str(ring.minId-hrings[0].minId) + "].rspChainIncoming, 0);\n"
+            # connect connectors
+            for r in range(len(hrings)-1): 
+                if r < len(hrings)-2: 
+                    hr_module_body += "    connectOutToIn(connector" + str(r) + ".reqChainOutgoing, connector" + str(r+1) + ".reqChainIncoming, 0);\n"
+                    hr_module_body += "    connectOutToIn(connector" + str(r+1) + ".rspChainOutgoing, connector" + str(r) + ".rspChainIncoming, 0);\n"
+                elif r == len(hrings)-2: 
+                    hr_module_body += "    connectOutToIn(connector" + str(r) + ".reqChainOutgoing, ringNodes[" + str(hrings[r+1].minId-hrings[0].minId) + "].reqChainIncoming, 0);\n"
+                    hr_module_body += "    connectOutToIn(connector" + str(r) + ".rspChainOutgoing, ringNodes[" + str(hrings[r+1].minId-hrings[0].minId) + "].rspChainIncoming, 0);\n"
+                 
+            hr_module_body += "\n    Vector#(t_NUM_CLIENTS, CONNECTION_IN#(SERVICE_CON_DATA_SIZE))  clientReqPortsVec = newVector();\n"
+            hr_module_body += "    Vector#(t_NUM_CLIENTS, CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) clientRspPortsVec = newVector();\n\n"
+            hr_module_body += "    for (Integer x = 0; x < valueOf(t_NUM_CLIENTS); x = x + 1)\n"
+            hr_module_body += "    begin\n"
+            hr_module_body += "        clientReqPortsVec[x] = (interface CONNECTION_IN#(SERVICE_CON_DATA_SIZE);\n"
+            hr_module_body += "                                    method Action try(Bit#(SERVICE_CON_DATA_SIZE) d);\n"
+            hr_module_body += "                                        ringNodes[x].clientReqIncoming.try(truncateNP(d));\n"
+            hr_module_body += "                                    endmethod\n"
+            hr_module_body += "                                    method Bool success = ringNodes[x].clientReqIncoming.success;\n"
+            hr_module_body += "                                    method Bool dequeued = ringNodes[x].clientReqIncoming.dequeued;\n"
+            hr_module_body += "                                    interface Clock clock = localClock;\n"
+            hr_module_body += "                                    interface Reset reset = localReset;\n"
+            hr_module_body += "                                endinterface); \n\n"
+            hr_module_body += "        clientRspPortsVec[x] = (interface CONNECTION_OUT#(SERVICE_CON_DATA_SIZE);\n"
+            hr_module_body += "                                    method Bit#(SERVICE_CON_DATA_SIZE) first();\n"
+            hr_module_body += "                                        Tuple2#(t_IDX, t_RSP) tmp = unpack(ringNodes[x].clientRspOutgoing.first());\n"
+            hr_module_body += "                                        return zeroExtendNP(tpl_2(tmp));\n"
+            hr_module_body += "                                    endmethod\n"
+            hr_module_body += "                                    method Action deq = ringNodes[x].clientRspOutgoing.deq;\n"
+            hr_module_body += "                                    method Bool notEmpty = ringNodes[x].clientRspOutgoing.notEmpty;\n"
+            hr_module_body += "                                    interface clock = localClock;\n"
+            hr_module_body += "                                    interface Reset reset = localReset;\n"
+            hr_module_body += "                                endinterface);\n"
+            hr_module_body += "    end\n\n"
+            hr_module_body += "    interface clientReqPorts = clientReqPortsVec;\n"
+            hr_module_body += "    interface clientRspPorts = clientRspPortsVec;\n\n"
+            hr_module_body += "    interface serverRspPort = interface CONNECTION_IN#(SERVICE_CON_RESP_SIZE);\n"
+            hr_module_body += "                                  method Action try(Bit#(SERVICE_CON_RESP_SIZE) d);\n"
+            hr_module_body += "                                      Tuple2#(Bit#(SERVICE_CON_IDX_SIZE),Bit#(SERVICE_CON_DATA_SIZE)) tmp = unpack(d);\n"
+            hr_module_body += "                                      t_IDX idx = truncateNP(tpl_1(tmp));\n"
+            hr_module_body += "                                      t_RSP rsp = truncateNP(tpl_2(tmp));\n"
+            hr_module_body += "                                      connector" + str(len(hrings)-2) + ".rspChainIncoming.try(pack(tuple2(idx,rsp)));\n"
+            hr_module_body += "                                  endmethod\n"
+            hr_module_body += "                                  method Bool success  = connector" + str(len(hrings)-2) + ".rspChainIncoming.success;\n"
+            hr_module_body += "                                  method Bool dequeued = connector" + str(len(hrings)-2) + ".rspChainIncoming.dequeued;\n"
+            hr_module_body += "                                  interface Clock clock = localClock;\n"
+            hr_module_body += "                                  interface Reset reset = localReset;\n"
+            hr_module_body += "                              endinterface; \n\n"
+            hr_module_body += "    interface serverReqPort = interface CONNECTION_OUT#(SERVICE_CON_DATA_SIZE);\n"
+            hr_module_body += "                                  method Bit#(SERVICE_CON_DATA_SIZE) first();\n"
+            hr_module_body += "                                      t_REQ req = ringNodes[fromInteger(valueOf(t_NUM_CLIENTS)-1)].reqChainOutgoing.first();\n"
+            hr_module_body += "                                      return zeroExtendNP(req);\n"
+            hr_module_body += "                                  endmethod\n"
+            hr_module_body += "                                  method Action deq = ringNodes[fromInteger(valueOf(t_NUM_CLIENTS)-1)].reqChainOutgoing.deq;\n"
+            hr_module_body += "                                  method Bool notEmpty = ringNodes[fromInteger(valueOf(t_NUM_CLIENTS)-1)].reqChainOutgoing.notEmpty;\n"
+            hr_module_body += "                                  interface clock = localClock;\n"
+            hr_module_body += "                                  interface reset = localReset;\n"
+            hr_module_body += "                              endinterface;\n\n"
+            hr_module_body += "endmodule\n\n"
+
     # connect network modules with services clients
-    fileHandle.write("    // Connect non-interleaved service clients\n")
-    for k, client in enumerate(rClients): 
-        if len(client.remappedIds) == 0:
-            remapped_id = client.id
-        else: 
-            remapped_id = client.remappedIds[client.controllerIdx[0]]
-        fileHandle.write("    let client" +  str(k) + " <- findMatchingServiceClient(clients, \"" + client.connection.name + "\", \"" + client.id + "\");\n")
-        fileHandle.write("    connectOutToIn(client" +  str(k) + ".outgoing, " + client.matchingPorts[client.controllerIdx[0]][0] + ", 0);\n")
-        fileHandle.write("    connectOutToInWithIdx(" + client.matchingPorts[client.controllerIdx[0]][1] + ", client" + str(k) + ".incoming, " + remapped_id + ", 0);\n\n")
-        
-    fileHandle.write("    // Connect interleaved service clients\n")
-    for i, client in enumerate(pClients):
-        fileHandle.write("    function t_CTRLR_IDX getControllerIdxFromAddr" + str(i) + "(SCRATCHPAD_MEM_ADDRESS addr);\n")
-        fileHandle.write("        Bit#(" + str(addr_bits[i])+ ") test_addr = truncate(addr);\n")
-        for j, par in enumerate(client.partition): 
-            if j == 0:
-                fileHandle.write("        if (test_addr < " + str((2**addr_bits[i])*par/sum(client.partition)) + ")\n")
-                fileHandle.write("            return unpack(0);\n")
-            elif j == (len(client.partition) -1) :
-                fileHandle.write("        else\n")
-                fileHandle.write("            return unpack(" + str(j) + ");\n")
-            else:
-                fileHandle.write("        else if (test_addr < " + str((2**addr_bits[i])*par/sum(client.partition)) + ")\n")
-                fileHandle.write("            return unpack(" + str(j) + ");\n")
-        fileHandle.write("    endfunction\n\n")
-        fileHandle.write("    Vector#(" + str(len(client.partition))+ ", CONNECTION_IN#(SERVICE_CON_DATA_SIZE)) controllerReqPortVec" + str(i) + " = newVector();\n")
-        fileHandle.write("    Vector#(" + str(len(client.partition))+ ", CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) controllerRspPortVec" + str(i) + " = newVector();\n")
-        for k, c in enumerate(client.controllerIdx):
-            fileHandle.write("    controllerReqPortVec" + str(i) + "[" + str(k) + "] = " + client.matchingPorts[c][0] + ";\n")
-            fileHandle.write("    controllerRspPortVec" + str(i) + "[" + str(k) + "] = " + client.matchingPorts[c][1] + ";\n")
-        
-        if len(client.remappedIds) == 0:
-            remapped_id = client.id
-        else: 
-            remapped_id = client.remappedIds[client.controllerIdx[0]]
-        
-        fileHandle.write("    let interleaver" + str(i) + " <- mkScratchpadClientInterleaver(controllerReqPortVec" + str(i) + ",")
-        fileHandle.write(" controllerRspPortVec" + str(i) + ", " + remapped_id + ", getControllerIdxFromAddr" + str(i) + ");\n")
-        fileHandle.write("    let client" +  str(i+len(rClients)) + " <- findMatchingServiceClient(clients, \"" + client.connection.name + "\", \"" + client.id + "\");\n")
-        fileHandle.write("    connectOutToIn(client" +  str(i+len(rClients)) + ".outgoing, interleaver" + str(i) + ".clientReqIncoming, 0);\n")
-        fileHandle.write("    connectOutToInWithIdx(interleaver" + str(i) + ".clientRspOutgoing, client" + str(i+len(rClients)) + ".incoming, " + remapped_id + ", 0);\n\n")
+    if len(rClients) > 0: 
+        fileHandle.write("\n    // Connect non-interleaved service clients\n")
+        for k, client in enumerate(rClients): 
+            if len(client.remappedIds) == 0:
+                remapped_id = client.id
+            else: 
+                remapped_id = client.remappedIds[client.controllerIdx[0]]
+            fileHandle.write("    let client" +  str(k) + " <- findMatchingServiceClient(clients, \"" + client.connection.name + "\", \"" + client.id + "\");\n")
+            fileHandle.write("    connectOutToIn(client" +  str(k) + ".outgoing, " + client.matchingPorts[client.controllerIdx[0]][0] + ", 0);\n")
+            fileHandle.write("    connectOutToInWithIdx(" + client.matchingPorts[client.controllerIdx[0]][1] + ", client" + str(k) + ".incoming, " + remapped_id + ", 0);\n\n")
+    
+    if len(pClients) > 0:
+        fileHandle.write("\n    // Connect interleaved service clients\n")
+        for i, client in enumerate(pClients):
+            fileHandle.write("    function t_CTRLR_IDX getControllerIdxFromAddr" + str(i) + "(SCRATCHPAD_MEM_ADDRESS addr);\n")
+            fileHandle.write("        Bit#(" + str(addr_bits[i])+ ") test_addr = truncate(addr);\n")
+            for j, par in enumerate(client.partition): 
+                if j == 0:
+                    fileHandle.write("        if (test_addr < " + str((2**addr_bits[i])*par/sum(client.partition)) + ")\n")
+                    fileHandle.write("            return unpack(0);\n")
+                elif j == (len(client.partition) -1) :
+                    fileHandle.write("        else\n")
+                    fileHandle.write("            return unpack(" + str(j) + ");\n")
+                else:
+                    fileHandle.write("        else if (test_addr < " + str((2**addr_bits[i])*par/sum(client.partition)) + ")\n")
+                    fileHandle.write("            return unpack(" + str(j) + ");\n")
+            fileHandle.write("    endfunction\n\n")
+            fileHandle.write("    Vector#(" + str(len(client.partition))+ ", CONNECTION_IN#(SERVICE_CON_DATA_SIZE)) controllerReqPortVec" + str(i) + " = newVector();\n")
+            fileHandle.write("    Vector#(" + str(len(client.partition))+ ", CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) controllerRspPortVec" + str(i) + " = newVector();\n")
+            for k, c in enumerate(client.controllerIdx):
+                fileHandle.write("    controllerReqPortVec" + str(i) + "[" + str(k) + "] = " + client.matchingPorts[c][0] + ";\n")
+                fileHandle.write("    controllerRspPortVec" + str(i) + "[" + str(k) + "] = " + client.matchingPorts[c][1] + ";\n")
+            
+            if len(client.remappedIds) == 0:
+                remapped_id = client.id
+            else: 
+                remapped_id = client.remappedIds[client.controllerIdx[0]]
+            
+            fileHandle.write("    let interleaver" + str(i) + " <- mkScratchpadClientInterleaver(controllerReqPortVec" + str(i) + ",")
+            fileHandle.write(" controllerRspPortVec" + str(i) + ", " + remapped_id + ", getControllerIdxFromAddr" + str(i) + ");\n")
+            fileHandle.write("    let client" +  str(i+len(rClients)) + " <- findMatchingServiceClient(clients, \"" + client.connection.name + "\", \"" + client.id + "\");\n")
+            fileHandle.write("    connectOutToIn(client" +  str(i+len(rClients)) + ".outgoing, interleaver" + str(i) + ".clientReqIncoming, 0);\n")
+            fileHandle.write("    connectOutToInWithIdx(interleaver" + str(i) + ".clientRspOutgoing, client" + str(i+len(rClients)) + ".incoming, " + remapped_id + ", 0);\n\n")
         
     fileHandle.write("endmodule\n\n")
+    fileHandle.write(hr_module_body) 
     fileHandle.close()
     
 #
@@ -575,10 +701,7 @@ def genRemapWrapper(platform, remapIds):
 def createDefaultRemapFile(remapFilePath):
     remapHandle = open(remapFilePath, 'w')
     remapHandle.write("// Generated by build pipeline (lim_memory)\n\n")
-    # remapHandle.write("function String connectionNameRemap(String inputName) = inputName;\n\n")
-    # remapHandle.write("module connectPartitionedScratchpads();\nendmodule\n\n")
     remapHandle.write("module connectScratchpadNetwork();\nendmodule\n\n")
-    # remapHandle.write("module mkScratchpadIdRemap();\nendmodule\n\n")
     remapHandle.close()
 
 #
