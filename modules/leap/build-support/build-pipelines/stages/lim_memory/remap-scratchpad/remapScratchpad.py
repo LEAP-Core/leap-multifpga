@@ -543,9 +543,9 @@ def genRemapWrapper(platform, remapIds):
    
         elif platform['networkType'] == "hring": 
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
-            clients.sort(key=lambda x: x.remappedIds[i], reverse=False)
+            clients.sort(key=lambda x: int(x.remappedIds[i]), reverse=False)
             for j, client in enumerate(clients): 
-                 fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  str(client.remappedIds[i]) + ";\n")
+                 fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  client.remappedIds[i] + ";\n")
                  req_matching_port = "network" + str(i) + ".clientReqPorts[" + str(j) + "]"
                  rsp_matching_port = "network" + str(i) + ".clientRspPorts[" + str(j) + "]"
                  client.matchingPorts[i] = (req_matching_port, rsp_matching_port)
@@ -571,9 +571,6 @@ def genRemapWrapper(platform, remapIds):
             hr_module_body += "    endfunction\n\n"
             hr_module_body += "    Vector#(t_NUM_CLIENTS, CONNECTION_SERVICE_RING_NODE_IFC#(t_REQ_SZ, t_RSP_SZ, t_IDX_SZ)) ringNodes <- \n"
             hr_module_body += "        mapM(mkServiceRingNode, map(isLocalFunc, clientIdVec));\n\n"
-            hr_module_body += "    function Bool isChildFunc(Integer minId, Integer maxId, t_IDX idx);\n"
-            hr_module_body += "        return (idx >= fromInteger(minId)) && (idx <= fromInteger(maxId));\n"
-            hr_module_body += "    endfunction\n\n"
            
             # connect ring nodes on the same level
             for j in range(len(clients)-1): 
