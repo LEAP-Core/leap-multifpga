@@ -305,7 +305,7 @@ def buildScratchpadTree(platforms):
         network = [ScratchpadTreeNode("root"+str(x)) for x in range(len(controllers))]
         for i, controller in enumerate(controllers):
             clients = [x for x in platform['clients'] if i in x.controllerIdx]
-            clients.sort(key=lambda x: x.latency, reverse=False)
+            clients.sort(key=lambda x: x.latency, reverse=True)
             total_leaves = len(clients)
             depth = int(math.ceil(math.log(total_leaves,radix)))
             # determine the number of leaf nodes for each level 
@@ -554,22 +554,21 @@ def genRemapWrapper(platform, remapIds):
             fileHandle.write("    connectOutToIn(network" + str(i) + ".serverReqPort, server" + str(i) + ".incoming, 0);\n\n")
             
             hrings = platform['network'][i]
-            hr_module_body += "module mkServiceHierarchicalRingNetworkModule" + str(i) + "#(Vector#(t_NUM_CLIENTS, Integer) clientIdVec,\n"
+            hr_module_body += "module mkServiceHierarchicalRingNetworkModule" + str(i) + "#(Vector#(" + str(len(clients)) + ", Integer) clientIdVec,\n"
             hr_module_body += "                                                NumTypeParam#(t_REQ_SZ) reqSz,\n"
             hr_module_body += "                                                NumTypeParam#(t_RSP_SZ) rspSz,\n" 
             hr_module_body += "                                                NumTypeParam#(t_IDX_SZ) idxSz)\n"
             hr_module_body += "    // Interface:\n"
-            hr_module_body += "    (CONNECTION_SERVICE_NETWORK_IFC#(t_NUM_CLIENTS))\n"
+            hr_module_body += "    (CONNECTION_SERVICE_NETWORK_IFC#(" + str(len(clients)) + "))\n"
             hr_module_body += "    provisos(Alias#(Bit#(t_REQ_SZ), t_REQ),\n"
             hr_module_body += "             Alias#(Bit#(t_RSP_SZ), t_RSP),\n"
-            hr_module_body += "             Alias#(Bit#(t_IDX_SZ), t_IDX),\n"
-            hr_module_body += "             Add#(" + str(len(clients)) + ", extras, t_NUM_CLIENTS));\n\n"
+            hr_module_body += "             Alias#(Bit#(t_IDX_SZ), t_IDX));\n\n"
             hr_module_body += "    Clock localClock <- exposeCurrentClock();\n"
             hr_module_body += "    Reset localReset <- exposeCurrentReset();\n\n"
             hr_module_body += "    function Bool isLocalFunc(Integer clientId, t_IDX idx);\n"
             hr_module_body += "        return idx == fromInteger(clientId);\n"
             hr_module_body += "    endfunction\n\n"
-            hr_module_body += "    Vector#(t_NUM_CLIENTS, CONNECTION_SERVICE_RING_NODE_IFC#(t_REQ_SZ, t_RSP_SZ, t_IDX_SZ)) ringNodes <- \n"
+            hr_module_body += "    Vector#(" + str(len(clients)) + ", CONNECTION_SERVICE_RING_NODE_IFC#(t_REQ_SZ, t_RSP_SZ, t_IDX_SZ)) ringNodes <- \n"
             hr_module_body += "        mapM(mkServiceRingNode, map(isLocalFunc, clientIdVec));\n\n"
            
             # connect ring nodes on the same level
@@ -577,25 +576,26 @@ def genRemapWrapper(platform, remapIds):
                  if clients[j].level == clients[j+1].level: 
                      hr_module_body += "    connectOutToIn(ringNodes[" + str(j) + "].reqChainOutgoing, ringNodes[" + str(j+1) + "].reqChainIncoming, 0);\n"
                      hr_module_body += "    connectOutToIn(ringNodes[" + str(j) + "].rspChainOutgoing, ringNodes[" + str(j+1) + "].rspChainIncoming, 0);\n"
-                 else:
+                 else: # instantiate connectors 
                      connector_idx = [x for x, y in enumerate(hrings) if y.level == clients[j].level][0]
                      ring = hrings[connector_idx]
                      hr_module_body += "    function Bool isChildFunc" + str(connector_idx) + "(t_IDX idx) = (idx <= " + str(ring.maxId) + ") && (idx >= " + str(ring.minId) + ");\n"
                      hr_module_body += "    let connector" + str(connector_idx) + " <- mkServiceRingNode(isChildFunc" + str(connector_idx) + ");\n"
                      hr_module_body += "    connectOutToIn(ringNodes[" + str(j) + "].reqChainOutgoing, connector" + str(connector_idx) + ".clientReqIncoming, 0);\n"
-                     hr_module_body += "    connectOutToIn(connector" + str(connector_idx) + ".clientRspOutgoing, ringNodes[" + str(ring.minId-hrings[0].minId) + "].rspChainIncoming, 0);\n"
-            # connect connectors
-            for r in range(len(hrings)-1): 
-                if r < len(hrings)-2: 
-                    hr_module_body += "    connectOutToIn(connector" + str(r) + ".reqChainOutgoing, connector" + str(r+1) + ".reqChainIncoming, 0);\n"
-                    hr_module_body += "    connectOutToIn(connector" + str(r+1) + ".rspChainOutgoing, connector" + str(r) + ".rspChainIncoming, 0);\n"
-                elif r == len(hrings)-2: 
-                    hr_module_body += "    connectOutToIn(connector" + str(r) + ".reqChainOutgoing, ringNodes[" + str(hrings[r+1].minId-hrings[0].minId) + "].reqChainIncoming, 0);\n"
-                    hr_module_body += "    connectOutToIn(connector" + str(r) + ".rspChainOutgoing, ringNodes[" + str(hrings[r+1].minId-hrings[0].minId) + "].rspChainIncoming, 0);\n"
+                     if connector_idx == 0: # connector at the maximum level
+                         hr_module_body += "    connectOutToIn(connector" + str(connector_idx) + ".clientRspOutgoing, ringNodes[" + str(ring.minId-hrings[0].minId) + "].rspChainIncoming, 0);\n"
+                     else:
+                         hr_module_body += "    connectOutToIn(connector" + str(connector_idx-1) + ".reqChainOutgoing, connector" + str(connector_idx) + ".reqChainIncoming, 0);\n"
+                         hr_module_body += "    connectOutToIn(connector" + str(connector_idx-1) + ".rspChainOutgoing, ringNodes[" + str(ring.minId-hrings[0].minId) + "].rspChainIncoming, 0);\n"
+                         hr_module_body += "    connectOutToIn(connector" + str(connector_idx) + ".clientRspOutgoing, connector" + str(connector_idx-1) + ".rspChainIncoming, 0);\n"
+            
+            # connect the last connector
+            hr_module_body += "    connectOutToIn(connector" + str(len(hrings)-2) + ".reqChainOutgoing, ringNodes[" + str(hrings[-1].minId-hrings[0].minId) + "].reqChainIncoming, 0);\n"
+            hr_module_body += "    connectOutToIn(connector" + str(len(hrings)-2) + ".rspChainOutgoing, ringNodes[" + str(hrings[-1].minId-hrings[0].minId) + "].rspChainIncoming, 0);\n"
                  
-            hr_module_body += "\n    Vector#(t_NUM_CLIENTS, CONNECTION_IN#(SERVICE_CON_DATA_SIZE))  clientReqPortsVec = newVector();\n"
-            hr_module_body += "    Vector#(t_NUM_CLIENTS, CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) clientRspPortsVec = newVector();\n\n"
-            hr_module_body += "    for (Integer x = 0; x < valueOf(t_NUM_CLIENTS); x = x + 1)\n"
+            hr_module_body += "\n    Vector#(" + str(len(clients)) + ", CONNECTION_IN#(SERVICE_CON_DATA_SIZE))  clientReqPortsVec = newVector();\n"
+            hr_module_body += "    Vector#(" + str(len(clients)) + ", CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) clientRspPortsVec = newVector();\n\n"
+            hr_module_body += "    for (Integer x = 0; x < " + str(len(clients)) + "; x = x + 1)\n"
             hr_module_body += "    begin\n"
             hr_module_body += "        clientReqPortsVec[x] = (interface CONNECTION_IN#(SERVICE_CON_DATA_SIZE);\n"
             hr_module_body += "                                    method Action try(Bit#(SERVICE_CON_DATA_SIZE) d);\n"
@@ -633,11 +633,11 @@ def genRemapWrapper(platform, remapIds):
             hr_module_body += "                              endinterface; \n\n"
             hr_module_body += "    interface serverReqPort = interface CONNECTION_OUT#(SERVICE_CON_DATA_SIZE);\n"
             hr_module_body += "                                  method Bit#(SERVICE_CON_DATA_SIZE) first();\n"
-            hr_module_body += "                                      t_REQ req = ringNodes[fromInteger(valueOf(t_NUM_CLIENTS)-1)].reqChainOutgoing.first();\n"
+            hr_module_body += "                                      t_REQ req = ringNodes[" + str(len(clients)-1) + "].reqChainOutgoing.first();\n"
             hr_module_body += "                                      return zeroExtendNP(req);\n"
             hr_module_body += "                                  endmethod\n"
-            hr_module_body += "                                  method Action deq = ringNodes[fromInteger(valueOf(t_NUM_CLIENTS)-1)].reqChainOutgoing.deq;\n"
-            hr_module_body += "                                  method Bool notEmpty = ringNodes[fromInteger(valueOf(t_NUM_CLIENTS)-1)].reqChainOutgoing.notEmpty;\n"
+            hr_module_body += "                                  method Action deq = ringNodes[" + str(len(clients)-1) + "].reqChainOutgoing.deq;\n"
+            hr_module_body += "                                  method Bool notEmpty = ringNodes[" + str(len(clients)-1) + "].reqChainOutgoing.notEmpty;\n"
             hr_module_body += "                                  interface clock = localClock;\n"
             hr_module_body += "                                  interface reset = localReset;\n"
             hr_module_body += "                              endinterface;\n\n"
