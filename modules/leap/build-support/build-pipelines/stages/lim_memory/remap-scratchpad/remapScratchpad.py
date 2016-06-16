@@ -269,6 +269,11 @@ def remapClientIds(platforms, remapMode):
     # tree structure 
     if remapMode == 2 or remapMode == 3: 
         return buildScratchpadTree(platforms)
+    elif remapMode == 4: 
+        for platform in platforms:
+            platform['networkType'] = "crossbar"
+        remapIds = {}
+        return remapIds
     else:
         hierarchy = 0
         for platform in platforms:
@@ -677,8 +682,36 @@ def genRemapWrapper(platform, remapIds, idealNetwork):
             hr_module_body += "                              endinterface;\n\n"
             hr_module_body += "endmodule\n\n"
 
+        elif platform['networkType'] == "crossbar":
+            bandwidth_bits = 5
+            bandwidth_max = max(1, max([getBandwidthFraction(x,i) for x in clients]))
+            fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
+            fileHandle.write("    Vector#(" +  str(len(clients)) + ", UInt#(" + str(bandwidth_bits) + ")) bandwidthFractionVec" + str(i) + " = newVector();\n")
+            fileHandle.write("    Vector#(" +  str(len(clients)) + ", CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) clientReqPortsVec" + str(i) + " = newVector();\n")
+            fileHandle.write("    Vector#(" +  str(len(clients)) + ", CONNECTION_IN_WITH_IDX#(SERVICE_CON_DATA_SIZE,SERVICE_CON_IDX_SIZE)) clientRspPortsVec" + str(i) + " = newVector();\n")
+            for j, client in enumerate(clients): 
+                 fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  str(client.id) + ";\n")
+                 fraction = max(1,min(getBandwidthFraction(client,i), int(round(float(getBandwidthFraction(client,i))*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
+                 fileHandle.write("    bandwidthFractionVec" + str(i) + "[" + str(j) + "] = " + str(fraction) + ";\n")
+                 if len(client.partition) == 0: # non-interleaved clients
+                      client_idx = rClients.index(client)
+                      fileHandle.write("    let client" +  str(client_idx) + " <- findMatchingServiceClient(clients, \"" + client.connection.name + "\", \"" + client.id + "\");\n")
+                      fileHandle.write("    clientReqPortsVec" + str(i) + "[" + str(j) + "] = client" + str(client_idx) + ".outgoing;\n")
+                      fileHandle.write("    clientRspPortsVec" + str(i) + "[" + str(j) + "] = client" + str(client_idx) + ".incoming;\n")
+                 else: # interleaved clients 
+                      client_idx = pClients.index(client)
+                      fileHandle.write("    let connector" + str(client_idx) + "Ctrl" + str(i) + "Req <- mkServiceConnector();\n")
+                      fileHandle.write("    let connector" + str(client_idx) + "Ctrl" + str(i) + "Rsp <- mkServiceConnector();\n")
+                      fileHandle.write("    clientReqPortsVec" + str(i) + "[" + str(j) + "] = connector" + str(client_idx) + "Ctrl" + str(i) + "Req.outgoing;\n")
+                      fileHandle.write("    clientRspPortsVec" + str(i) + "[" + str(j) + "] = convertConnectionInToConnectionInWithIdx(connector" + str(client_idx) + "Ctrl" + str(i) + "Rsp.incoming);\n")
+                      req_matching_port = "connector" + str(client_idx) + "Ctrl" + str(i) + "Req.incoming"
+                      rsp_matching_port = "connector" + str(client_idx) + "Ctrl" + str(i) + "Rsp.outgoing"
+                      client.matchingPorts[i] = (req_matching_port, rsp_matching_port)
+            fileHandle.write("    connectManyOutToIn(clientReqPortsVec" + str(i) + ", server" + str(i) + ".incoming, 0, mkLocalArbiterBandwidth(bandwidthFractionVec" + str(i) + "));\n")
+            fileHandle.write("    connectOutToManyInWithIdx(server" + str(i) + ".outgoing, clientRspPortsVec" + str(i) + ", clientIdVec" + str(i) + ", 0);\n\n")
+            
     # connect network modules with services clients
-    if len(rClients) > 0: 
+    if len(rClients) > 0 and platform['networkType'] != "crossbar": 
         fileHandle.write("\n    // Connect non-interleaved service clients\n")
         for k, client in enumerate(rClients): 
             if len(client.remappedIds) == 0:

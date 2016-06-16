@@ -6,5 +6,5 @@
 
 %scons %library LIMMemory.py
 
-%param --global SCRATCHPAD_REMAP_MODE  0  "0: Construct ring networks, 1: Randomly remap scratchpads to controllers, 2: Construct tree networks, 3: Construct tree networks in a faster clock domain"
+%param --global SCRATCHPAD_REMAP_MODE  0  "0: Construct ring networks, 1: Randomly remap scratchpads to controllers, 2: Construct tree networks, 3: Construct tree networks in a faster clock domain, 4: Construct crossbar networks"
 
