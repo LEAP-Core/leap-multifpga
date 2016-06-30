@@ -35,18 +35,11 @@ Packagehint=leap-platforms
 File=modules/bluespec/common/fpgaenv/physical-platform/debuggers/null/null-debugger.awb
 Packagehint=leap-platforms
 
-[Local Memory Interface using BRAM]
-File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-bram.awb
-Packagehint=leap
 
 [Common Physical Platform Utilities]
 File=modules/bluespec/common/fpgaenv/physical-platform/utils/utils.awb
 Packagehint=leap-platforms
 
-[Local Memory Interface using BRAM/Params]
-LOCAL_MEM_WRITE_LATENCY=4
-LOCAL_MEM_READ_LATENCY=8
-LOCAL_MEM_ADDR_BITS=10
 
 [Null Remote Memory]
 File=modules/leap/virtual-platform/low-level-platform-interface/remote-memory/null/null-remote-memory.awb
@@ -122,7 +115,7 @@ rrr=LI RRR Interface Module
 remote_memory=Null Remote Memory
 channelio=LI Channel Multiplexer
 physical_platform_debugger=Null Physical Platform Debugger
-local_mem=Local Memory Interface using BRAM
+local_mem=Local Memory using DDR DRAM (burst holds at least one line)
 physical_channel=BlueNoC PCIe Tunnel
 
 [Low Level Platform LI]
@@ -206,9 +199,14 @@ Packagehint=leap
 [RRR Common Module/Requires]
 rrr_debug=RRR Debug Module
 
-[Local Memory Interface using BRAM/Requires]
-local_mem_interface=Local Memory Interface
 
 [Local Memory Interface]
 File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-interface/local-mem-interface.awb
 Packagehint=leap
+
+[Local Memory using DDR DRAM (burst holds at least one line)]
+File=modules/leap/virtual-platform/low-level-platform-interface/local-mem/local-mem-ddr-wide.awb
+Packagehint=leap
+
+[Local Memory using DDR DRAM (burst holds at least one line)/Requires]
+local_mem_interface=Local Memory Interface
