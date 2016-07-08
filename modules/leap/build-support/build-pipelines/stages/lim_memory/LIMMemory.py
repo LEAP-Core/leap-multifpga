@@ -87,5 +87,6 @@ class LIMMemory():
         # generate scratchpad connection remapping function
         remappingFiles = list(self.moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'])
         REMAP_MODE = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_REMAP_MODE')
-        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), self.hwPlatformNames, remappingFiles, self.scratchpadStats, REMAP_MODE) 
+        DYN_BANDWIDTH = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_DYN_BANDWIDTH_ALLOC_EN')
+        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), self.hwPlatformNames, remappingFiles, self.scratchpadStats, REMAP_MODE, DYN_BANDWIDTH) 
 
