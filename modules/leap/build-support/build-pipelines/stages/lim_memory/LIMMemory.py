@@ -50,7 +50,7 @@ class LIMMemory():
         
         moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'] = []
 
-        self.hwPlatformNames = []
+        self.hwPlatforms= []
         
         for platformName in self.environment.getPlatformNames():
         # these defs are copied from a previous tool.  refactor
@@ -72,7 +72,7 @@ class LIMMemory():
                  # Set dependencies for real output files (in bitfile dir) 
                  parameterFile =  platformBitfileBuildDir +'/'+ remapFile
                  moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'] += [parameterFile]
-                 self.hwPlatformNames.append(platform.name)
+                 self.hwPlatforms.append(lim_remap_scratchpad.ScratchpadPlatform(platform.name, self.environment.getSynthesisBoundaryPlatformID(platform.name), parameterFile))
 
         subbuild = moduleList.env.Command( 
             moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'],        
@@ -85,8 +85,8 @@ class LIMMemory():
     def optimizeMemory(self, target, source, env):
         print "LIMMemory: optimizeMemory"
         # generate scratchpad connection remapping function
-        remappingFiles = list(self.moduleList.topModule.moduleDependency['FPGA_MEMORY_PARAMETERS'])
         REMAP_MODE = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_REMAP_MODE')
+        K_ARY = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_REMAP_TREE_K_ARY')
         DYN_BANDWIDTH = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_DYN_BANDWIDTH_ALLOC_EN')
-        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), self.hwPlatformNames, remappingFiles, self.scratchpadStats, REMAP_MODE, DYN_BANDWIDTH) 
+        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), self.hwPlatforms, self.scratchpadStats, REMAP_MODE, K_ARY, DYN_BANDWIDTH) 
 

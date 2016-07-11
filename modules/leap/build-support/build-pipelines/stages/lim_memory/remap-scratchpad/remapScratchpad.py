@@ -95,21 +95,41 @@ class Scratchpad():
         return print_str
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
+
+class ScratchpadPlatform():
+    def __init__(self, name, id, filePath):
+        self.name = name
+        self.id = id
+        self.clients = []
+        self.partitionedClients = []
+        self.restClients = []
+        self.controllers = []
+        self.network = []
+        self.networkType = ""
+        self.remapFile = filePath
+    def __repr__(self):
+        print_str =  "Platform: name: " + self.name + " id: " + str(self.id)
+        print_str += " clients: " + str(self.clients) + " controllers: " + str(self.controllers)
+        print_str += " remapFile: " + outFilePath
+        return print_str
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
 #
 # This function separates scratchpad connections based on the platform 
 # they are mapped to
 # 
 def separateScratchpadConnections(clients, controllers, platforms):
     
-    names = [x['name'] for x in platforms]
+    names = [x.name for x in platforms]
     
     for controller in controllers: 
         idx = names.index(controller.platform())
-        platforms[idx]['controllers'].append(controller.copy())
+        platforms[idx].controllers.append(controller.copy())
     
     for client in clients: 
         idx = names.index(client.platform())
-        platforms[idx]['clients'].append(Scratchpad(client.client_idx, client.copy()))
+        platforms[idx].clients.append(Scratchpad(client.client_idx, client.copy()))
 
 #
 # This function parses scratchpad statsFile
@@ -265,22 +285,22 @@ def printRemapTable(remapIds):
 #
 # This function remaps client ids for different kinds of networks
 #
-def remapClientIds(platforms, remapMode):
+def remapClientIds(platforms, remapMode, treeKary):
     # tree structure 
     if remapMode == 2 or remapMode == 3: 
-        return buildScratchpadTree(platforms)
+        return buildScratchpadTree(platforms, treeKary)
     elif remapMode == 4: 
         for platform in platforms:
-            platform['networkType'] = "crossbar"
+            platform.networkType = "crossbar"
         remapIds = {}
         return remapIds
     else:
         hierarchy = 0
         for platform in platforms:
-            hierarchy += sum([x.level for x in platform['clients']])
+            hierarchy += sum([x.level for x in platform.clients])
         if hierarchy == 0 or remapMode == 1: 
             for platform in platforms:
-                platform['networkType'] = "ring"
+                platform.networkType = "ring"
             remapIds = {}
             return remapIds
         else:
@@ -300,16 +320,16 @@ def getBandwidthFraction(client, controllerIdx):
 #
 # This function builds scratchpad trees
 #
-def buildScratchpadTree(platforms): 
-    radix  = 6
+def buildScratchpadTree(platforms, treeKary): 
+    radix  = treeKary
     remapIds = {}
     new_id = 1
     internal_node_id = 1
     for platform in platforms:
-        controllers = platform['controllers']
+        controllers = platform.controllers
         network = [ScratchpadTreeNode("root"+str(x)) for x in range(len(controllers))]
         for i, controller in enumerate(controllers):
-            clients = [x for x in platform['clients'] if i in x.controllerIdx]
+            clients = [x for x in platform.clients if i in x.controllerIdx]
             clients.sort(key=lambda x: x.latency, reverse=True)
             total_leaves = len(clients)
             depth = int(math.ceil(math.log(total_leaves,radix)))
@@ -367,8 +387,8 @@ def buildScratchpadTree(platforms):
                 child_nodes = [ScratchpadTreeLeaf(x,x.remappedIds[i],getBandwidthFraction(x,i)) for x in clients]
                 root.add_children(child_nodes)
             print root
-        platform['network'] = network
-        platform['networkType'] = "tree"
+        platform.network = network
+        platform.networkType = "tree"
     return remapIds
     
 # This function builds hierarchical ring structure 
@@ -377,10 +397,10 @@ def buildHierarchicalRing(platforms):
     for platform in platforms:
         new_id = 1
         for platform in platforms:
-            controllers = platform['controllers']
+            controllers = platform.controllers
             network = [x[:] for x in [[]]*len(controllers)]
             for i, controller in enumerate(controllers):
-                clients = [x for x in platform['clients'] if i in x.controllerIdx]
+                clients = [x for x in platform.clients if i in x.controllerIdx]
                 clients.sort(key=lambda x: x.level, reverse=True)
                 rings  = network[i]
                 min_id = new_id
@@ -404,8 +424,8 @@ def buildHierarchicalRing(platforms):
                 if len(rings) > 0: 
                     rings[-1].minId = min_id
                     rings[-1].maxId = max_id - 1
-            platform['network'] = network
-            platform['networkType'] = "hring"
+            platform.network = network
+            platform.networkType = "hring"
             print network
     return remapIds        
 
@@ -420,7 +440,7 @@ def getHierarchyRingName(baseName, level):
 #
 def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
     
-    fileHandle = open(platform['file'], 'w')
+    fileHandle = open(platform.remapFile, 'w')
     fileHandle.write("// Generated by build pipeline (lim_memory)\n\n")
         
     # include headers
@@ -438,9 +458,9 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
     
     fileHandle.write("import Vector::*;\n\n")
     
-    controllers = platform['controllers']
-    pClients = platform['partitioned_clients']
-    rClients = platform['rest_clients']
+    controllers = platform.controllers
+    pClients = platform.partitionedClients
+    rClients = platform.restClients
     hr_module_body = "" 
     clock_info = ""
 
@@ -476,18 +496,18 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
     fileHandle.write("    let clients <- getUnmatchedServiceClients();\n")
     fileHandle.write("    let servers <- getUnmatchedServiceServers();\n\n")
 
-    if platform['networkType'] != "tree": 
+    if platform.networkType != "tree": 
         fileHandle.write("    NumTypeParam#(" + str(controllers[0].req_bitwidth) + ") reqSz = ?;\n")
         fileHandle.write("    NumTypeParam#(" + str(controllers[0].resp_bitwidth) + ") rspSz = ?;\n")
         fileHandle.write("    NumTypeParam#(" + str(controllers[0].idx_bitwidth) + ") idxSz = ?;\n\n")
         
-    if platform['networkType'] == "crossbar" and dynBandwidthEn: 
+    if platform.networkType == "crossbar" and dynBandwidthEn: 
         fileHandle.write("    PARAMETER_NODE paramNode <- mkDynamicParameterNode();\n\n")
     
     # instantiate service network modules and connect them with service controllers
     for i, controller in enumerate(controllers):
         fileHandle.write("    let server" + str(i) + " <- findMatchingServiceServer(servers, \"" + controller.name + "\");\n")
-        clients = [x for x in platform['clients'] if i in x.controllerIdx]
+        clients = [x for x in platform.clients if i in x.controllerIdx]
         # deal with single client service
         if len(clients) == 1: # no network needed
             # directly connect the service server with the service client
@@ -506,7 +526,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
             rsp_matching_port = "resizeServiceConnectionOut(" + server_rsp_port + ")"
             clients[0].matchingPorts[i] = (req_matching_port, rsp_matching_port)
         
-        elif platform['networkType'] == "ring": 
+        elif platform.networkType == "ring": 
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
             for j, client in enumerate(clients): 
                  fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  str(client.id) + ";\n")
@@ -517,9 +537,9 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
             fileHandle.write("    connectOutToIn(server" + str(i) + ".outgoing, network" + str(i) + ".serverRspPort, 0);\n")
             fileHandle.write("    connectOutToIn(network" + str(i) + ".serverReqPort, server" + str(i) + ".incoming, 0);\n\n")
         
-        elif platform['networkType'] == "tree": 
+        elif platform.networkType == "tree": 
             bandwidth_bits = 5
-            root = platform['network'][i]
+            root = platform.network[i]
             for node in root.traverse_post_order():
                 if node.isLeaf:
                     fileHandle.write("    let "+ node.name + " <- mkServiceTreeLeaf(" + clock_info + ");\n")
@@ -548,7 +568,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
                         fileHandle.write("    bandwidthFractions_" + node.name + "[" + str(j) + "] = " + str(fraction) + ";\n")
                     
                     if node == root:
-                        remapped_clients = [x for x in platform['clients'] if i in x.controllerIdx and i != x.controllerIdx[0]]
+                        remapped_clients = [x for x in platform.clients if i in x.controllerIdx and i != x.controllerIdx[0]]
                         if len(remapped_clients) > 0: 
                             fileHandle.write("    function SCRATCHPAD_PORT_NUM getRemappedIdx" + str(i) + "(SCRATCHPAD_PORT_NUM idx);\n")
                             for r, client in enumerate(remapped_clients): 
@@ -585,7 +605,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
                         else: 
                             fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" + node.name + ", mkLocalArbiterBandwidth(bandwidthFractions_" + node.name + "));\n");
    
-        elif platform['networkType'] == "hring": 
+        elif platform.networkType == "hring": 
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
             clients.sort(key=lambda x: int(x.remappedIds[i]), reverse=False)
             for j, client in enumerate(clients): 
@@ -597,7 +617,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
             fileHandle.write("    connectOutToIn(server" + str(i) + ".outgoing, network" + str(i) + ".serverRspPort, 0);\n")
             fileHandle.write("    connectOutToIn(network" + str(i) + ".serverReqPort, server" + str(i) + ".incoming, 0);\n\n")
             
-            hrings = platform['network'][i]
+            hrings = platform.network[i]
             hr_module_body += "module mkServiceHierarchicalRingNetworkModule" + str(i) + "#(Vector#(" + str(len(clients)) + ", Integer) clientIdVec,\n"
             hr_module_body += "                                                NumTypeParam#(t_REQ_SZ) reqSz,\n"
             hr_module_body += "                                                NumTypeParam#(t_RSP_SZ) rspSz,\n" 
@@ -687,7 +707,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
             hr_module_body += "                              endinterface;\n\n"
             hr_module_body += "endmodule\n\n"
 
-        elif platform['networkType'] == "crossbar":
+        elif platform.networkType == "crossbar":
             bandwidth_bits = 5
             bandwidth_max = max(1, max([getBandwidthFraction(x,i) for x in clients]))
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
@@ -699,7 +719,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
                  static_fraction = max(1,min(getBandwidthFraction(client,i), int(round(float(getBandwidthFraction(client,i))*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
                  if dynBandwidthEn:  
                      fileHandle.write("    Param#(" + str(bandwidth_bits) + ") bandwidthParam" + str(i) + "_" + str(j))
-                     fileHandle.write(" <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_" + client.id + "_CTRL" + str(i) + "_NETWORK_BANDWIDTH\", " + str(bandwidth_bits) + "'d" + str(static_fraction) + ", paramNode);\n")
+                     fileHandle.write(" <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_" + client.id + "_CTRL" + str(i) + "_PLATFORM_" + str(platform.id) + "_NETWORK_BANDWIDTH\", " + str(bandwidth_bits) + "'d" + str(static_fraction) + ", paramNode);\n")
                      fraction = "unpack(bandwidthParam" + str(i) + "_" + str(j) + ")"
                  else: 
                      fraction = str(static_fraction)
@@ -722,7 +742,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
             fileHandle.write("    connectOutToManyInWithIdx(server" + str(i) + ".outgoing, clientRspPortsVec" + str(i) + ", clientIdVec" + str(i) + ", 0);\n\n")
             
     # connect network modules with services clients
-    if len(rClients) > 0 and platform['networkType'] != "crossbar": 
+    if len(rClients) > 0 and platform.networkType != "crossbar": 
         fileHandle.write("\n    // Connect non-interleaved service clients\n")
         for k, client in enumerate(rClients): 
             if len(client.remappedIds) == 0:
@@ -794,20 +814,11 @@ def createDefaultRemapFile(remapFilePath):
 #
 # This function is the top function that handles scratchpad connection remapping
 #
-def remapScratchpadConnections(liModules, platformNames, fileLists, scratchpadStats, remapMode, dynBandwidthEn):
+def remapScratchpadConnections(liModules, platforms, scratchpadStats, remapMode, treeKary, dynBandwidthEn):
     print "remapScratchpadConnections: "
     scratchpadClients = []
     scratchpadServers = []
     nonMemoryConnections = []
-    platforms = []
-    
-    for idx, platformName in enumerate(platformNames): 
-        platform = {}
-        platform['name'] = platformName
-        platform['clients'] = []
-        platform['controllers'] = []
-        platform['file'] = fileLists[idx]
-        platforms.append(platform)
 
     for liModule in liModules:
         for service in liModule.services:
@@ -825,12 +836,12 @@ def remapScratchpadConnections(liModules, platformNames, fileLists, scratchpadSt
     separateScratchpadConnections(scratchpadClients, scratchpadServers, platforms)
 
     # scratchpad remap is enabled
-    if sum([len(x['clients']) for x in platforms]) > 0:
+    if sum([len(x.clients) for x in platforms]) > 0:
         for platform in platforms: 
-            partitioned_clients, rest_clients, controllers = assignScratchpadClients(platform['controllers'], platform['clients'], scratchpadStats, remapMode)
-            platform['partitioned_clients'] = partitioned_clients 
-            platform['rest_clients'] = rest_clients
-        remapIds = remapClientIds(platforms, remapMode)
+            partitioned_clients, rest_clients, controllers = assignScratchpadClients(platform.controllers, platform.clients, scratchpadStats, remapMode)
+            platform.partitionedClients = partitioned_clients 
+            platform.restClients = rest_clients
+        remapIds = remapClientIds(platforms, remapMode, treeKary)
         # print remapIds
         printRemapTable(remapIds)
         print ""
@@ -838,8 +849,8 @@ def remapScratchpadConnections(liModules, platformNames, fileLists, scratchpadSt
     # generate scratchpad service network file
     
     for platform in platforms: 
-        if len(platform['clients']) > 0: 
+        if len(platform.clients) > 0: 
             genRemapWrapper(platform, remapIds, (remapMode == 3), (dynBandwidthEn==1))
         else:
-            createDefaultRemapFile(platform['file'])
+            createDefaultRemapFile(platform.remapFile)
 
