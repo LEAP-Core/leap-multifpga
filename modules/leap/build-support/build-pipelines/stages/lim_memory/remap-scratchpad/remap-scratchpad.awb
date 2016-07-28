@@ -6,4 +6,6 @@
 %provides lim_remap_scratchpad
 
 %scons %library remapScratchpad.py
+%scons %library scratchpadModules.py
+%scons %library scratchpadTree.py
 

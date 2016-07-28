@@ -8,112 +8,16 @@ import operator
 import sys
 
 # AWB dependencies
+import scratchpadTree
+from scratchpadModules import Scratchpad, ScratchpadPlatform, ScratchpadRing, ScratchpadTreeNode, ScratchpadTreeLeaf
 from li_module import LIModule, LIChain, LIService
+
 
 ######################################################################
 #
 #  Latency-insensitive Module Scratchpad Connection Remapping
 #
 ######################################################################
-
-class ScratchpadRing():
-    def __init__(self, baseName, level):
-        self.baseName = baseName
-        self.level = level
-        self.minId = 0
-        self.maxId = 0
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-    def __str__(self):
-        return "ScratchpadRing: baseName=" + self.baseName + " level=" + str(self.level) + " [" + str(self.minId) + ":" + str(self.maxId) + "]"
-    def __repr__(self):
-        return "ScratchpadRing: baseName=" + self.baseName + " level=" + str(self.level) + " [" + str(self.minId) + ":" + str(self.maxId) + "]"
-
-class ScratchpadTreeNode():
-    def __init__(self, name):
-        self.name = name
-        self.children = []
-        self.idRange = (0, 0)
-        self.bandwidth = 0
-        self.isLeaf = False
-    def add_child(self, child):
-        if len(self.children) == 0: 
-            self.idRange = child.idRange
-        else:
-            self.idRange = (min(self.idRange[0], child.idRange[0]), max(self.idRange[1], child.idRange[1]))
-        self.bandwidth += child.bandwidth
-        self.children.append(child)
-    def add_children(self, children):
-        for child in children:
-            self.add_child(child) 
-    def traverse_post_order(self):
-        for child in self.children:
-            for node in child.traverse_post_order():
-                yield node
-        yield self
-    def __str__(self, depth=0):
-        print_str = "\t"*depth + self.name + "\n"
-        for child in self.children:
-            print_str += child.__str__(depth+1)
-        return print_str
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-class ScratchpadTreeLeaf():
-    def __init__(self, scratchpad, newId, bandwidth):
-        self.scratchpad = scratchpad
-        self.id = newId
-        self.name = "leaf" + newId
-        self.idRange = (int(newId), int(newId))
-        self.bandwidth = max(bandwidth, 1)
-        self.isLeaf = True
-    def traverse_post_order(self):
-        yield self
-    def __str__(self, depth=0):
-        return "\t"*depth + self.id + "[" + self.scratchpad.id + "]\n"
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-class Scratchpad():
-    def __init__(self, id, connection, traffic=0):
-        self.id = id
-        self.remappedIds = {}
-        self.connection = connection
-        self.platformName = connection.platform()
-        self.traffic = traffic
-        self.partition = []
-        self.controllerIdx = []
-        self.matchingPorts = {}
-        self.level = 0
-        self.latency = 1
-        self.bandwidth = 1
-    def __repr__(self):
-        print_str =  "Scratchpad: name: " + self.connection.name + " id: " + self.id
-        print_str += " controllerIdx: " + str(self.controllerIdx) + " traffic: " + str(self.traffic)
-        print_str += " remappedIds: " + str(self.remappedIds)
-        print_str += " level: " + str(self.level) + " latency: " + str(self.latency) + " bandwidth: " + str(self.bandwidth)
-        return print_str
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-class ScratchpadPlatform():
-    def __init__(self, name, id, filePath):
-        self.name = name
-        self.id = id
-        self.clients = []
-        self.partitionedClients = []
-        self.restClients = []
-        self.controllers = []
-        self.network = []
-        self.networkType = ""
-        self.remapFile = filePath
-    def __repr__(self):
-        print_str =  "Platform: name: " + self.name + " id: " + str(self.id)
-        print_str += " clients: " + str(self.clients) + " controllers: " + str(self.controllers)
-        print_str += " remapFile: " + outFilePath
-        return print_str
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
 
 #
 # This function separates scratchpad connections based on the platform 
@@ -144,7 +48,7 @@ def parseStatsFile(clients, statsFiles):
                 m = re.match("LEAP_SCRATCHPAD_(\d+)_PLATFORM_(\d+)_(?:READ|WRITE)_REQUESTS,.*,(\d+)", line)
                 n = re.match("Scratchpad bandwidth partition:\s*ID:\s*(\d+).*Ratio:(.*)", line)
                 h = re.match("Scratchpad hierarchical ring assignment:(.*)", line)
-                l = re.match("LEAP_SCRATCHPAD_(\d+)_PLATFORM_(\d+)_LATENCY,(\d+)", line)
+                l = re.match("LEAP_SCRATCHPAD_(\d+)_PLATFORM_(\d+)_LATENCY,([0-9.]+) \((.+)\)", line)
                 b = re.match("LEAP_SCRATCHPAD_(\d+)_PLATFORM_(\d+)_BANDWIDTH,(\d+)", line)
                 if m:
                     client = next((x for x in clients if x.id == m.group(1)), None)
@@ -173,7 +77,8 @@ def parseStatsFile(clients, statsFiles):
                 elif l:
                     client = next((x for x in clients if x.id == l.group(1)), None)
                     if client != None: 
-                        client.latency = int(l.group(3))
+                        client.latency = float(l.group(3))
+                        client.weightVals = map(float,l.group(4).split(' '))
                 elif b:
                     client = next((x for x in clients if x.id == b.group(1)), None)
                     if client != None: 
@@ -285,10 +190,10 @@ def printRemapTable(remapIds):
 #
 # This function remaps client ids for different kinds of networks
 #
-def remapClientIds(platforms, remapMode, treeKary):
+def remapClientIds(platforms, remapMode, treeKary, treeMode):
     # tree structure 
     if remapMode == 2 or remapMode == 3: 
-        return buildScratchpadTree(platforms, treeKary)
+        return scratchpadTree.buildScratchpadTrees(platforms, treeKary, treeMode)
     elif remapMode == 4: 
         for platform in platforms:
             platform.networkType = "crossbar"
@@ -306,90 +211,6 @@ def remapClientIds(platforms, remapMode, treeKary):
         else:
             return buildHierarchicalRing(platforms)
 
-#
-# This function returns the scratchpad client's bandwidth fraction given the 
-# controller index
-#
-def getBandwidthFraction(client, controllerIdx):
-    if len(client.partition) == 0: 
-        return client.bandwidth
-    else:
-        idx = client.controllerIdx.index(controllerIdx)
-        return int(round(client.partition[idx]*client.bandwidth/float(sum(client.partition))))
-
-#
-# This function builds scratchpad trees
-#
-def buildScratchpadTree(platforms, treeKary): 
-    radix  = treeKary
-    remapIds = {}
-    new_id = 1
-    internal_node_id = 1
-    for platform in platforms:
-        controllers = platform.controllers
-        network = [ScratchpadTreeNode("root"+str(x)) for x in range(len(controllers))]
-        for i, controller in enumerate(controllers):
-            clients = [x for x in platform.clients if i in x.controllerIdx]
-            clients.sort(key=lambda x: x.latency, reverse=True)
-            total_leaves = len(clients)
-            depth = int(math.ceil(math.log(total_leaves,radix)))
-            # determine the number of leaf nodes for each level 
-            num_leaves = []
-            level = max(1, depth-1)
-            if total_leaves < int(math.pow(radix,level)): # depth == 1 case
-                num_leaves.append(total_leaves)
-            else:
-                num_leaves.append(int(math.pow(radix, level)))
-                level = level + 1
-                ret = total_leaves - num_leaves[0]
-                internals = int(math.ceil(float(ret)/radix))
-                while num_leaves[0] + internals > int(math.pow(radix, level-1)):
-                    num_leaves[0] = int(math.pow(radix, level-1)) - internals
-                    ret = total_leaves - num_leaves[0]
-                    internals = int(math.ceil(float(ret)/radix))
-                num_leaves.append(ret)
-            
-            # remap client IDs
-            for client in clients:
-                client.remappedIds[i] = str(new_id)
-                if len(client.controllerIdx) > 1: 
-                    remapIds[str(new_id)] = client.id + "*"
-                else:
-                    remapIds[str(new_id)] = client.id
-                new_id += 1
-                       
-            # build scratchpad tree
-            root = network[i]
-            if depth >= 2:
-               # create leaf nodes
-                parent_nodes = [ScratchpadTreeLeaf(x,x.remappedIds[i],getBandwidthFraction(x,i)) for x in clients[:num_leaves[0]]]
-                child_nodes = [ScratchpadTreeLeaf(x,x.remappedIds[i],getBandwidthFraction(x,i)) for x in clients[len(clients)-num_leaves[1]:]]
-                level = depth
-                if num_leaves[1]%radix > 0:  
-                    n = ScratchpadTreeNode("n"+str(internal_node_id))
-                    n.add_children(child_nodes[:num_leaves[1]%radix])
-                    parent_nodes.append(n)
-                    child_nodes = child_nodes[num_leaves[1]%radix:]
-                    internal_node_id += 1
-                while level >= 2:
-                    while len(child_nodes) > 0:
-                        n = ScratchpadTreeNode("n"+str(internal_node_id))
-                        n.add_children(child_nodes[:radix])
-                        parent_nodes.append(n)
-                        child_nodes = child_nodes[radix:]
-                        internal_node_id += 1
-                    child_nodes = parent_nodes
-                    parent_nodes = []
-                    level -= 1
-                root.add_children(child_nodes) 
-            else: # depth == 1 
-                # create leaf nodes
-                child_nodes = [ScratchpadTreeLeaf(x,x.remappedIds[i],getBandwidthFraction(x,i)) for x in clients]
-                root.add_children(child_nodes)
-            print root
-        platform.network = network
-        platform.networkType = "tree"
-    return remapIds
     
 # This function builds hierarchical ring structure 
 def buildHierarchicalRing(platforms):
@@ -709,14 +530,14 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn):
 
         elif platform.networkType == "crossbar":
             bandwidth_bits = 5
-            bandwidth_max = max(1, max([getBandwidthFraction(x,i) for x in clients]))
+            bandwidth_max = max(1, max([x.getBandwidthFraction(i) for x in clients]))
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", UInt#(" + str(bandwidth_bits) + ")) bandwidthFractionVec" + str(i) + " = newVector();\n")
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) clientReqPortsVec" + str(i) + " = newVector();\n")
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", CONNECTION_IN_WITH_IDX#(SERVICE_CON_DATA_SIZE,SERVICE_CON_IDX_SIZE)) clientRspPortsVec" + str(i) + " = newVector();\n")
             for j, client in enumerate(clients): 
                  fileHandle.write("    clientIdVec" + str(i) + "[" + str(j) + "] = " +  str(client.id) + ";\n")
-                 static_fraction = max(1,min(getBandwidthFraction(client,i), int(round(float(getBandwidthFraction(client,i))*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
+                 static_fraction = max(1,min(client.getBandwidthFraction(i), int(round(float(client.getBandwidthFraction(i))*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
                  if dynBandwidthEn:  
                      fileHandle.write("    Param#(" + str(bandwidth_bits) + ") bandwidthParam" + str(i) + "_" + str(j))
                      fileHandle.write(" <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_" + client.id + "_CTRL" + str(i) + "_PLATFORM_" + str(platform.id) + "_NETWORK_BANDWIDTH\", " + str(bandwidth_bits) + "'d" + str(static_fraction) + ", paramNode);\n")
@@ -814,7 +635,7 @@ def createDefaultRemapFile(remapFilePath):
 #
 # This function is the top function that handles scratchpad connection remapping
 #
-def remapScratchpadConnections(liModules, platforms, scratchpadStats, remapMode, treeKary, dynBandwidthEn):
+def remapScratchpadConnections(liModules, platforms, scratchpadStats, remapMode, treeKary, treeMode, dynBandwidthEn):
     print "remapScratchpadConnections: "
     scratchpadClients = []
     scratchpadServers = []
@@ -838,10 +659,11 @@ def remapScratchpadConnections(liModules, platforms, scratchpadStats, remapMode,
     # scratchpad remap is enabled
     if sum([len(x.clients) for x in platforms]) > 0:
         for platform in platforms: 
+            print "client ids: " + str([x.id for x in platform.clients]).replace("\'", "")
             partitioned_clients, rest_clients, controllers = assignScratchpadClients(platform.controllers, platform.clients, scratchpadStats, remapMode)
             platform.partitionedClients = partitioned_clients 
             platform.restClients = rest_clients
-        remapIds = remapClientIds(platforms, remapMode, treeKary)
+        remapIds = remapClientIds(platforms, remapMode, treeKary, treeMode)
         # print remapIds
         printRemapTable(remapIds)
         print ""
