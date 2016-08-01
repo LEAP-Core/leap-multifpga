@@ -89,5 +89,6 @@ class LIMMemory():
         K_ARY = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_REMAP_TREE_K_ARY')
         TREE_MODE = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_REMAP_TREE_MODE')
         DYN_BANDWIDTH = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_DYN_BANDWIDTH_ALLOC_EN')
-        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), self.hwPlatforms, self.scratchpadStats, REMAP_MODE, K_ARY, TREE_MODE, DYN_BANDWIDTH) 
+        INTERLEAVE_ALL = self.moduleList.getAWBParam('lim_memory', 'SCRATCHPAD_REMAP_ALL_INTERLEAVE')
+        lim_remap_scratchpad.remapScratchpadConnections(self.moduleGraph.modules.values(), self.hwPlatforms, self.scratchpadStats, REMAP_MODE, K_ARY, TREE_MODE, DYN_BANDWIDTH, INTERLEAVE_ALL) 
 

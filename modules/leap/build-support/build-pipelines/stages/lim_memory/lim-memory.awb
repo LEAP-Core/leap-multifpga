@@ -10,4 +10,5 @@
 %param --global SCRATCHPAD_REMAP_TREE_K_ARY         6  "The maximum number of children for each tree node"
 %param --global SCRATCHPAD_REMAP_TREE_MODE          0  "0: Use ILP to build minimum latency trees, 1: Build balanced trees, 2: Use DP to build minimum latency trees, 3: Build balanced trees with random leaf assignment"
 %param --global SCRATCHPAD_DYN_BANDWIDTH_ALLOC_EN   0  "0: Disable, 1: Enable dynamic bandwidth allocation for scratchpad connections"
+%param --global SCRATCHPAD_REMAP_ALL_INTERLEAVE     0  "0: Disable, 1: Enable interleaving all scratchpads across controller networks"
 
