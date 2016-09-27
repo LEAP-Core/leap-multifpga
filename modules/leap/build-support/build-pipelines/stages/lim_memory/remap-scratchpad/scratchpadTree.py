@@ -68,18 +68,21 @@ def constructScratchpadTreeTopology(clients, treeKary, treeMode):
         m.optimize()
         
         # show results
+        print 'x = ' + str([i.x for i in x])
+        print 'y = ' + str([i.x for i in y])
+
         for d in range(D+1): 
-            print 'Depth', d, ':', [new_clients[n].id for n in range(N) if z[n][d].x==1] + ['x']*int(y[d].x)
+            print 'Depth', d, ':', [new_clients[n].id for n in range(N) if z[n][d].x==1] + ['x']*int(round(y[d].x))
         
         # sort clients based on the depth assignment (from small depth to large)
         sorted_clients = []
         for d in range(1,D+1):
             sorted_clients += [new_clients[n] for n in range(N) if z[n][d].x == 1 and new_clients[n].id != "dummy"]
         
-        num_leaves = [int(x[d].x) for d in range(1,D+1) ]
+        num_leaves = [int(round(x[d].x)) for d in range(1,D+1) ]
         # remove dummies
         num_leaves[-1] -= P
-        num_internals = [int(y[d].x) for d in range(1,D) ]
+        num_internals = [int(round(y[d].x)) for d in range(1,D) ]
         
         return sorted_clients, num_leaves, num_internals
 

@@ -50,6 +50,7 @@ def parseStatsFile(clients, statsFiles):
                 h = re.match("Scratchpad hierarchical ring assignment:(.*)", line)
                 l = re.match("LEAP_SCRATCHPAD_(\d+)_PLATFORM_(\d+)_LATENCY,([0-9.]+) \((.+)\)", line)
                 b = re.match("LEAP_SCRATCHPAD_(\d+)_PLATFORM_(\d+)_BANDWIDTH,(\d+)", line)
+                p = re.match("LEAP_SCRATCHPAD_(\d+)_PLATFORM_(\d+)_PRIORITY,(\d+)", line)
                 if m:
                     client = next((x for x in clients if x.id == m.group(1)), None)
                     if client != None: 
@@ -83,6 +84,10 @@ def parseStatsFile(clients, statsFiles):
                     client = next((x for x in clients if x.id == b.group(1)), None)
                     if client != None: 
                         client.bandwidth = int(b.group(3))
+                elif p:
+                    client = next((x for x in clients if x.id == p.group(1)), None)
+                    if client != None: 
+                        client.priority = int(p.group(3))
 
         statsFile.close()     
 
@@ -298,7 +303,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
     fileHandle.write("`include \"awb/provides/clocks_device.bsh\"\n")
     if len(remapIds) > 0 or fastNetwork == True:
         fileHandle.write("`include \"awb/provides/fpga_components.bsh\"\n")
-    if dynBandwidthEn: 
+    if platform.networkType == "tree" or platform.networkType == "crossbar": 
         fileHandle.write("`include \"awb/provides/common_services.bsh\"\n")
 
     fileHandle.write("\n")
@@ -354,7 +359,13 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
         
     if platform.networkType == "crossbar" and (dynBandwidthEn or interleaveAll): 
         fileHandle.write("    PARAMETER_NODE paramNode <- mkDynamicParameterNode();\n\n")
-    
+    elif platform.networkType == "tree": 
+        fileHandle.write("    PARAMETER_NODE paramNode <- mkDynamicParameterNode();\n")
+        fileHandle.write("    Param#(1) prioritySelEnParam <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_PLATFORM_" + str(platform.id) + "_NETWORK_PRIORITY_SEL_EN\", 1'd1, paramNode);\n")
+        fileHandle.write("    Param#(1) bandwidthSelEnParam <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_PLATFORM_" + str(platform.id) + "_NETWORK_BANDWIDTH_SEL_EN\", 1'd1, paramNode);\n")
+        fileHandle.write("    let prioritySelEn = (prioritySelEnParam == 1);\n")
+        fileHandle.write("    let bandwidthSelEn = (bandwidthSelEnParam == 1);\n\n")
+
     # instantiate service network modules and connect them with service controllers
     for i, controller in enumerate(controllers):
         fileHandle.write("    let server" + str(i) + " <- findMatchingServiceServer(servers, \"" + controller.name + "\");\n")
@@ -389,7 +400,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
             fileHandle.write("    connectOutToIn(network" + str(i) + ".serverReqPort, server" + str(i) + ".incoming, 0);\n\n")
         
         elif platform.networkType == "tree": 
-            bandwidth_bits = 5
+            bandwidth_bits = 6
             root = platform.network[i]
             for node in root.traverse_post_order():
                 if node.isLeaf:
@@ -402,6 +413,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
                     fileHandle.write("\n    Vector#(" + str(r) + ", CONNECTION_ADDR_TREE#(SCRATCHPAD_PORT_NUM, SCRATCHPAD_MEM_REQ, SCRATCHPAD_READ_RSP)) children_" + node.name + " = newVector();\n")
                     fileHandle.write("    Vector#(" + str(r+1) + ", SCRATCHPAD_PORT_NUM) addressBounds_" + node.name + " = newVector();\n")
                     fileHandle.write("    Vector#(" + str(r) + ", UInt#(" + str(bandwidth_bits) + ")) bandwidthFractions_" + node.name + " = newVector();\n")
+                    fileHandle.write("    Vector#(" + str(r) + ", Bool) priorityVec_" + node.name + " = newVector();\n")
                     for j, child in enumerate(node.children): 
                         if child.isLeaf: 
                             name = child.name + ".tree"
@@ -415,9 +427,26 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
                    
                     bandwidth_max = max(1, max([x.bandwidth for x in node.children]))
                     for j, child in enumerate(node.children): 
-                        fraction = max(1,min(child.bandwidth, int(round(float(child.bandwidth)*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
-                        fileHandle.write("    bandwidthFractions_" + node.name + "[" + str(j) + "] = " + str(fraction) + ";\n")
-                    
+                        # fraction = max(1,min(child.bandwidth, int(round(float(child.bandwidth)*(math.pow(2, bandwidth_bits)-1)/bandwidth_max))))
+                        static_fraction = max(1,min(child.bandwidth, int(math.pow(2, bandwidth_bits)-1)))
+                        if child.isLeaf and dynBandwidthEn:
+                            fileHandle.write("    Param#(" + str(bandwidth_bits) + ") bandwidthParam_" + node.name + "_" + str(j))
+                            fileHandle.write(" <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_" + child.scratchpad.id + "_CTRL" + str(i))
+                            fileHandle.write("_PLATFORM_" + str(platform.id) + "_NETWORK_BANDWIDTH\", " + str(bandwidth_bits) + "'d" + str(static_fraction) + ", paramNode);\n")
+                            fraction = "unpack(bandwidthParam_" + node.name + "_" + str(j) + ")"
+                            fileHandle.write("    Param#(1) priorityParam_" + node.name + "_" + str(j))
+                            fileHandle.write(" <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_" + child.scratchpad.id + "_CTRL" + str(i))
+                            fileHandle.write("_PLATFORM_" + str(platform.id) + "_NETWORK_PRIORITIZED\", 1'd" + str(child.scratchpad.priority) + ", paramNode);\n")
+                            priority = "(priorityParam_" + node.name + "_" + str(j) + " == 1)"
+                        else: 
+                            fraction = str(static_fraction)
+                            if child.isLeaf and child.scratchpad.priority == 0:
+                                priority = "False"
+                            else: 
+                                priority = "True"
+                        fileHandle.write("    bandwidthFractions_" + node.name + "[" + str(j) + "] = " + fraction + ";\n")
+                        fileHandle.write("    priorityVec_" + node.name + "[" + str(j) + "] = " + priority + ";\n")
+
                     if node == root:
                         remapped_clients = [x for x in platform.clients if i in x.controllerIdx and i != x.controllerIdx[0]]
                         if len(remapped_clients) > 0: 
@@ -444,17 +473,20 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
                         fileHandle.write( indent + "                      " + server_rsp_port + ",\n")
                         fileHandle.write( indent + "                      children_" + node.name + ",\n")
                         fileHandle.write( indent + "                      addressBounds_" + node.name + ",\n")
+                        fileHandle.write( indent + "                      bandwidthFractions_" + node.name + ",\n");
+                        fileHandle.write( indent + "                      priorityVec_" + node.name + ",\n");
+                        fileHandle.write( indent + "                      bandwidthSelEn,\n");
                         if fastNetwork: 
-                            fileHandle.write( indent + "                      bandwidthFractions_" + node.name + ",\n");
+                            fileHandle.write( indent + "                      prioritySelEn,\n");
                             fileHandle.write( indent + "                      " + clock_info + ");\n\n");
                         else: 
-                            fileHandle.write( indent + "                      bandwidthFractions_" + node.name + ");\n\n");
+                            fileHandle.write( indent + "                      prioritySelEn);\n\n");
                     else:
+                        fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" + node.name + ", ")
                         if fastNetwork: 
-                            fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" +\
-                                             node.name + ", mkLocalArbiterBandwidth(bandwidthFractions_" + node.name + ")," + clock_info + ");\n");
+                            fileHandle.write("mkLocalArbiterBandwidthWithPriority(bandwidthFractions_" + node.name + ", priorityVec_" + node.name + ", bandwidthSelEn, prioritySelEn)," + clock_info + ");\n");
                         else: 
-                            fileHandle.write("    let " + node.name + " <- mkTreeRouter(children_" + node.name + ", addressBounds_" + node.name + ", mkLocalArbiterBandwidth(bandwidthFractions_" + node.name + "));\n");
+                            fileHandle.write("mkLocalArbiterBandwidthWithPriority(bandwidthFractions_" + node.name + ", priorityVec_" + node.name + ", bandwidthSelEn, prioritySelEn));\n");
    
         elif platform.networkType == "hring": 
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
@@ -494,7 +526,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
                  else: # instantiate connectors 
                      connector_idx = [x for x, y in enumerate(hrings) if y.level == clients[j].level][0]
                      ring = hrings[connector_idx]
-                     hr_module_body += "    function Bool isChildFunc" + str(connector_idx) + "(t_IDX idx) = (idx <= " + str(ring.maxId) + ") && (idx >= " + str(ring.minId) + ");\n"
+                     hr_module_body += "    function Bool isChildFunc" + str(connector_idx) + "(t_IDX idx) = (idx <= " + str(ring.maxId) + ") && (idx >= " + str(hrings[0].minId) + ");\n"
                      hr_module_body += "    let connector" + str(connector_idx) + " <- mkServiceRingNode(isChildFunc" + str(connector_idx) + ");\n"
                      hr_module_body += "    connectOutToIn(ringNodes[" + str(j) + "].reqChainOutgoing, connector" + str(connector_idx) + ".clientReqIncoming, 0);\n"
                      if connector_idx == 0: # connector at the maximum level
@@ -563,6 +595,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
             bandwidth_max = max(1, max([x.getBandwidthFraction(i) for x in clients]))
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", Integer) clientIdVec" + str(i) + " = newVector();\n")
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", UInt#(" + str(bandwidth_bits) + ")) bandwidthFractionVec" + str(i) + " = newVector();\n")
+            fileHandle.write("    Vector#(" +  str(len(clients)) + ", Bool) priorityVec" + str(i) + " = newVector();\n")
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", CONNECTION_OUT#(SERVICE_CON_DATA_SIZE)) clientReqPortsVec" + str(i) + " = newVector();\n")
             fileHandle.write("    Vector#(" +  str(len(clients)) + ", CONNECTION_IN_WITH_IDX#(SERVICE_CON_DATA_SIZE,SERVICE_CON_IDX_SIZE)) clientRspPortsVec" + str(i) + " = newVector();\n")
             for j, client in enumerate(clients): 
@@ -572,9 +605,14 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
                      fileHandle.write("    Param#(" + str(bandwidth_bits) + ") bandwidthParam" + str(i) + "_" + str(j))
                      fileHandle.write(" <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_" + client.id + "_CTRL" + str(i) + "_PLATFORM_" + str(platform.id) + "_NETWORK_BANDWIDTH\", " + str(bandwidth_bits) + "'d" + str(static_fraction) + ", paramNode);\n")
                      fraction = "unpack(bandwidthParam" + str(i) + "_" + str(j) + ")"
+                     fileHandle.write("    Param#(1) priorityParam" + str(i) + "_" + str(j))
+                     fileHandle.write(" <- mkDynamicParameterFromStringInitialized(\"LEAP_SCRATCHPAD_" + client.id + "_CTRL" + str(i) + "_PLATFORM_" + str(platform.id) + "_NETWORK_PRIORITIZED\", 1'd1, paramNode);\n")
+                     priority = "(priorityParam" + str(i) + "_" + str(j) + " == 1)"
                  else: 
                      fraction = str(static_fraction)
+                     priority = "True"
                  fileHandle.write("    bandwidthFractionVec" + str(i) + "[" + str(j) + "] = " + fraction + ";\n")
+                 fileHandle.write("    priorityVec" + str(i) + "[" + str(j) + "] = " + priority + ";\n")
                  if len(client.partition) == 0: # non-interleaved clients
                       client_idx = rClients.index(client)
                       fileHandle.write("    let client" +  str(client_idx) + " <- findMatchingServiceClient(clients, \"" + client.connection.name + "\", \"" + client.id + "\");\n")
@@ -589,7 +627,7 @@ def genRemapWrapper(platform, remapIds, fastNetwork, dynBandwidthEn, interleaveA
                       req_matching_port = "connector" + str(client_idx) + "Ctrl" + str(i) + "Req.incoming"
                       rsp_matching_port = "connector" + str(client_idx) + "Ctrl" + str(i) + "Rsp.outgoing"
                       client.matchingPorts[i] = (req_matching_port, rsp_matching_port)
-            fileHandle.write("    connectManyOutToIn(clientReqPortsVec" + str(i) + ", server" + str(i) + ".incoming, 0, mkLocalArbiterBandwidth(bandwidthFractionVec" + str(i) + "));\n")
+            fileHandle.write("    connectManyOutToIn(clientReqPortsVec" + str(i) + ", server" + str(i) + ".incoming, 0, mkLocalArbiterBandwidthWithPriority(bandwidthFractionVec" + str(i) + ", priorityVec" + str(i) + ", True, True));\n")
             fileHandle.write("    connectOutToManyInWithIdx(server" + str(i) + ".outgoing, clientRspPortsVec" + str(i) + ", clientIdVec" + str(i) + ", 0);\n\n")
             
     # connect network modules with services clients
@@ -680,11 +718,14 @@ def createDefaultRemapFile(remapFilePath):
 #
 # This function is the top function that handles scratchpad connection remapping
 #
-def remapScratchpadConnections(liModules, platforms, scratchpadStats, remapMode, treeKary, treeMode, dynBandwidthEn, interleaveAll):
+def remapScratchpadConnections(liModules, platforms, scratchpadStats, remapMode, treeKary, treeMode, dynBandwidthEn, interleaveAll, statsEn):
     print "remapScratchpadConnections: "
     scratchpadClients = []
     scratchpadServers = []
     nonMemoryConnections = []
+
+    if statsEn == 0: 
+        scratchpadStats = []
 
     for liModule in liModules:
         for service in liModule.services:

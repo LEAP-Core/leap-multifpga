@@ -85,6 +85,7 @@ class Scratchpad():
         self.level = 0
         self.latency = 0
         self.bandwidth = 1
+        self.priority = 1
         self.weightVals = []
         self.finalBandwidthFraction = {}
     #
@@ -109,7 +110,7 @@ class Scratchpad():
         print_str =  "Scratchpad: name: " + self.connection.name + " id: " + self.id
         print_str += " controllerIdx: " + str(self.controllerIdx) + " traffic: " + str(self.traffic)
         print_str += " remappedIds: " + str(self.remappedIds)
-        print_str += " level: " + str(self.level) + " latency: " + str(self.latency) + " bandwidth: " + str(self.bandwidth)
+        print_str += " level: " + str(self.level) + " latency: " + str(self.latency) + " bandwidth: " + str(self.bandwidth) + " priority: " + str(self.priority)
         return print_str
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
