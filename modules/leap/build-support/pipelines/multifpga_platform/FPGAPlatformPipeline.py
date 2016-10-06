@@ -19,8 +19,7 @@ class Build(ProjectDependency):
 
         # Floor planner can influence the BSV build, and must therefore
         # run first.
-        if (not moduleList.getAWBParam('bsv_tool', 'BUILD_LOGS_ONLY')):
-            Floorplanner(moduleList)
+        Floorplanner(moduleList)
 
         BSV(moduleList)
         FPGAProgram(moduleList)
