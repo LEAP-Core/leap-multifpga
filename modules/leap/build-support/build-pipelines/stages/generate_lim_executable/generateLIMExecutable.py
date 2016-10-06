@@ -131,7 +131,7 @@ class GenerateLIMExecutable():
             platformAPMName = platformAPMBaseName + '.apm'
             platformPath = makePlatformConfigPath(platformAPMName)
             platformBuildDir = makePlatformBuildDir(platform.name)
-            bitfile = platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/.xilinx/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_'
+            bitfile = platformBuildDir + '/' + moduleList.env['DEFS']['ROOT_DIR_HW']+ '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '/' + moduleList.env['DEFS']['TMP_FPGA_DIR']  + '/' + moduleList.env['DEFS']['ROOT_DIR_MODEL'] + '_'
 
             awbBatchFile = 'config/' + platformName + '.exec.batch'
             need_config = not os.path.isdir(platformBuildDir)
