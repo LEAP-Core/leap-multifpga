@@ -1,0 +1,43 @@
+
+[Global]
+SaveParameters=0
+Description=Hello World Demo using hybrid streams
+File=hello_hybrid_vc707_li
+Version=2.2
+Name=Hello World
+DefaultBenchmark=config/bm/leap/demos.cfx/benchmarks/null.cfg
+Type=Leap
+Class=Asim::Model
+DefaultRunOpts=
+RootName=HW/SW Hybrid Multifpga Project Foundation
+RootProvides=model
+
+[Model]
+DefaultAttributes=hello unconnected hybrid project exe
+model=HW/SW Hybrid Multifpga Project Foundation
+
+[Hello World]
+File=modules/leap/examples/hello-world/hello-world.awb
+Packagehint=leap
+
+[HW/SW Hybrid Multifpga Project Foundation]
+File=modules/leap/build-support/project/project-multifpga.awb
+Packagehint=leap-multifpga
+
+[Null FPGA Mapping]
+File=modules/leap/build-support/project/null_mapping.awb
+Packagehint=leap-multifpga
+
+[LIM Compiler Pipeline]
+File=config/pm/leap/submodels/pipelines/build-pipeline-lim.apm
+Packagehint=leap-multifpga
+
+[HW/SW Hybrid Multifpga Project Foundation/Requires]
+fpga_mapping=Null FPGA Mapping
+build_pipeline=LIM Compiler Pipeline
+connected_application=Hello World
+environment_description=VC707 HW/SW Environment
+
+[VC707 HW/SW Environment]
+File=modules/leap-platforms/fpga-environments/vc707/vc707_hwsw.awb
+Packagehint=leap-multifpga
